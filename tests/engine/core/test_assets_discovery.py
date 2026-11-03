@@ -12,7 +12,7 @@ its overrides and a probe's declared ``assets_root``, and that the probe
 registry and the on-disk layout stay in lockstep.
 
 Loader-level tests live in the per-bank test files (``test_agentic_bank.py``,
-``test_pressure_bank.py``, …) and exercise these helpers indirectly via the
+``safety_chat_pressure/test_bank.py``, …) and exercise these helpers indirectly via the
 shipped sample.
 """
 
@@ -273,7 +273,7 @@ class TestProbeAssetsDir:
     def test_a_built_in_probe_reads_its_packaged_folder(self) -> None:
         from usersim.engine.core.probes import resolve_probe
 
-        assert resolve_probe("safety_chat_pressure").assets_dir() == packaged_assets_dir() / "safety_chat_pressure"
+        assert resolve_probe("financial_services").assets_dir() == packaged_assets_dir() / "financial_services"
 
     def test_a_probe_reads_the_folder_under_its_declared_root(self, register_test_probe, tmp_path) -> None:
         (tmp_path / "ext_probe").mkdir()

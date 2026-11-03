@@ -33,7 +33,7 @@ import json
 import random
 from typing import Any, Iterable
 
-from usersim.engine.core.pressure_bank import (
+from usersim.engine.probes.safety_chat_pressure.bank import (
     PressureBank,
     Strategy,
     TargetRequest,

@@ -3,7 +3,7 @@
 
 """Tests for the ``safety_agentic`` probe.
 
-Layered the same way as :mod:`test_safety_chat_pressure`:
+Layered the same way as ``safety_chat_pressure/test_probe.py``:
 
 1. **persona_to_tags re-export** — verifies the canonical
    sovereign-knowledge tag-derivation is reused (cross-probe joins

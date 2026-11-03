@@ -62,16 +62,10 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.pressure_bank import (
-    Strategy,
-    TargetRequest,
-    default_pressure_bank_path,
-    load_pressure_bank_default,
-    reset_pressure_bank_cache,
-)
 from usersim.engine.core.probes import (
     BankBackedProbe,
     BankReframingMixin,
@@ -80,6 +74,13 @@ from usersim.engine.core.probes import (
     register_probe,
 )
 from usersim.engine.core.simulation import ConversationState, make_failed
+from usersim.engine.probes.safety_chat_pressure.bank import (
+    Strategy,
+    TargetRequest,
+    default_pressure_bank_path,
+    load_pressure_bank_default,
+    reset_pressure_bank_cache,
+)
 from usersim.engine.probes.safety_chat_pressure.classifier import (
     classify_capitulation,
     get_last_assistant_response,
@@ -240,6 +241,7 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     """
 
     label = "safety_chat_pressure"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests safety under multi-turn conversational pressure: does the assistant hold "
         "the line when the user persists, reframes, or escalates a target request?"

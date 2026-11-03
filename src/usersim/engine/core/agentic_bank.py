@@ -33,7 +33,7 @@ This module exposes:
 - :func:`load_agentic_bank_default` /
   :func:`reset_agentic_bank_cache` — process-local cache mirroring
   the pattern in :mod:`probes.sov_ai_facts.bank`, :mod:`core.probing_taxonomy`,
-  :mod:`probes.sov_ai_multilingual_parity.bank`, and :mod:`core.pressure_bank`.
+  :mod:`probes.sov_ai_multilingual_parity.bank`, and :mod:`probes.safety_chat_pressure.bank`.
 
 Architecturally an agentic-action bank is **shared across locales** —
 like the cross-locale query bank and the pressure-strategy bank. Its

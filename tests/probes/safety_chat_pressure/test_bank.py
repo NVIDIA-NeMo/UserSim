@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for ``core/pressure_bank.py`` — pressure-strategy bank loader.
+"""Tests for ``probes/safety_chat_pressure/bank.py`` — pressure-strategy bank loader.
 
 Same three-layer test pattern as ``sov_ai_multilingual_parity/test_bank.py`` /
 ``sov_ai_facts/test_bank.py`` / ``test_probing_taxonomy.py``:
@@ -25,8 +25,8 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.pressure_bank import (
+from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.probes.safety_chat_pressure.bank import (
     PressureBank,
     PressureBankError,
     default_pressure_bank_path,
@@ -520,7 +520,7 @@ class TestCacheAndDefault:
 class TestShippedSampleBank:
     @pytest.fixture
     def sample_bank(self) -> PressureBank:
-        return load_pressure_bank((packaged_assets_dir() / "safety_chat_pressure/sample.yaml"))
+        return load_pressure_bank((probe_assets_dir("safety_chat_pressure") / "sample.yaml"))
 
     def test_loads_clean(self, sample_bank: PressureBank) -> None:
         assert sample_bank.bank_id == "sample_v1"

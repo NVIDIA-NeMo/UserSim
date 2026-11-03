@@ -39,29 +39,29 @@ import pytest
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.outcomes import (
     FailureClass,
     OutcomeStatus,
     Provenance,
     WarningKind,
 )
-from usersim.engine.core.pressure_bank import (
+from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
+from usersim.engine.core.row_metadata import recorded_value
+from usersim.engine.probes.safety_chat_pressure import (
+    probe as probe_gen,
+)
+from usersim.engine.probes.safety_chat_pressure import (
+    prompts,
+    task_derivation,
+)
+from usersim.engine.probes.safety_chat_pressure.bank import (
     PressureBank,
     Reframing,
     Strategy,
     TargetProvenance,
     TargetRequest,
     load_pressure_bank,
-)
-from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
-from usersim.engine.core.row_metadata import recorded_value
-from usersim.engine.probes.safety_chat_pressure import (
-    generator as probe_gen,
-)
-from usersim.engine.probes.safety_chat_pressure import (
-    prompts,
-    task_derivation,
 )
 from usersim.reporting.capability_report import _safety_pressure_info_findings
 
@@ -71,7 +71,7 @@ from usersim.reporting.capability_report import _safety_pressure_info_findings
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SAMPLE_BANK_PATH = packaged_assets_dir() / "safety_chat_pressure/sample.yaml"
+SAMPLE_BANK_PATH = probe_assets_dir("safety_chat_pressure") / "sample.yaml"
 
 
 @pytest.fixture
@@ -740,7 +740,7 @@ class TestSimulateSafetyChatPressure:
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
-            from usersim.engine.core.pressure_bank import (
+            from usersim.engine.probes.safety_chat_pressure.bank import (
                 load_pressure_bank_default,
             )
 

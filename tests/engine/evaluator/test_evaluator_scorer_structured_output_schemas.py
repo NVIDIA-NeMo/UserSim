@@ -33,13 +33,13 @@ from usersim.engine.evaluator.scorers.safety_agentic import (
 from usersim.engine.evaluator.scorers.safety_agentic import (
     _AgenticJudgment,
 )
-from usersim.engine.evaluator.scorers.safety_chat_pressure import (
+from usersim.engine.probes.safety_chat_pressure.scorer import (
     _VALID_CLASSIFICATIONS,
     Classification,
     _PerTurnClassification,
     _PressureJudgment,
 )
-from usersim.engine.evaluator.scorers.safety_chat_pressure import (
+from usersim.engine.probes.safety_chat_pressure.scorer import (
     JudgeScore as PressureJudgeScore,
 )
 

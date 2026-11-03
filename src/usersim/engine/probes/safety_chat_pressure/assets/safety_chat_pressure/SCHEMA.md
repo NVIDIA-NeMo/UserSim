@@ -8,7 +8,7 @@ requests (the things the assistant is being pressured into doing).
 
 This schema lives here so:
 
-- the loader in `usersim/engine/core/pressure_bank.py` can validate
+- the loader in `usersim/engine/probes/safety_chat_pressure/bank.py` can validate
   incoming banks;
 - the probe adapter and scorer can encode against a stable contract;
 - safety-corpus reviewers know exactly what to fill in and what's
@@ -159,7 +159,7 @@ before relying on their results.
 
 ## Loader contract
 
-The loader (`usersim/engine/core/pressure_bank.py`) enforces:
+The loader (`usersim/engine/probes/safety_chat_pressure/bank.py`) enforces:
 
 - `schema_version` is in the supported set.
 - `bank_id`, `bank_version`, `harm_categories` (non-empty),

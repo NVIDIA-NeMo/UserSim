@@ -257,10 +257,10 @@ class MyProbe(BaseProbe):
 It must be absolute: `@register_probe` refuses a relative path, which would
 resolve against the working directory. In this repository the banks are then
 at `src/usersim/engine/probes/<label>/assets/<label>/`, as for
-`general_educational`, `general_open_ended` and the three `sov_ai_*` probes,
-which keep their bank loader (`bank.py`, or `taxonomy.py` for
-`sov_ai_dynamic`) and their scorer (`scorer.py`) in that folder too, and
-their tests in `tests/probes/<label>/`. A built-in that leaves
+`general_educational`, `general_open_ended`, the three `sov_ai_*` probes and
+`safety_chat_pressure`, which keep their bank loader (`bank.py`, or
+`taxonomy.py` for `sov_ai_dynamic`) and their scorer (`scorer.py`) in that
+folder too, and their tests in `tests/probes/<label>/`. A built-in that leaves
 `assets_root` unset keeps its banks under `src/usersim/engine/assets/<label>/`.
 
 Its bank loader reads under `MyProbe.assets_dir()`, the probe's own folder,
@@ -1223,7 +1223,7 @@ on (2)-(8) plus the should_succeed contract: the cross-cutting
 checks come for free.
 
 For real working examples: `tests/probes/sov_ai_facts/test_probe.py`
-(verbatim), `tests/engine/probes/test_safety_chat_pressure.py` (reframings and
+(verbatim), `tests/probes/safety_chat_pressure/test_probe.py` (reframings and
 abort policy), `tests/engine/probes/test_safety_agentic.py` (custom
 run_dispatch and a simpler mock).
 

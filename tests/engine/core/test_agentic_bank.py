@@ -4,7 +4,7 @@
 """Tests for ``core/agentic_bank.py`` — the agentic-action bank loader.
 
 Same three-layer test pattern as the other curated-asset bank loaders
-(``sov_ai_facts/test_bank.py`` / ``sov_ai_multilingual_parity/test_bank.py`` / ``test_pressure_bank.py``):
+(``sov_ai_facts/test_bank.py`` / ``sov_ai_multilingual_parity/test_bank.py`` / ``safety_chat_pressure/test_bank.py``):
 
 1. **Schema validation** — every required field, every cross-product
    invariant (sub_protocol membership, simulated_tools shape,

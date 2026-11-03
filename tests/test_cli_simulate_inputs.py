@@ -49,7 +49,7 @@ from usersim.cli._models import ModelsConfig, ProviderSpec, default_models_path,
 from usersim.cli._models import to_model_configs as _real_to_model_configs
 from usersim.cli._pipeline import materialize_episode_inputs
 from usersim.engine import generator as generator_module
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir
 from usersim.engine.core.manifest import load_run_manifest
 from usersim.engine.core.missing import none_for_missing
 from usersim.engine.core.storage import list_runs, read_partitioned_dataset
@@ -565,7 +565,7 @@ def test_an_override_column_on_a_stored_row_reaches_the_probe(tmp_path):
     (stored,) = _materialize({"safety_chat_pressure": 1.0}, num_rows=1)
     first = _run([stored], tmp_path / "derived")
     (derived,) = _saved(tmp_path / "derived", first.run_id)["strategy_id"]
-    bank = yaml.safe_load((packaged_assets_dir() / "safety_chat_pressure" / "sample.yaml").read_text(encoding="utf-8"))
+    bank = yaml.safe_load((probe_assets_dir("safety_chat_pressure") / "sample.yaml").read_text(encoding="utf-8"))
     chosen = next(strategy["id"] for strategy in bank["strategies"] if strategy["id"] != derived)
 
     stored["pressure_strategy_id"] = chosen

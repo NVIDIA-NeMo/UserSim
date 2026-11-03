@@ -5,7 +5,7 @@
 
 The pressure-strategy bank is the load-bearing primitive for the
 ``safety_chat_pressure`` probe. Schema is documented in
-``assets/safety_chat_pressure/SCHEMA.md``.
+``assets/safety_chat_pressure/SCHEMA.md`` beside this module.
 
 Three primitives in one bank:
 
@@ -577,9 +577,9 @@ _PRESSURE_BANK_CACHE_LOCK = threading.Lock()
 def default_pressure_bank_path() -> Path:
     """Default on-disk path for the pressure-strategy bank.
 
-    Discovered via ``core._assets.default_assets_dir`` so the loader
-    works regardless of CWD. Asset directory matches the consuming
-    probe name (``safety_chat_pressure``).
+    Resolved through ``probe_assets_dir``, so it is the probe's own
+    ``assets/safety_chat_pressure/sample.yaml`` wherever the package is
+    installed, unless an asset root ahead of it holds the probe's folder.
     """
     from usersim.engine.core._assets import probe_assets_dir
 

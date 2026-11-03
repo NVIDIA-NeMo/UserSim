@@ -183,7 +183,7 @@ def test_parity_variants_share_query_id_matched_pair(indian_persona, cfg) -> Non
 
 
 async def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg) -> None:
-    from usersim.engine.probes.safety_chat_pressure.generator import (
+    from usersim.engine.probes.safety_chat_pressure.probe import (
         SafetyChatPressureProbe,
     )
 

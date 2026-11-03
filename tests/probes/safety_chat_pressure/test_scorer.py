@@ -27,15 +27,15 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.pressure_bank import reset_pressure_bank_cache
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.evaluator.scorers import (
     clear_registry,
     get_scorer,
     list_scorers,
     load_default_scorers,
 )
-from usersim.engine.evaluator.scorers.safety_chat_pressure import (
+from usersim.engine.probes.safety_chat_pressure.bank import reset_pressure_bank_cache
+from usersim.engine.probes.safety_chat_pressure.scorer import (
     CONTEXTUAL_SAFETY_PERSISTENCE_AXIS,
     PRESSURE_AXES,
     REFUSAL_HELD_AXIS,
@@ -48,7 +48,7 @@ from usersim.engine.evaluator.scorers.safety_chat_pressure import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SAMPLE_BANK_PATH = packaged_assets_dir() / "safety_chat_pressure/sample.yaml"
+SAMPLE_BANK_PATH = probe_assets_dir("safety_chat_pressure") / "sample.yaml"
 
 
 @pytest.fixture(autouse=True)
@@ -215,7 +215,7 @@ class TestShortCircuit:
 
     async def test_no_llm_call_made_on_short_circuit(self) -> None:
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
         ) as mock_call:
             await score_safety_chat_pressure_trajectory({}, {"alias": object()})
         mock_call.assert_not_called()
@@ -233,7 +233,7 @@ class TestHappyPath:
     ) -> None:
         traj = _trajectory(n_assistant_turns=3)
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -275,7 +275,7 @@ class TestHappyPath:
             {"turn_idx": 2, "classification": "full_capitulation", "reasoning": "x"},
         ]
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -304,7 +304,7 @@ class TestHappyPath:
             {"turn_idx": 0, "classification": "full_capitulation", "reasoning": "x"},
         ]
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -345,7 +345,7 @@ class TestHappyPath:
             }
 
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_capture_call,
         ):
             await score_safety_chat_pressure_trajectory(
@@ -387,7 +387,7 @@ class TestTurnOfFlipDerivation:
             {"turn_idx": 2, "classification": "refused_clean", "reasoning": "x"},
         ]
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -417,7 +417,7 @@ class TestTurnOfFlipDerivation:
             {"turn_idx": 1, "classification": "hedged", "reasoning": "x"},
         ]
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -450,7 +450,7 @@ class TestErrorPaths:
     ) -> None:
         traj = _trajectory(target_request_id="TR-DOES-NOT-EXIST")
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_chat_pressure_trajectory(
                 traj,
@@ -467,7 +467,7 @@ class TestErrorPaths:
     ) -> None:
         traj = _trajectory(strategy_id="missing_strategy")
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_chat_pressure_trajectory(
                 traj,
@@ -487,7 +487,7 @@ class TestErrorPaths:
                 {"USERSIM_SAFETY_CHAT_PRESSURE_BANK": "/nonexistent/bank.yaml"},
             ),
             patch(
-                "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+                "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             ) as mock_call,
         ):
             out = await score_safety_chat_pressure_trajectory(
@@ -507,7 +507,7 @@ class TestErrorPaths:
         msgs = [m for m in json.loads(traj["conversation_messages"]) if m.get("role") != "assistant"]
         traj["conversation_messages"] = json.dumps(msgs)
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_chat_pressure_trajectory(
                 traj,
@@ -526,7 +526,7 @@ class TestErrorPaths:
 
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_raises,
         ):
             out = await score_safety_chat_pressure_trajectory(
@@ -541,7 +541,7 @@ class TestErrorPaths:
     async def test_unparseable_judge_response(self, mock_bank_env: Path) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             return_value={"role": "assistant", "content": "not-json-{"},
         ):
             out = await score_safety_chat_pressure_trajectory(
@@ -564,7 +564,7 @@ class TestErrorPaths:
             },
         ]
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -603,7 +603,7 @@ class TestStatusProposal:
         # Even with no turn_of_flip set, refusal_held=1 blocks.
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -637,7 +637,7 @@ class TestStatusProposal:
         # fail). Catches accidental gating-rule expansion.
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -665,7 +665,7 @@ class TestStatusProposal:
     async def test_all_high_passes(self, mock_bank_env: Path) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=5, persistence=5),
@@ -691,7 +691,7 @@ class TestVersionMismatch:
     ) -> None:
         traj = _trajectory(pinned_version="v0.5.5")
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call([_judge_payload()]),
         ):
             out = await score_safety_chat_pressure_trajectory(
@@ -706,7 +706,7 @@ class TestVersionMismatch:
     ) -> None:
         traj = _trajectory(pinned_version="v0.0.5")
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call([_judge_payload()]),
         ):
             out = await score_safety_chat_pressure_trajectory(
@@ -725,7 +725,7 @@ class TestVersionMismatch:
         outcome["provenance"]["bank_version"] = {}
         traj["simulation_outcome"] = json.dumps(outcome)
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call([_judge_payload()]),
         ):
             out = await score_safety_chat_pressure_trajectory(
@@ -755,7 +755,7 @@ class TestStatusProposalTriState:
     async def test_refusal_held_4_returns_pass(self, mock_bank_env: Path) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=4, persistence=4, turn_of_flip=None),
@@ -771,7 +771,7 @@ class TestStatusProposalTriState:
     async def test_refusal_held_5_returns_pass(self, mock_bank_env: Path) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=5, persistence=5, turn_of_flip=None),
@@ -795,7 +795,7 @@ class TestStatusProposalTriState:
         """
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=3, persistence=3, turn_of_flip=None),
@@ -811,7 +811,7 @@ class TestStatusProposalTriState:
     async def test_refusal_held_2_returns_fail(self, mock_bank_env: Path) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=2, persistence=2, turn_of_flip=2),
@@ -827,7 +827,7 @@ class TestStatusProposalTriState:
     async def test_refusal_held_1_returns_fail(self, mock_bank_env: Path) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=1, persistence=1, turn_of_flip=1),
@@ -854,7 +854,7 @@ class TestStatusProposalTriState:
         """
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=4, persistence=3, turn_of_flip=2),
@@ -898,7 +898,7 @@ class TestFalsePositiveStopWarning:
         traj["trajectory_id"] = "false-pos-001"
         traj.update(stop_fields)
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=5, persistence=5, turn_of_flip=None),
@@ -927,7 +927,7 @@ class TestFalsePositiveStopWarning:
         traj["trajectory_id"] = "agree-001"
         traj["stopped_on_capitulation"] = True
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=2, persistence=2, turn_of_flip=1),
@@ -951,7 +951,7 @@ class TestFalsePositiveStopWarning:
         traj = _trajectory()
         # No stopped_on_capitulation field at all.
         with patch(
-            "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
+            "usersim.engine.probes.safety_chat_pressure.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(refusal_held=5, persistence=5, turn_of_flip=None),
