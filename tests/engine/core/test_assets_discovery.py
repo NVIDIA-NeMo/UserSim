@@ -19,6 +19,7 @@ shipped sample.
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -328,3 +329,25 @@ class TestPinnedPackagedRoot:
         register_test_probe("ext_probe", assets_root=own)
 
         assert probe_assets_dir("ext_probe", assets_root=tmp_path / "mine") == tmp_path / "mine" / "ext_probe"
+
+
+class TestBeforeTheProbeIsImported:
+    """A built-in kept in its own folder is found before its class is registered."""
+
+    def test_its_banks_and_prompts_are_found_in_a_fresh_process(self):
+        # A prompt read while the probe's module loads, or a scorer in a process
+        # that never imports the probe, looks the assets up with the probe unregistered.
+        code = (
+            "from usersim.engine.core import probes\n"
+            "from usersim.engine.core.prompt_loader import load_prompt_file\n"
+            "from usersim.engine.core.seeds import load_seeds\n"
+            "assert not probes._PROBE_REGISTRY, 'a probe was registered before the lookup'\n"
+            "print(len(load_seeds('en_US', 'general_educational', 'subjects')))\n"
+            "print(sorted(load_prompt_file('general_open_ended')))\n"
+        )
+        result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+
+        assert result.returncode == 0, result.stderr
+        count, keys = result.stdout.splitlines()
+        assert int(count) > 0
+        assert "user_agent_system_prompt" in keys

@@ -31,7 +31,10 @@ banks wherever the package is installed, with no environment variable to
 set. Registration refuses a relative root. That root is searched for that
 probe only, after the first three entries and before the packaged directory,
 so a deliberate override wins over it. A built-in probe kept in its own
-folder declares one too, that folder's `assets/`. A probe's bank loader reads
+folder declares one too, that folder's `assets/`, and the lookup finds that
+folder before the probe's module is imported: a prompt read while the module
+loads, or a scorer in a process that never imports the probe, reaches the
+probe's assets. A probe's bank loader reads
 under its class's `assets_dir()`, the folder this search finds for the probe,
 and its `prompts.yaml` is read from that folder too.
 

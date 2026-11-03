@@ -127,13 +127,35 @@ def declared_assets_roots() -> dict[str, Path]:
     }
 
 
+def _builtin_probe_root(probe: str) -> Path:
+    """``usersim/engine/probes/<probe>/assets/``, where a built-in kept in its own folder holds ``<probe>/``."""
+    return Path(str(resources.files("usersim.engine") / "probes" / probe / "assets"))
+
+
+def _declared_root(probe: str) -> Path | None:
+    """The root ``probe``'s class declares, found before its module is imported if it is a built-in.
+
+    A built-in kept in its own folder declares ``usersim/engine/probes/<probe>/assets/``.
+    Until its class is registered, that folder stands in for the declaration when it
+    holds ``probe``, so a lookup made while the probe's module loads, such as a prompt
+    read at import time, or by a scorer in a process that never imports the probe,
+    reaches the probe's assets.
+    """
+    declared = declared_assets_roots().get(probe)
+    if declared is None and probe not in probes._PROBE_REGISTRY:
+        builtin = _builtin_probe_root(probe)
+        if (builtin / probe).is_dir():
+            return builtin
+    return declared
+
+
 def probe_asset_roots(probe: str) -> tuple[Path, ...]:
     """The roots searched for ``probe``'s assets, highest priority first.
 
     The search path, with the root ``probe``'s class declares placed just
     ahead of the packaged directory.
     """
-    declared = declared_assets_roots().get(probe)
+    declared = _declared_root(probe)
     roots = [*_override_roots(), *([declared] if declared is not None else []), packaged_assets_dir()]
     return tuple(dict.fromkeys(roots))
 
@@ -177,9 +199,10 @@ def probe_assets_dir(
     folder belongs to a registered probe.
 
     Args:
-        probe: A registered probe label. Its class's ``assets_root``,
-            when declared, joins the search; a label not registered yet
-            is looked up on the search path alone.
+        probe: A probe label. Its class's ``assets_root``, when declared,
+            joins the search. A label not registered yet is looked up on
+            the search path, and in its own folder under
+            ``usersim/engine/probes/`` when it is a built-in kept there.
         assets_root: Pin resolution to exactly this directory, skipping
             the search path. This is what ``--assets-dir`` becomes: a
             user who named a location is told when the assets are not
@@ -199,7 +222,7 @@ def probe_assets_dir(
             return candidate
     # Nothing matched. Report where a user would most expect it to have
     # been: the root the probe declares, else the highest-priority root.
-    declared = declared_assets_roots().get(probe)
+    declared = _declared_root(probe)
     return (declared if declared is not None else roots[0]) / probe
 
 
@@ -215,7 +238,7 @@ def _pinned_probe_dir(probe: str, root: Path) -> Path:
     packaged = packaged_assets_dir().resolve()
     if folder.is_dir() or root.resolve() != packaged:
         return folder
-    declared = declared_assets_roots().get(probe)
+    declared = _declared_root(probe)
     # ``packaged`` is ``usersim/engine/assets/``, so ``parents[1]`` is the package.
     if declared is not None and declared.resolve().is_relative_to(packaged.parents[1]):
         return declared / probe
