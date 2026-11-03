@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for ``usersim.engine.core.fact_bank``.
+"""Tests for ``usersim.engine.probes.sov_ai_facts.bank``.
 
 The loader is the entry-point that subject-matter reviewers' YAML
 files pass through. Every schema invariant is exercised here so a
@@ -15,8 +15,8 @@ from pathlib import Path
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.fact_bank import (
+from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.probes.sov_ai_facts.bank import (
     ALLOWED_DIFFICULTIES,
     ALLOWED_QUESTION_TYPES,
     SUPPORTED_SCHEMA_VERSIONS,
@@ -521,7 +521,7 @@ class TestPtBrSampleBank:
 
     @pytest.fixture
     def bank(self) -> FactBank:
-        return load_fact_bank((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))
+        return load_fact_bank((probe_assets_dir("sov_ai_facts") / "pt_BR/sample.yaml"))
 
     def test_loads(self, bank: FactBank) -> None:
         assert bank.locale == "pt_BR"

@@ -3,7 +3,7 @@
 
 """Tests for the ``sov_ai_multilingual_parity`` probe.
 
-Layered the same way as ``test_sov_ai_facts.py`` and
+Layered the same way as ``sov_ai_facts/test_probe.py`` and
 ``test_sov_ai_dynamic.py``:
 
 1. **Task-derivation primitives** — ``persona_to_tags`` (re-exported

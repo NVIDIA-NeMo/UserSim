@@ -4,7 +4,7 @@
 """Tests for ``core/pressure_bank.py`` — pressure-strategy bank loader.
 
 Same three-layer test pattern as ``test_query_bank.py`` /
-``test_fact_bank.py`` / ``test_probing_taxonomy.py``:
+``sov_ai_facts/test_bank.py`` / ``test_probing_taxonomy.py``:
 
 1. **Schema validation** — every required field, every cross-product
    invariant (placeholder discipline, template placeholders), every

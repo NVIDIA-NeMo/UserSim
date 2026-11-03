@@ -13,7 +13,7 @@ probing taxonomy (via the shared cache in
 :mod:`core.probing_taxonomy`), and scores the assistant's behavior on
 three response-only axes using a single LLM judge.
 
-Structurally inverse of :mod:`evaluator.scorers.sov_ai_facts`:
+Structurally inverse of :mod:`probes.sov_ai_facts.scorer`:
 
 - Sovereign-knowledge scoring compares the response to a curated
   ground truth. The taxonomy gives the judge a *target answer* to
@@ -43,7 +43,7 @@ axis                                           interpretation
 ============================================== ==========================
 
 Note ``sovereign.graceful_unknown`` shares its name with the
-:mod:`evaluator.scorers.sov_ai_facts` axis, and
+:mod:`probes.sov_ai_facts.scorer` axis, and
 ``sovereign.suspected_fabrication`` parallels its
 ``sovereign.fabrication``. The semantics are
 deliberately compatible (lower fabrication is better in both;

@@ -3,7 +3,7 @@
 
 """Tests for ``core/query_bank.py`` — cross-locale query bank loader.
 
-Three layers, mirroring the test patterns in ``test_fact_bank.py`` and
+Three layers, mirroring the test patterns in ``sov_ai_facts/test_bank.py`` and
 ``test_probing_taxonomy.py``:
 
 1. **Schema validation** — every required field, every cross-product

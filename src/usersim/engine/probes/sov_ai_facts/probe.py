@@ -51,13 +51,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.fact_bank import (
-    Fact,
-    default_fact_bank_path,
-    load_fact_bank,
-    load_fact_bank_for_locale,
-    reset_fact_bank_cache,
-)
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
@@ -69,6 +62,13 @@ from usersim.engine.core.probes import (
     register_probe,
 )
 from usersim.engine.core.simulation import ConversationState, make_failed
+from usersim.engine.probes.sov_ai_facts.bank import (
+    Fact,
+    default_fact_bank_path,
+    load_fact_bank,
+    load_fact_bank_for_locale,
+    reset_fact_bank_cache,
+)
 from usersim.engine.probes.sov_ai_facts.prompts import (
     PromptsUnavailableError,
     get_followup_instruction,
@@ -104,8 +104,8 @@ PROMPT_VERSION: str = "v1.0"
 # ---------------------------------------------------------------------------
 #
 # Thin re-exports so tests can patch on the probe module's surface
-# while the cache still lives in ``core.fact_bank`` (where the scorer
-# also reads it from). Single shared cache prevents the simulator and
+# while the cache lives in ``bank.py`` beside this module, where the scorer
+# also reads it from. Single shared cache prevents the simulator and
 # the scorer from disagreeing on what bank version was used.
 
 _load_bank_for_locale = load_fact_bank_for_locale
@@ -165,6 +165,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "sov_ai_facts"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests recall of locale-specific (sovereign) facts drawn from a curated bank, "
         "graded against ground-truth answers. Some questions embed a false premise to "

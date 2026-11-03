@@ -23,15 +23,15 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.fact_bank import reset_fact_bank_cache
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.evaluator.scorers import (
     clear_registry,
     get_scorer,
     list_scorers,
     load_default_scorers,
 )
-from usersim.engine.evaluator.scorers.sov_ai_facts import (
+from usersim.engine.probes.sov_ai_facts.bank import reset_fact_bank_cache
+from usersim.engine.probes.sov_ai_facts.scorer import (
     _ACCURACY,
     _COMPLETENESS,
     _COMPLETION_AXES,
@@ -66,7 +66,7 @@ def _reset_state_between_tests():
 
 @pytest.fixture
 def sample_bank_path() -> Path:
-    return packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"
+    return probe_assets_dir("sov_ai_facts") / "pt_BR/sample.yaml"
 
 
 @pytest.fixture
@@ -255,7 +255,7 @@ class TestAxisDefinitions:
 class TestShortCircuit:
     async def test_missing_facts_probed_returns_empty_envelope(self) -> None:
         # No LLM call should fire.
-        with patch("usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm") as mock:
+        with patch("usersim.engine.probes.sov_ai_facts.scorer.acall_llm") as mock:
             result = await score_sov_ai_facts_trajectory(
                 trajectory={"locale": "pt_BR", "conversation_messages": "[]"},
                 models={"judge_model": object()},
@@ -267,7 +267,7 @@ class TestShortCircuit:
         assert "no sovereign_facts_probed" in result["error"]
 
     async def test_empty_facts_probed_list_short_circuits(self) -> None:
-        with patch("usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm") as mock:
+        with patch("usersim.engine.probes.sov_ai_facts.scorer.acall_llm") as mock:
             result = await score_sov_ai_facts_trajectory(
                 trajectory={
                     "sovereign_facts_probed": [],
@@ -280,7 +280,7 @@ class TestShortCircuit:
         assert result["error"].startswith("no sovereign_facts_probed")
 
     async def test_missing_locale_short_circuits(self) -> None:
-        with patch("usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm") as mock:
+        with patch("usersim.engine.probes.sov_ai_facts.scorer.acall_llm") as mock:
             result = await score_sov_ai_facts_trajectory(
                 trajectory={
                     "sovereign_facts_probed": ["BR-GEO-001"],
@@ -307,7 +307,7 @@ class TestFactualRecallScoring:
             false_premise_catch=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -336,7 +336,7 @@ class TestFactualRecallScoring:
             false_premise_catch=3,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -361,7 +361,7 @@ class TestFactualRecallScoring:
             false_premise_catch=1,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -376,7 +376,7 @@ class TestFactualRecallScoring:
             false_premise_catch=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -399,7 +399,7 @@ class TestCompletionScoring:
             question_type="completion",
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -425,7 +425,7 @@ class TestCompletionScoring:
             question_type="completion",
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -441,7 +441,7 @@ class TestCompletionScoring:
 class TestErrorPaths:
     async def test_unknown_fact_id_recorded_not_fatal(self, mock_bank_env: Path) -> None:
         traj = _factual_recall_trajectory(fact_id="BR-GEO-XXX-nonexistent")
-        with patch("usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm") as mock:
+        with patch("usersim.engine.probes.sov_ai_facts.scorer.acall_llm") as mock:
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         # No LLM call fires because the fact isn't in the bank.
         mock.assert_not_called()
@@ -458,7 +458,7 @@ class TestErrorPaths:
         missing = tmp_path / "does-not-exist.yaml"
         with (
             patch.dict(os.environ, {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(missing)}),
-            patch("usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm") as mock,
+            patch("usersim.engine.probes.sov_ai_facts.scorer.acall_llm") as mock,
         ):
             traj = _factual_recall_trajectory()
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -476,7 +476,7 @@ class TestErrorPaths:
             false_premise_catch=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -490,7 +490,7 @@ class TestErrorPaths:
     async def test_judge_exception_becomes_per_fact_error(self, mock_bank_env: Path) -> None:
         traj = _factual_recall_trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=RuntimeError("rate-limited"),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -509,7 +509,7 @@ class TestErrorPaths:
             return {"role": "assistant", "content": "not valid json"}
 
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_return_garbage,
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
@@ -535,7 +535,7 @@ class TestMultiFact:
             _axis_payload(accuracy=3, completeness=2, fabrication=3, false_premise_catch=3),
         ]
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.acall_llm",
+            "usersim.engine.probes.sov_ai_facts.scorer.acall_llm",
             side_effect=_mock_judge_call(payloads),
         ):
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})

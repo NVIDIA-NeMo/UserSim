@@ -314,7 +314,7 @@ def reload_scorers(scorer_module_paths: Iterable[str]) -> None:
 # probes add their scorer modules to this list.
 DEFAULT_SCORER_MODULES: tuple[str, ...] = (
     "usersim.engine.evaluator.scorers.tool_use",
-    "usersim.engine.evaluator.scorers.sov_ai_facts",
+    "usersim.engine.probes.sov_ai_facts.scorer",
     "usersim.engine.evaluator.scorers.sov_ai_dynamic",
     "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity",
     "usersim.engine.evaluator.scorers.safety_chat_pressure",

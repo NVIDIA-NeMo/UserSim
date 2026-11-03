@@ -128,7 +128,7 @@ different questions of the model.
 
 | Asset | Loader | Unit | Per-locale shape | Used by |
 | --- | --- | --- | --- | --- |
-| Fact bank | `core/fact_bank.py` | One fact per entry (with `question`, `false_premises`, `ground_truth`) | One file per locale, content authored separately per locale | `sov_ai_facts` |
+| Fact bank | `probes/sov_ai_facts/bank.py` | One fact per entry (with `question`, `false_premises`, `ground_truth`) | One file per locale, content authored separately per locale | `sov_ai_facts` |
 | Probing / dynamic-tier taxonomy | `core/probing_taxonomy.py` | One topic category per entry (`invitation`, `subtopic_hints`, optional `applies_to_types` + `persona_affinities`); shared `select_category` derivation | One file per locale (`categories.yaml` for sov_ai_dynamic; `dynamic.yaml` for financial_services) | `sov_ai_dynamic`, `financial_services` |
 | Financial-services bank | `core/finance_bank.py` (+ `finance_tasks.py`, `embeddings.py`) | Per-institution corpus + tools + tasks + embeddings; `Institution` / `FinanceBank` typed views; sim-time gold derivation | One dir tree per locale (`<type>/<institution>/`) | `financial_services` |
 | Query bank | `core/query_bank.py` | One **conceptual question** per entry (with N locale `renderings` + `concern`) | **One file shared across locales; N renderings per entry joined by `query_id`** | `sov_ai_multilingual_parity` |
@@ -547,7 +547,7 @@ what each one carries:
 | Module | Purpose |
 |--------|---------|
 | `core/_assets.py` | Resolves the runtime assets directory (`set_runtime_assets_dir` / `probe_assets_dir`) so every loader uses the same root |
-| `core/fact_bank.py` | Per-locale fact-bank loader, schema validator, persona-tag matcher (consumed by `sov_ai_facts`) |
+| `probes/sov_ai_facts/bank.py` | Per-locale fact-bank loader, schema validator, persona-tag matcher (consumed by `sov_ai_facts`) |
 | `core/probing_taxonomy.py` | Per-locale dynamic-tier taxonomy loader + schema validator + the shared `select_category` derivation (optional `applies_to_types` scoping + `persona_affinities` soft-weighting); consumed by `sov_ai_dynamic` and `financial_services` |
 | `core/finance_bank.py` | Per-locale multi-institution financial-services bank loader (`Institution` / `FinanceBank`, scope-integrity, embeddings sidecar); `core/finance_tasks.py` (sim-time instantiation + gold derivation) + `core/embeddings.py` (query embedding); consumed by `financial_services` |
 | `core/query_bank.py` | Cross-locale query-bank loader, schema validator with rendering × locale cross-product check, persona-tag matcher (consumed by `sov_ai_multilingual_parity`) |
@@ -597,7 +597,6 @@ plugin entry points, undeclared result columns). The tables describe the main fi
 | `test_multi_locale.py` | Multi-locale config, seed loading, language mapping |
 | `test_llm.py` | LLM call helpers (retries, debug log, per-model stats, per-conversation outcome-builder hook) |
 | `test_analysis.py` | Score extraction, demographic preservation, edge cases used by the deep-dive analysis script |
-| `test_fact_bank.py` | Fact-bank YAML schema validator, loader, persona-tag matching, locale-keyed shared cache |
 | `test_probing_taxonomy.py` | Probing-taxonomy YAML schema validator, loader, lookup helpers, locale-keyed shared cache |
 | `test_query_bank.py` | Cross-locale query-bank YAML schema validator, loader (with cross-product rendering × locale validation + opt-out semantics), persona-tag matcher, file-path-keyed cache, env override, shipped-sample end-to-end check |
 | `test_pressure_bank.py` | Pressure-strategy bank YAML schema validator, loader with template-placeholder validation, deterministic reframing rotation with wrap-around, persona-tag matcher, cache + env override, shipped-sample end-to-end |
@@ -612,7 +611,6 @@ plugin entry points, undeclared result columns). The tables describe the main fi
 | `test_probe_invariants.py` | Cross-probe invariants every shipped probe upholds (registration, side-channel keys, prompt-version monotonicity, etc.) |
 | `test_tool_calling.py` | Tool-calling probe: tool sampling, gate check |
 | `test_verifiers.py` | Tool-call JSON-schema validator |
-| `test_sov_ai_facts.py` | `sov_ai_facts` probe: persona→tag, deterministic `derive_task` (bank-version salted), prompts, e2e with mocked LLM |
 | `test_sov_ai_dynamic.py` | `sov_ai_dynamic` probe: persona→tag, deterministic `derive_probe` + hint rotation (taxonomy-version salted), all-locale prompt availability, e2e with mocked LLM |
 | `test_sov_ai_multilingual_parity.py` | `sov_ai_multilingual_parity` probe: persona→tag re-export, deterministic `derive_task` with locale opt-out filtering (bank-version salted), all-locale prompt completeness with no-half-shipped invariant, query-bank cache + env override, e2e with mocked LLM, verbatim turn-1 injection, structured failure paths |
 | `test_safety_chat_pressure.py` | `safety_chat_pressure` probe: persona→tag re-export, `derive_task` with independent strategy/target salts (50-seed cell-coverage test), `resolve_task_from_row` (full / partial / neither override + persona-tag guard against panel-driven mismatches), prompt-formatting helpers, end-to-end with mocked LLM (verbatim turn-1, multi-turn rotation, bank-load failure, panel-id miss, no-resolvable-pair, assistant-error attribution, follow-up-failure breaks loop) |
@@ -633,7 +631,6 @@ plugin entry points, undeclared result columns). The tables describe the main fi
 | `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `reload_scorers`) |
 | `test_evaluator_scorer_structured_output_schemas.py` | Cross-cutting schema-design contract for LLM-judge scorers (Literal-typed enums, Optional fields, 1–5 score constraints): fails the build on violations |
 | `test_evaluator_scorer_tool_use.py` | 8-axis tool-calling trajectory judge |
-| `test_evaluator_scorer_sov_ai_facts.py` | `sov_ai_facts` out-of-sim scorer: per-fact LLM judge with question-type-specific axes, error paths, multi-fact aggregation |
 | `test_evaluator_scorer_sov_ai_dynamic.py` | `sov_ai_dynamic` out-of-sim scorer: response-only LLM judge with `sovereign.{suspected_fabrication,self_consistency,graceful_unknown}` axes, multi-category aggregation, drift detection |
 | `test_evaluator_scorer_sov_ai_multilingual_parity.py` | `sov_ai_multilingual_parity` out-of-sim respect-parity scorer: single LLM judge per trajectory with `respect.{condescension,complexity_calibration,helpfulness_at_proficiency}` axes, concern-grounded rubric, locale+language interpolation, status-proposal gating, error paths, version-mismatch drift |
 | `test_evaluator_scorer_safety_chat_pressure.py` | `safety_chat_pressure` out-of-sim scorer: single LLM judge per trajectory with `pressure.{refusal_held,contextual_safety_persistence}` scored axes plus per-turn classifications + derived `turn_of_flip`, rubric grounded in `target.expected_refusal` + `strategy.description`, status-proposal gating, error paths, version-mismatch drift |
@@ -643,3 +640,11 @@ plugin entry points, undeclared result columns). The tables describe the main fi
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |
 | `test_evaluator_scorer_response_shape.py` | Deterministic (no-LLM) scorer: per-classifier unit tests (empty/trivial, over-formatted, mid-sentence truncation) + trajectory-level aggregation |
 | `test_evaluator_scorer_refusal_basics.py` | Deterministic (no-LLM) scorer: refusal lexicon detection across shipped locales, `refusal.in_wrong_language_rate` (English-refusal-in-non-English-locale) composite, canned-AI-phrase detection, status-proposal gating semantics |
+
+**`tests/probes/<label>/`: a probe's own tests, beside each other**
+
+| Test File | Coverage |
+|-----------|----------|
+| `sov_ai_facts/test_probe.py` | `sov_ai_facts` probe: persona→tag, deterministic `derive_task` (bank-version salted), prompts, e2e with mocked LLM |
+| `sov_ai_facts/test_scorer.py` | `sov_ai_facts` out-of-sim scorer: per-fact LLM judge with question-type-specific axes, error paths, multi-fact aggregation |
+| `sov_ai_facts/test_bank.py` | Fact-bank YAML schema validator, loader, persona-tag matching, locale-keyed shared cache |

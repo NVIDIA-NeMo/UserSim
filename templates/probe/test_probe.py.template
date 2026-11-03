@@ -9,7 +9,7 @@ with ``usersim.testing.run_episode`` and scripted models, with nothing
 patched; the 8 standard tests every probe should have are stubbed
 after it. For real working examples, see:
 
-- ``test_sov_ai_facts.py`` — banked-verbatim probe (the canonical
+- ``tests/probes/sov_ai_facts/test_probe.py`` — banked-verbatim probe (the canonical
   reference for the alias-dispatching mock + dual-module patching
   pattern).
 - ``test_safety_chat_pressure.py`` — bank-reframing probe

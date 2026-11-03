@@ -10,6 +10,6 @@ Paulo business owner. Ground truth comes from the bank, never from
 LLM fabrication.
 
 Entry point: :func:`simulate_sov_ai_facts` in
-:mod:`.generator` — registered as ``sov_ai_facts``
+:mod:`.probe` — registered as ``sov_ai_facts``
 on ``_PROBE_REGISTRY`` in :mod:`usersim.engine.generator`.
 """

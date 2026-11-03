@@ -9,7 +9,7 @@ that rest on them (see §Placeholder discipline).
 
 This schema lives here so:
 
-- the loader in `usersim/engine/core/fact_bank.py` can validate
+- the loader in `usersim/engine/probes/sov_ai_facts/bank.py` can validate
   incoming banks;
 - probe scorers can encode against a stable contract;
 - native-language reviewers know exactly what to fill in (and what's

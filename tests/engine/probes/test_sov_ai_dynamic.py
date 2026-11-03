@@ -3,7 +3,7 @@
 
 """Tests for the ``sov_ai_dynamic`` probe.
 
-Three layers (parallel to ``test_sov_ai_facts.py``):
+Three layers (parallel to ``sov_ai_facts/test_probe.py``):
 
 1. **Task-derivation primitives** (``task_derivation.py``) — pure
    functions that pick a category + sub-topic hint deterministically

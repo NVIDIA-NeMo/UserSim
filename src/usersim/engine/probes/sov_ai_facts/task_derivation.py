@@ -25,7 +25,7 @@ import json
 import random
 from typing import Any, Iterable
 
-from usersim.engine.core.fact_bank import Fact, FactBank
+from usersim.engine.probes.sov_ai_facts.bank import Fact, FactBank
 
 # ---------------------------------------------------------------------------
 # Brazilian region classifier

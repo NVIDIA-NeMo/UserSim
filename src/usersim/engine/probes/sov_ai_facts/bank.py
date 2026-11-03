@@ -5,7 +5,7 @@
 
 A fact bank is a curated YAML file of authoritative, locale-specific
 ground-truth facts used by the ``sov_ai_facts`` probe. The schema lives
-in ``assets/sov_ai_facts/SCHEMA.md``.
+in ``assets/sov_ai_facts/SCHEMA.md`` beside this module.
 
 The module exposes:
 
@@ -224,9 +224,9 @@ _FACT_BANK_CACHE_LOCK = threading.Lock()
 def default_fact_bank_path(locale: str) -> Path:
     """Default on-disk path for a locale's fact bank.
 
-    Discovered via ``core._assets.default_assets_dir`` so the loader
-    picks up ``assets/sov_ai_facts/<locale>/sample.yaml`` regardless
-    of CWD. Asset directory matches the consuming probe name.
+    Resolved through ``probe_assets_dir``, so it is the probe's own
+    ``assets/sov_ai_facts/<locale>/sample.yaml`` wherever the package is
+    installed, unless an asset root ahead of it holds ``sov_ai_facts/``.
     """
     from usersim.engine.core._assets import probe_assets_dir
 

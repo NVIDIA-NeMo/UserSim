@@ -28,13 +28,7 @@ from unittest.mock import patch
 import pytest
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.fact_bank import (
-    Fact,
-    FactBank,
-    FactProvenance,
-    load_fact_bank,
-)
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import (
     FailureClass,
@@ -42,11 +36,17 @@ from usersim.engine.core.outcomes import (
 )
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.sov_ai_facts import (
-    generator as probe_gen,
+    probe as probe_gen,
 )
 from usersim.engine.probes.sov_ai_facts import (
     prompts,
     task_derivation,
+)
+from usersim.engine.probes.sov_ai_facts.bank import (
+    Fact,
+    FactBank,
+    FactProvenance,
+    load_fact_bank,
 )
 
 # ---------------------------------------------------------------------------
@@ -83,7 +83,7 @@ def pt_br_persona_northeast_retiree() -> dict[str, Any]:
 
 @pytest.fixture
 def pt_br_sample_bank() -> FactBank:
-    return load_fact_bank((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))
+    return load_fact_bank((probe_assets_dir("sov_ai_facts") / "pt_BR/sample.yaml"))
 
 
 @pytest.fixture(autouse=True)
@@ -177,7 +177,7 @@ class TestPersonaToTags:
         [("London", "england"), ("Scotland", "scotland"), ("Wales", "wales"), ("Northern Ireland", "northern-ireland")],
     )
     def test_the_uk_bank_serves_each_nation_its_own_facts(self, region: str, nation: str) -> None:
-        bank = load_fact_bank(packaged_assets_dir() / "sov_ai_facts/en_GB/sample.yaml")
+        bank = load_fact_bank(probe_assets_dir("sov_ai_facts") / "en_GB/sample.yaml")
         tags = task_derivation.persona_to_tags({"region": region, "age": 30}, "en_GB")
         own = {f.id for f in bank.by_tag(f"region:{nation}")}
         assert len(own) >= 8
@@ -228,7 +228,7 @@ class TestPersonaToTags:
         ],
     )
     def test_the_german_bank_serves_each_land_its_own_facts(self, region: str) -> None:
-        bank = load_fact_bank(packaged_assets_dir() / "sov_ai_facts/de_DE/sample.yaml")
+        bank = load_fact_bank(probe_assets_dir("sov_ai_facts") / "de_DE/sample.yaml")
         tags = task_derivation.persona_to_tags({"region": region, "age": 30}, "de_DE")
         (land,) = [t for t in tags if t.startswith("region:") and t != "region:any"]
         own = {f.id for f in bank.by_tag(land)}
@@ -559,7 +559,7 @@ class TestSimulateSovAiFacts:
         with (
             patch.dict(
                 os.environ,
-                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))},
+                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((probe_assets_dir("sov_ai_facts") / "pt_BR/sample.yaml"))},
             ),
             _patched_call_llm(
                 _mock_call_llm(
@@ -619,7 +619,7 @@ class TestSimulateSovAiFacts:
         with (
             patch.dict(
                 os.environ,
-                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))},
+                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((probe_assets_dir("sov_ai_facts") / "pt_BR/sample.yaml"))},
             ),
             _patched_call_llm(
                 _mock_call_llm(
@@ -667,7 +667,7 @@ class TestSimulateSovAiFacts:
         with (
             patch.dict(
                 os.environ,
-                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))},
+                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((probe_assets_dir("sov_ai_facts") / "pt_BR/sample.yaml"))},
             ),
             _patched_call_llm(
                 _mock_call_llm(
@@ -714,7 +714,7 @@ class TestSimulateSovAiFacts:
         with (
             patch.dict(
                 os.environ,
-                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))},
+                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((probe_assets_dir("sov_ai_facts") / "pt_BR/sample.yaml"))},
             ),
             _patched_call_llm(RuntimeError("rate-limited by provider")),
         ):

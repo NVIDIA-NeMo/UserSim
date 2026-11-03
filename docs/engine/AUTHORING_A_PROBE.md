@@ -1219,7 +1219,7 @@ covers (1) for you parametrically. So your per-probe file can focus
 on (2)-(8) plus the should_succeed contract: the cross-cutting
 checks come for free.
 
-For real working examples: `tests/engine/probes/test_sov_ai_facts.py`
+For real working examples: `tests/probes/sov_ai_facts/test_probe.py`
 (verbatim), `tests/engine/probes/test_safety_chat_pressure.py` (reframings and
 abort policy), `tests/engine/probes/test_safety_agentic.py` (custom
 run_dispatch and a simpler mock).
@@ -1294,7 +1294,7 @@ goes on the class: see
 
 The scorer is its own design exercise (axis definition, rubric
 authoring, threshold gating). See
-[`evaluator/scorers/sov_ai_facts.py`](../../src/usersim/engine/evaluator/scorers/sov_ai_facts.py)
+[`probes/sov_ai_facts/scorer.py`](../../src/usersim/engine/probes/sov_ai_facts/scorer.py)
 or `safety_chat_pressure.py` for canonical examples.
 
 ---

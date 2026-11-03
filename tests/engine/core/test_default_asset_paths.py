@@ -58,11 +58,6 @@ from usersim.engine.core.clinical_profile_bank import (
     load_clinical_profile_bank,
     reset_clinical_profile_bank_cache,
 )
-from usersim.engine.core.fact_bank import (
-    default_fact_bank_path,
-    load_fact_bank,
-    reset_fact_bank_cache,
-)
 from usersim.engine.core.identity_spec import (
     default_identity_spec_path,
     load_identity_spec,
@@ -85,6 +80,11 @@ from usersim.engine.core.query_bank import (
     reset_query_bank_cache,
 )
 from usersim.engine.core.seeds import load_seeds
+from usersim.engine.probes.sov_ai_facts.bank import (
+    default_fact_bank_path,
+    load_fact_bank,
+    reset_fact_bank_cache,
+)
 
 # ---------------------------------------------------------------------------
 # Per-locale loaders: fact_bank + probing_taxonomy

@@ -32,7 +32,7 @@ This module exposes:
 - :func:`load_agentic_bank` — parse + validate a single file.
 - :func:`load_agentic_bank_default` /
   :func:`reset_agentic_bank_cache` — process-local cache mirroring
-  the pattern in :mod:`core.fact_bank`, :mod:`core.probing_taxonomy`,
+  the pattern in :mod:`probes.sov_ai_facts.bank`, :mod:`core.probing_taxonomy`,
   :mod:`core.query_bank`, and :mod:`core.pressure_bank`.
 
 Architecturally an agentic-action bank is **shared across locales** —

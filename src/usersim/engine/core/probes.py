@@ -1551,7 +1551,7 @@ BUILTIN_PROBE_MODULES: tuple[str, ...] = (
     "usersim.engine.probes.safety_agentic.generator",
     "usersim.engine.probes.safety_chat_pressure.generator",
     "usersim.engine.probes.sov_ai_dynamic.generator",
-    "usersim.engine.probes.sov_ai_facts.generator",
+    "usersim.engine.probes.sov_ai_facts.probe",
     "usersim.engine.probes.sov_ai_multilingual_parity.generator",
     "usersim.engine.probes.tool_calling.generator",
 )

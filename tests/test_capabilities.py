@@ -170,7 +170,7 @@ def test_all_probe_capabilities_are_declared_with_sentinel() -> None:
 
 def test_capabilities_expose_implementation_refs() -> None:
     assert any(
-        ref.endswith("evaluator/scorers/sov_ai_facts.py")
+        ref.endswith("probes/sov_ai_facts/scorer.py")
         for ref in implementation_refs_for_capability(capability_by_id("sovereign_local_knowledge"))
     )
     assert any(

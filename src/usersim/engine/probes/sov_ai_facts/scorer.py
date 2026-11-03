@@ -8,7 +8,7 @@ Applied by the ``TrajectoryEvaluator`` when a config carries
 off a trajectory produced by the
 :mod:`usersim.engine.probes.sov_ai_facts` probe,
 re-loads the corresponding :class:`Fact` objects from the locale's
-fact bank (via the shared cache in :mod:`core.fact_bank`), and scores
+fact bank (via the shared cache in :mod:`probes.sov_ai_facts.bank`), and scores
 the assistant's response against each fact's ``ground_truth``.
 
 The scorer is probe-specific: it only makes sense for trajectories
@@ -46,10 +46,10 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.fact_bank import Fact, load_fact_bank_for_locale
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.evaluator.scorers import register_scorer
+from usersim.engine.probes.sov_ai_facts.bank import Fact, load_fact_bank_for_locale
 
 logger = logging.getLogger("usersim.engine")
 
@@ -257,7 +257,7 @@ async def score_sov_ai_facts_trajectory(
       no-op scores envelope so running this scorer against a different
       probe's trajectory doesn't explode).
     - Loads the fact bank for the trajectory's locale via the shared
-      cache in :mod:`core.fact_bank`. If any probed fact_id is missing
+      cache in :mod:`probes.sov_ai_facts.bank`. If any probed fact_id is missing
       from the bank (e.g., the bank was edited after the simulator
       ran), that fact is recorded in ``per_fact_scores`` with a
       structured error entry but does not crash the scorer.
@@ -291,8 +291,8 @@ async def score_sov_ai_facts_trajectory(
 
     # India language-variants reuse the en_IN fact bank (presence-aware:
     # a native per-variant bank is used if it has been authored).
-    from usersim.engine.core.fact_bank import default_fact_bank_path
     from usersim.engine.core.locale import asset_locale
+    from usersim.engine.probes.sov_ai_facts.bank import default_fact_bank_path
 
     bank_locale = asset_locale(locale, exists=lambda l: default_fact_bank_path(l).exists())
 
@@ -300,7 +300,7 @@ async def score_sov_ai_facts_trajectory(
         bank = load_fact_bank_for_locale(bank_locale)
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: failed to load bank for locale=%s (bank_locale=%s): %s",
+            "  |-- sov_ai_facts scorer: failed to load bank for locale=%s (bank_locale=%s): %s",
             locale,
             bank_locale,
             e,
@@ -320,7 +320,7 @@ async def score_sov_ai_facts_trajectory(
     bank_version_mismatch = pinned_version is not None and pinned_version != bank.bank_version
     if bank_version_mismatch:
         logger.info(
-            "  |-- evaluator/scorers.sov_ai_facts: trajectory pinned "
+            "  |-- sov_ai_facts scorer: trajectory pinned "
             "bank_version=%s but current loaded bank is %s for locale=%s — "
             "reporting drift flag on this row",
             pinned_version,
@@ -428,7 +428,7 @@ async def _score_one_fact(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: judge %r raised on fact %s: %s: %s",
+            "  |-- sov_ai_facts scorer: judge %r raised on fact %s: %s: %s",
             judge_alias,
             fact.id,
             type(e).__name__,
@@ -445,7 +445,7 @@ async def _score_one_fact(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: failed to parse structured output for fact %s",
+            "  |-- sov_ai_facts scorer: failed to parse structured output for fact %s",
             fact.id,
         )
         return _error_result(

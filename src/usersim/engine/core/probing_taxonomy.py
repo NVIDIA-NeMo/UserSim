@@ -21,7 +21,7 @@ exposes:
 - :func:`load_probing_taxonomy_for_locale` / :func:`reset_probing_taxonomy_cache`
   — locale-keyed shared cache so the probe and the ``sov_ai_dynamic``
   scorer agree on ``taxonomy_version`` from one source of truth
-  (same pattern as ``core.fact_bank``).
+  (same pattern as ``probes.sov_ai_facts.bank``).
 """
 
 from __future__ import annotations
@@ -358,7 +358,7 @@ def _taxonomy_salt(taxonomy: ProbingTaxonomy) -> int:
 # Family + locale-indexed cache (shared by a domain's probe and its scorer)
 # ---------------------------------------------------------------------------
 #
-# Same pattern as ``core.fact_bank``: one cache, one source of truth, so the
+# Same pattern as ``probes.sov_ai_facts.bank``: one cache, one source of truth, so the
 # simulator-side and evaluator-side both see the same ``taxonomy_version`` for
 # cross-run drift detection. Keyed by (family, locale, filename) so multiple
 # domains (sov_ai_dynamic, financial_services, ...) share the machinery.

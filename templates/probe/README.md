@@ -175,7 +175,7 @@ When porting one of the templates into a new module:
       `_patched_call_llm` patches BOTH `core.simulation.acall_llm` AND
       `core.judges.acall_llm`, and the alias-dispatching mock returns
       XML-shaped judge verdicts. See
-      [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
+      [`tests/probes/sov_ai_facts/test_probe.py`](../../tests/probes/sov_ai_facts/test_probe.py)
       for a real reference. The tests run under `usersim.testing.pytest_plugin`,
       so a model call nothing mocked fails with `BlockedNetworkCall`.
 - [ ] Update `docs/engine/README.md`'s probe table and the catalog in

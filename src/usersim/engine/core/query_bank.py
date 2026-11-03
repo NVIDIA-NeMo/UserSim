@@ -26,7 +26,7 @@ This module exposes:
 - :func:`load_query_bank_default` / :func:`reset_query_bank_cache`
   — process-local cache for the (typically single) bank used by the
   probe and downstream scorers, mirroring the pattern in
-  :mod:`core.fact_bank` and :mod:`core.probing_taxonomy`.
+  :mod:`probes.sov_ai_facts.bank` and :mod:`core.probing_taxonomy`.
 
 Architecturally a query bank is **shared across locales** (one file,
 N renderings per entry) — this is the structural difference from the

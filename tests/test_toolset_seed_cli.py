@@ -27,7 +27,7 @@ from usersim.cli._pipeline import (
     TOOLSET_SEED_SUFFIXES,
     resolve_toolset_seed_path,
 )
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir
 from usersim.engine.probes.tool_calling.generator import _normalize_tool_list
 
 
@@ -41,7 +41,7 @@ def _assets_root(tmp_path: Path, *seed_names: str) -> Path:
     (probe_dir / "prompts.yaml").write_text("prompts: []\n", encoding="utf-8")
     facts = tmp_path / "sov_ai_facts" / "en_US"
     facts.mkdir(parents=True)
-    shutil.copy(packaged_assets_dir() / "sov_ai_facts" / "en_US" / "sample.yaml", facts / "sample.yaml")
+    shutil.copy(probe_assets_dir("sov_ai_facts") / "en_US" / "sample.yaml", facts / "sample.yaml")
     for name in seed_names:
         (probe_dir / name).touch()
     return tmp_path

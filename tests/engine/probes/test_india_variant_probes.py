@@ -92,7 +92,7 @@ def _mt_warned(ob: OutcomeBuilder) -> bool:
 
 
 async def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> None:
-    from usersim.engine.probes.sov_ai_facts.generator import SovAiFactsProbe
+    from usersim.engine.probes.sov_ai_facts.probe import SovAiFactsProbe
 
     T.reset_translation_cache()
     ob = _builder()
