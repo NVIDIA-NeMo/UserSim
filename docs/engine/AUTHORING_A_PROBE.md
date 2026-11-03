@@ -257,7 +257,10 @@ class MyProbe(BaseProbe):
 It must be absolute: `@register_probe` refuses a relative path, which would
 resolve against the working directory. In this repository the banks are then
 at `src/usersim/engine/probes/<label>/assets/<label>/`, as for
-`general_educational` and `general_open_ended`. A built-in that leaves
+`general_educational`, `general_open_ended` and the three `sov_ai_*` probes,
+which keep their bank loader (`bank.py`, or `taxonomy.py` for
+`sov_ai_dynamic`) and their scorer (`scorer.py`) in that folder too, and
+their tests in `tests/probes/<label>/`. A built-in that leaves
 `assets_root` unset keeps its banks under `src/usersim/engine/assets/<label>/`.
 
 Its bank loader reads under `MyProbe.assets_dir()`, the probe's own folder,
@@ -1013,17 +1016,17 @@ names and arguments; `ProbeEpisodeRuntime` assigns the indices. Author probe
 logic against those supplied indices rather than reconstructing host
 transcript positions.
 
-### File 8: tests at `tests/engine/probes/test_bookings.py`
+### File 8: tests at `tests/probes/bookings/test_probe.py`
 
-Copy [`templates/probe/test_probe.py.template`](../../templates/probe/test_probe.py.template),
-substitute `bookings` for `YOUR_PROBE`, fill in the 8 standard
+Copy [`templates/probe/test_probe.py.template`](../../templates/probe/test_probe.py.template)
+there, beside an `__init__.py`, substitute `bookings` for `YOUR_PROBE`, fill in the 8 standard
 test stubs.
 
 ### Run it
 
 ```bash
 usersim smoke                                      # confirms registration
-pytest tests/engine/probes/test_bookings.py -v     # confirms behavior
+pytest tests/probes/bookings/ -v                   # confirms behavior
 usersim simulate --locale pt_BR --num-rows 5 \
   --probe-mix 'bookings=1.0' --out output/bookings # end-to-end
 ```

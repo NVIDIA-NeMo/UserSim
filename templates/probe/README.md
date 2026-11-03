@@ -55,7 +55,8 @@ shape matches your probe into
 copy `prompts.py` into the same directory, put its banks in that
 directory's `assets/<your_probe>/`, and copy
 `test_probe.py.template` to
-`tests/engine/probes/test_<your_probe>.py`. Then follow the
+`tests/probes/<your_probe>/test_probe.py`, beside an `__init__.py`. Then
+follow the
 authoring tutorial.
 
 ## The contract a probe class must satisfy

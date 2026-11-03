@@ -235,14 +235,16 @@ class TestProbeTemplate:
         assert not broken, f"probe template imports do not resolve: {broken}"
 
     def test_template_names_a_real_destination(self) -> None:
-        """The 'copy this to ...' path must exist, or step one fails."""
+        """The 'copy this to ...' path must sit in a folder that exists, up to the
+        probe's own folder, which the author creates, or step one fails."""
         import re
 
         src = self.TEMPLATE.read_text()
         match = re.search(r"Copy this to ``([^`]+)``", src)
         assert match, "template should say where to copy itself"
-        destination = (_REPO_ROOT / match.group(1)).parent
-        assert destination.is_dir(), f"template points at a missing dir: {destination}"
+        folders = Path(match.group(1)).parent.parts
+        known = folders[: next((i for i, part in enumerate(folders) if "<" in part), len(folders))]
+        assert (_REPO_ROOT.joinpath(*known)).is_dir(), f"template points under a missing dir: {'/'.join(known)}"
 
     def test_referenced_examples_exist(self) -> None:
         """It cites three probe tests as references; dead ones help nobody."""

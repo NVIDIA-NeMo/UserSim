@@ -567,7 +567,9 @@ uv run pytest tests/ -q    # or: make test
 The engine's tests live under `tests/engine/`, which mirrors
 `src/usersim/engine/`: `core/`, `probes/` and `evaluator/`, plus cross-cutting
 suites at the top level (conformance, scripted episode runs and hosted parity,
-plugin entry points, undeclared result columns). The tables describe the main files.
+plugin entry points, undeclared result columns). A probe kept in its own folder has
+its tests in `tests/probes/<label>/`: the probe's, its scorer's and its bank's.
+The tables describe the main files.
 
 **`tests/engine/core/`: substrate, asset loaders, behavioral, identity, storage**
 

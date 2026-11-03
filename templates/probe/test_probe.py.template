@@ -3,8 +3,8 @@
 
 """Test scaffold for a new probe.
 
-Copy this to ``tests/engine/probes/test_<your_probe>.py`` and
-edit the marked sections. The first test runs the probe end to end
+Copy this to ``tests/probes/<your_probe>/test_probe.py``, beside an
+``__init__.py``, and edit the marked sections. The first test runs the probe end to end
 with ``usersim.testing.run_episode`` and scripted models, with nothing
 patched; the 8 standard tests every probe should have are stubbed
 after it. For real working examples, see:
