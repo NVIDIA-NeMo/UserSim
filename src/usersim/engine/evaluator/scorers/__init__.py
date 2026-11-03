@@ -319,7 +319,7 @@ DEFAULT_SCORER_MODULES: tuple[str, ...] = (
     "usersim.engine.probes.sov_ai_multilingual_parity.scorer",
     "usersim.engine.probes.safety_chat_pressure.scorer",
     "usersim.engine.probes.safety_agentic.scorer",
-    "usersim.engine.evaluator.scorers.financial_services",
+    "usersim.engine.probes.financial_services.scorer",
     "usersim.engine.evaluator.scorers.language_compliance",
     "usersim.engine.evaluator.scorers.response_shape",
     "usersim.engine.evaluator.scorers.refusal_basics",

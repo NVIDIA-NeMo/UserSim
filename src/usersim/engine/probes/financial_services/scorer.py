@@ -76,7 +76,7 @@ def _bank_locale(locale: str) -> str:
     language variant or a Hindi locale without tasks of its own is scored
     against the ``en_IN`` bank its conversation used.
     """
-    from usersim.engine.core.finance_bank import finance_bank_locale
+    from usersim.engine.probes.financial_services.bank import finance_bank_locale
 
     return finance_bank_locale(locale)
 
@@ -90,7 +90,7 @@ def _ordered_subsequence(needles: list[str], haystack: list[str]) -> bool:
 def _side_effect_by_tool(locale: str, institution_id: str) -> dict[str, str]:
     """Map tool name -> side_effect_class, SCOPED to the row's institution."""
     try:
-        from usersim.engine.core.finance_bank import (
+        from usersim.engine.probes.financial_services.bank import (
             load_finance_bank_for_locale,
         )
 
@@ -122,7 +122,7 @@ def _document_types_by_id(locale: str, institution_id: str) -> dict[str, str]:
     parallel column has to be emitted and kept in sync with the id list.
     """
     try:
-        from usersim.engine.core.finance_bank import (
+        from usersim.engine.probes.financial_services.bank import (
             load_finance_bank_for_locale,
         )
 
@@ -171,7 +171,7 @@ def _allowed_tools_for_task(locale: str, institution_id: str, task_id: str) -> s
     if not institution_id or not task_id:
         return set()
     try:
-        from usersim.engine.core.finance_bank import (
+        from usersim.engine.probes.financial_services.bank import (
             load_finance_bank_for_locale,
         )
 
@@ -192,7 +192,7 @@ def _task_ordering_required(locale: str, institution_id: str, task_id: str) -> b
     if not institution_id or not task_id:
         return False
     try:
-        from usersim.engine.core.finance_bank import (
+        from usersim.engine.probes.financial_services.bank import (
             load_finance_bank_for_locale,
         )
 
@@ -453,7 +453,7 @@ def _dynamic_reference(
     bank-load failure yields empty reference so the judge still runs.
     """
     try:
-        from usersim.engine.core.finance_bank import (
+        from usersim.engine.probes.financial_services.bank import (
             load_finance_bank_for_locale,
         )
 

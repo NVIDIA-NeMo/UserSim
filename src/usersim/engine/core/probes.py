@@ -1540,7 +1540,7 @@ def register_probe(
 #: ``@register_probe``. Listed by path because every probe module imports
 #: this one, so this module cannot import them at load time.
 BUILTIN_PROBE_MODULES: tuple[str, ...] = (
-    "usersim.engine.probes.financial_services.generator",
+    "usersim.engine.probes.financial_services.probe",
     "usersim.engine.probes.general_educational.probe",
     "usersim.engine.probes.general_open_ended.probe",
     "usersim.engine.probes.health_disclosure.decision_support",

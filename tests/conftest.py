@@ -35,9 +35,9 @@ def finance_assets_without_fr_tasks(tmp_path: Path) -> Path:
     """
     import shutil
 
-    from usersim.engine.core._assets import packaged_assets_dir
+    from usersim.engine.core._assets import probe_assets_dir
 
-    source = packaged_assets_dir() / "financial_services" / "en_US"
+    source = probe_assets_dir("financial_services") / "en_US"
     root = tmp_path / "assets"
     for locale in ("en_US", "fr_FR"):
         dest = root / "financial_services" / locale

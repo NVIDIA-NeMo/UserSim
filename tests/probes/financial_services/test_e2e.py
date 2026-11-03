@@ -25,13 +25,13 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core.finance_bank import (
+from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
+from usersim.engine.probes.financial_services import scorer as FS
+from usersim.engine.probes.financial_services.bank import (
     load_finance_bank_for_locale,
     reset_finance_bank_cache,
 )
-from usersim.engine.evaluator.scorers import financial_services as FS
-from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
-from usersim.engine.probes.financial_services.generator import (
+from usersim.engine.probes.financial_services.probe import (
     FINANCE_TRAJECTORY_COLUMNS,
 )
 from usersim.reporting.capability_report import build_capability_report

@@ -51,7 +51,7 @@ set. The remaining shipped locales have the persona substrate in place but no
 region spec. See [Authoring a new locale](#authoring-a-new-locale).
 
 > For the asset-bank contract see
-> [SCHEMA.md](../../assets/financial_services/SCHEMA.md). A file-by-file
+> [SCHEMA.md](assets/financial_services/SCHEMA.md). A file-by-file
 > code map is at the [bottom of this document](#code-layout).
 
 ## Two tiers
@@ -335,7 +335,7 @@ regenerations, and a task's gold documents are derived from its tool sequence at
 load time. The authoring workflow lives in
 [finance_assets.ipynb](../../../asset_gen/notebooks/finance_assets.ipynb),
 and the asset contract in
-[SCHEMA.md](../../assets/financial_services/SCHEMA.md).
+[SCHEMA.md](assets/financial_services/SCHEMA.md).
 
 ### Tuning a generation run
 
@@ -377,7 +377,7 @@ A locale is only as good as its task set: the corpus can be excellent while the
 eval still measures very little. The conventions below are calibrated from the
 `en_US` and `en_IN` builds and are what a reviewer should check a new locale
 against. Field-level semantics live in
-[SCHEMA.md](../../assets/financial_services/SCHEMA.md); this is the
+[SCHEMA.md](assets/financial_services/SCHEMA.md); this is the
 *shape* the authored set should have.
 
 **Reference numbers.** `en_US` ships 70 verifiable tasks across 4 institutions;
@@ -516,11 +516,11 @@ Related code elsewhere:
 
 | Concern | Location |
 | --- | --- |
-| Bank loader / sim-time gold | `core/finance_bank.py`, `core/finance_tasks.py` |
+| Bank loader / sim-time gold | `probes/financial_services/bank.py`, `probes/financial_services/tasks.py` |
 | Dynamic-tier taxonomy + selection (shared) | `core/probing_taxonomy.py` |
 | Inner tool-loop scaffold (shared) | `core/probes.py` (`ToolExecutionMixin`) |
-| Query embedding (dense retrieval) | `core/embeddings.py` |
-| Scorer | `evaluator/scorers/financial_services.py` |
+| Query embedding (dense retrieval) | `probes/financial_services/embeddings.py` |
+| Scorer | `probes/financial_services/scorer.py` |
 | Capabilities | `taxonomy/capabilities.py` |
 | Training-export columns | `selection/schemas.py` (`finance` group) |
 | Assets + schema | `assets/financial_services/<locale>/` + `assets/financial_services/SCHEMA.md` |

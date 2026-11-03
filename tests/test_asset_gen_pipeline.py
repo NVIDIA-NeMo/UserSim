@@ -27,7 +27,7 @@ from usersim.asset_gen.financial_services.pipeline import (
     serialize_bank,
 )
 from usersim.asset_gen.financial_services.spec import load_region_spec
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 
 
 def _asset_gen_dir() -> Path:
@@ -719,7 +719,7 @@ class TestPlanOwnedTitles:
         import yaml
 
         planned = self._plan_titles(locale)
-        root = packaged_assets_dir() / "financial_services" / locale
+        root = probe_assets_dir("financial_services") / locale
         titles = [
             d["title"] for corpus in root.rglob("corpus.yaml") for d in yaml.safe_load(corpus.read_text())["documents"]
         ]
@@ -735,7 +735,7 @@ class TestPlanOwnedTitles:
 
         spec = load_region_spec(self._SPEC_DIR / "en_GB.yaml")
         assert spec.language_conventions.respell
-        report = validate_bank(packaged_assets_dir() / "financial_services" / "en_GB", spec)
+        report = validate_bank(probe_assets_dir("financial_services") / "en_GB", spec)
         results = [r for r in report.results if r.check == "language_conventions"]
         assert len(results) == len(spec.institutions)
         assert [r.detail for r in results if r.status == FAIL] == []
@@ -964,7 +964,7 @@ def test_explode_docset_uses_plan_uuid_for_id():
 
 
 def test_serialize_bank_round_trips_through_loader(tmp_path: Path):
-    from usersim.engine.core.finance_bank import load_finance_bank
+    from usersim.engine.probes.financial_services.bank import load_finance_bank
 
     region_meta = {
         "locale": "en_TT",
@@ -1034,7 +1034,7 @@ def test_serialize_bank_round_trips_through_loader(tmp_path: Path):
 def test_serialize_bank_writes_embedding_sidecar(tmp_path: Path):
     import pandas as pd
 
-    from usersim.engine.core.finance_bank import _load_embeddings
+    from usersim.engine.probes.financial_services.bank import _load_embeddings
 
     region_meta = {"locale": "en_TT", "domain_regulators": {}}
     inst = InstitutionBank(

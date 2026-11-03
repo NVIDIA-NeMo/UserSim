@@ -838,7 +838,7 @@ class TestAssetCommandDefaults:
             "evaluate-assets": evaluate_assets,
             "gen-assets": gen_assets,
         }[command]
-        default = module.packaged_assets_dir() / "financial_services" / "en_US"
+        default = module.probe_assets_dir("financial_services", assets_root=module.packaged_assets_dir()) / "en_US"
         assert default.is_dir(), f"{command} default resolves to a missing dir: {default}"
         assert (default / "region_meta.yaml").exists() or any(default.iterdir())
 

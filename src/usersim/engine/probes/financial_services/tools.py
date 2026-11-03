@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 from typing import Any, Sequence
 
-from usersim.engine.core.finance_bank import (
+from usersim.engine.probes.financial_services.bank import (
     Institution,
     framework_primitive_tool,
     verify_identity_schema,
@@ -35,7 +35,7 @@ def build_offered_tools(
     Permanent (non-discoverable) tools are offered by name; discoverable tools
     are reached only through the ``call_tool`` gate. Framework primitives
     (``kb_search`` / ``verify_identity``) use the canonical schema from
-    ``core.finance_bank`` so the assistant always sees their real parameters
+    ``probes.financial_services.bank`` so the assistant always sees their real parameters
     even if a bank asset ships them empty.
 
     ``identity_required_fields`` specializes ``verify_identity`` to the region's

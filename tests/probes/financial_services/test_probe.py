@@ -26,15 +26,7 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.finance_bank import (
-    FinanceBankError,
-    finance_bank_locale,
-    has_finance_tasks,
-    load_finance_bank,
-    load_finance_bank_for_locale,
-)
-from usersim.engine.core.finance_tasks import build_instance
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
@@ -46,14 +38,22 @@ from usersim.engine.core.probing_taxonomy import (
     load_probing_taxonomy_for,
     reset_probing_taxonomy_cache,
 )
-from usersim.engine.evaluator.scorers import financial_services as FS
 from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
-from usersim.engine.probes.financial_services import generator as G
+from usersim.engine.probes.financial_services import probe as G
 from usersim.engine.probes.financial_services import retrieval as R
+from usersim.engine.probes.financial_services import scorer as FS
 from usersim.engine.probes.financial_services import tools as T
+from usersim.engine.probes.financial_services.bank import (
+    FinanceBankError,
+    finance_bank_locale,
+    has_finance_tasks,
+    load_finance_bank,
+    load_finance_bank_for_locale,
+)
 from usersim.engine.probes.financial_services.task_derivation import (
     derive_instance,
 )
+from usersim.engine.probes.financial_services.tasks import build_instance
 
 _PERSONA = {
     "first_name": "Yumi",
@@ -158,7 +158,7 @@ def _partition_committed_banks() -> tuple[list[Path], list[Path]]:
     Presence of ``region_meta.yaml`` alone is not enough: it marks a committed
     bank, not a bank with scenarios to run.
     """
-    banks_root = packaged_assets_dir() / "financial_services"
+    banks_root = probe_assets_dir("financial_services")
     locales = [p for p in sorted(banks_root.iterdir()) if (p / "region_meta.yaml").exists()]
     assert locales, f"no committed banks under {banks_root}"
     runnable = [p for p in locales if any(p.glob("*/*/tasks.yaml"))]
@@ -337,7 +337,7 @@ def test_retrieval_never_crosses_institutions():
 def test_dense_retrieval_ranks_by_cosine():
     """dense mode ranks the institution's precomputed vectors against the query
     vector by cosine; the doc whose vector points the same way ranks first."""
-    from usersim.engine.core.finance_bank import Document, Institution
+    from usersim.engine.probes.financial_services.bank import Document, Institution
 
     docs = (
         Document(
@@ -377,7 +377,7 @@ def test_dense_retrieval_ranks_by_cosine():
 def test_dense_retrieval_falls_back_to_lexical_without_query_vector():
     """No query embedding (offline / no endpoint) -> deterministic lexical rank,
     so dense mode never hard-fails a run."""
-    from usersim.engine.core.finance_bank import Document, Institution
+    from usersim.engine.probes.financial_services.bank import Document, Institution
 
     docs = (
         Document(
@@ -426,7 +426,7 @@ class TestHybridRetrieval:
 
     @staticmethod
     def _inst(embeddings):
-        from usersim.engine.core.finance_bank import Document, Institution
+        from usersim.engine.probes.financial_services.bank import Document, Institution
 
         docs = (
             # Short, and its body repeats the account-action vocabulary that shows
@@ -598,7 +598,7 @@ class TestHybridRetrieval:
 
 
 async def test_embed_query_soft_fails_to_none():
-    from usersim.engine.core.embeddings import aembed_query
+    from usersim.engine.probes.financial_services.embeddings import aembed_query
 
     class _Facade:
         async def agenerate_text_embeddings(self, texts):
@@ -629,7 +629,7 @@ def test_shipped_banks_carry_no_vectors_and_still_load():
     own via ``gen-assets``. The loader treats an absent sidecar as an empty map
     and retrieval stays on the lexical path.
     """
-    assets = packaged_assets_dir() / "financial_services"
+    assets = probe_assets_dir("financial_services")
     assert not list(assets.rglob("embeddings.parquet"))
 
     bank = load_finance_bank_for_locale("en_US")
@@ -1087,7 +1087,7 @@ def test_verify_identity_requires_name_and_dob():
     assert ok is False
 
     # the advertised schema marks both as required so the agent knows to collect them
-    from usersim.engine.core.finance_bank import framework_primitive_tool
+    from usersim.engine.probes.financial_services.bank import framework_primitive_tool
 
     req = framework_primitive_tool("verify_identity")["parameters"].get("required")
     assert req == ["full_name", "date_of_birth"]
@@ -1290,7 +1290,7 @@ def _dynamic_instance(institution_id="northwind_bank"):
     bank = load_finance_bank_for_locale("en_US")
     tax = _load_finance_taxonomy()
     inst = bank.institution(institution_id)
-    from usersim.engine.core.finance_tasks import build_dynamic_instance
+    from usersim.engine.probes.financial_services.tasks import build_dynamic_instance
 
     cat = tax.categories_for_type(inst.type)[0]
     return build_dynamic_instance(
@@ -1443,7 +1443,7 @@ async def test_allowed_tools_not_flagged_unauthorized():
 def test_tasks_ship_multiple_openings_varied_per_persona():
     """Verifiable tasks carry several opening phrasings; build_instance picks one
     deterministically per persona but varies across personas (generalizability)."""
-    from usersim.engine.core.finance_tasks import build_instance
+    from usersim.engine.probes.financial_services.tasks import build_instance
 
     bank = load_finance_bank_for_locale("en_US")
     inst = bank.institution("northwind_bank")
@@ -1882,7 +1882,9 @@ class TestQueryEmbedding:
     async def _search(probe):
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        with patch("usersim.engine.core.embeddings.aembed_query", return_value=[0.1, 0.2]) as embed:
+        with patch(
+            "usersim.engine.probes.financial_services.embeddings.aembed_query", return_value=[0.1, 0.2]
+        ) as embed:
             await probe.execute_tool_call(
                 "kb_search", {"query": "dispute a card charge"}, {}, state, {}, turn_idx=0, call_idx=0
             )
@@ -1979,7 +1981,7 @@ class TestSearchQueryTranslation:
                 return_value=[],
             ) as retrieve,
             patch(
-                "usersim.engine.core.embeddings.aembed_query",
+                "usersim.engine.probes.financial_services.embeddings.aembed_query",
                 return_value=[0.1, 0.2],
             ) as embed,
         ):
@@ -2120,7 +2122,7 @@ class TestNativeScriptQueryCannotMatchAnEnglishCorpus:
         assert R._tokens(self.HINDI) == {"बचत", "खाते", "पर", "शुल्क"}
 
     def test_a_native_script_query_ranks_the_same_whatever_it_asks(self):
-        from usersim.engine.core.finance_bank import load_finance_bank_for_locale
+        from usersim.engine.probes.financial_services.bank import load_finance_bank_for_locale
 
         inst = load_finance_bank_for_locale("en_IN").institution("chandrika_bank")
         corpus = set().union(*(R._tokens(f"{d.title} {d.body}") for d in inst.documents))
@@ -2137,7 +2139,7 @@ class TestNativeScriptQueryCannotMatchAnEnglishCorpus:
 
 def _institution_with(*docs):
     """An institution holding only the given ``(id, title, body)`` documents."""
-    from usersim.engine.core.finance_bank import Document, Institution
+    from usersim.engine.probes.financial_services.bank import Document, Institution
 
     return Institution(
         institution_id="acme",
@@ -2349,7 +2351,7 @@ class TestRegionAwareKyc:
         An agent never told a PAN is required cannot collect one, so the region's
         required set has to show up in the offered tool schema too.
         """
-        from usersim.engine.core.finance_bank import verify_identity_schema
+        from usersim.engine.probes.financial_services.bank import verify_identity_schema
 
         schema = verify_identity_schema(("full_name", "date_of_birth", "pan"))
         assert schema["parameters"]["required"] == [
@@ -2427,7 +2429,7 @@ class TestRegionalConventions:
         assert us.format_money("n/a") == "$n/a"
 
     def test_percentages_and_whole_amounts_follow_the_region(self):
-        from usersim.engine.core.finance_bank import format_amount, format_percent
+        from usersim.engine.probes.financial_services.bank import format_amount, format_percent
 
         assert format_percent(15.9, number_format="fr_FR") == "15,9 %"
         assert format_percent(1.70, number_format="de_DE") == "1,7 %"
@@ -2437,7 +2439,7 @@ class TestRegionalConventions:
         assert format_amount(7.9, currency_symbol="£", number_format="en_GB") == "£7.90"
 
     def test_yen_and_won_are_whole_amounts_with_the_unit_after(self):
-        from usersim.engine.core.finance_bank import format_percent
+        from usersim.engine.probes.financial_services.bank import format_percent
 
         japan = load_finance_bank_for_locale("ja_JP")
         korea = load_finance_bank_for_locale("ko_KR")
@@ -2526,7 +2528,7 @@ class TestRegionalConventions:
         assert state == {"opened_account_id": "acct_new_0001"}
 
     def test_the_kb_search_example_names_no_country_specific_product(self):
-        from usersim.engine.core.finance_bank import FRAMEWORK_PRIMITIVE_TOOLS
+        from usersim.engine.probes.financial_services.bank import FRAMEWORK_PRIMITIVE_TOOLS
 
         description = FRAMEWORK_PRIMITIVE_TOOLS["kb_search"]["parameters"]["properties"]["query"]["description"]
         assert "401(k)" not in description and "IRA" not in description
@@ -2788,7 +2790,7 @@ class TestAuthoredPersonaTagsAreReachable:
     def test_dynamic_persona_affinities_are_reachable(self, locale):
         import yaml
 
-        path = packaged_assets_dir() / "financial_services" / locale / "dynamic.yaml"
+        path = probe_assets_dir("financial_services") / locale / "dynamic.yaml"
         categories = yaml.safe_load(path.read_text(encoding="utf-8"))["categories"]
         dead = {
             (cat["id"], tag)
@@ -2875,7 +2877,7 @@ class TestRetrievalEffortIsRecorded:
         assert json.loads(extras["kb_search_queries"]) == []
 
     def test_columns_are_declared_in_the_contract(self):
-        from usersim.engine.probes.financial_services.generator import (
+        from usersim.engine.probes.financial_services.probe import (
             FINANCE_TRAJECTORY_COLUMNS,
         )
         from usersim.selection.schemas import LOGICAL_GROUPS
@@ -2897,7 +2899,7 @@ class TestSubstantiveRetrievalRate:
 
     @staticmethod
     def _rate(ids, locale="en_IN", inst="chandrika_bank"):
-        from usersim.engine.evaluator.scorers.financial_services import (
+        from usersim.engine.probes.financial_services.scorer import (
             _substantive_retrieval_rate,
         )
 
@@ -2997,7 +2999,7 @@ class TestAccountLabelIsRegionalVocabulary:
 
     def test_unauthored_domain_falls_back_to_a_region_neutral_label(self):
         """A locale that never authored the block must be generic, not US-flavoured."""
-        from usersim.engine.core.finance_bank import (
+        from usersim.engine.probes.financial_services.bank import (
             DEFAULT_DOMAIN_ACCOUNT_LABELS,
         )
 
@@ -3012,7 +3014,7 @@ class TestAccountLabelIsRegionalVocabulary:
     def test_engine_default_and_asset_gen_default_agree(self):
         """Two copies of the same table drift; pin them to each other."""
         from usersim.asset_gen.financial_services.spec import DEFAULT_DOMAIN_ACCOUNT_LABELS as A
-        from usersim.engine.core.finance_bank import (
+        from usersim.engine.probes.financial_services.bank import (
             DEFAULT_DOMAIN_ACCOUNT_LABELS as B,
         )
 
@@ -3020,7 +3022,7 @@ class TestAccountLabelIsRegionalVocabulary:
 
     def test_authored_account_type_still_wins(self):
         """A task that names its own account type must not be overridden."""
-        from usersim.engine.probes.financial_services.generator import (
+        from usersim.engine.probes.financial_services.probe import (
             _resolve_accounts,
         )
 
@@ -3056,7 +3058,7 @@ def _all_task_param_spaces():
     """(locale, template_id, slot, values) for every authored param slot."""
     import yaml
 
-    root = packaged_assets_dir() / "financial_services"
+    root = probe_assets_dir("financial_services")
     for path in sorted(root.glob("*/*/*/tasks.yaml")):
         for tpl in yaml.safe_load(path.read_text())["templates"]:
             for slot, values in (tpl.get("param_space") or {}).items():

@@ -130,7 +130,7 @@ different questions of the model.
 | --- | --- | --- | --- | --- |
 | Fact bank | `probes/sov_ai_facts/bank.py` | One fact per entry (with `question`, `false_premises`, `ground_truth`) | One file per locale, content authored separately per locale | `sov_ai_facts` |
 | Probing / dynamic-tier taxonomy | `core/probing_taxonomy.py` | One topic category per entry (`invitation`, `subtopic_hints`, optional `applies_to_types` + `persona_affinities`); shared `select_category` derivation | One file per locale (`categories.yaml` for sov_ai_dynamic; `dynamic.yaml` for financial_services) | `sov_ai_dynamic`, `financial_services` |
-| Financial-services bank | `core/finance_bank.py` (+ `finance_tasks.py`, `embeddings.py`) | Per-institution corpus + tools + tasks + embeddings; `Institution` / `FinanceBank` typed views; sim-time gold derivation | One dir tree per locale (`<type>/<institution>/`) | `financial_services` |
+| Financial-services bank | `probes/financial_services/bank.py` (+ `tasks.py`, `embeddings.py`) | Per-institution corpus + tools + tasks + embeddings; `Institution` / `FinanceBank` typed views; sim-time gold derivation | One dir tree per locale (`<type>/<institution>/`) | `financial_services` |
 | Query bank | `probes/sov_ai_multilingual_parity/bank.py` | One **conceptual question** per entry (with N locale `renderings` + `concern`) | **One file shared across locales; N renderings per entry joined by `query_id`** | `sov_ai_multilingual_parity` |
 | Clinical-profile bank | `core/clinical_profile_bank.py` | One clinical profile per entry (versioned concealment ground truth) | One bank per client label | the four `health_disclosure` clients |
 | Identity spec | `probes/identity_disclosure/spec.py` | Developers, ordered expected-identity rules, competitors, tactics and strategies; a spec layer can extend another | One file shared across locales; localized text per tactic | `identity_disclosure` |
@@ -549,7 +549,7 @@ what each one carries:
 | `core/_assets.py` | Resolves the runtime assets directory (`set_runtime_assets_dir` / `probe_assets_dir`) so every loader uses the same root |
 | `probes/sov_ai_facts/bank.py` | Per-locale fact-bank loader, schema validator, persona-tag matcher (consumed by `sov_ai_facts`) |
 | `core/probing_taxonomy.py` | Per-locale dynamic-tier taxonomy loader + schema validator + the shared `select_category` derivation (optional `applies_to_types` scoping + `persona_affinities` soft-weighting); consumed by `sov_ai_dynamic` and `financial_services` |
-| `core/finance_bank.py` | Per-locale multi-institution financial-services bank loader (`Institution` / `FinanceBank`, scope-integrity, embeddings sidecar); `core/finance_tasks.py` (sim-time instantiation + gold derivation) + `core/embeddings.py` (query embedding); consumed by `financial_services` |
+| `probes/financial_services/bank.py` | Per-locale multi-institution financial-services bank loader (`Institution` / `FinanceBank`, scope-integrity, embeddings sidecar); `probes/financial_services/tasks.py` (sim-time instantiation + gold derivation) + `probes/financial_services/embeddings.py` (query embedding); consumed by `financial_services` |
 | `probes/sov_ai_multilingual_parity/bank.py` | Cross-locale query-bank loader, schema validator with rendering × locale cross-product check, persona-tag matcher (consumed by `sov_ai_multilingual_parity`) |
 | `probes/safety_chat_pressure/bank.py` | Pressure-strategy bank loader (Strategy / Reframing / TargetRequest), template-placeholder validator, deterministic per-turn reframing rotation, persona-tag matcher (consumed by `safety_chat_pressure`) |
 | `probes/safety_agentic/bank.py` | Agentic-action bank loader (SubProtocol / ToolSpec / ActionRequest), JSON-Schema tool-spec validator, mock-response cross-reference validator, **action-taxonomy name resolution at load time** (rejects banks that reference an unknown action), persona-tag matcher (consumed by `safety_agentic`) |
@@ -608,7 +608,6 @@ The tables describe the main files.
 | `test_probe_invariants.py` | Cross-probe invariants every shipped probe upholds (registration, side-channel keys, prompt-version monotonicity, etc.) |
 | `test_tool_calling.py` | Tool-calling probe: tool sampling, gate check |
 | `test_verifiers.py` | Tool-call JSON-schema validator |
-| `test_financial_services.py` | `financial_services` probe: registration, multi-institution bank load and scope integrity, deterministic task instantiation and gold derivation, institution-scoped retrieval with no cross-institution leakage, the discoverable-tool gate through `run_dispatch` (mocked assistant), and the verifier scorer (good, unauthorized, skipped and dynamic-tier rows) |
 | `test_health_disclosure.py` | `health_disclosure` family: the Guard's pacing gates, the `commit_move` tool schema, move extraction, and the per-client config (topics, risk, archetype, prompts, axes) |
 
 **`tests/engine/evaluator/`: judges, scorers, registry**
@@ -653,3 +652,5 @@ The tables describe the main files.
 | `identity_disclosure/test_spec.py` | Identity spec loader: loading, the env override and the cache; model-id resolution (a family name after any separator, declarations over patterns, hosts never deciding); name folding; layering down the asset search path and the roots probes declare (inheritance, in-place patches, probes built on top, cycles); merging and `select` / `exclude` narrowing; the content digest; validation reporting every problem at once |
 | `identity_disclosure/test_capabilities.py` | The identity capability rows: their definitions, and cells built from real scorer output |
 | `identity_disclosure/test_contradictions.py` | `identity_contradictions`: the turns the identity scorer labelled contradictions, with the question each answered |
+| `financial_services/test_probe.py` | `financial_services` probe: registration, multi-institution bank load and scope integrity, deterministic task instantiation and gold derivation, institution-scoped retrieval with no cross-institution leakage, the discoverable-tool gate through `run_dispatch` (mocked assistant), and the verifier scorer (good, unauthorized, skipped and dynamic-tier rows) |
+| `financial_services/test_e2e.py` | A finance trajectory of each tier through evaluation, selection and the capability report, with the judge mocked |

@@ -258,10 +258,11 @@ It must be absolute: `@register_probe` refuses a relative path, which would
 resolve against the working directory. In this repository the banks are then
 at `src/usersim/engine/probes/<label>/assets/<label>/`, as for
 `general_educational`, `general_open_ended`, the three `sov_ai_*` probes,
-`safety_chat_pressure`, `safety_agentic` and `identity_disclosure`, which keep
-their bank loader (`bank.py`, `taxonomy.py` for `sov_ai_dynamic`, `spec.py` for
-`identity_disclosure`) and their scorer (`scorer.py`) in that folder too, and
-their tests in `tests/probes/<label>/`. A built-in that leaves
+`safety_chat_pressure`, `safety_agentic`, `identity_disclosure` and
+`financial_services`, which keep their bank loader (`bank.py`, `taxonomy.py`
+for `sov_ai_dynamic`, `spec.py` for `identity_disclosure`) and their scorer
+(`scorer.py`) in that folder too, and their tests in `tests/probes/<label>/`.
+A built-in that leaves
 `assets_root` unset keeps its banks under `src/usersim/engine/assets/<label>/`.
 
 Its bank loader reads under `MyProbe.assets_dir()`, the probe's own folder,

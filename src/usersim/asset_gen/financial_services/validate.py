@@ -131,7 +131,7 @@ def _read_bank(bank_dir: Path) -> tuple[dict[str, Any], dict[str, _InstData]]:
 def _check_structural(bank_dir: Path, insts: dict[str, _InstData], rep: ValidationReport) -> None:
     corpus_only = any(not d.has_tasks for d in insts.values())
     try:
-        from usersim.engine.core.finance_bank import (
+        from usersim.engine.probes.financial_services.bank import (
             FinanceBankError,
             load_finance_bank,
         )
@@ -709,11 +709,11 @@ def _check_tool_schemas(insts: dict[str, _InstData], rep: ValidationReport) -> N
     An empty schema (no description / no parameters) leaves the assistant calling
     kb_search({}) with no query — it retrieves nothing and never unlocks the
     discoverable gold tools, so every verifiable task fails. The generator now
-    backfills these from ``core.finance_bank.FRAMEWORK_PRIMITIVE_TOOLS``; this
+    backfills these from ``probes.financial_services.bank.FRAMEWORK_PRIMITIVE_TOOLS``; this
     check guards against a bank that predates the backfill or bypasses it.
     """
     try:
-        from usersim.engine.core.finance_bank import FRAMEWORK_PRIMITIVE_TOOLS
+        from usersim.engine.probes.financial_services.bank import FRAMEWORK_PRIMITIVE_TOOLS
     except Exception:  # pragma: no cover - plugin import issue
         rep.add("tool_schemas", "bank", WARN, "could not import primitive contract")
         return

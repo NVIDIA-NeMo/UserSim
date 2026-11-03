@@ -32,7 +32,7 @@ never imports `asset_gen`.
 ## region_meta.yaml (locale-level)
 
 `schema_version`, `locale`, `bank_id`, `bank_version`, `task_contract_version`
-(pins the gold-derivation CODE contract in `core/finance_tasks.py`, independent
+(pins the gold-derivation CODE contract in `probes/financial_services/tasks.py`, independent
 of `bank_version`), `region`, `currency`, `currency_symbol`, `number_format`,
 `privacy_regime`, `placeholder`, `provenance`, and `domain_regulators`:
 
@@ -231,7 +231,7 @@ are offered up front, discoverable ones only via the `call_tool` gate),
 
 Two layers land here automatically at generation time and need not be listed in a
 region spec: (1) the framework primitives `kb_search` + `verify_identity` (schema
-backfilled from `core.finance_bank.FRAMEWORK_PRIMITIVE_TOOLS`); (2) the
+backfilled from `probes.financial_services.bank.FRAMEWORK_PRIMITIVE_TOOLS`); (2) the
 **common-operations** layer: account-lifecycle + servicing tools every
 institution offers (`open_account`, `close_account`, `update_contact_info`,
 `get_statements`, `update_beneficiary`, `set_alerts`) plus a fuller per-type set

@@ -273,7 +273,9 @@ class TestProbeAssetsDir:
     def test_a_built_in_probe_reads_its_packaged_folder(self) -> None:
         from usersim.engine.core.probes import resolve_probe
 
-        assert resolve_probe("financial_services").assets_dir() == packaged_assets_dir() / "financial_services"
+        assert (
+            resolve_probe("health_triage_disclosure").assets_dir() == packaged_assets_dir() / "health_triage_disclosure"
+        )
 
     def test_a_probe_reads_the_folder_under_its_declared_root(self, register_test_probe, tmp_path) -> None:
         (tmp_path / "ext_probe").mkdir()

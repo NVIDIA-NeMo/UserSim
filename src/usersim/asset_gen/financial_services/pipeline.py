@@ -576,7 +576,7 @@ def products_for_prompt(products: list[Product], spec: RegionSpec) -> list[dict[
     Without the label the model reads a meaning off the key's English words, so a
     tax-credit base named ``combined_credit_base_limit`` reads as a credit line.
     """
-    from usersim.engine.core.finance_bank import format_amount, format_percent
+    from usersim.engine.probes.financial_services.bank import format_amount, format_percent
 
     number_format = spec.number_format or spec.locale
     labels = spec.doc_titles.variable_labels
@@ -1181,9 +1181,9 @@ def _backfill_primitive_tools(
     ``tools.yaml`` would ship a primitive with an empty schema — leaving the
     assistant to call ``kb_search({})`` (no query), which retrieves nothing and
     never unlocks the discoverable gold tools. Single source of truth:
-    ``core.finance_bank.FRAMEWORK_PRIMITIVE_TOOLS``.
+    ``probes.financial_services.bank.FRAMEWORK_PRIMITIVE_TOOLS``.
     """
-    from usersim.engine.core.finance_bank import framework_primitive_tool
+    from usersim.engine.probes.financial_services.bank import framework_primitive_tool
 
     out: list[dict[str, Any]] = []
     for t in tools:

@@ -84,11 +84,12 @@ throughout, so a name tells you which one you are reading about.
 src/usersim/
 ├── cli/               console driver; models_*.toml catalogs
 ├── engine/
-│   ├── core/          the conversation loop, probe base classes, banks,
-│   │                  identity, outcomes, storage
+│   ├── core/          the conversation loop, probe base classes, asset lookup,
+│   │                  shared bank loaders, identity, outcomes, storage
 │   ├── evaluator/     judges, axes, and the scorer registry
-│   ├── probes/        the shipped probes
-│   ├── assets/        per-probe YAML and parquet banks
+│   ├── probes/        the shipped probes, most with their banks, loaders and
+│   │                  scorer in their own folder
+│   ├── assets/        the banks of the probes that keep none of their own
 │   └── plugin.py      the two Data Designer entry points
 ├── reporting/         capability dashboard and model comparison
 ├── selection/         trajectory curation and export

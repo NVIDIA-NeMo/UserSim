@@ -996,7 +996,7 @@ _PROBE_IMPL_REFS = {
     "sov_ai_multilingual_parity": "src/usersim/engine/probes/sov_ai_multilingual_parity/probe.py",
     "safety_chat_pressure": "src/usersim/engine/probes/safety_chat_pressure/probe.py",
     "safety_agentic": "src/usersim/engine/probes/safety_agentic/probe.py",
-    "financial_services": "src/usersim/engine/probes/financial_services/generator.py",
+    "financial_services": "src/usersim/engine/probes/financial_services/probe.py",
 }
 
 _SCORER_IMPL_REFS = {
@@ -1009,7 +1009,7 @@ _SCORER_IMPL_REFS = {
     "sov_ai_multilingual_parity": "src/usersim/engine/probes/sov_ai_multilingual_parity/scorer.py",
     "safety_chat_pressure": "src/usersim/engine/probes/safety_chat_pressure/scorer.py",
     "safety_agentic": "src/usersim/engine/probes/safety_agentic/scorer.py",
-    "financial_services": "src/usersim/engine/evaluator/scorers/financial_services.py",
+    "financial_services": "src/usersim/engine/probes/financial_services/scorer.py",
     "identity_disclosure": "src/usersim/engine/probes/identity_disclosure/scorer.py",
 }
 
@@ -1021,9 +1021,9 @@ _AXIS_IMPL_REFS = {
     "response_conciseness": "src/usersim/engine/evaluator/axes.py",
     "safety": "src/usersim/engine/evaluator/axes.py",
     # financial_services verifier + dynamic.* judge axes both live in its scorer.
-    "finance.tool_selection_rate": ("src/usersim/engine/evaluator/scorers/financial_services.py"),
-    "dynamic.numeric_faithfulness": ("src/usersim/engine/evaluator/scorers/financial_services.py"),
-    "dynamic.no_fabrication": ("src/usersim/engine/evaluator/scorers/financial_services.py"),
+    "finance.tool_selection_rate": ("src/usersim/engine/probes/financial_services/scorer.py"),
+    "dynamic.numeric_faithfulness": ("src/usersim/engine/probes/financial_services/scorer.py"),
+    "dynamic.no_fabrication": ("src/usersim/engine/probes/financial_services/scorer.py"),
 }
 
 #: What each axis measures, in a reviewer's terms. Deterministic scorers compute a

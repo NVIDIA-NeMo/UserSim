@@ -22,7 +22,7 @@ accounting. This probe contributes only the pieces that are finance-specific:
   at least one domain tool call before "user satisfied" can end the run).
 
 Gold metadata (gold docs / gold tool sequence / expected state deltas) is
-derived deterministically at sim time by ``core/finance_tasks.py`` and
+derived deterministically at sim time by ``probes/financial_services/tasks.py`` and
 persisted on the trajectory as side channels + top-level columns, so the
 deterministic scorer is self-contained (no re-derivation).
 """
@@ -42,18 +42,6 @@ from usersim.engine.core.behavioral import (
     format_disclosure_instructions,
     format_interaction_style_instructions,
 )
-from usersim.engine.core.finance_bank import (
-    DEFAULT_DOMAIN_ACCOUNT_LABELS,
-    DEFAULT_IDENTITY_REQUIRED_FIELDS,
-    FinanceBank,
-    finance_bank_dir_for,
-    finance_bank_locale,
-    has_finance_tasks,
-    load_finance_bank,
-    load_finance_bank_for_locale,
-    reset_finance_bank_cache,
-)
-from usersim.engine.core.finance_tasks import FinanceInstance
 from usersim.engine.core.identity import persona_uuid as compute_persona_uuid
 from usersim.engine.core.locale import (
     expected_language_display,
@@ -87,6 +75,17 @@ from usersim.engine.core.simulation import (
 )
 from usersim.engine.probes.financial_services import retrieval as _retrieval
 from usersim.engine.probes.financial_services import tools as _tools
+from usersim.engine.probes.financial_services.bank import (
+    DEFAULT_DOMAIN_ACCOUNT_LABELS,
+    DEFAULT_IDENTITY_REQUIRED_FIELDS,
+    FinanceBank,
+    finance_bank_dir_for,
+    finance_bank_locale,
+    has_finance_tasks,
+    load_finance_bank,
+    load_finance_bank_for_locale,
+    reset_finance_bank_cache,
+)
 from usersim.engine.probes.financial_services.prompts import (
     DYNAMIC_FOLLOWUP_INSTRUCTION,
     DYNAMIC_USER_SYSTEM_PROMPT,
@@ -97,6 +96,7 @@ from usersim.engine.probes.financial_services.task_derivation import (
     derive_financial_literacy,
     derive_instance,
 )
+from usersim.engine.probes.financial_services.tasks import FinanceInstance
 
 logger = logging.getLogger("usersim.engine")
 
@@ -320,6 +320,7 @@ class _PickedTask:
 )
 class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     label = "financial_services"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests financial customer-support / advisory grounded in a per-institution "
         "knowledge base, across two tiers: verifiable (param-locked tasks scored by a "
@@ -830,7 +831,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             # A query vector is only compared with the bank's document vectors;
             # without them it would be an embedding call whose result goes unused.
             if self._retrieval_mode in ("hybrid", "dense") and getattr(self._institution, "embeddings", None):
-                from usersim.engine.core.embeddings import aembed_query
+                from usersim.engine.probes.financial_services.embeddings import aembed_query
 
                 query_embedding = await aembed_query(
                     models,

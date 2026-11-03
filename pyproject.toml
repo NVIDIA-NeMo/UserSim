@@ -193,9 +193,9 @@ include = ["usersim*"]
 # vectors `gen-assets` writes beside a bank stay local, as do the judge
 # scorecards `evaluate-assets` writes there.
 "usersim.engine" = [
-    "assets/financial_services/**/embeddings.parquet",
-    "assets/financial_services/**/_eval_scorecard.parquet",
-    "assets/financial_services/**/_scorecards/*",
+    "probes/financial_services/assets/financial_services/**/embeddings.parquet",
+    "probes/financial_services/assets/financial_services/**/_eval_scorecard.parquet",
+    "probes/financial_services/assets/financial_services/**/_scorecards/*",
 ]
 
 [tool.pytest.ini_options]

@@ -43,10 +43,10 @@ data/
 artifacts/
 output/
 # Dense-retrieval vectors `gen-assets` writes beside a bank stay local.
-src/usersim/engine/assets/financial_services/**/embeddings.parquet
+src/usersim/engine/probes/financial_services/assets/financial_services/**/embeddings.parquet
 # So do the judge scorecards `evaluate-assets` writes there.
-src/usersim/engine/assets/financial_services/**/_eval_scorecard.parquet
-src/usersim/engine/assets/financial_services/**/_scorecards/
+src/usersim/engine/probes/financial_services/assets/financial_services/**/_eval_scorecard.parquet
+src/usersim/engine/probes/financial_services/assets/financial_services/**/_scorecards/
 
 # IDE
 .vscode/

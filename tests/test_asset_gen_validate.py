@@ -737,9 +737,9 @@ def test_symbols_and_dollar_amounts_are_plain_text(tmp_path: Path):
 
 
 def test_every_committed_bank_is_plain_text():
-    from usersim.engine.core._assets import packaged_assets_dir
+    from usersim.engine.core._assets import probe_assets_dir
 
-    banks = sorted(p.parent for p in (packaged_assets_dir() / "financial_services").glob("*/region_meta.yaml"))
+    banks = sorted(p.parent for p in probe_assets_dir("financial_services").glob("*/region_meta.yaml"))
     assert banks, "no committed banks found"
     for bank in banks:
         results = [r for r in validate_bank(bank, None).results if r.check == "plain_text"]
