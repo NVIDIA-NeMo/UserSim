@@ -91,6 +91,15 @@ def test_no_template_text_in_shipped_banks():
         pytest.fail(msg)
 
 
+def test_half_remember_pattern_needs_a_proverb():
+    """``half_remember_proverb`` flags a half-remembered proverb, not every half-remembered line."""
+    assert _asset_audit._detect_template_in_string("Ask about a proverb you half remember.") == [
+        "half_remember_proverb"
+    ]
+    assert _asset_audit._detect_template_in_string("Quote a half-remembered proverb.") == ["half_remember_proverb"]
+    assert _asset_audit._detect_template_in_string("Bring up lyrics you only half remember.") == []
+
+
 def test_audit_helper_runs():
     """Sanity: the per-bank audit function returns a structured finding
     dict for every shipped bank.

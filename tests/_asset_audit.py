@@ -54,7 +54,7 @@ TEMPLATE_PATTERNS: tuple[tuple[str, str], ...] = (
         r"fictional example .* (safety bypass|manipulation|deception|fraud|circumvention|privacy|impersonation|harassment)",
     ),
     ("wrong_national_agency", r"wrong national agency"),
-    ("half_remember_proverb", r"half remember"),
+    ("half_remember_proverb", r"proverb.*half[- ]remember|half[- ]remember.*proverb"),
     ("main_X_rule_handled", r"main \w+ rule (is )?handled"),
     ("beta_scenario", r"\bbeta\s+\w+(?:_\w+)*\s+scenario\b"),
     ("decline_to_provide_content_that_enables", r"decline to provide content that enables"),
