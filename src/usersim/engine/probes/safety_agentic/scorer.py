@@ -9,7 +9,7 @@ Applied by the ``TrajectoryEvaluator`` when a config carries
 ``attempted_actions`` the ``safety_agentic`` probe records in its
 metadata (stored with the row as ``conversation_metadata``), joins every
 attempted action against the rich action taxonomy (loaded via
-:mod:`core.action_taxonomy`), and produces:
+:mod:`probes.safety_agentic.action_taxonomy`), and produces:
 
 - **mechanical** per-trajectory findings that need no LLM call:
 
@@ -93,18 +93,18 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from usersim.engine.core.action_taxonomy import (
-    ActionTaxonomy,
-    load_action_taxonomy_default,
-)
-from usersim.engine.core.agentic_bank import (
-    ActionRequest,
-    load_agentic_bank_default,
-)
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.core.row_metadata import recorded_value
 from usersim.engine.evaluator.scorers import register_scorer
+from usersim.engine.probes.safety_agentic.action_taxonomy import (
+    ActionTaxonomy,
+    load_action_taxonomy_default,
+)
+from usersim.engine.probes.safety_agentic.bank import (
+    ActionRequest,
+    load_agentic_bank_default,
+)
 
 logger = logging.getLogger("usersim.engine")
 
@@ -362,7 +362,7 @@ async def score_safety_agentic_trajectory(
         bank = load_agentic_bank_default()
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.safety_agentic: failed to load agentic bank: %s",
+            "  |-- safety_agentic scorer: failed to load agentic bank: %s",
             e,
         )
         return _no_op_envelope(
@@ -378,7 +378,7 @@ async def score_safety_agentic_trajectory(
         taxonomy = load_action_taxonomy_default()
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.safety_agentic: failed to load action taxonomy: %s",
+            "  |-- safety_agentic scorer: failed to load action taxonomy: %s",
             e,
         )
         return _no_op_envelope(
@@ -393,7 +393,7 @@ async def score_safety_agentic_trajectory(
     bank_version_mismatch = pinned_version is not None and pinned_version != bank.bank_version
     if bank_version_mismatch:
         logger.info(
-            "  |-- evaluator/scorers.safety_agentic: trajectory pinned "
+            "  |-- safety_agentic scorer: trajectory pinned "
             "bank_version=%s but current loaded bank is %s — reporting "
             "drift flag on this row",
             pinned_version,
@@ -818,7 +818,7 @@ async def _call_judge(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.safety_agentic: judge %r raised on action_request %s: %s: %s",
+            "  |-- safety_agentic scorer: judge %r raised on action_request %s: %s: %s",
             judge_alias,
             action_request.id,
             type(e).__name__,
@@ -831,7 +831,7 @@ async def _call_judge(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.safety_agentic: failed to parse structured output for action_request %s",
+            "  |-- safety_agentic scorer: failed to parse structured output for action_request %s",
             action_request.id,
         )
         return None, "parse_failure"
@@ -840,7 +840,7 @@ async def _call_judge(
         judgment = _AgenticJudgment.model_validate(parsed)
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.safety_agentic: schema validation failed for action_request %s: %s",
+            "  |-- safety_agentic scorer: schema validation failed for action_request %s: %s",
             action_request.id,
             e,
         )

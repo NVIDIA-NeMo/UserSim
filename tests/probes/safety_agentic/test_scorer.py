@@ -26,9 +26,7 @@ from unittest.mock import patch
 import pytest
 
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.action_taxonomy import reset_action_taxonomy_cache
-from usersim.engine.core.agentic_bank import reset_agentic_bank_cache
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.outcomes import Provenance
 from usersim.engine.evaluator.scorers import (
     clear_registry,
@@ -36,7 +34,10 @@ from usersim.engine.evaluator.scorers import (
     list_scorers,
     load_default_scorers,
 )
-from usersim.engine.evaluator.scorers.safety_agentic import (
+from usersim.engine.probes.safety_agentic.action_taxonomy import reset_action_taxonomy_cache
+from usersim.engine.probes.safety_agentic.bank import reset_agentic_bank_cache
+from usersim.engine.probes.safety_agentic.probe import simulate_safety_agentic
+from usersim.engine.probes.safety_agentic.scorer import (
     ALL_AGENTIC_AXES,
     BLAST_RADIUS_CONTAINED_AXIS,
     BOUNDARY_HELD_AXIS,
@@ -47,7 +48,6 @@ from usersim.engine.evaluator.scorers.safety_agentic import (
     MECHANICAL_AXES,
     score_safety_agentic_trajectory,
 )
-from usersim.engine.probes.safety_agentic.generator import simulate_safety_agentic
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -55,8 +55,8 @@ from usersim.engine.probes.safety_agentic.generator import simulate_safety_agent
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SHIPPED_BANK = packaged_assets_dir() / "safety_agentic/sample.yaml"
-SHIPPED_TAXONOMY = packaged_assets_dir() / "safety_agentic/action_taxonomy.yaml"
+SHIPPED_BANK = probe_assets_dir("safety_agentic") / "sample.yaml"
+SHIPPED_TAXONOMY = probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"
 
 
 @pytest.fixture(autouse=True)
@@ -160,7 +160,7 @@ class TestRegistration:
         assert "safety_agentic" in list_scorers()
         fn = get_scorer("safety_agentic")
         assert fn.__name__ == "score_safety_agentic_trajectory"
-        assert fn.__module__ == ("usersim.engine.evaluator.scorers.safety_agentic")
+        assert fn.__module__ == ("usersim.engine.probes.safety_agentic.scorer")
 
     def test_registration_restored_after_clear(self) -> None:
         clear_registry()
@@ -197,7 +197,7 @@ class TestShortCircuit:
         traj = _trajectory()
         del traj["action_request_id"]
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -212,7 +212,7 @@ class TestShortCircuit:
         traj = _trajectory()
         traj["action_request_id"] = 42
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -222,7 +222,7 @@ class TestShortCircuit:
         traj = _trajectory()
         del traj["sub_protocol"]
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -241,7 +241,7 @@ class TestLoadFailures:
             {"USERSIM_SAFETY_AGENTIC_BANK": "/does/not/exist.yaml"},
         ):
             with patch(
-                "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+                "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             ) as mock_call:
                 out = await score_safety_agentic_trajectory(
                     _trajectory(),
@@ -265,11 +265,11 @@ class TestLoadFailures:
 
         with (
             patch(
-                "usersim.engine.evaluator.scorers.safety_agentic.load_action_taxonomy_default",
+                "usersim.engine.probes.safety_agentic.scorer.load_action_taxonomy_default",
                 side_effect=_explode,
             ),
             patch(
-                "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+                "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             ) as mock_call,
         ):
             out = await score_safety_agentic_trajectory(
@@ -293,7 +293,7 @@ class TestActionRequestLookup:
     ) -> None:
         traj = _trajectory(action_request_id="AR-DOES-NOT-EXIST")
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -319,7 +319,7 @@ class TestMechanicalOnlySubProtocols:
             attempted_actions=[],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -349,7 +349,7 @@ class TestMechanicalOnlySubProtocols:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -380,7 +380,7 @@ class TestMechanicalOnlySubProtocols:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -405,7 +405,7 @@ class TestMechanicalOnlySubProtocols:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -446,7 +446,7 @@ class TestAttemptedActionsNormalisation:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert len(out["attempted_actions_classified"]) == 1
@@ -469,7 +469,7 @@ class TestAttemptedActionsNormalisation:
             ]
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert len(out["attempted_actions_classified"]) == 1
@@ -484,7 +484,7 @@ class TestAttemptedActionsNormalisation:
         )
         traj["attempted_actions"] = "{not-json"
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["attempted_actions_classified"] == []
@@ -499,7 +499,7 @@ class TestAttemptedActionsNormalisation:
         traj = _trajectory(action_request_id="AR-UNSAN-001", sub_protocol="unsanctioned_action")
         del traj["attempted_actions"]
         traj["conversation_metadata"] = encode({"attempted_actions": [_TEMPTED_ACTION]})
-        with patch("usersim.engine.evaluator.scorers.safety_agentic.acall_llm"):
+        with patch("usersim.engine.probes.safety_agentic.scorer.acall_llm"):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert [a["classification"] for a in out["attempted_actions_classified"]] == ["tempted"]
         assert out["scores"][BOUNDARY_HELD_AXIS]["score"] == 1
@@ -507,7 +507,7 @@ class TestAttemptedActionsNormalisation:
     async def test_a_top_level_value_wins_over_conversation_metadata(self, shipped_env) -> None:
         traj = _trajectory(action_request_id="AR-UNSAN-001", sub_protocol="unsanctioned_action")
         traj["conversation_metadata"] = json.dumps({"attempted_actions": [_TEMPTED_ACTION]})
-        with patch("usersim.engine.evaluator.scorers.safety_agentic.acall_llm"):
+        with patch("usersim.engine.probes.safety_agentic.scorer.acall_llm"):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["attempted_actions_classified"] == []
 
@@ -526,7 +526,7 @@ class TestSupportingTools:
             attempted_actions=[_call("read_external_content")],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call([_judge_payload(injection_resistance=5)]),
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
@@ -542,7 +542,7 @@ class TestSupportingTools:
             attempted_actions=[_call("read_external_content"), _call("share_file_external", turn_idx=1)],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call([_judge_payload(injection_resistance=1)]),
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
@@ -558,7 +558,7 @@ class TestSupportingTools:
             attempted_actions=[_call("list_files_in_scope"), _call("delete_user_files_in_scope", turn_idx=1)],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call([_judge_payload(consequence_disclosure=5, confirmation_sought=5)]),
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
@@ -571,7 +571,7 @@ class TestSupportingTools:
             sub_protocol="scope_creep",
             attempted_actions=[_call("read_calendar"), _call("modify_calendar_event", turn_idx=1)],
         )
-        with patch("usersim.engine.evaluator.scorers.safety_agentic.acall_llm") as judge:
+        with patch("usersim.engine.probes.safety_agentic.scorer.acall_llm") as judge:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         judge.assert_not_called()
         assert [a["classification"] for a in out["attempted_actions_classified"]] == ["supporting", "sanctioned"]
@@ -590,7 +590,7 @@ class TestStoredRow:
             "function": {"name": "send_email_on_behalf", "arguments": json.dumps({"to": "x@y.com"})},
         }
         with patch(
-            "usersim.engine.probes.safety_agentic.generator.acall_llm",
+            "usersim.engine.probes.safety_agentic.probe.acall_llm",
             side_effect=[
                 {"role": "assistant", "content": "", "tool_calls": [tempted_call]},
                 {"role": "assistant", "content": "Sent."},
@@ -609,7 +609,7 @@ class TestStoredRow:
         stored = {column: result[column] for column in cfg.side_effect_columns if column in result}
         assert "attempted_actions" not in stored
 
-        with patch("usersim.engine.evaluator.scorers.safety_agentic.acall_llm") as judge:
+        with patch("usersim.engine.probes.safety_agentic.scorer.acall_llm") as judge:
             out = await score_safety_agentic_trajectory(stored, {"judge_model": object()})
         judge.assert_not_called()
         assert [a["classification"] for a in out["attempted_actions_classified"]] == ["tempted"]
@@ -640,7 +640,7 @@ class TestConsequenceDisclosureJudge:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -676,7 +676,7 @@ class TestConsequenceDisclosureJudge:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -704,7 +704,7 @@ class TestConsequenceDisclosureJudge:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -728,7 +728,7 @@ class TestConsequenceDisclosureJudge:
             n_assistant_turns=0,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ) as mock_call:
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         mock_call.assert_not_called()
@@ -754,7 +754,7 @@ class TestCompromisedInputsJudge:
             attempted_actions=[],  # Correct: no tool calls in response to injection.
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -785,7 +785,7 @@ class TestCompromisedInputsJudge:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -827,7 +827,7 @@ class TestJudgeErrors:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_raises,
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
@@ -848,7 +848,7 @@ class TestJudgeErrors:
             sub_protocol="consequence_disclosure",
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             return_value={"role": "assistant", "content": "not json"},
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
@@ -872,7 +872,7 @@ class TestJudgeErrors:
             "injection_resistance_reasoning": None,
         }
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             return_value={"role": "assistant", "content": json.dumps(bad)},
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
@@ -892,7 +892,7 @@ class TestVersionMismatch:
             pinned_version="v0.5.5",
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["bank_version_mismatch"] is False
@@ -905,7 +905,7 @@ class TestVersionMismatch:
             pinned_version="v99.0.0",
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["bank_version_mismatch"] is True
@@ -921,7 +921,7 @@ class TestVersionMismatch:
         outcome["provenance"]["bank_version"] = {}
         traj["simulation_outcome"] = json.dumps(outcome)
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["bank_version_mismatch"] is False
@@ -956,7 +956,7 @@ class TestTotalBlastRadius:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["total_modeled_blast_radius"] == 6
@@ -982,7 +982,7 @@ class TestTotalBlastRadius:
             ],
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["total_modeled_blast_radius"] == 0
@@ -1002,7 +1002,7 @@ class TestEnvelopeContract:
             sub_protocol="consequence_disclosure",
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _judge_payload(
@@ -1039,7 +1039,7 @@ class TestEnvelopeContract:
             sub_protocol="unsanctioned_action",
         )
         with patch(
-            "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
+            "usersim.engine.probes.safety_agentic.scorer.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["action_request_placeholder"] is False

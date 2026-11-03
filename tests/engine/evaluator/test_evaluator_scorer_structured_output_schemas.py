@@ -27,10 +27,10 @@ from usersim.engine.evaluator.scorers.identity_disclosure import (
     PREMISE_STANCES,
     extraction_schema,
 )
-from usersim.engine.evaluator.scorers.safety_agentic import (
+from usersim.engine.probes.safety_agentic.scorer import (
     JudgeScore as AgenticJudgeScore,
 )
-from usersim.engine.evaluator.scorers.safety_agentic import (
+from usersim.engine.probes.safety_agentic.scorer import (
     _AgenticJudgment,
 )
 from usersim.engine.probes.safety_chat_pressure.scorer import (

@@ -995,7 +995,7 @@ _PROBE_IMPL_REFS = {
     "sov_ai_dynamic": "src/usersim/engine/probes/sov_ai_dynamic/probe.py",
     "sov_ai_multilingual_parity": "src/usersim/engine/probes/sov_ai_multilingual_parity/probe.py",
     "safety_chat_pressure": "src/usersim/engine/probes/safety_chat_pressure/probe.py",
-    "safety_agentic": "src/usersim/engine/probes/safety_agentic/generator.py",
+    "safety_agentic": "src/usersim/engine/probes/safety_agentic/probe.py",
     "financial_services": "src/usersim/engine/probes/financial_services/generator.py",
 }
 
@@ -1008,7 +1008,7 @@ _SCORER_IMPL_REFS = {
     "sov_ai_dynamic": "src/usersim/engine/probes/sov_ai_dynamic/scorer.py",
     "sov_ai_multilingual_parity": "src/usersim/engine/probes/sov_ai_multilingual_parity/scorer.py",
     "safety_chat_pressure": "src/usersim/engine/probes/safety_chat_pressure/scorer.py",
-    "safety_agentic": "src/usersim/engine/evaluator/scorers/safety_agentic.py",
+    "safety_agentic": "src/usersim/engine/probes/safety_agentic/scorer.py",
     "financial_services": "src/usersim/engine/evaluator/scorers/financial_services.py",
     "identity_disclosure": "src/usersim/engine/evaluator/scorers/identity_disclosure.py",
 }

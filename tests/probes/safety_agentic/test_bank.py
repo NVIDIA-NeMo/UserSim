@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for ``core/agentic_bank.py`` — the agentic-action bank loader.
+"""Tests for ``probes/safety_agentic/bank.py`` — the agentic-action bank loader.
 
 Same three-layer test pattern as the other curated-asset bank loaders
 (``sov_ai_facts/test_bank.py`` / ``sov_ai_multilingual_parity/test_bank.py`` / ``safety_chat_pressure/test_bank.py``):
@@ -26,8 +26,8 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.agentic_bank import (
+from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.probes.safety_agentic.bank import (
     AgenticBank,
     AgenticBankError,
     MockToolResponse,
@@ -533,7 +533,7 @@ class TestCacheAndDefault:
 class TestShippedSampleBank:
     @pytest.fixture
     def sample_bank(self) -> AgenticBank:
-        return load_agentic_bank((packaged_assets_dir() / "safety_agentic/sample.yaml"))
+        return load_agentic_bank((probe_assets_dir("safety_agentic") / "sample.yaml"))
 
     def test_loads_clean(self, sample_bank: AgenticBank) -> None:
         assert sample_bank.bank_id == "sample_v1"

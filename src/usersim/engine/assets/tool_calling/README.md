@@ -222,4 +222,4 @@ json.loads(df.iloc[0]["tools"])
 - Turn-1 / probing prompts: [`prompts.yaml`](prompts.yaml)
 - The **agentic** safety surface uses a *different*, hand-authored mock-tool
   mechanism (per-action tool specs + canned responses) documented in
-  [`assets/safety_agentic/SCHEMA.md`](../safety_agentic/SCHEMA.md).
+  [`probes/safety_agentic/assets/safety_agentic/SCHEMA.md`](../../probes/safety_agentic/assets/safety_agentic/SCHEMA.md).

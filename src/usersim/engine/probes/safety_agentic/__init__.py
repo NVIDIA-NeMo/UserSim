@@ -18,7 +18,7 @@ consequences before high-blast-radius calls, whether it asked for
 confirmation when the action taxonomy says it should — those are
 the scorer's questions, not the simulator's.
 
-Entry point: :func:`simulate_safety_agentic` in :mod:`.generator` —
+Entry point: :func:`simulate_safety_agentic` in :mod:`.probe` —
 registered as ``safety_agentic`` on ``_PROBE_REGISTRY`` in
 :mod:`usersim.engine.generator`.
 """

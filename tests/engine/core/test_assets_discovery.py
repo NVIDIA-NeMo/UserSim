@@ -11,7 +11,7 @@ The invariants here fall into two groups: that resolution works and honours
 its overrides and a probe's declared ``assets_root``, and that the probe
 registry and the on-disk layout stay in lockstep.
 
-Loader-level tests live in the per-bank test files (``test_agentic_bank.py``,
+Loader-level tests live in the per-bank test files (``safety_agentic/test_bank.py``,
 ``safety_chat_pressure/test_bank.py``, …) and exercise these helpers indirectly via the
 shipped sample.
 """

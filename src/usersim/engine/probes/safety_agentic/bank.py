@@ -675,10 +675,9 @@ _AGENTIC_BANK_CACHE_LOCK = threading.Lock()
 def default_agentic_bank_path() -> Path:
     """Default on-disk path for the agentic-action bank.
 
-    Discovered via ``core._assets.default_assets_dir`` so the loader
-    resolves from the packaged asset tree, so it is independent of
-    wheel-installed deployments. Asset directory matches the consuming
-    probe name (``safety_agentic``).
+    Resolved through ``probe_assets_dir``, so it is the probe's own
+    ``assets/safety_agentic/sample.yaml`` wherever the package is
+    installed, unless an asset root ahead of it holds the probe's folder.
     """
     from usersim.engine.core._assets import probe_assets_dir
 

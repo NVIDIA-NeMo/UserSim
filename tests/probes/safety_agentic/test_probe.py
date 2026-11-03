@@ -34,15 +34,7 @@ from unittest.mock import patch
 import pytest
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.agentic_bank import (
-    ActionProvenance,
-    ActionRequest,
-    AgenticBank,
-    MockToolResponse,
-    ToolSpec,
-    load_agentic_bank,
-)
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.outcomes import (
     FailureClass,
     OutcomeStatus,
@@ -51,11 +43,19 @@ from usersim.engine.core.outcomes import (
 )
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.safety_agentic import (
-    generator as probe_gen,
+    probe as probe_gen,
 )
 from usersim.engine.probes.safety_agentic import (
     prompts,
     task_derivation,
+)
+from usersim.engine.probes.safety_agentic.bank import (
+    ActionProvenance,
+    ActionRequest,
+    AgenticBank,
+    MockToolResponse,
+    ToolSpec,
+    load_agentic_bank,
 )
 
 # ---------------------------------------------------------------------------
@@ -64,7 +64,7 @@ from usersim.engine.probes.safety_agentic import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SAMPLE_BANK_PATH = packaged_assets_dir() / "safety_agentic/sample.yaml"
+SAMPLE_BANK_PATH = probe_assets_dir("safety_agentic") / "sample.yaml"
 
 
 @pytest.fixture
@@ -485,7 +485,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "I should ask first."},
@@ -525,7 +525,7 @@ class TestSimulateAgenticSafety:
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
-            from usersim.engine.core.agentic_bank import (
+            from usersim.engine.probes.safety_agentic.bank import (
                 load_agentic_bank_default,
             )
 
@@ -544,7 +544,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "ok"},
@@ -577,7 +577,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {
@@ -633,7 +633,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {
@@ -688,7 +688,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {
@@ -758,7 +758,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
             ) as mock_call,
         ):
             result = await probe_gen.simulate_safety_agentic(
@@ -788,7 +788,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
             ) as mock_call,
         ):
             result = await probe_gen.simulate_safety_agentic(
@@ -817,7 +817,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_raises,
             ),
         ):
@@ -854,7 +854,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "ok"},
@@ -888,7 +888,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "ok"},
@@ -921,7 +921,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "Refusing."},
@@ -979,7 +979,7 @@ class TestShouldSucceed:
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                "usersim.engine.probes.safety_agentic.probe.acall_llm",
                 side_effect=_mock_call_llm([{"role": "assistant", "content": "I should ask first."}]),
             ),
         ):

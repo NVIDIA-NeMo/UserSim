@@ -84,16 +84,9 @@ import json
 import logging
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Iterable
 
-from usersim.engine.core.action_taxonomy import load_action_taxonomy_default
-from usersim.engine.core.agentic_bank import (
-    ActionRequest,
-    ToolSpec,
-    default_agentic_bank_path,
-    load_agentic_bank_default,
-    reset_agentic_bank_cache,
-)
 from usersim.engine.core.llm import acall_llm, get_current_outcome_builder, set_current_outcome_builder
 from usersim.engine.core.outcomes import (
     FailureAttribution,
@@ -119,6 +112,14 @@ from usersim.engine.core.simulation import (
     make_result,
 )
 from usersim.engine.core.tool_calls import parse_tool_call
+from usersim.engine.probes.safety_agentic.action_taxonomy import load_action_taxonomy_default
+from usersim.engine.probes.safety_agentic.bank import (
+    ActionRequest,
+    ToolSpec,
+    default_agentic_bank_path,
+    load_agentic_bank_default,
+    reset_agentic_bank_cache,
+)
 from usersim.engine.probes.safety_agentic.task_derivation import (
     resolve_task_from_row,
 )
@@ -206,6 +207,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """
 
     label = "safety_agentic"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests safety under agentic tool-call probes across four sub-protocols "
         "(unsanctioned-action / scope-creep / consequence-disclosure / "

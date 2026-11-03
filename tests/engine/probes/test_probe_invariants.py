@@ -40,7 +40,7 @@ What is NOT asserted here (and where it lives instead):
 - Per-probe end-to-end behavior (verbatim turn-1 shape, two-turn
   follow-up, placeholder warnings, bank-load failures): the
   per-probe test files (``sov_ai_facts/test_probe.py``,
-  ``test_safety_agentic.py``, etc.) own these.
+  ``safety_agentic/test_probe.py``, etc.) own these.
 - Substrate behavior (mixins, ``BankBackedProbe``,
   ``LocalePromptPack``, ``@register_probe`` decorator semantics):
   ``test_probes_substrate.py`` owns these.

@@ -54,7 +54,7 @@ class TestRuntimeAssetsRoot:
 
         from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
         from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
-        from usersim.engine.probes.safety_agentic import generator as safety_agentic
+        from usersim.engine.probes.safety_agentic import probe as safety_agentic
 
         row_builder = OutcomeBuilder(provenance=Provenance())
         probe = safety_agentic.SafetyAgenticProbe.__new__(safety_agentic.SafetyAgenticProbe)

@@ -174,7 +174,7 @@ def test_capabilities_expose_implementation_refs() -> None:
         for ref in implementation_refs_for_capability(capability_by_id("sovereign_local_knowledge"))
     )
     assert any(
-        ref.endswith("probes/safety_agentic/generator.py")
+        ref.endswith("probes/safety_agentic/probe.py")
         for ref in implementation_refs_for_capability(capability_by_id("agentic_disclosure"))
     )
 

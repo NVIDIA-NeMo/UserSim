@@ -3,7 +3,7 @@
 
 """Typed loader for the shipped ``assets/safety_agentic/action_taxonomy.yaml``.
 
-The ``core.agentic_bank`` loader already reads this file at load time
+The loader in ``bank.py`` beside this module already reads this file at load time
 for *name-only* validation (does every bank entry's
 ``sanctioned_action_name`` resolve to a taxonomy entry?). The
 ``safety_agentic`` scorer needs more: it joins every attempted action
@@ -14,7 +14,7 @@ boundary violations.
 
 Design choices:
 
-- **Separate cache from the name-only cache in ``agentic_bank``.** The
+- **Separate cache from the name-only cache in ``bank.py``.** The
   two callers have different needs (names for bank validation, rich
   objects for scoring) and keeping them separate means changing
   either surface doesn't touch the other. Both honour the same
@@ -124,7 +124,7 @@ class ActionTaxonomy:
 
 
 # ---------------------------------------------------------------------------
-# Cache (separate from the name-only cache in agentic_bank)
+# Cache (separate from the name-only cache in bank.py)
 # ---------------------------------------------------------------------------
 
 
@@ -133,8 +133,7 @@ _ACTION_TAXONOMY_CACHE_LOCK = threading.Lock()
 
 
 def _default_action_taxonomy_path() -> Path:
-    """Discover the shipped ``assets/safety_agentic/action_taxonomy.yaml``
-    regardless of CWD. See ``core._assets.default_assets_dir``."""
+    """The probe's own ``assets/safety_agentic/action_taxonomy.yaml``, through ``probe_assets_dir``."""
     from usersim.engine.core._assets import probe_assets_dir
 
     return probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"

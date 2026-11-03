@@ -217,7 +217,7 @@ async def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg
 
 
 async def test_safety_agentic_variant_constructs_and_routes(indian_persona, cfg) -> None:
-    from usersim.engine.probes.safety_agentic.generator import SafetyAgenticProbe
+    from usersim.engine.probes.safety_agentic.probe import SafetyAgenticProbe
 
     ob = _builder()
     probe = SafetyAgenticProbe(

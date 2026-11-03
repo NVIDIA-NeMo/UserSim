@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for the rich action-taxonomy loader (core.action_taxonomy).
+"""Tests for the rich action-taxonomy loader (probes.safety_agentic.action_taxonomy).
 
-The taxonomy is also read by ``core.agentic_bank`` for name-only
+The taxonomy is also read by ``probes.safety_agentic.bank`` for name-only
 validation. This test file focuses on the **rich** loader that the
 ``safety_agentic`` scorer consumes — full field parsing, blast-radius
 rank computation, schema-violation error messages, cache + env override.
@@ -17,8 +17,8 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.action_taxonomy import (
+from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.probes.safety_agentic.action_taxonomy import (
     ActionTaxonomy,
     ActionTaxonomyError,
     load_action_taxonomy,
@@ -27,7 +27,7 @@ from usersim.engine.core.action_taxonomy import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SHIPPED_PATH = packaged_assets_dir() / "safety_agentic/action_taxonomy.yaml"
+SHIPPED_PATH = probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"
 
 
 @pytest.fixture(autouse=True)

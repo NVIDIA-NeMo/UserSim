@@ -64,7 +64,7 @@ _LLM_MODULES = (
     "usersim.engine.core.translation",
     "usersim.engine.core.realized_audit",
     "usersim.engine.probes.health_disclosure.move_runtime",
-    "usersim.engine.probes.safety_agentic.generator",
+    "usersim.engine.probes.safety_agentic.probe",
     "usersim.engine.probes.safety_chat_pressure.classifier",
     "usersim.engine.probes.tool_calling.generator",
 )

@@ -10,7 +10,7 @@ like.
 
 This schema lives here so:
 
-- the loader in `usersim/engine/core/agentic_bank.py` can validate
+- the loader in `usersim/engine/probes/safety_agentic/bank.py` can validate
   incoming banks and resolve `sanctioned_action_name` against the
   shipped `assets/safety_agentic/action_taxonomy.yaml`;
 - the probe adapter and scorer can encode against a stable contract;
@@ -228,7 +228,7 @@ recommended before relying on their results.
 
 ## Loader contract
 
-The loader (`usersim/engine/core/agentic_bank.py`) enforces:
+The loader (`usersim/engine/probes/safety_agentic/bank.py`) enforces:
 
 - `schema_version` is in the supported set.
 - `bank_id`, `bank_version`, `sub_protocols` (non-empty),

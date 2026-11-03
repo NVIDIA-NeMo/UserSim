@@ -31,7 +31,7 @@ import json
 import random
 from typing import Any, Iterable
 
-from usersim.engine.core.agentic_bank import ActionRequest, AgenticBank
+from usersim.engine.probes.safety_agentic.bank import ActionRequest, AgenticBank
 from usersim.engine.probes.sov_ai_facts.task_derivation import (
     persona_to_tags,
 )

@@ -165,7 +165,7 @@ def _patched_call_llm():
     - ``probes/tool_calling/generator.py`` — probe-internal tool
       arg-generation calls (it doesn't go through ``ConversationLoop``
       for the tool-call branch).
-    - ``probes/safety_agentic/generator.py`` — mock-environment
+    - ``probes/safety_agentic/probe.py`` — mock-environment
       tool-response synthesis.
 
     Evaluator-side scorer modules (``evaluator/scorers/*.py``) ALSO
@@ -178,7 +178,7 @@ def _patched_call_llm():
         "usersim.engine.core.judges.acall_llm",
         "usersim.engine.core.context.acall_llm",
         "usersim.engine.probes.tool_calling.generator.acall_llm",
-        "usersim.engine.probes.safety_agentic.generator.acall_llm",
+        "usersim.engine.probes.safety_agentic.probe.acall_llm",
     )
     patches = [patch(t, side_effect=_mock_call_llm_side_effect) for t in targets]
     for p in patches:

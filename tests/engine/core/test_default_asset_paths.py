@@ -43,15 +43,6 @@ from __future__ import annotations
 
 import pytest
 
-from usersim.engine.core.action_taxonomy import (
-    load_action_taxonomy_default,
-    reset_action_taxonomy_cache,
-)
-from usersim.engine.core.agentic_bank import (
-    default_agentic_bank_path,
-    load_agentic_bank,
-    reset_agentic_bank_cache,
-)
 from usersim.engine.core.clinical_profile_bank import (
     CLIENT_PROBE_LABELS,
     default_clinical_profile_bank_path,
@@ -66,6 +57,15 @@ from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.probing_taxonomy import load_probing_taxonomy, reset_probing_taxonomy_cache
 from usersim.engine.core.prompt_loader import load_prompt_file
 from usersim.engine.core.seeds import load_seeds
+from usersim.engine.probes.safety_agentic.action_taxonomy import (
+    load_action_taxonomy_default,
+    reset_action_taxonomy_cache,
+)
+from usersim.engine.probes.safety_agentic.bank import (
+    default_agentic_bank_path,
+    load_agentic_bank,
+    reset_agentic_bank_cache,
+)
 from usersim.engine.probes.safety_chat_pressure.bank import (
     default_pressure_bank_path,
     load_pressure_bank,
