@@ -37,7 +37,7 @@ jobs:
     name: ${{ matrix.provider }} end to end
     runs-on: ubuntu-latest
     # A provider outage should not hide the state of the other two.
-    continue-on-error: true
+    timeout-minutes: 50
     strategy:
       fail-fast: false
       matrix:
@@ -93,23 +93,20 @@ jobs:
           make health-check \
             PROVIDER_CONFIG="$PROVIDER_CONFIG" \
             HEALTH_LOCALE="$HEALTH_LOCALE" \
-            | tee /tmp/health.log
+            HEALTH_SUMMARY_FILE=/tmp/usersim-health-summary.md
 
       - name: Summary
         if: always()
         env:
           PROVIDER: ${{ matrix.provider }}
           LOCALE: ${{ matrix.locale }}
-          SECRET_NAME: ${{ matrix.secret_name }}
         run: |
           {
             echo "### $PROVIDER ($LOCALE)"
             echo
-            if grep -q '^SKIP' /tmp/health.log; then
-              echo "Skipped: repository secret \`$SECRET_NAME\` is not set."
+            if test -f /tmp/usersim-health-summary.md; then
+              cat /tmp/usersim-health-summary.md
             else
-              echo '```'
-              tail -20 /tmp/health.log || echo "(no output captured)"
-              echo '```'
+              echo "**failure** (setup): health check did not produce an outcome."
             fi
           } >> "$GITHUB_STEP_SUMMARY"

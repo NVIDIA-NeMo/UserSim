@@ -282,7 +282,10 @@ make health-check PROVIDER_CONFIG=src/usersim/cli/models_openai.toml
 ```
 
 A provider whose API key you have not set is reported as skipped rather than
-failed, so you can run this with one key and check one provider.
+failed, so you can run this with one key and check one provider. Invalid
+configuration and execution errors fail the check. It loads `.env.local` before
+`.env`, preserving exported variables. Each CLI command has a 900-second timeout;
+set `HEALTH_TIMEOUT` to change it.
 
 It runs a real one-row `simulate`, `eval` and `report`. Please run it if you
 touched models, providers, prompts, scorers or the trajectory store. The
