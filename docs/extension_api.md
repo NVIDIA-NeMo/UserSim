@@ -121,6 +121,9 @@ does not load the conversation loop.
 | `CapabilityDefinition` | A row of the capability report and the evidence it is scored from |
 | `EvidenceSource` | One probe, scorer and set of axes a capability reads |
 | `AssetDomain` | A domain `usersim gen-assets` can build banks for |
+| `to_model_configs` | The Data Designer model configs for the models an asset domain receives |
+| `to_data_designer_kwargs` | The `DataDesigner` keyword arguments for those models' providers |
+| `require_aliases` | Raises a configuration error naming the aliases a domain needs that the models lack |
 | `ExecutionBackend` | Somewhere a run can be submitted, for `--backend` |
 | `JobSpec` | What to run, independent of where |
 | `JobHandle` | A backend's reference to work it accepted |

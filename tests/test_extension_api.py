@@ -127,6 +127,7 @@ def test_an_asset_domain_or_backend_import_leaves_the_conversation_loop_unloaded
     code = (
         "import sys\n"
         "from usersim.extension import AssetDomain, CapabilityDefinition, ExecutionBackend, JobSpec\n"
+        "from usersim.extension import require_aliases, to_data_designer_kwargs, to_model_configs\n"
         "print(sorted(m for m in ('usersim.engine.core.simulation', 'data_designer') if m in sys.modules))\n"
     )
     result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)

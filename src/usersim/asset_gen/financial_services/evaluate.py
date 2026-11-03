@@ -257,7 +257,7 @@ def shape_scorecard(result_df) -> EvalScorecard:
 
 
 def validate_eval_models(models: Any) -> None:
-    from usersim.cli._models import require_aliases
+    from usersim.extension import require_aliases
 
     require_aliases(models, required=(EVAL_JUDGE_MODEL_ALIAS,), context="evaluate-assets --domain financial_services")
 
@@ -309,7 +309,7 @@ def evaluate_bank(
     import data_designer.config as dd
 
     from usersim.asset_gen.financial_services.pipeline import _make_engine
-    from usersim.cli._models import to_model_configs
+    from usersim.extension import to_model_configs
 
     seed = build_eval_seed(bank_dir, region_spec)
     if seed.empty:

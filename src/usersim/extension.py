@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from usersim.asset_gen.registry import AssetDomain
+    from usersim.cli._models import require_aliases, to_data_designer_kwargs, to_model_configs
     from usersim.engine.config import MODEL_ASSISTANT, MODEL_JUDGE, MODEL_USER, ConversationSimulatorConfig
     from usersim.engine.core.backends import ExecutionBackend, JobHandle, JobSpec, JobStatus
     from usersim.engine.core.behavioral import (
@@ -146,11 +147,15 @@ __all__ = [
     "JobHandle",
     "JobSpec",
     "JobStatus",
+    "require_aliases",
+    "to_data_designer_kwargs",
+    "to_model_configs",
 ]
 
 #: The module each public name is defined in, by module.
 _EXPORTS: dict[str, tuple[str, ...]] = {
     "usersim.asset_gen.registry": ("AssetDomain",),
+    "usersim.cli._models": ("require_aliases", "to_data_designer_kwargs", "to_model_configs"),
     "usersim.engine.config": ("MODEL_ASSISTANT", "MODEL_JUDGE", "MODEL_USER", "ConversationSimulatorConfig"),
     "usersim.engine.core.backends": ("ExecutionBackend", "JobHandle", "JobSpec", "JobStatus"),
     "usersim.engine.core.behavioral": (

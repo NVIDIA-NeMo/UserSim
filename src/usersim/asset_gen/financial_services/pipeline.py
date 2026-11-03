@@ -669,7 +669,7 @@ def build_brief_config(models: Any, inst_seed) -> Any:
     """Assemble the Phase-1 (engine, builder). One place, explicit add_column."""
     import data_designer.config as dd
 
-    from usersim.cli._models import to_model_configs
+    from usersim.extension import to_model_configs
 
     engine = _make_engine(models)
     builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
@@ -873,7 +873,7 @@ def build_docset_config(models: Any, cluster_seed) -> Any:
     """Assemble the Phase-2 (engine, builder). One place, explicit add_column."""
     import data_designer.config as dd
 
-    from usersim.cli._models import to_model_configs
+    from usersim.extension import to_model_configs
 
     engine = _make_engine(models)
     builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
@@ -1122,7 +1122,7 @@ def serialize_bank(
 
 def validate_generation_models(models: Any) -> None:
     """Fail fast if the doc-gen / judge / embedding aliases aren't configured."""
-    from usersim.cli._models import require_aliases
+    from usersim.extension import require_aliases
 
     require_aliases(
         models,
@@ -1136,7 +1136,7 @@ def _make_engine(models: Any) -> Any:
     import data_designer.config as dd
     from data_designer.interface import DataDesigner
 
-    from usersim.cli._models import to_data_designer_kwargs
+    from usersim.extension import to_data_designer_kwargs
 
     engine = DataDesigner(**to_data_designer_kwargs(models))
     engine.set_run_config(dd.RunConfig(jinja_rendering_engine=dd.JinjaRenderingEngine.NATIVE))
@@ -1514,7 +1514,7 @@ def _embed_documents(
         return
     edf = pd.DataFrame(rows)
 
-    from usersim.cli._models import to_model_configs
+    from usersim.extension import to_model_configs
 
     result = None
     for attempt in range(1, max_attempts + 1):
