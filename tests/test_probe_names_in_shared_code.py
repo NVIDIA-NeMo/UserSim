@@ -35,7 +35,7 @@ _ALLOWED: dict[str, int] = {
     "engine/evaluator/axes.py": 6,
     "reporting/capability_report.py": 1,
     "reporting/identity.py": 1,
-    "taxonomy/capabilities.py": 41,
+    "taxonomy/capabilities.py": 27,
 }
 
 

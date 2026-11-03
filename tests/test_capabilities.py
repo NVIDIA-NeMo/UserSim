@@ -9,6 +9,8 @@ from pathlib import Path
 
 from usersim.taxonomy.capabilities import (
     ALL_PROBES,
+    _probe_ref,
+    _scorer_ref,
     capabilities_missing_scorer,
     capability_by_id,
     capability_definitions,
@@ -179,6 +181,16 @@ def test_capabilities_expose_implementation_refs() -> None:
         ref.endswith("probes/safety_agentic/probe.py")
         for ref in implementation_refs_for_capability(capability_by_id("agentic_disclosure"))
     )
+
+
+def test_each_probe_and_scorer_a_capability_names_has_a_ref() -> None:
+    """A probe's or scorer's ref is the file its registered class or function is defined in."""
+    sources = [source for definition in capability_definitions() for source in definition.sources]
+    probes = {source.probe for source in sources if source.probe and source.probe != ALL_PROBES}
+    scorers = {source.scorer for source in sources if source.scorer}
+    assert probes and scorers
+    assert sorted(probe for probe in probes if _probe_ref(probe) is None) == []
+    assert sorted(scorer for scorer in scorers if _scorer_ref(scorer) is None) == []
 
 
 def test_every_implementation_ref_names_a_file_in_the_repo() -> None:

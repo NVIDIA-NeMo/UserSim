@@ -10,7 +10,9 @@ them. Probes are measurement instruments; capabilities are behavioral claims.
 
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass, field, replace
+from pathlib import Path
 from typing import Iterable, Literal, Mapping
 
 ALL_PROBES = "*"
@@ -174,18 +176,48 @@ def probe_label_for_capability(definition: CapabilityDefinition) -> str:
     return "Multiple"
 
 
+#: The folder holding the ``usersim`` package: ``src/`` in a checkout.
+_SRC = Path(__file__).resolve().parents[2]
+
+
+def _source_ref(obj: object) -> str | None:
+    """``src/usersim/...py``, the file defining ``obj``, when it ships with User Sim."""
+    module = sys.modules.get(getattr(obj, "__module__", ""))
+    if module is None or not module.__name__.startswith("usersim.") or not getattr(module, "__file__", None):
+        return None
+    return "src/" + Path(module.__file__).resolve().relative_to(_SRC).as_posix()
+
+
+def _probe_ref(label: str) -> str | None:
+    # The registries load here, when a ref is asked for, so importing the taxonomy loads no probe.
+    from usersim.engine.core.probes import known_probes, resolve_probe
+
+    return _source_ref(resolve_probe(label)) if label in known_probes() else None
+
+
+def _scorer_ref(name: str) -> str | None:
+    from usersim.engine.evaluator.scorers import get_scorer
+
+    try:
+        return _source_ref(get_scorer(name))
+    except KeyError:
+        return None
+
+
 def implementation_refs_for_capability(
     definition: CapabilityDefinition,
 ) -> tuple[str, ...]:
+    """The files that implement a capability: its sources' own refs, the module of
+    each probe and scorer it names, and the files defining its axes."""
     refs: list[str] = []
     for source in definition.sources:
         refs.extend(source.implementation_refs)
         if source.probe and source.probe != ALL_PROBES:
-            probe_ref = _PROBE_IMPL_REFS.get(source.probe)
+            probe_ref = _probe_ref(source.probe)
             if probe_ref:
                 refs.append(probe_ref)
         if source.scorer:
-            scorer_ref = _SCORER_IMPL_REFS.get(source.scorer)
+            scorer_ref = _scorer_ref(source.scorer)
             if scorer_ref:
                 refs.append(scorer_ref)
     for axis in definition.critical_axes:
@@ -988,30 +1020,6 @@ _CAPABILITIES: tuple[CapabilityDefinition, ...] = (
     ),
 ) + _finance_verifiable_by_institution_type()
 
-
-_PROBE_IMPL_REFS = {
-    "tool_calling": "src/usersim/engine/probes/tool_calling/generator.py",
-    "sov_ai_facts": "src/usersim/engine/probes/sov_ai_facts/probe.py",
-    "sov_ai_dynamic": "src/usersim/engine/probes/sov_ai_dynamic/probe.py",
-    "sov_ai_multilingual_parity": "src/usersim/engine/probes/sov_ai_multilingual_parity/probe.py",
-    "safety_chat_pressure": "src/usersim/engine/probes/safety_chat_pressure/probe.py",
-    "safety_agentic": "src/usersim/engine/probes/safety_agentic/probe.py",
-    "financial_services": "src/usersim/engine/probes/financial_services/probe.py",
-}
-
-_SCORER_IMPL_REFS = {
-    "tool_use": "src/usersim/engine/evaluator/scorers/tool_use.py",
-    "language_compliance": "src/usersim/engine/evaluator/scorers/language_compliance.py",
-    "response_shape": "src/usersim/engine/evaluator/scorers/response_shape.py",
-    "refusal_basics": "src/usersim/engine/evaluator/scorers/refusal_basics.py",
-    "sov_ai_facts": "src/usersim/engine/probes/sov_ai_facts/scorer.py",
-    "sov_ai_dynamic": "src/usersim/engine/probes/sov_ai_dynamic/scorer.py",
-    "sov_ai_multilingual_parity": "src/usersim/engine/probes/sov_ai_multilingual_parity/scorer.py",
-    "safety_chat_pressure": "src/usersim/engine/probes/safety_chat_pressure/scorer.py",
-    "safety_agentic": "src/usersim/engine/probes/safety_agentic/scorer.py",
-    "financial_services": "src/usersim/engine/probes/financial_services/scorer.py",
-    "identity_disclosure": "src/usersim/engine/probes/identity_disclosure/scorer.py",
-}
 
 _AXIS_IMPL_REFS = {
     "helpfulness": "src/usersim/engine/evaluator/axes.py",
