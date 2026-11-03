@@ -19,7 +19,7 @@ the matching and the layering rules are described in
 ``assets/identity_disclosure/SCHEMA.md``.
 
 The typed views and the model-id and name matching live in
-``usersim.engine.core.identity_spec_types`` and are re-exported here.
+``usersim.engine.probes.identity_disclosure.spec_types`` and are re-exported here.
 """
 
 from __future__ import annotations
@@ -37,7 +37,8 @@ from typing import Any, Mapping
 import yaml
 
 from usersim.engine.core._assets import asset_roots_in_use, probe_asset_roots, probe_assets_dir
-from usersim.engine.core.identity_spec_types import (
+from usersim.engine.core.localized import LocalizedText, LocalizedTextError
+from usersim.engine.probes.identity_disclosure.spec_types import (
     Developer,
     ExpectedIdentity,
     IdentityRule,
@@ -56,7 +57,6 @@ from usersim.engine.core.identity_spec_types import (
     match_model_id,
     name_pattern,
 )
-from usersim.engine.core.localized import LocalizedText, LocalizedTextError
 
 __all__ = [
     "ALLOWED_PLACEHOLDERS",

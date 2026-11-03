@@ -329,8 +329,8 @@ def test_changed_assets_are_a_new_setup_and_moved_ones_are_not(rows, tmp_path):
 def test_a_change_in_a_lower_priority_asset_root_is_a_new_setup(monkeypatch, tmp_path):
     """A spec that ``extends`` its own probe reads the copy below it, so every root counts."""
     top, below = tmp_path / "top", tmp_path / "below"
-    shutil.copytree(packaged_assets_dir(), top)
-    shutil.copytree(packaged_assets_dir(), below)
+    shutil.copytree(probe_assets_dir("identity_disclosure").parent, top)
+    shutil.copytree(probe_assets_dir("identity_disclosure").parent, below)
     monkeypatch.setenv("USERSIM_ASSET_PATH", str(below))
     before = _inputs._asset_roots_digest(top)
     shadowed = next(below.rglob("spec.yaml"))

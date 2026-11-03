@@ -19,7 +19,7 @@ from typing import Any
 import pytest
 import yaml
 
-from usersim.engine.core.identity_spec import (
+from usersim.engine.probes.identity_disclosure.spec import (
     IdentitySpecError,
     ProblemCode,
     SpecProblem,

@@ -13,13 +13,13 @@ from unittest.mock import AsyncMock, patch
 import pandas as pd
 import pytest
 
-from usersim.engine.core.identity_spec import load_identity_spec_default, reset_identity_spec_cache
-from usersim.engine.evaluator.scorers.identity_disclosure import score_identity_disclosure_trajectory
+from usersim.engine.probes.identity_disclosure.scorer import score_identity_disclosure_trajectory
+from usersim.engine.probes.identity_disclosure.spec import load_identity_spec_default, reset_identity_spec_cache
 from usersim.reporting import identity_contradictions
 from usersim.reporting.identity import CONTRADICTION_COLUMNS
 
 NEMOTRON = "nvidia/nemotron-3-super-120b-a12b"
-PATCH = "usersim.engine.evaluator.scorers.identity_disclosure.acall_llm"
+PATCH = "usersim.engine.probes.identity_disclosure.scorer.acall_llm"
 
 
 @pytest.fixture(scope="module")

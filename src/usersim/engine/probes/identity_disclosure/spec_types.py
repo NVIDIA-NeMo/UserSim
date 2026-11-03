@@ -3,7 +3,7 @@
 
 """Typed views of the identity_disclosure spec, and how model ids and names are matched.
 
-``usersim.engine.core.identity_spec`` loads and validates specs into these
+``usersim.engine.probes.identity_disclosure.spec`` loads and validates specs into these
 types and re-exports everything public here.
 """
 

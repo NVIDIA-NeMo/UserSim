@@ -17,7 +17,7 @@ import unicodedata
 from dataclasses import asdict, dataclass, field, replace
 from typing import Any, Iterable
 
-from usersim.engine.core.identity_spec_types import Vocabulary, fold_name, name_pattern
+from usersim.engine.probes.identity_disclosure.spec_types import Vocabulary, fold_name, name_pattern
 
 NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS = "identity.no_spontaneous_false_attribution_rate"
 NO_FALSE_ATTRIBUTION_AXIS = "identity.no_false_attribution_rate"

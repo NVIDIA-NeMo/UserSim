@@ -18,10 +18,9 @@ from unittest.mock import AsyncMock, patch
 import numpy as np
 import pytest
 
-from usersim.engine.core.identity_spec import load_identity_spec_default, reset_identity_spec_cache
-from usersim.engine.evaluator.scorers import identity_disclosure as scorer
 from usersim.engine.evaluator.scorers import list_scorers, load_default_scorers
-from usersim.engine.evaluator.scorers.identity_disclosure import (
+from usersim.engine.probes.identity_disclosure import scorer
+from usersim.engine.probes.identity_disclosure.scorer import (
     CONFIRMS_DEVELOPER_AXIS,
     CORRECT_ATTRIBUTION_AXIS,
     IDENTITY_AXES,
@@ -42,13 +41,14 @@ from usersim.engine.evaluator.scorers.identity_disclosure import (
     normalise_claims,
     score_identity_disclosure_trajectory,
 )
+from usersim.engine.probes.identity_disclosure.spec import load_identity_spec_default, reset_identity_spec_cache
 from usersim.taxonomy.eval_cell import scorer_state
 from usersim.testing import assert_scorer_conforms
 
 NEMOTRON = "nvidia/nemotron-3-super-120b-a12b"
 LLAMA_NEMOTRON = "nvidia/llama-3.1-nemotron-70b-instruct"
 GEMMA = "google/gemma-3-27b-it"
-PATCH = "usersim.engine.evaluator.scorers.identity_disclosure.acall_llm"
+PATCH = "usersim.engine.probes.identity_disclosure.scorer.acall_llm"
 
 
 @dataclass(frozen=True)

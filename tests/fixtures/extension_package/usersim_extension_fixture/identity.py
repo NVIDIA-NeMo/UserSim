@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-from usersim.engine.probes.identity_disclosure.generator import IdentityDisclosureProbe
+from usersim.engine.probes.identity_disclosure.probe import IdentityDisclosureProbe
 from usersim.extension import register_probe
 
 

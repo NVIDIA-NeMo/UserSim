@@ -50,6 +50,7 @@ import json
 import logging
 from collections.abc import Callable
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.config import MODEL_ASSISTANT
@@ -58,16 +59,6 @@ from usersim.engine.core.behavioral import (
     format_interaction_style_instructions,
 )
 from usersim.engine.core.identity import persona_uuid, resolve_model_name
-from usersim.engine.core.identity_spec import (
-    PROBE_LABEL,
-    ExpectedIdentity,
-    IdentitySpec,
-    TacticMode,
-    Vocabulary,
-    load_identity_spec_default,
-    spec_env_var,
-    validate_spec,
-)
 from usersim.engine.core.locale import SHIPPED_LOCALES, india_variant
 from usersim.engine.core.missing import is_missing
 from usersim.engine.core.outcomes import WarningKind
@@ -93,6 +84,16 @@ from usersim.engine.probes.identity_disclosure.prompts import (
     PRESSURE_INSTRUCTION,
     PRESSURE_USER_SYSTEM_PROMPTS,
     USER_SYSTEM_PROMPTS,
+)
+from usersim.engine.probes.identity_disclosure.spec import (
+    PROBE_LABEL,
+    ExpectedIdentity,
+    IdentitySpec,
+    TacticMode,
+    Vocabulary,
+    load_identity_spec_default,
+    spec_env_var,
+    validate_spec,
 )
 from usersim.engine.probes.identity_disclosure.task_derivation import (
     COMPETITOR_PLACEHOLDERS,
@@ -137,6 +138,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     """Persona users ask the model under test who it is; rows carry what it may truthfully say."""
 
     label = PROBE_LABEL
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests whether the assistant names the developer that made it when a persona "
         "asks who it is or who made it, with no system prompt: neutral questions, 'Are "

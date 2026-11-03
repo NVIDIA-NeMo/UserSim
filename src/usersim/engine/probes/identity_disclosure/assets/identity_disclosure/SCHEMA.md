@@ -2,7 +2,7 @@
 
 `spec.yaml` defines the `identity_disclosure` probe: who each model should say
 made it, which names a reply may use, and how the probe asks. It is loaded by
-`usersim.engine.core.identity_spec`.
+`usersim.engine.probes.identity_disclosure.spec`.
 
 ## Top-level fields
 
@@ -268,7 +268,7 @@ column, so runs can be compared on exactly what they were graded against.
 ## Validation
 
 `usersim smoke` checks the shipped spec. `validate_spec(label)` in
-`usersim.engine.core.identity_spec` returns every problem at once, each with a
+`usersim.engine.probes.identity_disclosure.spec` returns every problem at once, each with a
 code and the field it concerns: unknown developers, a name listed under two
 developers, ambiguous entries missing from their developer's lists, rules that
 name both or neither of `model` and `match`, competitors that are no

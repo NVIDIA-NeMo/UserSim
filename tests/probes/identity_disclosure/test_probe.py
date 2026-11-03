@@ -25,7 +25,23 @@ from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core import probes as core_probes
 from usersim.engine.core import translation
 from usersim.engine.core.behavioral import compute_behavioral_profile
-from usersim.engine.core.identity_spec import (
+from usersim.engine.core.locale import INDIA_VARIANT_LOCALES
+from usersim.engine.core.localized import LocalizedText
+from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus, Provenance, WarningKind
+from usersim.engine.core.probes import register_probe, resolve_probe
+from usersim.engine.probes.identity_disclosure import probe as probe_gen
+from usersim.engine.probes.identity_disclosure import scorer as identity_scorer
+from usersim.engine.probes.identity_disclosure.probe import (
+    IdentityDisclosureProbe,
+    IdentityDisclosureProbeError,
+)
+from usersim.engine.probes.identity_disclosure.prompts import FOLLOWUP_ANCHOR, OPENING_SENT, OPENING_TO_WRITE
+from usersim.engine.probes.identity_disclosure.scorer import (
+    PRESSURE_RESISTANCE_AXIS,
+    Vocabulary,
+    score_identity_disclosure_trajectory,
+)
+from usersim.engine.probes.identity_disclosure.spec import (
     Reframing,
     Strategy,
     TacticKind,
@@ -35,22 +51,6 @@ from usersim.engine.core.identity_spec import (
     spec_env_var,
     validate_spec,
 )
-from usersim.engine.core.locale import INDIA_VARIANT_LOCALES
-from usersim.engine.core.localized import LocalizedText
-from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus, Provenance, WarningKind
-from usersim.engine.core.probes import register_probe, resolve_probe
-from usersim.engine.evaluator.scorers import identity_disclosure as identity_scorer
-from usersim.engine.evaluator.scorers.identity_disclosure import (
-    PRESSURE_RESISTANCE_AXIS,
-    Vocabulary,
-    score_identity_disclosure_trajectory,
-)
-from usersim.engine.probes.identity_disclosure import generator as probe_gen
-from usersim.engine.probes.identity_disclosure.generator import (
-    IdentityDisclosureProbe,
-    IdentityDisclosureProbeError,
-)
-from usersim.engine.probes.identity_disclosure.prompts import FOLLOWUP_ANCHOR, OPENING_SENT, OPENING_TO_WRITE
 from usersim.engine.probes.identity_disclosure.task_derivation import (
     opening_frame,
     placeholders_in,
@@ -698,7 +698,7 @@ class TestPressure:
         }
         monkeypatch.setattr(identity_scorer, "_vocabularies", {})
         extractor = AsyncMock(return_value={"role": "assistant", "content": json.dumps(extraction)})
-        with patch("usersim.engine.evaluator.scorers.identity_disclosure.acall_llm", extractor):
+        with patch("usersim.engine.probes.identity_disclosure.scorer.acall_llm", extractor):
             scored = await score_identity_disclosure_trajectory(result, {"evaluator_model": object()})
         assert scored["scores"][PRESSURE_RESISTANCE_AXIS]["score"] == pytest.approx(1.0)
 

@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import typing as _typing
 
-from usersim.engine.evaluator.scorers.identity_disclosure import (
+from usersim.engine.probes.identity_disclosure.scorer import (
     CLAIM_TYPES,
     DETAIL_KINDS,
     PREMISE_STANCES,

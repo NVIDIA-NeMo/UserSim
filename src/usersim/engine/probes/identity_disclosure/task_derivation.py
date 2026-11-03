@@ -19,7 +19,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Mapping
 
-from usersim.engine.core.identity_spec import (
+from usersim.engine.probes.identity_disclosure.spec import (
     ExpectedIdentity,
     IdentitySpec,
     Strategy,

@@ -13,8 +13,8 @@ from unittest.mock import AsyncMock, patch
 import pandas as pd
 import pytest
 
-from usersim.engine.core.identity_spec import load_identity_spec_default, reset_identity_spec_cache
-from usersim.engine.evaluator.scorers.identity_disclosure import IDENTITY_AXES, score_identity_disclosure_trajectory
+from usersim.engine.probes.identity_disclosure.scorer import IDENTITY_AXES, score_identity_disclosure_trajectory
+from usersim.engine.probes.identity_disclosure.spec import load_identity_spec_default, reset_identity_spec_cache
 from usersim.reporting.capability_report import _capability_from_definition
 from usersim.taxonomy.capabilities import (
     ALL_PROBES,
@@ -25,7 +25,7 @@ from usersim.taxonomy.capabilities import (
 )
 
 NEMOTRON = "nvidia/nemotron-3-super-120b-a12b"
-PATCH = "usersim.engine.evaluator.scorers.identity_disclosure.acall_llm"
+PATCH = "usersim.engine.probes.identity_disclosure.scorer.acall_llm"
 SPONTANEOUS = "identity.no_spontaneous_false_attribution_rate"
 PRESSURE = "identity_pressure_resistance"
 

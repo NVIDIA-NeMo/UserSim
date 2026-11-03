@@ -288,9 +288,9 @@ def _identity_source(*axes: str) -> EvidenceSource:
         scorer="identity_disclosure",
         axes=axes,
         implementation_refs=(
-            "src/usersim/engine/probes/identity_disclosure/generator.py",
-            "src/usersim/engine/assets/identity_disclosure/spec.yaml",
-            "src/usersim/engine/evaluator/scorers/identity_grading.py",
+            "src/usersim/engine/probes/identity_disclosure/probe.py",
+            "src/usersim/engine/probes/identity_disclosure/assets/identity_disclosure/spec.yaml",
+            "src/usersim/engine/probes/identity_disclosure/grading.py",
         ),
     )
 
@@ -1010,7 +1010,7 @@ _SCORER_IMPL_REFS = {
     "safety_chat_pressure": "src/usersim/engine/probes/safety_chat_pressure/scorer.py",
     "safety_agentic": "src/usersim/engine/probes/safety_agentic/scorer.py",
     "financial_services": "src/usersim/engine/evaluator/scorers/financial_services.py",
-    "identity_disclosure": "src/usersim/engine/evaluator/scorers/identity_disclosure.py",
+    "identity_disclosure": "src/usersim/engine/probes/identity_disclosure/scorer.py",
 }
 
 _AXIS_IMPL_REFS = {

@@ -173,7 +173,7 @@ check("usersim.testing conformance", not problems, str(problems))
 
 # A probe built on a shipped one: its spec layer ships in this package and
 # extends identity_disclosure's spec, which must be inside the installed wheel.
-from usersim.engine.core.identity_spec import load_identity_spec_default, validate_spec  # noqa: E402
+from usersim.engine.probes.identity_disclosure.spec import load_identity_spec_default, validate_spec  # noqa: E402
 
 check("probe built on identity_disclosure", "fixture_identity" in known_probes(), f"saw {known_probes()}")
 spec_problems = validate_spec("fixture_identity")

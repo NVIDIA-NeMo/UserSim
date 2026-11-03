@@ -1547,7 +1547,7 @@ BUILTIN_PROBE_MODULES: tuple[str, ...] = (
     "usersim.engine.probes.health_disclosure.general",
     "usersim.engine.probes.health_disclosure.therapy",
     "usersim.engine.probes.health_disclosure.triage",
-    "usersim.engine.probes.identity_disclosure.generator",
+    "usersim.engine.probes.identity_disclosure.probe",
     "usersim.engine.probes.safety_agentic.probe",
     "usersim.engine.probes.safety_chat_pressure.probe",
     "usersim.engine.probes.sov_ai_dynamic.probe",

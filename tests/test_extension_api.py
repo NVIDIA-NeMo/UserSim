@@ -68,7 +68,7 @@ _KEPT_INTERNAL_IMPORTS = {
     ("usersim.engine.core.probes", "dispatch_episode"),
     ("usersim.engine.generator", None),
     # The fixture's probe that layers a spec over a shipped probe's.
-    ("usersim.engine.probes.identity_disclosure.generator", "IdentityDisclosureProbe"),
+    ("usersim.engine.probes.identity_disclosure.probe", "IdentityDisclosureProbe"),
 }
 
 

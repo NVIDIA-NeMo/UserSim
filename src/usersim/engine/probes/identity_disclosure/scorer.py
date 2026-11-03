@@ -75,10 +75,9 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, create_model
 
 from usersim.engine.core.identity import resolve_model_name
-from usersim.engine.core.identity_spec_types import match_model_id
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.evaluator.scorers import register_scorer
-from usersim.engine.evaluator.scorers.identity_grading import (
+from usersim.engine.probes.identity_disclosure.grading import (
     CONFIRMS_DEVELOPER_AXIS,
     CORRECT_ATTRIBUTION_AXIS,
     IDENTITY_AXES,
@@ -100,6 +99,7 @@ from usersim.engine.evaluator.scorers.identity_grading import (
     grade,
     normalise_claims,
 )
+from usersim.engine.probes.identity_disclosure.spec_types import match_model_id
 
 __all__ = [
     "CLAIM_TYPES",
@@ -419,9 +419,7 @@ async def _extract(
             },
         )
     except Exception as e:
-        logger.warning(
-            "  |-- evaluator/scorers.identity_disclosure: extractor %r raised %s: %s", judge_alias, type(e).__name__, e
-        )
+        logger.warning("  |-- identity_disclosure scorer: extractor %r raised %s: %s", judge_alias, type(e).__name__, e)
         return {}, f"{type(e).__name__}: {e}"
     content = resp.get("content", "") if isinstance(resp, dict) else ""
     try:
@@ -472,7 +470,7 @@ def _extractor_family(
     if same and key not in _same_family_warned:
         _same_family_warned.add(key)
         logger.warning(
-            "  |-- evaluator/scorers.identity_disclosure: the extractor %s is made by %s, the developer under test; "
+            "  |-- identity_disclosure scorer: the extractor %s is made by %s, the developer under test; "
             "pick an extractor from another developer",
             model_id,
             ", ".join(developers),
