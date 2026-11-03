@@ -113,14 +113,14 @@ class ToolSpec:
 # ---------------------------------------------------------------------------
 #: Universal identity requirement, used when a bank's ``region_meta`` carries no
 #: ``identity_verification`` block (every bank generated before the field
-#: existed). Mirrors ``asset_gen.financial_services.spec``'s default.
+#: existed). Mirrors ``asset_gen.spec``'s default.
 DEFAULT_IDENTITY_REQUIRED_FIELDS: tuple[str, ...] = ("full_name", "date_of_birth")
 
 #: Region-NEUTRAL account labels, used when a bank's ``region_meta`` carries no
 #: ``account_labels`` block. Generic on purpose: a retail deposit product is named
 #: differently in every market, so the fallback must be true everywhere rather
 #: than quietly exporting US vocabulary. Mirrors
-#: ``asset_gen.financial_services.spec.DEFAULT_DOMAIN_ACCOUNT_LABELS``.
+#: ``asset_gen.spec.DEFAULT_DOMAIN_ACCOUNT_LABELS``.
 DEFAULT_DOMAIN_ACCOUNT_LABELS: dict[str, str] = {
     "retail_banking": "deposit account",
     "payments": "payment account",

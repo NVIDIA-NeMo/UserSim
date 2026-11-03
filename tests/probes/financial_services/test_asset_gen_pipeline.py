@@ -9,7 +9,9 @@ from pathlib import Path
 
 import pytest
 
-from usersim.asset_gen.financial_services.pipeline import (
+from usersim.asset_gen.registry import get_domain
+from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.probes.financial_services.asset_gen.pipeline import (
     DOC_GEN_MODEL_ALIAS,
     EMBEDDING_MODEL_ALIAS,
     DocSet,
@@ -26,18 +28,15 @@ from usersim.asset_gen.financial_services.pipeline import (
     explode_to_cluster_rows,
     serialize_bank,
 )
-from usersim.asset_gen.financial_services.spec import load_region_spec
-from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.probes.financial_services.asset_gen.spec import load_region_spec
 
 
-def _asset_gen_dir() -> Path:
-    """Directory the ``asset_gen`` package lives in, wherever that ends up."""
-    import usersim.asset_gen
-
-    return Path(usersim.asset_gen.__file__).resolve().parent
+def _region_spec_dir() -> Path:
+    """The finance domain's committed region specs, where the domain reads them."""
+    return get_domain("financial_services").region_spec_dir
 
 
-_REGION_SPEC = _asset_gen_dir() / "financial_services" / "region_spec" / "en_US.yaml"
+_REGION_SPEC = _region_spec_dir() / "en_US.yaml"
 
 #: Region specs that author their own title vocabulary.
 _LABELLED_SPECS = sorted(
@@ -90,8 +89,8 @@ def test_prompt_values_carry_the_locale_notation():
 
     import yaml
 
-    from usersim.asset_gen.financial_services.pipeline import products_for_prompt
-    from usersim.asset_gen.financial_services.spec import validate_region_spec
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import products_for_prompt
+    from usersim.engine.probes.financial_services.asset_gen.spec import validate_region_spec
 
     raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
     product = raw["institutions"][0]["products"][0]
@@ -124,8 +123,8 @@ def test_common_operations_the_simulator_reads_arguments_from_are_described():
 
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.pipeline import _tool_dict, explode_to_cluster_rows
-    from usersim.asset_gen.financial_services.spec import (
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import _tool_dict, explode_to_cluster_rows
+    from usersim.engine.probes.financial_services.asset_gen.spec import (
         COMMON_OPERATION_DESCRIPTIONS,
         COMMON_TYPE_OPERATIONS,
         COMMON_UNIVERSAL_OPERATIONS,
@@ -154,9 +153,9 @@ def test_prompt_values_carry_the_spec_label():
     each value the region spec labels carries its label into the prompt."""
     import yaml
 
-    from usersim.asset_gen.financial_services.pipeline import products_for_prompt
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
-    from usersim.asset_gen.financial_services.spec import validate_region_spec
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import products_for_prompt
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.spec import validate_region_spec
 
     raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
     raw["institutions"][0]["products"][0]["variables"] = {
@@ -181,8 +180,8 @@ def test_a_discoverable_tool_description_steers_its_doc_but_stays_out_of_tools_y
     import pandas as pd
     import yaml
 
-    from usersim.asset_gen.financial_services.pipeline import _tool_dict
-    from usersim.asset_gen.financial_services.spec import validate_region_spec
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import _tool_dict
+    from usersim.engine.probes.financial_services.asset_gen.spec import validate_region_spec
 
     raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
     bank = raw["institutions"][0]
@@ -269,7 +268,7 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None, sc
     entirely on attempt i; ``bad_by_attempt[i]`` are the ones that come BACK but
     with an unusable payload (the truncated-response shape); ``score_by_attempt[i]``
     maps a cluster_id to the faithfulness score the judge gives it (default 4)."""
-    from usersim.asset_gen.financial_services import pipeline as P
+    from usersim.engine.probes.financial_services.asset_gen import pipeline as P
 
     calls: list = []
     bad_by_attempt = bad_by_attempt or {}
@@ -327,7 +326,7 @@ def _seed(*cluster_ids):
 def test_generate_docsets_with_backfill_regenerates_dropped_clusters(monkeypatch):
     """A cluster the hub drops on the first attempt is regenerated on its own on the
     next attempt (matched by cluster_id), so the final frame is complete."""
-    from usersim.asset_gen.financial_services import pipeline as P
+    from usersim.engine.probes.financial_services.asset_gen import pipeline as P
 
     calls = _fake_docset_engine(monkeypatch, drop_by_attempt={0: {"c2"}})
     result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
@@ -348,7 +347,7 @@ def test_generate_docsets_with_backfill_retries_an_unusable_payload(monkeypatch)
     back to regeneration. Truncation is not hypothetical: a cluster is ten long
     documents in one response, and ``max_docs_per_cluster`` is a tunable knob.
     """
-    from usersim.asset_gen.financial_services import pipeline as P
+    from usersim.engine.probes.financial_services.asset_gen import pipeline as P
 
     calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, bad_by_attempt={0: {"c2"}})
     result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
@@ -366,7 +365,7 @@ def test_generate_docsets_with_backfill_drops_a_persistently_unusable_cluster(mo
     Attempts are bounded, and the cluster then surfaces in the 'backfill
     exhausted' warning rather than being silently dropped later at collect time.
     """
-    from usersim.asset_gen.financial_services import pipeline as P
+    from usersim.engine.probes.financial_services.asset_gen import pipeline as P
 
     bad = {i: {"c2"} for i in range(P.DOCSET_MAX_ATTEMPTS)}
     calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, bad_by_attempt=bad)
@@ -379,7 +378,7 @@ def test_generate_docsets_with_backfill_drops_a_persistently_unusable_cluster(mo
 def test_generate_docsets_with_backfill_regenerates_a_cluster_below_the_faithfulness_floor(monkeypatch):
     """A cluster the judge scores below the floor is regenerated, and a better attempt
     replaces it."""
-    from usersim.asset_gen.financial_services import pipeline as P
+    from usersim.engine.probes.financial_services.asset_gen import pipeline as P
 
     calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, score_by_attempt={0: {"c2": 1.0}, 1: {"c2": 4.0}})
     result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
@@ -392,7 +391,7 @@ def test_generate_docsets_with_backfill_regenerates_a_cluster_below_the_faithful
 def test_generate_docsets_with_backfill_keeps_the_best_attempt_below_the_floor(monkeypatch):
     """When no attempt reaches the floor, the cluster is still written, flagged, from
     its best-scoring attempt: dropping it would leave gaps in the corpus."""
-    from usersim.asset_gen.financial_services import pipeline as P
+    from usersim.engine.probes.financial_services.asset_gen import pipeline as P
 
     scores = {0: {"c2": 1.0}, 1: {"c2": 2.0}, 2: {"c2": 1.0}}
     calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, score_by_attempt=scores)
@@ -409,7 +408,7 @@ def test_usable_docset_rows_keeps_low_faithfulness_clusters():
     the retry predicate must not filter them out."""
     import pandas as pd
 
-    from usersim.asset_gen.financial_services import pipeline as P
+    from usersim.engine.probes.financial_services.asset_gen import pipeline as P
 
     df = pd.DataFrame(
         [
@@ -424,7 +423,7 @@ def test_usable_docset_rows_falls_back_when_the_column_is_absent():
     """A frame with no doc_set column at all must not be emptied out."""
     import pandas as pd
 
-    from usersim.asset_gen.financial_services import pipeline as P
+    from usersim.engine.probes.financial_services.asset_gen import pipeline as P
 
     df = pd.DataFrame([{"cluster_id": "c1"}, {"cluster_id": "c2"}])
     assert set(P._usable_docset_rows(df)["cluster_id"]) == {"c1", "c2"}
@@ -568,7 +567,7 @@ def test_as_docset_normalizes_numpy_documents():
     # numpy arrays; _as_docset must yield a plain list so truth-tests don't blow up.
     import numpy as np
 
-    from usersim.asset_gen.financial_services.pipeline import _as_docset
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import _as_docset
 
     raw = {"documents": np.array([{"doc_key": "a", "title": "A", "document_type": "faq", "body": "x"}], dtype=object)}
     out = _as_docset(raw)
@@ -639,10 +638,10 @@ class TestPlanOwnedTitles:
     handed over an English title AND demanded it be reproduced exactly.
     """
 
-    _SPEC_DIR = _asset_gen_dir() / "financial_services" / "region_spec"
+    _SPEC_DIR = _region_spec_dir()
 
     def _plan_titles(self, locale: str) -> set:
-        from usersim.asset_gen.financial_services.pipeline import build_shared_doc_plan
+        from usersim.engine.probes.financial_services.asset_gen.pipeline import build_shared_doc_plan
 
         spec = load_region_spec(self._SPEC_DIR / f"{locale}.yaml")
         out = set()
@@ -731,7 +730,7 @@ class TestPlanOwnedTitles:
         assert [t for t in titles if any(us in t for us in ("APY", "unauthorized", "recognizing"))] == []
 
     def test_uk_corpus_follows_its_language_conventions(self):
-        from usersim.asset_gen.financial_services.validate import FAIL, validate_bank
+        from usersim.engine.probes.financial_services.asset_gen.validate import FAIL, validate_bank
 
         spec = load_region_spec(self._SPEC_DIR / "en_GB.yaml")
         assert spec.language_conventions.respell
@@ -775,10 +774,10 @@ class TestPlanOwnedTitles:
         assert domains - set(spec.doc_titles.domain_labels) == set()
 
     def test_omitted_vocabulary_falls_back_to_the_english_defaults(self):
-        from usersim.asset_gen.financial_services.pipeline import (
+        from usersim.engine.probes.financial_services.asset_gen.pipeline import (
             _FAQ_INTENTS,
         )
-        from usersim.asset_gen.financial_services.pipeline import (
+        from usersim.engine.probes.financial_services.asset_gen.pipeline import (
             build_product_doc_plan as plan,
         )
 
@@ -800,7 +799,7 @@ class TestPlanOwnedTitles:
         title, which then de-duplicates down to a single document."""
         from pydantic import ValidationError
 
-        from usersim.asset_gen.financial_services.spec import DocTitleVocabulary
+        from usersim.engine.probes.financial_services.asset_gen.spec import DocTitleVocabulary
 
         with pytest.raises(ValidationError):
             DocTitleVocabulary(**{field: value})
@@ -915,8 +914,8 @@ def test_references_are_a_prompt_sink_and_never_reach_the_corpus():
 def test_the_prompt_still_offers_the_slug_sink():
     """The corpus stays free of raw doc_keys only while the prompt gives the model an
     alternative home for them, so the sink and the by-title rule travel together."""
-    from usersim.asset_gen.financial_services.pipeline import GeneratedDoc
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import GeneratedDoc
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     assert "references" in GeneratedDoc.model_fields
     assert "`references`" in DOCSET_PROMPT
@@ -925,7 +924,7 @@ def test_the_prompt_still_offers_the_slug_sink():
 def test_doc_uuid_is_deterministic_and_scoped():
     import uuid as _uuid
 
-    from usersim.asset_gen.financial_services.pipeline import doc_uuid
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import doc_uuid
 
     a = doc_uuid("en_US", "northwind_bank", "acct_sheet")
     assert a == doc_uuid("en_US", "northwind_bank", "acct_sheet")  # stable across calls
@@ -937,7 +936,7 @@ def test_doc_uuid_is_deterministic_and_scoped():
 
 
 def test_explode_docset_uses_plan_uuid_for_id():
-    from usersim.asset_gen.financial_services.pipeline import doc_uuid
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import doc_uuid
 
     uid = doc_uuid("en_US", "northwind_bank", "acct_sheet")
     docset = DocSet(
@@ -1092,8 +1091,8 @@ def test_cli_gen_assets_dry_run():
 
 def test_generate_corpus_validates_endpoints_before_network():
     """generate_corpus fails fast (offline) if the gen model aliases are absent."""
-    from usersim.asset_gen.financial_services.pipeline import generate_corpus
     from usersim.cli._models import ConfigError, ModelsConfig, ModelSpec
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import generate_corpus
 
     cfg = ModelsConfig(
         providers=(),
@@ -1110,11 +1109,10 @@ def test_default_models_config_declares_gen_aliases():
     All three aliases resolve against a built-in provider, so the only
     credential needed is the one the default config already requires.
     """
-    from usersim.asset_gen.financial_services.pipeline import validate_generation_models
-
     # bundled_models_path, not default_models_path: this asserts what ships,
     # and default_models_path honours a developer's models.local.toml.
     from usersim.cli._models import bundled_models_path, load_models_config
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import validate_generation_models
 
     cfg = load_models_config(bundled_models_path())
     validate_generation_models(cfg)  # must not raise
@@ -1142,7 +1140,7 @@ def test_off_plan_doc_key_is_reported_not_silent(caplog):
     """
     import logging
 
-    from usersim.asset_gen.financial_services.pipeline import explode_docset
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import explode_docset
 
     plan = {"savings_product_sheet": {"uuid": "u1", "domain": "retail_banking", "product_category": "savings_regular"}}
 

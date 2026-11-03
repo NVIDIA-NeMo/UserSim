@@ -1,6 +1,6 @@
 # Structured region_spec for en_IN — the INDIA REGION MODEL and the source of
 # truth every Indian language surface inherits (generation INPUT: data, not code).
-# Validated against asset_gen/financial_services/spec.py.
+# Validated against asset_gen/spec.py.
 #
 # A region_spec is keyed by LOCALE, but institutions, products, tools and
 # regulators are properties of the REGION — identical whether the conversation is

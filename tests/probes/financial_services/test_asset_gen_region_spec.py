@@ -10,7 +10,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from usersim.asset_gen.financial_services.spec import (
+from usersim.asset_gen.registry import get_domain
+from usersim.engine.probes.financial_services.asset_gen.spec import (
     DOMAINS,
     INSTITUTION_TYPES,
     RegionSpecError,
@@ -20,14 +21,12 @@ from usersim.asset_gen.financial_services.spec import (
 )
 
 
-def _asset_gen_dir() -> Path:
-    """Directory the ``asset_gen`` package lives in, wherever that ends up."""
-    import usersim.asset_gen
-
-    return Path(usersim.asset_gen.__file__).resolve().parent
+def _region_spec_dir() -> Path:
+    """The finance domain's committed region specs, where the domain reads them."""
+    return get_domain("financial_services").region_spec_dir
 
 
-_REGION_SPEC_DIR = _asset_gen_dir() / "financial_services" / "region_spec"
+_REGION_SPEC_DIR = _region_spec_dir()
 _EN_US = _REGION_SPEC_DIR / "en_US.yaml"
 
 
@@ -99,7 +98,7 @@ def test_common_operations_injected_into_every_institution():
 
 def test_common_operations_do_not_override_explicit_tools():
     """An explicitly-declared tool of a common-ops name keeps its own schema."""
-    from usersim.asset_gen.financial_services.spec import Institution
+    from usersim.engine.probes.financial_services.asset_gen.spec import Institution
 
     inst = Institution.model_validate(
         {
@@ -206,7 +205,7 @@ def test_nbfc_is_a_deposit_less_lender_in_the_ontology():
     a dominant retail-credit channel with no equivalent in the US institution
     set. It must be able to lend, and must NOT offer retail banking.
     """
-    from usersim.asset_gen.financial_services.spec import (
+    from usersim.engine.probes.financial_services.asset_gen.spec import (
         COMMON_TYPE_OPERATIONS,
         INSTITUTION_DOMAINS,
         common_operations_for_type,
@@ -256,7 +255,7 @@ def test_identity_verification_rejects_unknown_field():
 def test_identity_verification_is_serialized_into_region_meta():
     """The sim reads the KYC contract off region_meta, so it must be emitted
     even at the default (otherwise the probe silently hardcodes name + DOB)."""
-    from usersim.asset_gen.financial_services.pipeline import _region_meta_from_spec
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import _region_meta_from_spec
 
     raw = _raw(_EN_US)
     raw["identity_verification"] = {
@@ -283,7 +282,7 @@ def test_concept_guidance_defaults_are_region_neutral():
     live in the US region_spec as data. Hardcoding them in BRIEF_PROMPT's
     per-type branches would make every non-US locale inherit them.
     """
-    from usersim.asset_gen.financial_services.prompts import (
+    from usersim.engine.probes.financial_services.asset_gen.prompts import (
         BRIEF_PROMPT,
         DEFAULT_TYPE_CONCEPT_GUIDANCE,
         DOCSET_PROMPT,
@@ -309,7 +308,7 @@ def test_concept_guidance_defaults_are_region_neutral():
 
 
 def test_concept_guidance_override_beats_the_default():
-    from usersim.asset_gen.financial_services.prompts import concept_guidance_for
+    from usersim.engine.probes.financial_services.asset_gen.prompts import concept_guidance_for
 
     spec = load_region_spec(_EN_US)
     # en_US supplies its own US framing...
@@ -330,7 +329,7 @@ def test_concept_guidance_rejects_unknown_institution_type():
 
 
 def test_institution_seed_carries_resolved_concept_guidance():
-    from usersim.asset_gen.financial_services.pipeline import build_institution_seed
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import build_institution_seed
 
     spec = load_region_spec(_EN_US)
     seed = build_institution_seed(spec)
@@ -538,7 +537,7 @@ def test_overlay_merges_any_id_keyed_list_and_replaces_the_rest():
     task_templates carries ids too, so it must patch by id like institutions and
     products; string lists and tool_taxonomy (keyed by `name`) replace wholesale.
     """
-    from usersim.asset_gen.financial_services.spec import _is_id_keyed, _merge_overlay
+    from usersim.engine.probes.financial_services.asset_gen.spec import _is_id_keyed, _merge_overlay
 
     assert _is_id_keyed([{"id": "a"}]) is True
     assert _is_id_keyed(["faq", "product_sheet"]) is False
@@ -559,7 +558,7 @@ def test_overlay_merges_any_id_keyed_list_and_replaces_the_rest():
 
 
 def test_overlay_onto_an_id_keyed_list_must_carry_ids():
-    from usersim.asset_gen.financial_services.spec import _merge_overlay
+    from usersim.engine.probes.financial_services.asset_gen.spec import _merge_overlay
 
     with pytest.raises(RegionSpecError):
         _merge_overlay([{"id": "a"}], [{"display_name": "no id here"}], path="institutions")
@@ -609,7 +608,7 @@ def test_declared_document_types_match_what_the_plan_emits(path):
     genres while its committed corpus contained 15, which misleads anyone reading
     the spec to learn what a locale's corpus holds. Bind the two.
     """
-    from usersim.asset_gen.financial_services.pipeline import (
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import (
         build_product_doc_plan,
         build_shared_doc_plan,
     )
@@ -636,7 +635,7 @@ def test_every_product_gets_every_servicing_angle(path, target):
     In en_US exactly the 7 products with 2 variables got them and the other 11 did
     not — at any depth. A single-product assertion would have passed throughout.
     """
-    from usersim.asset_gen.financial_services.pipeline import build_product_doc_plan
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import build_product_doc_plan
 
     for inst_id, product in _all_products(path):
         angles = {s["angle"] for s in build_product_doc_plan(product, target)}
@@ -657,7 +656,7 @@ def test_no_product_plan_ever_repeats_an_angle(path, target):
     as angle lists grow, where a fixed ceiling would go stale on the next addition.
     Past the supply the plan is expected to return FEWER slots than requested.
     """
-    from usersim.asset_gen.financial_services.pipeline import build_product_doc_plan
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import build_product_doc_plan
 
     for inst_id, product in _all_products(path):
         slots = build_product_doc_plan(product, target)
@@ -671,7 +670,7 @@ def test_no_product_plan_ever_repeats_an_angle(path, target):
 
 def test_plan_under_delivers_rather_than_padding_past_the_angle_supply():
     """Supply is ``40 + 3 * n_variables``; asking for more must shrink, not repeat."""
-    from usersim.asset_gen.financial_services.pipeline import build_product_doc_plan
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import build_product_doc_plan
 
     _, product = _all_products(_EN_IN)[0]
     supply = 40 + 3 * len(product.variables)
@@ -685,7 +684,7 @@ def test_intent_first_and_variable_first_generators_differ_as_intended():
     """``how_to_guide`` / ``troubleshooting`` lead with intents (the customer-journey
     docs); ``faq`` leads with per-variable explainers (the value-bearing docs that
     back numeric faithfulness). Getting these backwards is the original bug."""
-    from usersim.asset_gen.financial_services.pipeline import build_product_doc_plan
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import build_product_doc_plan
 
     _, product = next((i, p) for i, p in _all_products(_EN_IN) if len(p.variables) >= 4)
     slots = build_product_doc_plan(product, 40)
@@ -711,11 +710,11 @@ def test_genre_conventions_are_scoped_to_the_cluster(cluster_kind):
 
     from jinja2 import Template
 
-    from usersim.asset_gen.financial_services.pipeline import (
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import (
         build_product_doc_plan,
         build_shared_doc_plan,
     )
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     spec = load_region_spec(_EN_IN)
     inst = spec.institutions[0]
@@ -770,7 +769,7 @@ def test_action_genres_require_the_agent_to_act_in_conversation(genre):
     """
     import re
 
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     block = re.search(rf"^    {genre}:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
     assert block, f"no convention for {genre}"
@@ -795,7 +794,7 @@ def test_how_to_guide_may_not_make_reaching_us_a_step():
     """
     import re
 
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     block = re.search(r"^    how_to_guide:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
     assert block, "no convention for how_to_guide"
@@ -811,7 +810,7 @@ def test_only_the_how_to_convention_bans_a_contact_step():
     A blanket ban would spend prompt budget on genres that never had the problem."""
     import re
 
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     for genre in ("troubleshooting", "policy_procedure"):
         block = re.search(rf"^    {genre}:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
@@ -823,7 +822,7 @@ def test_the_constraint_is_region_neutral():
     """It ships in the shared prompt, so it must not assume one market's channels --
     and it must still allow steps that really are physical (presenting an original
     document, having collateral valued), which India's KYC and gold loans require."""
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     # No market-specific institutions or instruments in the constraint text.
     for us_ism in ("FDIC", "IRS", "401(k)", "Regulation E", "RBI", "IRDAI", "UPI"):
@@ -841,7 +840,7 @@ def test_customer_facing_genres_are_told_not_to_name_tools():
 
     from jinja2 import Template
 
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     base = dict(
         display_name="X",
@@ -870,7 +869,7 @@ def test_cross_references_must_use_titles_not_doc_keys():
     defer their own substance (self-containment 2.38 vs 2.78 for clean docs)."""
     import re
 
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     text = re.sub(r"\s+", " ", DOCSET_PROMPT).lower()
     assert "doc_key` is an internal slug" in text or "internal slug" in text
@@ -889,7 +888,7 @@ def test_tool_docs_must_not_invent_unobtainable_arguments():
 
     from jinja2 import Template
 
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     base = dict(
         display_name="X",
@@ -932,7 +931,7 @@ def test_documents_are_asked_for_plain_text_symbols():
 
     from jinja2 import Template
 
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     base = dict(
         display_name="X",
@@ -964,7 +963,7 @@ def test_documents_are_asked_for_plain_text_symbols():
 
 
 def test_identity_fields_are_the_regions_verify_identity_fields():
-    from usersim.asset_gen.financial_services.pipeline import identity_fields_for
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import identity_fields_for
 
     assert identity_fields_for(load_region_spec(_EN_US)) == "full name and date of birth"
     assert identity_fields_for(load_region_spec(_REGION_SPEC_DIR / "en_IN.yaml")) == "full name, date of birth and pan"
@@ -973,7 +972,10 @@ def test_identity_fields_are_the_regions_verify_identity_fields():
 def test_identity_fields_reach_the_brief_and_every_cluster_row():
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.pipeline import build_institution_seed, explode_to_cluster_rows
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import (
+        build_institution_seed,
+        explode_to_cluster_rows,
+    )
 
     spec = load_region_spec(_REGION_SPEC_DIR / "en_IN.yaml")
     assert set(build_institution_seed(spec)["identity_fields"]) == {"full name, date of birth and pan"}
@@ -994,7 +996,7 @@ def test_documents_verify_identity_once_and_add_no_other_step():
 
     from jinja2 import Template
 
-    from usersim.asset_gen.financial_services.prompts import BRIEF_PROMPT, DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import BRIEF_PROMPT, DOCSET_PROMPT
 
     seed = dict(
         display_name="X",
@@ -1045,7 +1047,7 @@ def _with_conventions(guidance: str, respell: dict[str, str]):
 
 
 def test_language_guidance_pairs_each_form_with_its_replacement():
-    from usersim.asset_gen.financial_services.prompts import language_guidance_for
+    from usersim.engine.probes.financial_services.asset_gen.prompts import language_guidance_for
 
     assert language_guidance_for("", {}) == ""
     assert language_guidance_for(" Write British English. ", {}) == "Write British English."
@@ -1091,7 +1093,7 @@ def test_language_guidance_adds_exactly_one_line_to_each_prompt(prompt_name):
     with them, the only difference is the spelling-and-usage line."""
     from jinja2 import Template
 
-    from usersim.asset_gen.financial_services import prompts
+    from usersim.engine.probes.financial_services.asset_gen import prompts
 
     seed = {
         "display_name": "X",
@@ -1121,7 +1123,10 @@ def test_language_guidance_adds_exactly_one_line_to_each_prompt(prompt_name):
 def test_language_conventions_reach_the_brief_and_every_cluster_row():
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.pipeline import build_institution_seed, explode_to_cluster_rows
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import (
+        build_institution_seed,
+        explode_to_cluster_rows,
+    )
 
     spec = _with_conventions("Write British English.", {"toward": "towards"})
     expected = 'Write British English. Write "towards" for "toward".'
@@ -1143,8 +1148,8 @@ def test_each_cluster_gets_the_institutions_rules_and_the_types_guidance():
 
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.pipeline import explode_to_cluster_rows
-    from usersim.asset_gen.financial_services.prompts import concept_guidance_for
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import explode_to_cluster_rows
+    from usersim.engine.probes.financial_services.asset_gen.prompts import concept_guidance_for
 
     spec = load_region_spec(_EN_US)
     spec_by_id = {i.id: i for i in spec.institutions}
@@ -1163,7 +1168,7 @@ def test_document_prompt_puts_the_rules_above_the_brief():
 
     from jinja2 import Template
 
-    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.engine.probes.financial_services.asset_gen.prompts import DOCSET_PROMPT
 
     seed = dict(
         display_name="X",
@@ -1194,7 +1199,7 @@ def test_generation_respells_bodies_and_leaves_plan_titles_alone():
 
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.pipeline import collect_institutions
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import collect_institutions
 
     spec = _with_conventions("", {"toward": "towards"})
     inst = spec.institutions[0]
@@ -1224,7 +1229,7 @@ def test_generation_writes_latex_symbols_as_characters():
 
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.pipeline import collect_institutions
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import collect_institutions
 
     spec = load_region_spec(_EN_US)
     inst = spec.institutions[0]

@@ -2694,8 +2694,8 @@ class TestLocalBrandNameReachesTheRuntime:
 
     def test_generated_asset_round_trips_the_local_name(self):
         """It must survive serialization, or the runtime can never see it."""
-        from usersim.asset_gen.financial_services.pipeline import _institution_meta
-        from usersim.asset_gen.financial_services.spec import Institution as SpecInstitution
+        from usersim.engine.probes.financial_services.asset_gen.pipeline import _institution_meta
+        from usersim.engine.probes.financial_services.asset_gen.spec import Institution as SpecInstitution
 
         spec_inst = SpecInstitution(
             id="x_bank",
@@ -3013,7 +3013,7 @@ class TestAccountLabelIsRegionalVocabulary:
 
     def test_engine_default_and_asset_gen_default_agree(self):
         """Two copies of the same table drift; pin them to each other."""
-        from usersim.asset_gen.financial_services.spec import DEFAULT_DOMAIN_ACCOUNT_LABELS as A
+        from usersim.engine.probes.financial_services.asset_gen.spec import DEFAULT_DOMAIN_ACCOUNT_LABELS as A
         from usersim.engine.probes.financial_services.bank import (
             DEFAULT_DOMAIN_ACCOUNT_LABELS as B,
         )

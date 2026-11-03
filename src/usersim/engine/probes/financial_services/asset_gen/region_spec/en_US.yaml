@@ -1,5 +1,5 @@
 # Structured region_spec for en_US — the generation INPUT (data, not code).
-# Validated against asset_gen/financial_services/spec.py. The DD pipeline expands
+# Validated against asset_gen/spec.py. The DD pipeline expands
 # this into the committed per-institution assets/financial_services/en_US/ bank.
 # A locale is a SET of institutions; each spans one or more domains. Brands are
 # fictional.
@@ -170,7 +170,7 @@ institutions:
   - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
   # open/close account, update_contact_info, get_statements (+ per-type
   # transfer_funds, order_replacement_card) are injected by the common-operations
-  # layer (asset_gen/financial_services/spec.py); no need to list them here.
+  # layer (asset_gen/spec.py); no need to list them here.
   task_templates:
   - {id: TPL-NB-DISPUTE-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_transaction_dispute]}
   - {id: TPL-NB-FEES-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}

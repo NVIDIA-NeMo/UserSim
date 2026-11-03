@@ -52,7 +52,7 @@ the arrow pointing one direction, and a test enforces it.
 | `usersim.reporting` | Turning parquets into a capability dashboard | [reporting.md](reporting.md) |
 | `usersim.selection` | Curating trajectories into exportable datasets | [selection.md](selection.md) |
 | `usersim.taxonomy` | The shared vocabulary of capabilities and evidence | above |
-| `usersim.asset_gen` | Generating new asset banks for a domain | [assets.md](assets.md) |
+| `usersim.asset_gen` | Dispatching asset-bank generation to a domain's generator | [assets.md](assets.md) |
 | `usersim.testing` | Conformance checks and the test harness for extensions you write | [plugins.md](plugins.md) |
 
 Probes get their own page: [probes.md](probes.md) for the substrate,
@@ -94,7 +94,7 @@ src/usersim/
 ├── reporting/         capability dashboard and model comparison
 ├── selection/         trajectory curation and export
 ├── taxonomy/          capability definitions, evaluation-cell decoding
-├── asset_gen/         asset-bank generation
+├── asset_gen/         the asset-domain registry the asset commands dispatch through
 └── testing/           conformance suites for extension authors
 
 architecture/          this directory

@@ -333,7 +333,7 @@ faithfulness, language/script, plain text, near-duplicates, coverage, scope) and
 `evaluate-assets` runs an LLM-judge scorecard. Document ids are stable across
 regenerations, and a task's gold documents are derived from its tool sequence at
 load time. The authoring workflow lives in
-[finance_assets.ipynb](../../../asset_gen/notebooks/finance_assets.ipynb),
+[finance_assets.ipynb](asset_gen/notebooks/finance_assets.ipynb),
 and the asset contract in
 [SCHEMA.md](assets/financial_services/SCHEMA.md).
 
@@ -524,4 +524,4 @@ Related code elsewhere:
 | Capabilities | `taxonomy/capabilities.py` |
 | Training-export columns | `selection/schemas.py` (`finance` group) |
 | Assets + schema | `assets/financial_services/<locale>/` + `assets/financial_services/SCHEMA.md` |
-| Offline generation | `asset_gen/financial_services/` + `asset_gen/notebooks/finance_assets.ipynb` |
+| Offline generation | `asset_gen/` + `asset_gen/notebooks/finance_assets.ipynb` |

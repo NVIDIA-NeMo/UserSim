@@ -24,8 +24,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from usersim.asset_gen.financial_services.prompts import EVAL_PROMPT
-from usersim.asset_gen.financial_services.spec import RegionSpec
+from usersim.engine.probes.financial_services.asset_gen.prompts import EVAL_PROMPT
+from usersim.engine.probes.financial_services.asset_gen.spec import RegionSpec
 
 #: judge model alias (distinct from the doc-gen model to avoid self-preference).
 EVAL_JUDGE_MODEL_ALIAS = "asset_judge_model"
@@ -147,7 +147,7 @@ def build_eval_seed(bank_dir: str | Path, region_spec: RegionSpec | None):
     """
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.validate import _read_bank
+    from usersim.engine.probes.financial_services.asset_gen.validate import _read_bank
 
     bank_dir = Path(bank_dir)
     region_meta, insts = _read_bank(bank_dir)
@@ -308,7 +308,7 @@ def evaluate_bank(
 
     import data_designer.config as dd
 
-    from usersim.asset_gen.financial_services.pipeline import _make_engine
+    from usersim.engine.probes.financial_services.asset_gen.pipeline import _make_engine
     from usersim.extension import to_model_configs
 
     seed = build_eval_seed(bank_dir, region_spec)

@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from usersim.asset_gen.financial_services.spec import RegionSpec
+from usersim.engine.probes.financial_services.asset_gen.spec import RegionSpec
 
 #: cosine >= this within an institution flags a near-duplicate pair.
 NEAR_DUP_THRESHOLD = 0.97

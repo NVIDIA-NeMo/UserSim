@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Offline tests for the DD-judge asset evaluation (asset_gen/financial_services/evaluate.py).
+"""Offline tests for the DD-judge asset evaluation (asset_gen/evaluate.py).
 
 The live judge path is network-gated; these exercise the pure pieces:
 build_eval_seed (reads a bank), build_eval_columns (config assembly),
@@ -16,15 +16,15 @@ from typing import Any
 
 import pytest
 
-from usersim.asset_gen.financial_services.evaluate import (
+from usersim.engine.probes.financial_services.asset_gen.evaluate import (
     build_eval_columns,
     build_eval_seed,
     evaluate_scores,
     shape_scorecard,
     validate_eval_models,
 )
-from usersim.asset_gen.financial_services.pipeline import InstitutionBank, serialize_bank
-from usersim.asset_gen.financial_services.spec import RegionSpec
+from usersim.engine.probes.financial_services.asset_gen.pipeline import InstitutionBank, serialize_bank
+from usersim.engine.probes.financial_services.asset_gen.spec import RegionSpec
 
 _SPEC_DICT: dict[str, Any] = {
     "locale": "en_US",
@@ -178,7 +178,7 @@ def test_previous_scorecard_is_archived_rather_than_overwritten(tmp_path):
     """
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.evaluate import (
+    from usersim.engine.probes.financial_services.asset_gen.evaluate import (
         SCORECARD_HISTORY_DIR,
         _archive_previous_scorecard,
     )
@@ -206,7 +206,7 @@ def test_evaluate_bank_actually_calls_the_archiver():
     """
     import inspect
 
-    from usersim.asset_gen.financial_services import evaluate as E
+    from usersim.engine.probes.financial_services.asset_gen import evaluate as E
 
     src = inspect.getsource(E.evaluate_bank)
     assert "_archive_previous_scorecard(" in src
@@ -218,7 +218,7 @@ def test_two_runs_leave_two_history_files(tmp_path):
 
     import pandas as pd
 
-    from usersim.asset_gen.financial_services.evaluate import (
+    from usersim.engine.probes.financial_services.asset_gen.evaluate import (
         SCORECARD_HISTORY_DIR,
         _archive_previous_scorecard,
     )

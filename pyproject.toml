@@ -178,13 +178,9 @@ include = ["usersim*"]
     "probes/*/assets/**/*.json",
     "probes/*/assets/**/*.parquet",
     "probes/*/assets/**/*.md",
+    # Every other YAML, the region specs an asset domain beside its probe reads
+    # among them: without those an installed package reports no locales to generate.
     "**/*.yaml",
-]
-"usersim.asset_gen" = [
-    # The region specs gen-assets, validate-assets and evaluate-assets read
-    # when no --region-spec is given. Without them an installed package
-    # reports no locales to generate.
-    "*/region_spec/*.yaml",
 ]
 
 [tool.setuptools.exclude-package-data]

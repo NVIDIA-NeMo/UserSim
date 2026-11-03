@@ -39,23 +39,23 @@ from typing import Any, Iterator
 
 from pydantic import BaseModel, Field
 
-from usersim.asset_gen.financial_services.prompts import (
+from usersim.engine.probes.financial_services.asset_gen.prompts import (
     BRIEF_PROMPT,
     DOCSET_PROMPT,
     DOCSET_QC_PROMPT,
     concept_guidance_for,
     language_guidance_for,
 )
-from usersim.asset_gen.financial_services.spec import (
+from usersim.engine.probes.financial_services.asset_gen.spec import (
     DocTitleVocabulary,
     Institution,
     Product,
     RegionSpec,
     Tool,
 )
-from usersim.asset_gen.financial_services.validate import plain_symbols
+from usersim.engine.probes.financial_services.asset_gen.validate import plain_symbols
 
-logger = logging.getLogger("usersim.asset_gen.financial_services.pipeline")
+logger = logging.getLogger("usersim.engine.probes.financial_services.asset_gen.pipeline")
 
 # Model aliases (resolved from cli/models_default.toml at generation time).
 DOC_GEN_MODEL_ALIAS = "doc_gen_model"

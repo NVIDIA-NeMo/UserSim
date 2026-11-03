@@ -92,9 +92,11 @@ Each domain's region specs (`<locale>.yaml`, one per locale it can generate)
 ship as package data, so all three commands find them from an installed
 package without `--region-spec`.
 
-Domains are discovered through the `usersim.asset_domains` entry point, so a
-new domain does not require modifying this project. See
-[plugins.md](plugins.md).
+A built-in domain's generator lives beside the probe whose banks it builds:
+`financial_services` keeps its generator, region specs and asset notebook in
+its folder's `asset_gen/`. Other domains are discovered through the
+`usersim.asset_domains` entry point, so a new domain does not require
+modifying this project. See [plugins.md](plugins.md).
 
 ## Every entry declares its provenance
 

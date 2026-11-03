@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for the generate+vet gate (asset_gen/financial_services/validate.py), offline."""
+"""Tests for the generate+vet gate (asset_gen/validate.py), offline."""
 
 from __future__ import annotations
 
@@ -11,9 +11,9 @@ from typing import Any
 import pytest
 import yaml
 
-from usersim.asset_gen.financial_services.pipeline import InstitutionBank, serialize_bank
-from usersim.asset_gen.financial_services.spec import RegionSpec
-from usersim.asset_gen.financial_services.validate import FAIL, PASS, WARN, plain_symbols, validate_bank
+from usersim.engine.probes.financial_services.asset_gen.pipeline import InstitutionBank, serialize_bank
+from usersim.engine.probes.financial_services.asset_gen.spec import RegionSpec
+from usersim.engine.probes.financial_services.asset_gen.validate import FAIL, PASS, WARN, plain_symbols, validate_bank
 
 _SPEC_DICT: dict[str, Any] = {
     "locale": "en_US",
@@ -224,7 +224,7 @@ def test_numeric_faithfulness_accepts_indian_digit_grouping():
     this the validator would report every INR value as "absent from prose" and
     fail an otherwise perfect Hindi corpus.
     """
-    from usersim.asset_gen.financial_services.validate import _indian_grouped, _value_present
+    from usersim.engine.probes.financial_services.asset_gen.validate import _indian_grouped, _value_present
 
     assert _indian_grouped(250_000) == "2,50,000"
     assert _indian_grouped(1_500_000) == "15,00,000"
@@ -239,7 +239,7 @@ def test_numeric_faithfulness_accepts_indian_digit_grouping():
 
 
 def test_numeric_faithfulness_accepts_lakh_and_crore_phrasing():
-    from usersim.asset_gen.financial_services.validate import _value_present
+    from usersim.engine.probes.financial_services.asset_gen.validate import _value_present
 
     assert _value_present(250_000, "a ceiling of Rs 2.5 lakh per year")
     assert _value_present(150_000, "the 1.5 lakh limit under the tax section")
@@ -248,7 +248,7 @@ def test_numeric_faithfulness_accepts_lakh_and_crore_phrasing():
 
 def test_numeric_faithfulness_accepts_japanese_and_korean_units_of_ten_thousand():
     """``1,000万円`` and ``1억 원`` state the value without its digit string."""
-    from usersim.asset_gen.financial_services.validate import _value_present
+    from usersim.engine.probes.financial_services.asset_gen.validate import _value_present
 
     assert _value_present(10_000_000, "預金保険で1,000万円まで保護されます", "ja_JP")
     assert _value_present(18_000_000, "非課税保有限度額は1,800万円です", "ja_JP")
@@ -261,7 +261,7 @@ def test_numeric_faithfulness_accepts_japanese_and_korean_units_of_ten_thousand(
 
 def test_numeric_faithfulness_still_rejects_a_wrong_number():
     """Tolerating locale formats must not tolerate a DIFFERENT value."""
-    from usersim.asset_gen.financial_services.validate import _value_present
+    from usersim.engine.probes.financial_services.asset_gen.validate import _value_present
 
     assert not _value_present(250_000, "minimum balance of Rs 2,60,000 applies")
     assert not _value_present(250_000, "a ceiling of Rs 3 lakh per year")
@@ -274,7 +274,7 @@ def test_numeric_faithfulness_still_rejects_a_wrong_number():
 def test_numeric_faithfulness_matches_whole_numbers_only():
     """A rendering inside a longer number states a different value: 5,000,000,000원
     doesn't state a 5,000,000원 limit."""
-    from usersim.asset_gen.financial_services.validate import _value_present
+    from usersim.engine.probes.financial_services.asset_gen.validate import _value_present
 
     assert not _value_present(5_000_000, "현금서비스 이용한도 최고액은 5,000,000,000원입니다", "ko_KR")
     assert not _value_present(5_000_000, "a limit of $15,000,000")
@@ -286,7 +286,7 @@ def test_numeric_faithfulness_matches_whole_numbers_only():
 
 def test_numeric_faithfulness_accepts_french_and_german_number_formats():
     """A French or German bank writes values in its own format, and they are faithful."""
-    from usersim.asset_gen.financial_services.validate import _value_present
+    from usersim.engine.probes.financial_services.asset_gen.validate import _value_present
 
     for space in (" ", "\u00a0", "\u202f"):
         assert _value_present(1234, f"des frais de 1{space}234 € par an", "fr_FR")
@@ -300,7 +300,7 @@ def test_numeric_faithfulness_accepts_french_and_german_number_formats():
 
 def test_a_decimal_comma_format_does_not_read_an_english_rendering_as_the_value():
     """There ``1,234`` reads as a decimal, so it is no evidence of 1234."""
-    from usersim.asset_gen.financial_services.validate import _value_present
+    from usersim.engine.probes.financial_services.asset_gen.validate import _value_present
 
     assert not _value_present(1234, "eine Gebühr von 1,234 €", "de_DE")
     assert not _value_present(1234, "des frais de 1,234 €", "fr_FR")
@@ -308,7 +308,7 @@ def test_a_decimal_comma_format_does_not_read_an_english_rendering_as_the_value(
 
 
 def test_english_formats_are_unchanged():
-    from usersim.asset_gen.financial_services.validate import _value_present
+    from usersim.engine.probes.financial_services.asset_gen.validate import _value_present
 
     for number_format in (None, "en_US", "en_IN", "en_GB"):
         assert _value_present(1234, "a fee of $1,234 a year", number_format)
@@ -534,7 +534,7 @@ def test_freeze_promotes_the_generation_report():
     """
     import json as _json
 
-    from usersim import asset_gen
+    from usersim.engine.probes.financial_services import asset_gen
 
     # Derived from the package, not the working directory: a relative path
     # here turns a real regression into a skip that nobody reads.

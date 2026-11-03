@@ -1,5 +1,5 @@
 # Structured region_spec for ko_KR, the generation INPUT (data, not code).
-# Validated against asset_gen/financial_services/spec.py. gen-assets expands this
+# Validated against asset_gen/spec.py. gen-assets expands this
 # into the committed per-institution assets/financial_services/ko_KR/ bank.
 #
 # The institution set follows the Korean retail market: a commercial bank, an

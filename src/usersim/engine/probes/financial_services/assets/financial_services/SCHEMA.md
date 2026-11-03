@@ -241,7 +241,7 @@ institution offers (`open_account`, `close_account`, `update_contact_info`,
 `deposit_funds`, `withdraw_funds`; retirement: `request_withdrawal`,
 `update_investment_election`, `plan_loan`; wealth: `fund_account`,
 `generate_financial_plan`; insurer: `file_claim`, `get_claim_status`,
-`update_policy`), injected by `asset_gen/financial_services/spec.py`. Most are
+`update_policy`), injected by `asset_gen/spec.py`. Most are
 never gold: they are realistic, gold-ADJACENT tool docs that make retrieval
 (and the discoverable-tool gate) non-trivial, and they stay consistent across
 locales. An institution that does not offer one of them lists it in its region

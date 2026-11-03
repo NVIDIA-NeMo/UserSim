@@ -1,5 +1,5 @@
 # Structured region_spec for de_DE, the generation INPUT (data, not code).
-# Validated against asset_gen/financial_services/spec.py. The DD pipeline expands
+# Validated against asset_gen/spec.py. The DD pipeline expands
 # this into the committed per-institution assets/financial_services/de_DE/ bank.
 #
 # The institution set follows the German retail market: a public savings bank

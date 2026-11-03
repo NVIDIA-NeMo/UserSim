@@ -45,7 +45,7 @@ to shape training records. `tests/test_extraction_example.py` pins the schema co
 pairwise shapes, confirming the trajectory and evaluation columns are
 sufficient to drive them.
 
-**[`finance_assets.ipynb`](../src/usersim/asset_gen/notebooks/finance_assets.ipynb)**
+**[`finance_assets.ipynb`](../src/usersim/engine/probes/financial_services/asset_gen/notebooks/finance_assets.ipynb)**
 generates and vets a `financial_services` asset bank: it drives
 `usersim gen-assets`, `validate-assets` and `evaluate-assets`, then previews
 the result. Its generate and evaluate cells make live, billable model calls;

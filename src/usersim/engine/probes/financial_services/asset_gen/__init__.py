@@ -7,7 +7,7 @@ The committed ``region_spec/*.yaml`` files are the generation input; ``spec.py``
 validates them and ``pipeline.py`` expands them into a per-institution asset bank.
 """
 
-from usersim.asset_gen.financial_services.spec import (
+from usersim.engine.probes.financial_services.asset_gen.spec import (
     RegionSpec,
     RegionSpecError,
     load_region_spec,
