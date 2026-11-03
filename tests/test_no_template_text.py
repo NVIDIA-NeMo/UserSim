@@ -100,3 +100,26 @@ def test_audit_finds_template_text_and_copied_locale_text(tmp_path: Path):
     assert [(d["entry_id"], d["field"], d["n_locales"]) for d in findings["duplicate_locale_dicts"]] == [
         ("copied", "question", 3)
     ]
+
+
+def test_audit_reads_strings_inside_lists(tmp_path: Path):
+    """Template text in a list item, or in a list a LocalizedText field holds, is found."""
+    bank = tmp_path / "categories.yaml"
+    bank.write_text(
+        "categories:\n"
+        "- id: hints\n"
+        "  subtopic_hints:\n"
+        "  - how the main tax rule handled it\n"
+        "- id: localized\n"
+        "  examples:\n"
+        "    en_US: [a sample target]\n"
+        "    de_DE: [ein Beispiel]\n",
+        encoding="utf-8",
+    )
+
+    findings = _asset_audit.audit_one_bank(bank)
+
+    assert [(h["entry_id"], h["field"], h["locale"], h["pattern"]) for h in findings["template_hits"]] == [
+        ("hints", "subtopic_hints", None, "main_X_rule_handled"),
+        ("localized", "examples", "en_US", "sample_target_filler"),
+    ]

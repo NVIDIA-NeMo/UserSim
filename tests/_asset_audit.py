@@ -99,23 +99,25 @@ def _is_locale_dict(node: Any) -> bool:
     return isinstance(node, dict) and len(node) >= 2 and any(loc in node for loc in SUPPORTED_LOCALES)
 
 
-def _walk_strings(node: Any, parent_id: str | None = None, parent_field: str | None = None):
-    """Yield ``(entry_id, field_name, string_value, is_locale_dict_member, locale)``
-    for every string in a YAML doc."""
-    if isinstance(node, dict):
-        entry_id = node.get("id", parent_id) if "id" in node else parent_id
+def _walk_strings(node: Any, parent_id: Any = None, parent_field: str | None = None, locale: str | None = None):
+    """Yield ``(entry_id, field_name, string_value, locale)`` for every string in a YAML doc.
+
+    Strings inside lists count. A string under a LocalizedText dict keeps the
+    field that holds the dict and carries its locale.
+    """
+    if isinstance(node, str):
+        yield (parent_id, parent_field, node, locale)
+    elif isinstance(node, dict):
+        entry_id = node.get("id", parent_id)
         for k, v in node.items():
-            if isinstance(v, str):
-                yield (entry_id, k, v, False, None)
-            elif _is_locale_dict(v):
+            if _is_locale_dict(v):
                 for loc, s in v.items():
-                    if isinstance(s, str):
-                        yield (entry_id, k, s, True, loc)
+                    yield from _walk_strings(s, entry_id, k, loc)
             else:
-                yield from _walk_strings(v, entry_id, k)
+                yield from _walk_strings(v, entry_id, k, locale)
     elif isinstance(node, list):
         for item in node:
-            yield from _walk_strings(item, parent_id, parent_field)
+            yield from _walk_strings(item, parent_id, parent_field, locale)
 
 
 def _detect_template_in_string(s: str) -> list[str]:
@@ -137,7 +139,7 @@ def audit_one_bank(path: Path) -> dict[str, Any]:
     }
 
     seen = set()
-    for entry_id, field, s, _is_loc_member, loc in _walk_strings(data):
+    for entry_id, field, s, loc in _walk_strings(data):
         if field in {
             "id",
             "schema_version",
