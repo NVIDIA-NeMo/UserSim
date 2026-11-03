@@ -353,3 +353,13 @@ class TestBeforeTheProbeIsImported:
         count, keys = result.stdout.splitlines()
         assert int(count) > 0
         assert "user_agent_system_prompt" in keys
+
+    def test_a_package_holding_several_probes_is_found_under_each_label(self, monkeypatch, tmp_path):
+        import usersim.engine.core._assets as assets
+
+        for label in ("multi_a", "multi_b"):
+            (tmp_path / "multi" / "assets" / label).mkdir(parents=True)
+        monkeypatch.setattr(assets, "_builtin_probes_dir", lambda: tmp_path)
+
+        assert assets.probe_assets_dir("multi_a") == tmp_path / "multi" / "assets" / "multi_a"
+        assert assets.probe_assets_dir("multi_b") == tmp_path / "multi" / "assets" / "multi_b"

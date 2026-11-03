@@ -127,25 +127,36 @@ def declared_assets_roots() -> dict[str, Path]:
     }
 
 
-def _builtin_probe_root(probe: str) -> Path:
-    """``usersim/engine/probes/<probe>/assets/``, where a built-in kept in its own folder holds ``<probe>/``."""
-    return Path(str(resources.files("usersim.engine") / "probes" / probe / "assets"))
+def _builtin_probes_dir() -> Path:
+    """``usersim/engine/probes/``, which holds the built-in probe packages."""
+    return Path(str(resources.files("usersim.engine") / "probes"))
+
+
+def _builtin_probe_root(probe: str) -> Path | None:
+    """The ``assets/`` folder of the built-in package that holds ``<probe>/``, if one does.
+
+    A package is usually named after its probe. A package that holds several probes
+    keeps each one's banks in its ``assets/<probe>/``.
+    """
+    packages = _builtin_probes_dir()
+    own = packages / probe / "assets"
+    if (own / probe).is_dir():
+        return own
+    return next((root for root in sorted(packages.glob("*/assets")) if (root / probe).is_dir()), None)
 
 
 def _declared_root(probe: str) -> Path | None:
     """The root ``probe``'s class declares, found before its module is imported if it is a built-in.
 
-    A built-in kept in its own folder declares ``usersim/engine/probes/<probe>/assets/``.
-    Until its class is registered, that folder stands in for the declaration when it
-    holds ``probe``, so a lookup made while the probe's module loads, such as a prompt
-    read at import time, or by a scorer in a process that never imports the probe,
-    reaches the probe's assets.
+    A built-in kept in its own folder declares its package's ``assets/`` folder under
+    ``usersim/engine/probes/``. Until its class is registered, the package folder that
+    holds ``probe`` stands in for the declaration, so a lookup made while the probe's
+    module loads, such as a prompt read at import time, or by a scorer in a process
+    that never imports the probe, reaches the probe's assets.
     """
     declared = declared_assets_roots().get(probe)
     if declared is None and probe not in probes._PROBE_REGISTRY:
-        builtin = _builtin_probe_root(probe)
-        if (builtin / probe).is_dir():
-            return builtin
+        return _builtin_probe_root(probe)
     return declared
 
 
