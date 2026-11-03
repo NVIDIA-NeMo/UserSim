@@ -7,7 +7,8 @@ The audit scans every bank ``shipped_banks()`` lists for template-fill
 placeholder strings and for ``LocalizedText`` fields that carry one identical
 string across three or more locales. ``test_no_template_text.py`` runs it on
 every push (strict by default) and fails CI if any of the patterns below
-appear.
+appear. ``test_asset_yaml.py`` reads the same banks, through
+``shipped_banks()`` and ``YAML_LOADER``.
 
 Public surface:
 
