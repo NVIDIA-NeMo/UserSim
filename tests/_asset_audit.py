@@ -3,17 +3,20 @@
 
 """Asset-bank audit primitives for ``test_no_template_text.py``.
 
-The audit scans every bank in ``BANK_PATHS`` for template-fill placeholder
-strings and for ``LocalizedText`` fields that carry one identical string
-across three or more locales. ``test_no_template_text.py`` runs it on
+The audit scans every bank ``shipped_banks()`` lists for template-fill
+placeholder strings and for ``LocalizedText`` fields that carry one identical
+string across three or more locales. ``test_no_template_text.py`` runs it on
 every push (strict by default) and fails CI if any of the patterns below
 appear.
 
 Public surface:
 
-- ``BANK_PATHS`` — tuple of repo-relative YAML paths to every shipped bank.
-- ``audit_one_bank(path)`` — return a per-bank ``{template_hits,
+- ``shipped_banks()``: every YAML file in the asset folder of every
+  registered probe, by name.
+- ``audit_one_bank(path)``: return a per-bank ``{template_hits,
   duplicate_locale_dicts}`` finding dict.
+- ``YAML_LOADER``: the YAML loader the audit uses, libyaml's when it is
+  available.
 """
 
 from __future__ import annotations
@@ -24,7 +27,10 @@ from typing import Any
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.core.probes import known_probes
+
+YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
 
 # All Nemotron-Personas locale ids the simulator currently supports.
 SUPPORTED_LOCALES: tuple[str, ...] = (
@@ -70,34 +76,22 @@ TEMPLATE_PATTERNS: tuple[tuple[str, str], ...] = (
 _TEMPLATE_RES = [(name, re.compile(pat, re.IGNORECASE)) for name, pat in TEMPLATE_PATTERNS]
 
 
-BANK_PATHS: tuple[str, ...] = (
-    "assets/sov_ai_facts/de_DE/sample.yaml",
-    "assets/sov_ai_facts/en_GB/sample.yaml",
-    "assets/sov_ai_facts/en_IN/sample.yaml",
-    "assets/sov_ai_facts/en_SG/sample.yaml",
-    "assets/sov_ai_facts/en_US/sample.yaml",
-    "assets/sov_ai_facts/fr_FR/sample.yaml",
-    "assets/sov_ai_facts/hi_Deva_IN/sample.yaml",
-    "assets/sov_ai_facts/hi_Latn_IN/sample.yaml",
-    "assets/sov_ai_facts/ja_JP/sample.yaml",
-    "assets/sov_ai_facts/ko_KR/sample.yaml",
-    "assets/sov_ai_facts/pt_BR/sample.yaml",
-    "assets/safety_chat_pressure/sample.yaml",
-    "assets/safety_agentic/sample.yaml",
-    "assets/safety_agentic/action_taxonomy.yaml",
-    "assets/sov_ai_multilingual_parity/sample.yaml",
-    "assets/sov_ai_dynamic/de_DE/categories.yaml",
-    "assets/sov_ai_dynamic/en_GB/categories.yaml",
-    "assets/sov_ai_dynamic/en_IN/categories.yaml",
-    "assets/sov_ai_dynamic/en_SG/categories.yaml",
-    "assets/sov_ai_dynamic/en_US/categories.yaml",
-    "assets/sov_ai_dynamic/fr_FR/categories.yaml",
-    "assets/sov_ai_dynamic/hi_Deva_IN/categories.yaml",
-    "assets/sov_ai_dynamic/hi_Latn_IN/categories.yaml",
-    "assets/sov_ai_dynamic/ja_JP/categories.yaml",
-    "assets/sov_ai_dynamic/ko_KR/categories.yaml",
-    "assets/sov_ai_dynamic/pt_BR/categories.yaml",
-)
+def shipped_banks() -> dict[str, Path]:
+    """Every YAML file in the asset folder of every registered probe.
+
+    Keyed by ``<label>/<path inside the probe's folder>``, so a bank is named
+    the same wherever its probe keeps it. Raises ``FileNotFoundError`` when a
+    probe's folder does not resolve, so banks that moved out of reach fail
+    the audit instead of dropping out of it.
+    """
+    banks: dict[str, Path] = {}
+    for label in known_probes():
+        folder = probe_assets_dir(label)
+        if not folder.is_dir():
+            raise FileNotFoundError(f"{label}: asset folder {folder} does not exist")
+        for path in sorted(folder.rglob("*.y*ml")):
+            banks[f"{label}/{path.relative_to(folder).as_posix()}"] = path
+    return banks
 
 
 def _is_locale_dict(node: Any) -> bool:
@@ -131,14 +125,13 @@ def _detect_template_in_string(s: str) -> list[str]:
 
 def audit_one_bank(path: Path) -> dict[str, Any]:
     """Audit a single bank YAML file for template-text and cross-locale-duplicate
-    LocalizedText fields. Returns a finding dict with keys ``path``,
-    ``template_hits``, and ``duplicate_locale_dicts``.
+    LocalizedText fields. Returns a finding dict with keys ``template_hits``
+    and ``duplicate_locale_dicts``.
     """
     with path.open(encoding="utf-8") as fh:
-        data = yaml.safe_load(fh)
+        data = yaml.load(fh, Loader=YAML_LOADER)
 
     findings: dict[str, Any] = {
-        "path": str(path.relative_to(REPO_ROOT)),
         "template_hits": [],  # list of (entry_id, field, locale, pattern_name)
         "duplicate_locale_dicts": [],  # list of (entry_id, field, en_value_truncated)
     }
