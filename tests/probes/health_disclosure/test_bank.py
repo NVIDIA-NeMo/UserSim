@@ -149,3 +149,29 @@ class TestPathResolutionAndCache:
         first = load_clinical_profile_bank_for_client("health_therapy_disclosure", "MY_CUSTOM_PROFILES")
         second = load_clinical_profile_bank_for_client("health_therapy_disclosure", "MY_CUSTOM_PROFILES")
         assert first is second  # cached instance
+
+
+class TestAssetCheck:
+    """Each client's asset check loads the bank its rows draw from, where a run reads it."""
+
+    @pytest.mark.parametrize(
+        "label",
+        [
+            "health_decision_support_disclosure",
+            "health_general_disclosure",
+            "health_therapy_disclosure",
+            "health_triage_disclosure",
+        ],
+    )
+    def test_the_shipped_bank_passes(self, label: str) -> None:
+        from usersim.engine.core.probes import resolve_probe
+
+        assert resolve_probe(label).asset_problems() == []
+
+    def test_a_customer_bank_that_does_not_load_is_reported(self, monkeypatch, tmp_path: Path) -> None:
+        from usersim.engine.core.probes import resolve_probe
+
+        cls = resolve_probe("health_triage_disclosure")
+        monkeypatch.setenv(cls.CLIENT["profiles_env"], str(tmp_path / "missing.yaml"))
+        (problem,) = cls.asset_problems()
+        assert "file not found" in problem and "missing.yaml" in problem
