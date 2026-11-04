@@ -665,23 +665,22 @@ class TestScenarioInputsPanel:
         assert "send_email_internal" in out
         assert "transfer_funds_external" in out
 
-    def test_general_family_includes_theme_in_inputs_panel(self) -> None:
-        # tool_calling / general_open_ended / general_educational don't carry
-        # curated-asset side channels but they ARE seeded by a
-        # ``theme`` (sampled from the locale's seed YAML or a
-        # toolset bundle). The Probe Inputs panel surfaces theme
-        # + toolset metadata for the general family so readers
-        # can answer "what was this probe seeded with?" without
-        # cross-referencing the seed parquet.
+    def test_tool_calling_inputs_panel_shows_its_toolset(self) -> None:
+        # A tool_calling row is seeded by the toolset it draws, which is
+        # also its theme, so the Probe Inputs panel shows the toolset and
+        # not the run's theme placeholder: readers can answer "what was
+        # this probe seeded with?" without cross-referencing the catalog.
         row = _general_row()
-        row["theme"] = '{"name": "weather"}'
+        row["theme"] = "__not_used__"
         row["toolset_name"] = "weather_tools"
         row["toolset_category"] = "weather"
         row["num_tools"] = 3
         out = _record([row])
         assert "Probe Inputs" in out
-        assert "Theme" in out
+        assert "Toolset category" in out
         assert "weather_tools" in out
+        assert "Theme" not in out
+        assert "__not_used__" not in out
 
     def test_multilingual_consistency_inputs_panel(self) -> None:
         row = _general_row()

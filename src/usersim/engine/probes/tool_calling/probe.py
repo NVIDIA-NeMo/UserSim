@@ -65,7 +65,6 @@ from usersim.extension import (
     format_persona_for_prompt,
     format_tools_for_prompt,
     load_prompt_file,
-    load_seeds,
     make_failed,
     register_probe,
     render_prompt,
@@ -88,16 +87,23 @@ MODEL_API_RESPONSE = "api_response_model"
 MODEL_JUDGE = "judge_model"
 
 
-def _derive_tool_theme(data: dict) -> dict | None:
-    """The theme a row's toolset gives it, or None when the row names no toolset category."""
-    category = data.get("toolset_category")
-    if not category:
-        return None
+def _derive_tool_theme(data: dict) -> dict:
+    """The theme a row's toolset gives it: the toolset's category, and its name where it has one.
+
+    A row from a catalog without categories takes its toolset's name, and one
+    that names neither gets a theme of using the offered tools.
+    """
+    category = data.get("toolset_category") or ""
     toolset_name = data.get("toolset_name") or ""
-    label = toolset_name if toolset_name else category
+    if not (category or toolset_name):
+        return {
+            "type": "Tool use",
+            "description": "Help the user with a task the offered tools support.",
+            "tool_expected": True,
+        }
     return {
-        "type": category,
-        "description": f"Help the user with a task that involves {label} capabilities.",
+        "type": category or toolset_name,
+        "description": f"Help the user with a task that involves {toolset_name or category} capabilities.",
         "tool_expected": True,
     }
 
@@ -276,7 +282,8 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
-    # the ``tools`` column.
+    # the ``tools`` column. The toolset is also the row's theme, so the probe
+    # lists no themes and its rows' ``theme`` column holds the run's placeholder.
     seed_dataset = "toolsets_seed"
     description = (
         "Tests the assistant's ability to invoke tools correctly in response to user "
@@ -285,28 +292,17 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     )
     default_scorers = ("tool_use",)
     preview_fields = (
-        PreviewField("theme", "Theme"),
         PreviewField("toolset_name", "Toolset"),
         PreviewField("toolset_category", "Toolset category"),
         PreviewField("num_tools", "Tools available"),
     )
 
     @classmethod
-    def themes(cls, locale: str) -> list[dict[str, Any]]:
-        """The themes in ``locale``'s ``themes.json``, or in the ``en_US`` file when the locale has none."""
-        return load_seeds(locale, cls.label, "themes")
-
-    @classmethod
     def asset_problems(cls) -> list[str]:
-        """The prompts file the prompt defaults would mask, and the themes."""
-        problems = []
+        """The prompts file the prompt defaults would mask."""
         if not load_prompt_file(_SCENARIO):
-            problems.append(f"{_SCENARIO}/prompts.yaml is missing or empty")
-        try:
-            cls.themes("en_US")
-        except FileNotFoundError as error:
-            problems.append(f"no themes: {error}")
-        return problems
+            return [f"{_SCENARIO}/prompts.yaml is missing or empty"]
+        return []
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -326,7 +322,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             min(cfg.max_tools, len(all_tools)),
         )
 
-        theme = _derive_tool_theme(self._data) or self.theme()
+        theme = _derive_tool_theme(self._data)
         logger.info(f"  |-- tool_calling: {len(self.tool_subset)} tools, theme={theme.get('type', '?')}")
 
         # The credentials each offered tool declares, by tool name, and the one

@@ -187,5 +187,5 @@ finds. See [assets.md](assets.md).
 A probe whose conversations vary by topic lists its themes in a `themes`
 classmethod, read under its asset folder. A run draws one per row into the
 `theme` column, and the probe reads it back with `theme()`. A probe that lists
-none gets a placeholder it never reads. `tool_calling` takes its themes and
-toolsets from the run's settings instead.
+none gets a placeholder it never reads. `tool_calling` lists none: a row's
+theme is the toolset it draws from its seed table.

@@ -143,6 +143,14 @@ def test_a_general_probe_draws_its_theme_from_its_seeds(probe_type: str, kind: s
     assert json.loads(row["theme"]) in load_seeds("en_US", probe_type, kind)
 
 
+def test_a_tool_calling_row_stores_no_drawn_theme() -> None:
+    """A tool_calling row's theme is its toolset, so the run draws none and the row holds the placeholder."""
+    (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"tool_calling": 1.0}, random_seed=5)
+
+    assert row["theme"] == "__not_used__"
+    assert row["toolset_category"]
+
+
 def _themes_from_its_folder(cls: type, locale: str) -> list[dict]:
     return json.loads((cls.assets_dir() / locale / "themes.json").read_text(encoding="utf-8"))
 

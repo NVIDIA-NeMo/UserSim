@@ -120,10 +120,12 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
 - A call that breaks its tool's schema gets a `400` response instead of a
   simulated one, and a call without the user's key for a tool that takes one
   gets a `401` (see [Credentials](#credentials)).
-- A conversation's theme is its toolset's category and name. A row whose
-  toolset has no `toolset_category` uses the theme the run drew from
-  [`en_US/themes.json`](en_US/themes.json) instead, which every locale reads
-  unless it has a `themes.json` of its own.
+- A conversation's theme is its toolset: the user is asked for a task in the
+  toolset's `toolset_category` that involves its `toolset_name`, or its
+  category where the name is empty. A catalog without categories gives each
+  row its toolset's name. The probe lists no themes, so a row's `theme`
+  column holds the run's `__not_used__` placeholder, as it does for every
+  probe that draws its area from its own data.
 
 ## Schema
 

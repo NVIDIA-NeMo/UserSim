@@ -37,8 +37,6 @@ def _assets_root(tmp_path: Path, *seed_names: str) -> Path:
     # pre-flight rejects one that holds only the seed. sov_ai_facts is
     # locale-scoped, so it needs the run's locale subtree with a bank that loads.
     (probe_dir / "prompts.yaml").write_text("prompts: []\n", encoding="utf-8")
-    (probe_dir / "en_US").mkdir()
-    shutil.copy(probe_assets_dir("tool_calling") / "en_US" / "themes.json", probe_dir / "en_US" / "themes.json")
     facts = tmp_path / "sov_ai_facts" / "en_US"
     facts.mkdir(parents=True)
     shutil.copy(probe_assets_dir("sov_ai_facts") / "en_US" / "sample.yaml", facts / "sample.yaml")

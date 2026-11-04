@@ -170,13 +170,7 @@ async def _run_concrete_tool_probe(
     persona = {"first_name": "A", "last_name": "User", "age": 35}
     data = {
         "tools": sample_tools,
-        "theme": json.dumps(
-            {
-                "type": "Weather & Location Lookup",
-                "description": "Look up weather.",
-                "tool_expected": True,
-            }
-        ),
+        "theme": "__not_used__",
         "persona_uuid": "persona-1",
         "disclosure_style": "upfront",
         "user_interaction_style": "neutral",
@@ -335,7 +329,7 @@ class TestToolSubsetIsRowDerived:
         persona = {"first_name": "A", "last_name": "User", "age": 35}
         data = {
             "tools": [_tool_entry(i) for i in range(12)],
-            "theme": json.dumps({"type": "T", "description": "d", "tool_expected": True}),
+            "theme": "__not_used__",
             "persona_uuid": "persona-1",
             "trajectory_id": "traj-1",
             "disclosure_style": "upfront",
@@ -374,6 +368,82 @@ class TestToolSubsetIsRowDerived:
         a = self._subset(trajectory_id="traj-a")
         b = self._subset(trajectory_id="traj-b")
         assert a != b, f"two rows drew the same subset {a}, so the draw is not derived from the row"
+
+
+class TestThemeFollowsTheToolset:
+    """A row's theme is its toolset, so the probe lists no themes for a run to draw."""
+
+    @staticmethod
+    def _user_prompt(**data_overrides: object) -> str:
+        from usersim.engine.core.behavioral import compute_behavioral_profile
+
+        persona = {"first_name": "A", "last_name": "User", "age": 35}
+        data = {
+            "tools": [_tool_entry(i) for i in range(3)],
+            "theme": "__not_used__",
+            "persona_uuid": "persona-1",
+            "trajectory_id": "traj-1",
+            "disclosure_style": "upfront",
+            "user_interaction_style": "neutral",
+        }
+        data.update(data_overrides)
+        cfg = types.SimpleNamespace(
+            tools_column="tools",
+            theme_column="theme",
+            max_tools=3,
+            max_turns=2,
+            max_query_attempts=1,
+            context_compression=False,
+            compression_window=1,
+            enforce_user_language=False,
+        )
+        probe = ToolCallingProbe(
+            persona=persona,
+            locale="en_US",
+            language="English",
+            models={},
+            cfg=cfg,
+            provenance=Provenance(),
+            profile=compute_behavioral_profile(persona),
+            data=data,
+            outcome_builder=OutcomeBuilder(provenance=Provenance()),
+        )
+        return probe.get_user_system_prompt()
+
+    def test_the_probe_lists_no_themes(self) -> None:
+        assert ToolCallingProbe.themes("en_US") is None
+
+    def test_a_row_takes_its_toolsets_category_and_name(self) -> None:
+        prompt = self._user_prompt(toolset_category="Weather", toolset_name="openweathermap")
+
+        assert '"type": "Weather"' in prompt
+        assert "a task that involves openweathermap capabilities" in prompt
+
+    def test_a_toolset_without_a_name_gives_its_category(self) -> None:
+        prompt = self._user_prompt(toolset_category="Weather", toolset_name=None)
+
+        assert "a task that involves Weather capabilities" in prompt
+
+    def test_a_catalog_without_categories_gives_the_toolsets_name(self) -> None:
+        prompt = self._user_prompt(toolset_name="openweathermap")
+
+        assert '"type": "openweathermap"' in prompt
+        assert "a task that involves openweathermap capabilities" in prompt
+
+    def test_a_row_naming_no_toolset_is_about_the_offered_tools(self) -> None:
+        prompt = self._user_prompt()
+
+        assert '"type": "Tool use"' in prompt
+        assert "a task the offered tools support" in prompt
+
+    def test_the_rows_theme_column_never_reaches_the_prompt(self) -> None:
+        prompt = self._user_prompt(
+            toolset_category="Weather",
+            theme=json.dumps({"type": "Calendar & Scheduling", "description": "Book a meeting."}),
+        )
+
+        assert "Calendar" not in prompt
+        assert "Book a meeting" not in prompt
 
 
 class TestCredentials:

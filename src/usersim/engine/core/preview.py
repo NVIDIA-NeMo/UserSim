@@ -822,8 +822,8 @@ def _render_field_value(value: Any) -> str | None:
 
     Strings that parse as JSON dicts / lists are re-rendered as
     human-friendly ``key: value · key: value`` rather than dumped
-    raw — themes for the general family (``tool_calling`` /
-    ``general_open_ended`` / ``general_educational``) are stored in the parquet
+    raw — themes for the general probes (``general_open_ended`` /
+    ``general_educational``) are stored in the parquet
     as JSON-encoded ``{type, description, ...}`` blobs and
     nobody wants to read raw JSON in a human preview.
     """
