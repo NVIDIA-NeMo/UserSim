@@ -292,12 +292,17 @@ other changes are listed per source:
 - **API-Bank** ([Li et al., 2023](https://aclanthology.org/2023.emnlp-main.187/)):
   100 of the 101 APIs listed in
   [`api-bank/data/all_apis.csv`](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/faf754671f5b850e1b4d1ff870db37a6a2480df6/api-bank/data/all_apis.csv)
-  (commit `faf7546`), all except `ImageCaption`. Descriptions and parameter
-  descriptions are unchanged. Tool names are the upstream class names in lower
-  case (`AddAlarm` becomes `addalarm`); parameter types are written as JSON
-  Schema types (`str` as `string`, `int` as `integer`, `datetime` as `string`,
-  `List[str]` as `array`); 32 tools gain a `required` list; and output
-  parameters are removed. The `All` toolset holds every API, and nine topical
+  (commit `faf7546`), all except `ImageCaption`. Tool names are the upstream
+  class names in lower case (`AddAlarm` becomes `addalarm`); parameter types
+  are written as JSON Schema types (`str` as `string`, `int` as `integer`,
+  `datetime` as `string`, `List[str]` as `array`); and output parameters are
+  removed. A tool requires the inputs that its signature in the `expressions`
+  column takes without a default, apart from inputs that upstream text marks
+  optional or that the class's `call` method does not take, and eight tools
+  gain the `token` input that their signature takes and their `api_info`
+  omits. Descriptions and parameter descriptions are upstream's, apart from 15
+  corrected against the class's code and the CSV, such as `gettoday`, which
+  gets the current date. The `All` toolset holds every API, and nine topical
   toolsets repeat subsets of them.
 - **RestGPT** ([Song et al., 2023](https://arxiv.org/abs/2306.06624)):
   all 40 Spotify and 54 TMDB operations in RestBench's OpenAPI specs under
