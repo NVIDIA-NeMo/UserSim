@@ -29,24 +29,13 @@ from typing import Any
 import yaml
 
 from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.probes import known_probes
 
 YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
 
-# All Nemotron-Personas locale ids the simulator currently supports.
-SUPPORTED_LOCALES: tuple[str, ...] = (
-    "en_US",
-    "en_IN",
-    "en_SG",
-    "en_GB",
-    "pt_BR",
-    "fr_FR",
-    "de_DE",
-    "ja_JP",
-    "hi_Deva_IN",
-    "hi_Latn_IN",
-    "ko_KR",
-)
+#: The shipped locales; a mapping keyed by them is a locale-keyed rendering.
+SUPPORTED_LOCALES: tuple[str, ...] = SHIPPED_LOCALES
 
 # Regex patterns that indicate template-fill / placeholder text masquerading
 # as bank content. Each entry is ``(name, pattern)``; the pattern is matched
