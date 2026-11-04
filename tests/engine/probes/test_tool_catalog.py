@@ -4,7 +4,8 @@
 """Tests for the tool catalog the tool_calling probe ships.
 
 Each row's tools reach the assistant model unchanged, as OpenAI-style function
-specs, so every spec in ``toolsets_seed.parquet`` must be one a provider accepts.
+specs, so every spec in ``toolsets_seed.parquet`` must be valid JSON Schema that
+a provider accepts, with every tool and parameter described and typed.
 """
 
 import json
@@ -14,20 +15,13 @@ from collections.abc import Iterator
 
 import pandas as pd
 import pytest
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import SchemaError
 
 from usersim.engine.core.missing import is_missing
 from usersim.engine.probes.tool_calling.generator import ToolCallingProbe
 
 JSON_SCHEMA_TYPES = frozenset({"string", "number", "integer", "boolean", "array", "object", "null"})
-_PYTHON_TYPES = {
-    "string": str,
-    "number": (int, float),
-    "integer": int,
-    "boolean": bool,
-    "array": list,
-    "object": dict,
-    "null": type(None),
-}
 _FUNCTION_NAME = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 _PARAMETER_NAME = re.compile(r"^[a-zA-Z0-9_.-]{1,64}$")
 #: The method and URL a REST tool's description ends with.
@@ -63,9 +57,8 @@ def _tools(toolsets) -> Iterator[tuple[str, dict]]:
 
 
 def _fits(value, json_type: str) -> bool:
-    if isinstance(value, bool) and json_type in ("number", "integer"):
-        return False
-    return isinstance(value, _PYTHON_TYPES[json_type])
+    """Whether JSON Schema's ``type`` keyword accepts the value (a boolean is no integer)."""
+    return Draft202012Validator({"type": json_type}).is_valid(value)
 
 
 def test_num_tools_counts_each_toolsets_specs(toolsets):
@@ -155,3 +148,103 @@ def test_each_placeholder_in_an_endpoint_is_a_required_parameter(toolsets):
                 wrong.append(f"{where}: {name}")
     assert checked, "no tool description ends with an endpoint, so no placeholder was checked"
     assert not wrong, f"endpoint placeholders that are not required parameters: {wrong[:10]}"
+
+
+#: The JSON Schema formats the catalog uses; anything else is a description, not a format.
+_FORMATS = frozenset({"date-time", "date", "time", "email", "uri", "uuid"})
+#: Keywords a parameter schema may carry: JSON Schema 2020-12 validation and annotation keywords.
+_KEYWORDS = frozenset(
+    {
+        "type",
+        "description",
+        "properties",
+        "required",
+        "items",
+        "enum",
+        "default",
+        "format",
+        "examples",
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "pattern",
+        "minLength",
+        "maxLength",
+        "minItems",
+        "maxItems",
+        "uniqueItems",
+        "contentMediaType",
+        "dependentRequired",
+        "additionalProperties",
+        "title",
+        "const",
+    }
+)
+
+
+def test_every_parameters_schema_is_valid_json_schema(toolsets):
+    """Draft 2020-12 is the dialect providers validate a tool's parameters against."""
+    wrong = []
+    for where, f in _tools(toolsets):
+        try:
+            Draft202012Validator.check_schema(f["parameters"])
+        except SchemaError as e:
+            wrong.append(f"{where}: {e.message}")
+    assert not wrong, f"parameters schemas that are not valid JSON Schema: {wrong[:10]}"
+
+
+def test_every_array_declares_its_items(toolsets):
+    wrong = [
+        f"{where}{path}"
+        for where, f in _tools(toolsets)
+        for path, schema in _schemas(f["parameters"], "")
+        if schema.get("type") == "array" and not isinstance(schema.get("items"), dict)
+    ]
+    assert not wrong, f"arrays without an item schema: {wrong[:10]}"
+
+
+def test_schemas_use_json_schema_keywords_and_formats(toolsets):
+    keywords, formats = [], []
+    for where, f in _tools(toolsets):
+        for path, schema in [("", f["parameters"]), *_schemas(f["parameters"], "")]:
+            keywords += [f"{where}{path}: {k}" for k in schema if k not in _KEYWORDS]
+            if "format" in schema and schema["format"] not in _FORMATS:
+                formats.append(f"{where}{path}: {schema['format']!r}")
+    assert not keywords, f"keywords outside JSON Schema: {keywords[:10]}"
+    assert not formats, f"formats outside JSON Schema: {formats[:10]}"
+
+
+def test_defaults_and_examples_have_the_declared_type(toolsets):
+    wrong = [
+        f"{where}{path}: {schema['type']} {value!r}"
+        for where, f in _tools(toolsets)
+        for path, schema in _schemas(f["parameters"], "")
+        if schema.get("type") in JSON_SCHEMA_TYPES
+        for value in ([schema["default"]] if "default" in schema else []) + list(schema.get("examples", []))
+        if not _fits(value, schema["type"])
+    ]
+    assert not wrong, f"defaults or examples of another type: {wrong[:10]}"
+
+
+def test_enum_values_are_distinct(toolsets):
+    wrong = [
+        f"{where}{path}"
+        for where, f in _tools(toolsets)
+        for path, schema in _schemas(f["parameters"], "")
+        if "enum" in schema and len({json.dumps(v) for v in schema["enum"]}) != len(schema["enum"])
+    ]
+    assert not wrong, f"enums that repeat a value: {wrong[:10]}"
+
+
+def test_every_tool_and_parameter_is_described(toolsets):
+    tools = [where for where, f in _tools(toolsets) if not str(f.get("description") or "").strip()]
+    params = [
+        f"{where}{path}"
+        for where, f in _tools(toolsets)
+        for path, schema in _schemas(f["parameters"], "")
+        if not path.endswith("[]") and not str(schema.get("description") or "").strip()
+    ]
+    assert not tools, f"tools without a description: {tools[:10]}"
+    assert not params, f"parameters without a description: {params[:10]}"

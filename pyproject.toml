@@ -115,6 +115,9 @@ dev = [
     # tests/test_network_guard.py unwraps exception groups, which Python 3.10
     # has only through this backport.
     "exceptiongroup>=1.0; python_version < '3.11'",
+    # Validates each tool spec in the tool_calling catalog against the JSON
+    # Schema 2020-12 meta-schema, in tests/engine/probes/test_tool_catalog.py.
+    "jsonschema>=4.0,<5",
 ]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the
