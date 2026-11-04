@@ -839,6 +839,35 @@ def test_rows_that_cannot_run_are_refused(rows, edit, message):
         prepare_episode_inputs(_edited(rows, edit))
 
 
+def test_the_library_refuses_stored_rows_whose_banks_are_missing_before_any_model_call(rows, tmp_path):
+    """``simulate_episode_inputs`` runs the CLI's pre-flight, so a host learns of a missing bank up front."""
+    from usersim.cli._models import bundled_models_path
+    from usersim.engine.external import simulate_episode_inputs
+
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    with pytest.raises(ValueError, match="probe assets are missing or unusable"):
+        simulate_episode_inputs(rows, out=tmp_path / "out", models_path=bundled_models_path(), assets_dir=empty)
+    assert not (tmp_path / "out").exists()
+
+
+def test_the_library_refuses_a_mix_whose_banks_are_missing_before_materializing(tmp_path):
+    """``materialize_episode_inputs`` runs the CLI's pre-flight for its locale."""
+    from usersim.cli._models import bundled_models_path
+    from usersim.engine.external import materialize_episode_inputs as materialize
+
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    with pytest.raises(ValueError, match="probe assets are missing or unusable"):
+        materialize(
+            locale="en_US",
+            num_rows=1,
+            probe_mix={"general_open_ended": 1.0},
+            models_path=bundled_models_path(),
+            assets_dir=empty,
+        )
+
+
 def test_rows_stored_without_an_asset_folder_read_each_probe_s_own(rows):
     assert {row["usersim_config"]["assets_dir"] for row in rows} == {None}
     assert prepare_episode_inputs(rows).assets_dir is None

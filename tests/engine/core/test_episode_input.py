@@ -183,19 +183,30 @@ def test_a_probes_themes_reach_its_rows(register_test_probe, tmp_path: Path) -> 
     assert "à la maison" in row["theme"]
 
 
-def test_a_probe_that_reads_no_theme_gets_a_placeholder(register_test_probe) -> None:
-    register_test_probe("ext_no_themes")
+def _bank_root(tmp_path: Path, label: str) -> Path:
+    """An asset root whose ``<label>/`` folder holds one bank file, as the pre-flight requires of every probe."""
+    (tmp_path / label).mkdir()
+    (tmp_path / label / "bank.yaml").write_text("entries: []\n", encoding="utf-8")
+    return tmp_path
+
+
+def test_a_probe_that_reads_no_theme_gets_a_placeholder(register_test_probe, tmp_path) -> None:
+    register_test_probe("ext_no_themes", assets_root=_bank_root(tmp_path, "ext_no_themes"))
 
     (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_no_themes": 1.0}, random_seed=5)
 
-    assert row["theme"] == "__not_used__"
+    assert row["theme"] == probes.NO_THEME
 
 
-def test_a_probe_with_no_themes_for_the_locale_is_refused(register_test_probe) -> None:
+def test_a_probe_with_no_themes_for_the_locale_is_refused(register_test_probe, tmp_path) -> None:
     """An empty list leaves the sampler nothing to draw for the probe's rows."""
     from usersim.cli._errors import ConfigError
 
-    register_test_probe("ext_no_themes", themes=classmethod(lambda cls, locale: []))
+    register_test_probe(
+        "ext_no_themes",
+        assets_root=_bank_root(tmp_path, "ext_no_themes"),
+        themes=classmethod(lambda cls, locale: []),
+    )
 
     with pytest.raises(ConfigError, match="ext_no_themes has no themes for en_US"):
         materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_no_themes": 1.0}, random_seed=5)

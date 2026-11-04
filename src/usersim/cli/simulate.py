@@ -540,10 +540,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         plan = plan_inputs_run(inputs, models, args.out, skip_existing=not args.no_skip_existing)
     except (OSError, ValueError) as error:
         raise SystemExit(f"--inputs {args.inputs}: {error}") from None
-    probe_locales: dict[str, list[str]] = {}
-    for row in inputs.rows:
-        probe_locales.setdefault(str(row["probe_type"]), []).append(row["usersim_config"]["locale"])
-    verify_probe_locales(probe_locales, inputs.assets_dir)
+    verify_probe_locales(inputs.probe_locales, inputs.assets_dir)
 
     config = inputs.config
     print("usersim simulate --inputs" + (" — dry run" if args.dry_run else ""))

@@ -77,6 +77,14 @@ class EpisodeInputs:
     #: The file the rows came from, when they came from one.
     source: Path | None = None
 
+    @property
+    def probe_locales(self) -> dict[str, list[str]]:
+        """Each probe the rows run, with the locale of each of its rows."""
+        found: dict[str, list[str]] = {}
+        for row in self.rows:
+            found.setdefault(str(row["probe_type"]), []).append(row["usersim_config"]["locale"])
+        return found
+
 
 @dataclass(frozen=True)
 class InputsRun:

@@ -33,7 +33,9 @@ themes and toolsets. Rows carry the persona, probe inputs, locale-aware
 behavioral settings, probe family and variant, trajectory ID, provenance, and
 the `usersim_config` snapshot `from_resolved_row()` restores. `models_path` and
 `assets_dir` are optional overrides. Model configuration supplies trajectory
-identities; no configured model is called.
+identities; no configured model is called. Before sampling, it checks each
+probe's bank as `usersim simulate` does, and raises `ValueError` when a probe in
+the mix has no usable bank for the locale.
 
 Rows are the dataset: store them, and replay from the stored rows. Regenerating
 the same rows from the same seed is explicitly *not* guaranteed, because
@@ -68,6 +70,9 @@ result = simulate_episode_inputs(rows, out=Path("output/trajectories"), models_p
 print(result.run_id, result.written, result.skipped)
 ```
 
+- **Checked before any model call.** The rows are checked as
+  `usersim simulate --inputs` checks them, including each probe's bank for its
+  rows' locales, and `ValueError` names what stops them.
 - **One run per setup.** A setup is everything that can change a
   conversation:
   - each simulator model as Data Designer sends it, provider settings

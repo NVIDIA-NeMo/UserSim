@@ -72,15 +72,21 @@ def materialize_episode_inputs(
 
     Model configuration is read only for stable trajectory identities and Data
     Designer configuration; this function never invokes a configured model.
+    Before sampling, it checks each probe's bank as ``usersim simulate`` does,
+    and raises ``ValueError`` when a probe in ``probe_mix`` has no usable bank
+    for ``locale`` under ``assets_dir``.
     """
     from usersim.cli._models import default_models_path, load_models_config
     from usersim.cli._pipeline import materialize_episode_inputs as _materialize
+    from usersim.cli._pipeline import verify_probe_assets
 
+    resolved_assets_dir = assets_dir.resolve() if assets_dir is not None else None
+    verify_probe_assets(probe_mix, [locale], resolved_assets_dir)
     return _materialize(
         locale=locale,
         num_rows=num_rows,
         models=load_models_config(models_path or default_models_path()),
-        assets_dir=assets_dir.resolve() if assets_dir is not None else None,
+        assets_dir=resolved_assets_dir,
         probe_mix=probe_mix,
         random_seed=random_seed,
         toolset_seed_path=toolset_seed_path,
@@ -114,7 +120,8 @@ def simulate_episode_inputs(
     already holds, so a caller can run a large set in batches (a stored field
     that two batches save differently does not read back exactly; see
     "Running stored rows" in ``docs/engine/EXTERNAL_PROBE_RUNTIME.md``). Raises
-    ``ValueError`` for rows that cannot run, before any model call, and for a
+    ``ValueError`` for rows that cannot run, before any model call (a probe
+    whose bank for a row's locale is missing among them), and for a
     stored row that the run already holds with different contents: before any
     model call when it is found up front, and when the rows are saved when
     another writer saved it meanwhile, where the write lock is shared. Where
@@ -127,12 +134,15 @@ def simulate_episode_inputs(
     """
     from usersim.cli._inputs import prepare_episode_inputs, simulate_inputs_to_dataset
     from usersim.cli._models import REQUIRED_SIMULATOR_ALIASES, default_models_path, load_models_config, require_aliases
+    from usersim.cli._pipeline import verify_probe_locales
 
     path = models_path or default_models_path()
     models = load_models_config(path)
     require_aliases(models, required=REQUIRED_SIMULATOR_ALIASES, context="simulate_episode_inputs")
+    inputs = prepare_episode_inputs(rows, assets_dir=assets_dir)
+    verify_probe_locales(inputs.probe_locales, inputs.assets_dir)
     return simulate_inputs_to_dataset(
-        inputs=prepare_episode_inputs(rows, assets_dir=assets_dir),
+        inputs=inputs,
         models=models,
         out=out,
         models_path=path,
