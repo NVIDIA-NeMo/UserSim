@@ -16,7 +16,7 @@ from unittest.mock import patch
 from usersim.engine.core.llm import ContextWindowError
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
 from usersim.engine.core.simulation import ConversationLoop
-from usersim.engine.probes.tool_calling.generator import (
+from usersim.engine.probes.tool_calling.probe import (
     ToolCallingProbe,
     _build_tool_context,
     _find_tool_spec,
@@ -115,7 +115,7 @@ class TestToolHelpers:
         from unittest.mock import patch
 
         with patch(
-            "usersim.engine.probes.tool_calling.generator.acall_llm",
+            "usersim.engine.probes.tool_calling.probe.acall_llm",
             side_effect=fake_call_llm,
         ):
             content, rerolled = await _simulate_tool_response(
@@ -233,7 +233,7 @@ async def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
         "usersim.engine.core.simulation.acall_llm",
         "usersim.engine.core.judges.acall_llm",
         "usersim.engine.core.llm.acall_llm",
-        "usersim.engine.probes.tool_calling.generator.acall_llm",
+        "usersim.engine.probes.tool_calling.probe.acall_llm",
     )
     with ExitStack() as stack:
         for target in targets:

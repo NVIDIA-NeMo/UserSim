@@ -1553,7 +1553,7 @@ BUILTIN_PROBE_MODULES: tuple[str, ...] = (
     "usersim.engine.probes.sov_ai_dynamic.probe",
     "usersim.engine.probes.sov_ai_facts.probe",
     "usersim.engine.probes.sov_ai_multilingual_parity.probe",
-    "usersim.engine.probes.tool_calling.generator",
+    "usersim.engine.probes.tool_calling.probe",
 )
 
 

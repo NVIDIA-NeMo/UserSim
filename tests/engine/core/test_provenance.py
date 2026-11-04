@@ -164,7 +164,7 @@ class TestNemotronPersonasVersion:
     [
         "usersim.engine.probes.general_open_ended.probe",
         "usersim.engine.probes.general_educational.probe",
-        "usersim.engine.probes.tool_calling.generator",
+        "usersim.engine.probes.tool_calling.probe",
     ],
 )
 class TestProbeMetadata:

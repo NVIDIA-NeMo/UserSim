@@ -603,13 +603,11 @@ The tables describe the main files.
 | `test_analysis.py` | Score extraction, demographic preservation, edge cases used by the deep-dive analysis script |
 | `test_probing_taxonomy.py` | Probing-taxonomy YAML schema validator, loader, lookup helpers, locale-keyed shared cache |
 
-**`tests/engine/probes/`: the probe generators, verifier and invariants**
+**`tests/engine/probes/`: cross-probe invariants**
 
 | Test File | Coverage |
 |-----------|----------|
 | `test_probe_invariants.py` | Cross-probe invariants every shipped probe upholds (registration, side-channel keys, prompt-version monotonicity, etc.) |
-| `test_tool_calling.py` | Tool-calling probe: tool sampling, gate check |
-| `test_verifiers.py` | Tool-call JSON-schema validator |
 
 **`tests/engine/evaluator/`: judges, scorers, registry**
 

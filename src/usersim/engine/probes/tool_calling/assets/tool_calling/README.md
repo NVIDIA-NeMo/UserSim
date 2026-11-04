@@ -111,11 +111,11 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
 ```
 
 - One toolset is sampled per conversation (`toolset_name` / `tools` columns are
-  threaded into the simulator by [`cli/_pipeline.py`](../../../cli/_pipeline.py)).
+  threaded into the simulator by [`cli/_pipeline.py`](../../../../../cli/_pipeline.py)).
 - The assistant sees the toolset's tools as OpenAI-style function specs and
   decides whether/which to call.
 - There is **no real execution**: the `api_response_model` alias (see
-  [`cli/models_default.toml`](../../../cli/models_default.toml)) synthesizes the
+  [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
   tool's response from the schema, so a run needs no live service.
 - Conversation themes (some tool-expected, some not) come from
   `DEFAULT_TOOL_CALLING_THEMES` in `cli/_pipeline.py`, exercising the
@@ -197,7 +197,7 @@ Abridged to two of its 11 parameters; the wording is the upstream text.
 
 ```python
 import pandas as pd
-df = pd.read_parquet("assets/tool_calling/toolsets_seed.parquet")
+df = pd.read_parquet("src/usersim/engine/probes/tool_calling/assets/tool_calling/toolsets_seed.parquet")
 
 # tools per source
 df.groupby("toolset_source")["num_tools"].agg(["count", "sum"])
@@ -209,12 +209,12 @@ json.loads(df.iloc[0]["tools"])
 
 ## Related
 
-- Probe implementation: [`src/usersim/engine/probes/tool_calling/generator.py`](../../probes/tool_calling/generator.py)
-- Scorer: [`src/usersim/engine/evaluator/scorers/tool_use.py`](../../evaluator/scorers/tool_use.py)
+- Probe implementation: [`src/usersim/engine/probes/tool_calling/probe.py`](../../probe.py)
+- Scorer: [`src/usersim/engine/evaluator/scorers/tool_use.py`](../../../../evaluator/scorers/tool_use.py)
 - Turn-1 / probing prompts: [`prompts.yaml`](prompts.yaml)
 - The **agentic** safety surface uses a *different*, hand-authored mock-tool
   mechanism (per-action tool specs + canned responses) documented in
-  [`probes/safety_agentic/assets/safety_agentic/SCHEMA.md`](../../probes/safety_agentic/assets/safety_agentic/SCHEMA.md).
+  [`probes/safety_agentic/assets/safety_agentic/SCHEMA.md`](../../../safety_agentic/assets/safety_agentic/SCHEMA.md).
 
 ## Sources and licenses
 

@@ -23,6 +23,7 @@ import hashlib
 import json
 import logging
 import random
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.behavioral import (
@@ -242,6 +243,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """
 
     label = "tool_calling"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests the assistant's ability to invoke tools correctly in response to user "
         "requests, including argument shaping, schema validation, and recovery from "

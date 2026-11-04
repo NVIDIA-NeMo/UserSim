@@ -66,7 +66,7 @@ _LLM_MODULES = (
     "usersim.engine.probes.health_disclosure.move_runtime",
     "usersim.engine.probes.safety_agentic.probe",
     "usersim.engine.probes.safety_chat_pressure.classifier",
-    "usersim.engine.probes.tool_calling.generator",
+    "usersim.engine.probes.tool_calling.probe",
 )
 _LLM_SITES = tuple(m for m in _LLM_MODULES if hasattr(importlib.import_module(m), "acall_llm"))
 

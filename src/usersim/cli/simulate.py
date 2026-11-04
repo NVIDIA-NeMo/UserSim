@@ -146,7 +146,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "one row per toolset with columns toolset_source, "
             "toolset_category, toolset_name, num_tools and tools (JSON list "
             "of OpenAI-style function specs) -- see the Schema section of "
-            "assets/tool_calling/README.md. "
+            "engine/probes/tool_calling/assets/tool_calling/README.md in the package. "
             "Defaults to <assets-dir>/tool_calling/toolsets_seed.{parquet,jsonl}. "
             "Requires tool_calling in --probe-mix; a missing or unsupported "
             "explicit file is an error."

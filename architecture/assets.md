@@ -2,8 +2,8 @@
 
 Probe content (fact banks, query banks, pressure banks, clinical profiles,
 finance corpora, tool catalogs, action taxonomies) ships as **package
-data** under `usersim/engine/assets/<probe>/`, or, for a built-in probe kept
-in its own folder, under that folder's `assets/<probe>/`.
+data** in each built-in probe's own folder, under
+`usersim/engine/probes/<folder>/assets/<probe>/`.
 
 They ship inside the package so a plain `pip install` gives you working
 probes with no extra download step. `make check-dist` fails if the wheel

@@ -60,7 +60,7 @@ import pytest
 # self-registers every probe class.
 import usersim.engine.generator  # noqa: F401
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
 from usersim.engine.core.probes import known_probes, resolve_probe
 
@@ -162,7 +162,7 @@ def _patched_call_llm():
       judge + early-stop checker.
     - ``core/context.py`` — context-compression rolling summary
       generation.
-    - ``probes/tool_calling/generator.py`` — probe-internal tool
+    - ``probes/tool_calling/probe.py`` — probe-internal tool
       arg-generation calls (it doesn't go through ``ConversationLoop``
       for the tool-call branch).
     - ``probes/safety_agentic/probe.py`` — mock-environment
@@ -177,7 +177,7 @@ def _patched_call_llm():
         "usersim.engine.core.simulation.acall_llm",
         "usersim.engine.core.judges.acall_llm",
         "usersim.engine.core.context.acall_llm",
-        "usersim.engine.probes.tool_calling.generator.acall_llm",
+        "usersim.engine.probes.tool_calling.probe.acall_llm",
         "usersim.engine.probes.safety_agentic.probe.acall_llm",
     )
     patches = [patch(t, side_effect=_mock_call_llm_side_effect) for t in targets]
@@ -286,7 +286,7 @@ def _toolset_for_test(assets_dir: Path) -> list[dict[str, Any]]:
     """
     import pyarrow.parquet as pq
 
-    toolset_path = assets_dir / "tool_calling" / "toolsets_seed.parquet"
+    toolset_path = probe_assets_dir("tool_calling", assets_root=assets_dir) / "toolsets_seed.parquet"
     table = pq.read_table(toolset_path).slice(0, 1).to_pylist()
     raw = table[0]["tools"]
     if isinstance(raw, str):

@@ -19,7 +19,7 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError
 
 from usersim.engine.core.missing import is_missing
-from usersim.engine.probes.tool_calling.generator import ToolCallingProbe
+from usersim.engine.probes.tool_calling.probe import ToolCallingProbe
 
 JSON_SCHEMA_TYPES = frozenset({"string", "number", "integer", "boolean", "array", "object", "null"})
 _FUNCTION_NAME = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")

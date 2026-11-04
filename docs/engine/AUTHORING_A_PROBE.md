@@ -259,12 +259,11 @@ resolve against the working directory. In this repository the banks are then
 at `src/usersim/engine/probes/<folder>/assets/<label>/`, as for
 `general_educational`, `general_open_ended`, the three `sov_ai_*` probes,
 `safety_chat_pressure`, `safety_agentic`, `identity_disclosure`,
-`financial_services` and the four `health_*` probes, which share the
-`health_disclosure/` folder. They keep their bank loader (`bank.py`,
-`taxonomy.py` for `sov_ai_dynamic`, `spec.py` for `identity_disclosure`) and
-their scorer (`scorer.py`) in that folder too, and their tests in
-`tests/probes/<folder>/`. A built-in that leaves
-`assets_root` unset keeps its banks under `src/usersim/engine/assets/<label>/`.
+`financial_services`, `tool_calling` and the four `health_*` probes, which
+share the `health_disclosure/` folder: every built-in probe. They keep their
+bank loader (`bank.py`, `taxonomy.py` for `sov_ai_dynamic`, `spec.py` for
+`identity_disclosure`) and their scorer (`scorer.py`) in that folder too, and
+their tests in `tests/probes/<folder>/`.
 
 Its bank loader reads under `MyProbe.assets_dir()`, the probe's own folder,
 resolved as the built-in loaders resolve theirs, so a folder `--assets-dir` or

@@ -443,3 +443,43 @@ def git() -> Callable[..., str]:
         return done.stdout.strip()
 
     return run
+
+
+@pytest.fixture
+def sample_tools():
+    return [
+        {
+            "tool": {
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"},
+                            "units": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }
+        },
+        {
+            "tool": {
+                "type": "function",
+                "function": {
+                    "name": "search_recipes",
+                    "description": "Search for recipes by ingredient",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "ingredient": {"type": "string"},
+                            "cuisine": {"type": "string"},
+                        },
+                        "required": ["ingredient"],
+                    },
+                },
+            }
+        },
+    ]

@@ -28,7 +28,7 @@ from usersim.cli._pipeline import (
     resolve_toolset_seed_path,
 )
 from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir
-from usersim.engine.probes.tool_calling.generator import _normalize_tool_list
+from usersim.engine.probes.tool_calling.probe import _normalize_tool_list
 
 
 def _assets_root(tmp_path: Path, *seed_names: str) -> Path:

@@ -65,7 +65,7 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
         if not getattr(cfg, "tools_column", None):
             raise ValueError("demo_tool_calling: cfg.tools_column not configured")
         # Real probe: parse self._data[cfg.tools_column], validate,
-        # sample subset. See tool_calling/generator.py for the
+        # sample subset. See tool_calling/probe.py for the
         # canonical tool-sampling logic.
         self._tools: list[dict] = []  # populated from row
 

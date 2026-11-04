@@ -125,7 +125,7 @@ class PartnerProbe(BaseProbe):
         with caplog.at_level(logging.WARNING, logger="usersim.engine"):
             assert "tool_calling" in known_probes()
         assert resolve_probe("tool_calling") is builtin
-        assert "'tool_calling' is already registered by usersim.engine.probes.tool_calling.generator" in caplog.text
+        assert "'tool_calling' is already registered by usersim.engine.probes.tool_calling.probe" in caplog.text
 
 
 @pytest.fixture

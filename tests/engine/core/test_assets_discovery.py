@@ -35,6 +35,7 @@ from usersim.engine.core._assets import (
     reset_runtime_assets_dir,
     set_runtime_assets_dir,
 )
+from usersim.engine.core.probes import resolve_probe
 
 
 class TestPackagedResolution:
@@ -116,8 +117,6 @@ class TestRegistryAndLayoutInvariants:
 
         The folder is named after the probe, or holds several probes that share it.
         """
-        from usersim.engine.core.probes import resolve_probe
-
         declared = {label: resolve_probe(label) for label in self._labels() if resolve_probe(label).assets_root}
         assert declared, "no built-in probe declares an assets_root"
         folders = {label: Path(sys.modules[cls.__module__].__file__).parent for label, cls in declared.items()}
@@ -135,7 +134,9 @@ class TestRegistryAndLayoutInvariants:
         behind by a renamed probe."""
         labels = self._labels()
         stray = [
-            p.name for p in packaged_assets_dir().iterdir() if p.name not in labels and not p.name.startswith("__")
+            p.name
+            for p in packaged_assets_dir().iterdir()
+            if p.name not in labels and p.name != "README.md" and not p.name.startswith("__")
         ]
         assert not stray, f"unexpected entries in packaged assets/: {stray}"
 
@@ -187,15 +188,10 @@ class TestAssetSearchPath:
 
     def test_shipped_banks_stay_reachable(self, monkeypatch, tmp_path) -> None:
         """Prepending a root must not hide the probes it does not carry."""
-        from usersim.engine.core._assets import (
-            packaged_assets_dir,
-            probe_assets_dir,
-        )
-
         contributed = tmp_path / "extra"
         (contributed / "financial_services").mkdir(parents=True)
         monkeypatch.setenv("USERSIM_ASSET_PATH", str(contributed))
-        assert probe_assets_dir("tool_calling").parent == packaged_assets_dir()
+        assert probe_assets_dir("tool_calling").parent == resolve_probe("tool_calling").assets_root
 
     def test_explicit_root_is_pinned_not_searched(self, tmp_path) -> None:
         """A user who named a directory is told when assets are absent
@@ -266,7 +262,7 @@ class TestDeclaredAssetsRoot:
         (tmp_path / "tool_calling").mkdir()
         register_test_probe("ext_probe", assets_root=tmp_path)
 
-        assert probe_assets_dir("tool_calling") == packaged_assets_dir() / "tool_calling"
+        assert probe_assets_dir("tool_calling") == resolve_probe("tool_calling").assets_root / "tool_calling"
 
     def test_roots_in_use_add_declared_roots_after_the_search_path(self, register_test_probe, tmp_path) -> None:
         register_test_probe("ext_probe", assets_root=tmp_path)
@@ -279,10 +275,10 @@ class TestDeclaredAssetsRoot:
 class TestProbeAssetsDir:
     """``BaseProbe.assets_dir()`` is the folder a probe's own bank loader reads."""
 
-    def test_a_built_in_probe_reads_its_packaged_folder(self) -> None:
-        from usersim.engine.core.probes import resolve_probe
+    def test_a_built_in_probe_reads_its_own_folder(self) -> None:
+        probe = resolve_probe("tool_calling")
 
-        assert resolve_probe("tool_calling").assets_dir() == packaged_assets_dir() / "tool_calling"
+        assert probe.assets_dir() == probe.assets_root / "tool_calling"
 
     def test_a_probe_reads_the_folder_under_its_declared_root(self, register_test_probe, tmp_path) -> None:
         (tmp_path / "ext_probe").mkdir()
