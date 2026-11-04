@@ -144,7 +144,7 @@ _ED_HIGH_KEYWORDS = ["master", "doctor", "phd", "bachelor", "graduate", "univers
 _ED_LOW_KEYWORDS = ["illiterate", "no_formal", "less_than", "below_primary"]
 
 
-def _education_ordinal(education_level: str, locale: str = "en_US") -> float:
+def education_ordinal(education_level: str, locale: str = "en_US") -> float:
     """Map an education_level string to a [0, 1] ordinal score.
 
     Uses exact per-locale lookup first, then keyword fallback, then 0.5.
@@ -289,7 +289,7 @@ def _infer_tech_literacy(persona: dict[str, Any], locale: str = "en_US") -> floa
     score = 0.5
 
     education = str(persona.get("education_level", ""))
-    ed_ord = _education_ordinal(education, locale)
+    ed_ord = education_ordinal(education, locale)
     if ed_ord >= 0.7:
         score += 0.15
     elif ed_ord <= 0.15:
@@ -329,7 +329,7 @@ def compute_behavioral_profile(
     tech_literacy = _infer_tech_literacy(persona, locale)
 
     education = str(persona.get("education_level", ""))
-    ed_ord = _education_ordinal(education, locale)
+    ed_ord = education_ordinal(education, locale)
     error_proneness = 0.3
     if ed_ord <= 0.15:
         error_proneness += 0.3

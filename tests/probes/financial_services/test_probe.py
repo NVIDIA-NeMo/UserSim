@@ -1803,17 +1803,17 @@ class TestPersonaLocaleResolution:
     def test_literacy_derives_against_the_persona_panel_not_the_variant(self):
         """A variant must not lose the exact education map.
 
-        ``derive_financial_literacy`` -> ``_education_ordinal`` is keyed per
+        ``derive_financial_literacy`` -> ``education_ordinal`` is keyed per
         locale; a variant like ta_Taml_IN has no map of its own, so deriving
         against the raw conversation locale silently degrades to the keyword
         heuristic. Routing through the persona locale keeps the en_IN map.
         """
-        from usersim.engine.core.behavioral import _education_ordinal
+        from usersim.engine.core.behavioral import education_ordinal
 
         probe, _ = _probe_on("en_US", _northwind_dispute_instance())
         probe._locale = "ta_Taml_IN"
-        exact = _education_ordinal("Graduate & above", probe._persona_locale())
-        degraded = _education_ordinal("Graduate & above", "ta_Taml_IN")
+        exact = education_ordinal("Graduate & above", probe._persona_locale())
+        degraded = education_ordinal("Graduate & above", "ta_Taml_IN")
         assert exact == 1.0
         assert exact != degraded
 

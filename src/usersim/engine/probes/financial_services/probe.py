@@ -453,7 +453,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
           loaded (an India language-variant, or a Hindi locale without tasks
           of its own, falls back to en_IN).
         - this — the locale whose persona parquet the personas were sampled
-          from, which is what ``_education_ordinal`` is keyed on. A variant like
+          from, which is what ``education_ordinal`` is keyed on. A variant like
           ``ta_Taml_IN`` samples ``en_IN`` personas, so deriving literacy against
           the raw conversation locale would miss the exact education map and
           silently fall through to the keyword heuristic. Hindi resolves to

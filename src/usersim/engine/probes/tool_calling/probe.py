@@ -29,7 +29,6 @@ import random
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.messages import _parse_theme
 from usersim.engine.probes.tool_calling.credentials import (
     declared_credentials,
     draw_credentials,
@@ -88,17 +87,18 @@ MODEL_API_RESPONSE = "api_response_model"
 MODEL_JUDGE = "judge_model"
 
 
-def _derive_tool_theme(data: dict, cfg: Any) -> dict:
+def _derive_tool_theme(data: dict) -> dict | None:
+    """The theme a row's toolset gives it, or None when the row names no toolset category."""
     category = data.get("toolset_category")
-    if category:
-        toolset_name = data.get("toolset_name") or ""
-        label = toolset_name if toolset_name else category
-        return {
-            "type": category,
-            "description": f"Help the user with a task that involves {label} capabilities.",
-            "tool_expected": True,
-        }
-    return _parse_theme(data.get(cfg.theme_column, "{}"))
+    if not category:
+        return None
+    toolset_name = data.get("toolset_name") or ""
+    label = toolset_name if toolset_name else category
+    return {
+        "type": category,
+        "description": f"Help the user with a task that involves {label} capabilities.",
+        "tool_expected": True,
+    }
 
 
 def _function_spec(tool_data: dict) -> dict:
@@ -312,7 +312,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             min(cfg.max_tools, len(all_tools)),
         )
 
-        theme = _derive_tool_theme(self._data, cfg)
+        theme = _derive_tool_theme(self._data) or self.theme()
         logger.info(f"  |-- tool_calling: {len(self.tool_subset)} tools, theme={theme.get('type', '?')}")
 
         # The credentials each offered tool declares, by tool name, and the one

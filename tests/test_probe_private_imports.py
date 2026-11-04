@@ -26,13 +26,13 @@ _ALLOWED: dict[str, int] = {
     "general_educational": 0,
     "general_open_ended": 0,
     "health_disclosure": 0,
-    "identity_disclosure": 6,
+    "identity_disclosure": 4,
     "safety_agentic": 3,
     "safety_chat_pressure": 0,
     "sov_ai_dynamic": 7,
     "sov_ai_facts": 0,
     "sov_ai_multilingual_parity": 0,
-    "tool_calling": 1,
+    "tool_calling": 0,
 }
 
 

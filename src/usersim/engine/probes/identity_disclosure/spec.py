@@ -36,7 +36,6 @@ from typing import Any, Mapping
 
 import yaml
 
-from usersim.engine.core._assets import asset_roots_in_use, probe_asset_roots
 from usersim.engine.probes.identity_disclosure.spec_types import (
     Developer,
     ExpectedIdentity,
@@ -56,7 +55,7 @@ from usersim.engine.probes.identity_disclosure.spec_types import (
     match_model_id,
     name_pattern,
 )
-from usersim.extension import LocalizedText, LocalizedTextError, probe_assets_dir
+from usersim.extension import LocalizedText, LocalizedTextError, asset_roots_in_use, probe_asset_roots, probe_assets_dir
 
 __all__ = [
     "ALLOWED_PLACEHOLDERS",

@@ -5,7 +5,6 @@
 
 from usersim.engine.core.behavioral import (
     ChatRealism,
-    _education_ordinal,
     _extract_ocean,
     _extract_ocean_metadata,
     _infer_tech_literacy,
@@ -15,6 +14,7 @@ from usersim.engine.core.behavioral import (
     compute_disclosure_style,
     compute_frustration_level,
     compute_user_interaction_style,
+    education_ordinal,
     format_behavioral_profile_for_prompt,
     format_disclosure_instructions,
     format_interaction_style_instructions,
@@ -80,48 +80,48 @@ class TestExtractOcean:
 
 class TestEducationOrdinal:
     def test_en_us_exact_values(self):
-        assert _education_ordinal("graduate", "en_US") == 1.0
-        assert _education_ordinal("less_than_9th", "en_US") == 0.0
-        assert _education_ordinal("bachelors", "en_US") == 0.7
-        assert _education_ordinal("some_college", "en_US") == 0.45
+        assert education_ordinal("graduate", "en_US") == 1.0
+        assert education_ordinal("less_than_9th", "en_US") == 0.0
+        assert education_ordinal("bachelors", "en_US") == 0.7
+        assert education_ordinal("some_college", "en_US") == 0.45
 
     def test_pt_br_exact_values(self):
-        assert _education_ordinal("Superior completo", "pt_BR") == 1.0
-        assert _education_ordinal("Sem instrução e fundamental incompleto", "pt_BR") == 0.0
+        assert education_ordinal("Superior completo", "pt_BR") == 1.0
+        assert education_ordinal("Sem instrução e fundamental incompleto", "pt_BR") == 0.0
 
     def test_en_in_exact_values(self):
-        assert _education_ordinal("Graduate & above", "en_IN") == 1.0
-        assert _education_ordinal("Illiterate", "en_IN") == 0.0
-        assert _education_ordinal("Primary", "en_IN") == 0.2
+        assert education_ordinal("Graduate & above", "en_IN") == 1.0
+        assert education_ordinal("Illiterate", "en_IN") == 0.0
+        assert education_ordinal("Primary", "en_IN") == 0.2
 
     def test_en_gb_exact_values(self):
-        assert _education_ordinal("No qualifications", "en_GB") == 0.0
-        assert _education_ordinal("GCSE level or below", "en_GB") == 0.25
-        assert _education_ordinal("Apprenticeship", "en_GB") == 0.4
-        assert _education_ordinal("A level or equivalent", "en_GB") == 0.5
-        assert _education_ordinal("Degree or other higher education", "en_GB") == 0.8
+        assert education_ordinal("No qualifications", "en_GB") == 0.0
+        assert education_ordinal("GCSE level or below", "en_GB") == 0.25
+        assert education_ordinal("Apprenticeship", "en_GB") == 0.4
+        assert education_ordinal("A level or equivalent", "en_GB") == 0.5
+        assert education_ordinal("Degree or other higher education", "en_GB") == 0.8
 
     def test_de_de_exact_values(self):
-        assert _education_ordinal("Ohne beruflichen Bildungsabschluss", "de_DE") == 0.2
-        assert _education_ordinal("Lehre, Berufsausbildung im dualen System", "de_DE") == 0.4
-        assert _education_ordinal("Fachschulabschluss", "de_DE") == 0.6
-        assert _education_ordinal("Bachelor, Master, Diplom, Promotion", "de_DE") == 0.85
+        assert education_ordinal("Ohne beruflichen Bildungsabschluss", "de_DE") == 0.2
+        assert education_ordinal("Lehre, Berufsausbildung im dualen System", "de_DE") == 0.4
+        assert education_ordinal("Fachschulabschluss", "de_DE") == 0.6
+        assert education_ordinal("Bachelor, Master, Diplom, Promotion", "de_DE") == 0.85
 
     def test_ko_kr_exact_values(self):
-        assert _education_ordinal("무학", "ko_KR") == 0.0
-        assert _education_ordinal("초등학교", "ko_KR") == 0.1
-        assert _education_ordinal("중학교", "ko_KR") == 0.15
-        assert _education_ordinal("고등학교", "ko_KR") == 0.3
-        assert _education_ordinal("2~3년제 전문대학", "ko_KR") == 0.5
-        assert _education_ordinal("4년제 대학교", "ko_KR") == 0.7
-        assert _education_ordinal("대학원", "ko_KR") == 1.0
+        assert education_ordinal("무학", "ko_KR") == 0.0
+        assert education_ordinal("초등학교", "ko_KR") == 0.1
+        assert education_ordinal("중학교", "ko_KR") == 0.15
+        assert education_ordinal("고등학교", "ko_KR") == 0.3
+        assert education_ordinal("2~3년제 전문대학", "ko_KR") == 0.5
+        assert education_ordinal("4년제 대학교", "ko_KR") == 0.7
+        assert education_ordinal("대학원", "ko_KR") == 1.0
 
     def test_keyword_fallback(self):
-        assert _education_ordinal("Bachelor's degree", "xx_UNKNOWN") >= 0.7
-        assert _education_ordinal("PhD", "xx_UNKNOWN") >= 0.7
+        assert education_ordinal("Bachelor's degree", "xx_UNKNOWN") >= 0.7
+        assert education_ordinal("PhD", "xx_UNKNOWN") >= 0.7
 
     def test_unknown_defaults_to_midpoint(self):
-        assert _education_ordinal("something_random", "en_US") == 0.5
+        assert education_ordinal("something_random", "en_US") == 0.5
 
 
 class TestIsTechOccupation:

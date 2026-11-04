@@ -82,9 +82,9 @@ def derive_financial_literacy(persona: dict[str, Any], locale: str = "en_US") ->
     basics vs. digging into specifics) — the population lever that makes the
     dynamic-tier scorecard ecologically weighted rather than uniform.
     """
-    from usersim.engine.core.behavioral import _education_ordinal
+    from usersim.engine.core.behavioral import education_ordinal
 
-    score = _education_ordinal(str(persona.get("education_level", "")), locale)
+    score = education_ordinal(str(persona.get("education_level", "")), locale)
     occ = str(persona.get("occupation", "")).lower()
     if any(kw in occ for kw in _FINANCE_OCCUPATION_KEYWORDS):
         score = min(1.0, score + 0.3)
