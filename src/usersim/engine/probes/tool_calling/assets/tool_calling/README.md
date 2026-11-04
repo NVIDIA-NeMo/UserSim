@@ -191,7 +191,8 @@ error because the override would otherwise be silently unused.
 
 ### Example tool spec (`ToolEyes / Trend / Google Trends`)
 
-Abridged to two of its 11 parameters; the wording is the upstream text.
+Abridged to two of its 11 parameters: `query`, in the upstream wording, and
+`api_key`, the key the tool declares under `credentials`.
 
 ```json
 {
@@ -206,14 +207,15 @@ Abridged to two of its 11 parameters; the wording is the upstream text.
           "type": "string",
           "description": "Parameter defines the query or queries you want to search. You can use anything that you would use in a regular Google Trends search. The maximum number of queries per search is 5 (this only applies to \"Interest over time\" and \"Compared breakdown by region\" data_type, other types of data will only accept 1 query per search)."
         },
-        "geo": {
+        "api_key": {
           "type": "string",
-          "description": "Parameter defines the location from where you want the search to originate. It defaults to Worldwide (activated when the value of geo parameter is not set or empty). Head to the Google Trends Locations for a full list of supported Google Trends locations."
+          "description": "Your SerpApi key."
         }
       },
-      "required": ["query"]
+      "required": ["query", "api_key"]
     }
-  }
+  },
+  "credentials": {"api_key": "SerpApi key"}
 }
 ```
 
@@ -313,6 +315,13 @@ other changes are listed per source:
   - `required` follows the signature where upstream's list differs from it
     (14 tools), five parameters the functions take are added, and `random`,
     which `search_recipes_by_ingredients` does not take, is removed.
+  - The 367 parameters, across 364 tools in 68 toolsets, that take the
+    caller's credential for the service a function calls (an API key, token,
+    secret or app ID, which upstream leaves optional) are required. Each is
+    described by its service, such as `Your SerpApi key.`, named after the
+    host or client library the function calls, and declared under its tool's
+    `credentials` (see [Credentials](#credentials)). `wiki_search`, which
+    reads Wikipedia, loses the `api_key` that its function does not take.
 - **API-Bank** ([Li et al., 2023](https://aclanthology.org/2023.emnlp-main.187/)):
   100 of the 101 APIs listed in
   [`api-bank/data/all_apis.csv`](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/faf754671f5b850e1b4d1ff870db37a6a2480df6/api-bank/data/all_apis.csv)

@@ -660,4 +660,4 @@ The tables describe the main files.
 | `tool_calling/test_probe.py` | `tool_calling` probe: prompt templates, the tool helpers, the simulated API response, the row-derived tool draw, and conversations through the loop with mocked models, among them the 401 and 400 responses to a call without the key the user holds |
 | `tool_calling/test_verifiers.py` | Tool-call JSON-schema validator |
 | `tool_calling/test_credentials.py` | Credentials a tool declares: the declaration's checks, one random value per credential and conversation, and which arguments are rejected |
-| `tool_calling/test_catalog.py` | The shipped tool catalog: every spec is valid JSON Schema that providers accept, with typed items, defaults, examples and enums, and every tool and parameter described |
+| `tool_calling/test_catalog.py` | The shipped tool catalog: every spec is valid JSON Schema that providers accept, with typed items, defaults, examples and enums, every tool and parameter described, and every key a tool takes required and declared as a credential |

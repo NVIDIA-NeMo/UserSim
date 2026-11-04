@@ -3,9 +3,11 @@
 
 """Tests for the tool catalog the tool_calling probe ships.
 
-Each row's tools reach the assistant model unchanged, as OpenAI-style function
-specs, so every spec in ``toolsets_seed.parquet`` must be valid JSON Schema that
-a provider accepts, with every tool and parameter described and typed.
+Each row's function specs reach the assistant model unchanged, as OpenAI-style
+tools, so every spec in ``toolsets_seed.parquet`` must be valid JSON Schema that
+a provider accepts, with every tool and parameter described and typed. A tool
+that takes the caller's key for a service declares it under ``credentials``,
+which the simulated user then holds.
 """
 
 import json
@@ -19,6 +21,7 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError
 
 from usersim.engine.core.missing import is_missing
+from usersim.engine.probes.tool_calling.credentials import declared_credentials
 from usersim.engine.probes.tool_calling.probe import ToolCallingProbe
 
 JSON_SCHEMA_TYPES = frozenset({"string", "number", "integer", "boolean", "array", "object", "null"})
@@ -26,6 +29,8 @@ _FUNCTION_NAME = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 _PARAMETER_NAME = re.compile(r"^[a-zA-Z0-9_.-]{1,64}$")
 #: The method and URL a REST tool's description ends with.
 _ENDPOINT = re.compile(r" HTTP [A-Z]+ (\S+)$")
+#: Parameter names that take nothing but the caller's credential for a service.
+_KEY_NAME = re.compile(r"(?i)api_?key|secret|access_token|public_key|appid")
 
 
 @pytest.fixture(scope="module")
@@ -248,3 +253,43 @@ def test_every_tool_and_parameter_is_described(toolsets):
     ]
     assert not tools, f"tools without a description: {tools[:10]}"
     assert not params, f"parameters without a description: {params[:10]}"
+
+
+def test_each_entry_holds_its_function_spec_and_at_most_its_credentials(toolsets):
+    extra = [
+        f"{label}:{spec['function']['name']}: {sorted(set(spec) - {'type', 'function', 'credentials'})}"
+        for label, _, specs in toolsets
+        for spec in specs
+        if set(spec) - {"type", "function", "credentials"}
+    ]
+    assert not extra, f"entries with keys beside the spec and its credentials: {extra[:10]}"
+
+
+def test_each_declared_credential_is_a_required_string_its_description_names(toolsets):
+    wrong = []
+    n_declared = 0
+    for label, _, specs in toolsets:
+        for spec in specs:
+            parameters = spec["function"]["parameters"]
+            for parameter, credential in declared_credentials(spec).items():
+                n_declared += 1
+                schema = parameters["properties"][parameter]
+                if (
+                    parameter not in parameters.get("required", [])
+                    or schema.get("type") != "string"
+                    or credential not in schema.get("description", "")
+                ):
+                    wrong.append(f"{label}:{spec['function']['name']}.{parameter} ({credential})")
+    assert n_declared, "the shipped catalog declares no credentials"
+    assert not wrong, f"credentials that are optional, not strings, or described without their name: {wrong[:10]}"
+
+
+def test_every_key_parameter_is_declared_as_a_credential(toolsets):
+    undeclared = [
+        f"{label}:{spec['function']['name']}.{parameter}"
+        for label, _, specs in toolsets
+        for spec in specs
+        for parameter in spec["function"]["parameters"].get("properties") or {}
+        if _KEY_NAME.search(parameter) and parameter not in (spec.get("credentials") or {})
+    ]
+    assert not undeclared, f"key parameters whose credential the user would not hold: {undeclared[:10]}"
