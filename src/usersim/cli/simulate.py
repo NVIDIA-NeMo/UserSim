@@ -47,6 +47,9 @@ from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_ass
 
 logger = logging.getLogger("usersim.cli.simulate")
 
+#: How a run that pins no asset folder reports where its assets come from.
+_OWN_ASSETS = "each probe's own assets"
+
 
 def register(subparsers: argparse._SubParsersAction) -> None:
     p = subparsers.add_parser(
@@ -120,7 +123,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         type=Path,
         default=None,
         help=(
-            "Path to an alternate assets/ tree (seeds + toolsets). Defaults to the banks shipped inside the package."
+            "Read every probe's assets from this folder, which holds a <probe>/ folder per probe. "
+            "Without it, each probe reads the banks it ships with, after any USERSIM_ASSET_PATH or "
+            "USERSIM_ASSETS_DIR override."
         ),
     )
     p.add_argument(
@@ -147,7 +152,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "toolset_category, toolset_name, num_tools and tools (JSON list "
             "of OpenAI-style function specs) -- see the Schema section of "
             "engine/probes/tool_calling/assets/tool_calling/README.md in the package. "
-            "Defaults to <assets-dir>/tool_calling/toolsets_seed.{parquet,jsonl}. "
+            "Defaults to toolsets_seed.{parquet,jsonl} in the tool_calling assets, under --assets-dir when given. "
             "Requires tool_calling in --probe-mix; a missing or unsupported "
             "explicit file is an error."
         ),
@@ -354,24 +359,16 @@ def run(args: argparse.Namespace) -> int:
 
     probe_mix = _parse_probe_mix(args.probe_mix)
 
-    # Resolve --assets-dir once, here, so every downstream consumer sees a
-    # real path rather than None.
-    from usersim.engine.core._assets import default_assets_dir
-
-    # Two different questions. ``pinned`` is whether the user named a
-    # directory: if so, resolution stays there and a missing bank is an
-    # error rather than a silent fall-through to the packaged copies.
-    # ``args.assets_dir`` is the single concrete root recorded in the
-    # generator config and the run manifest, which cannot hold a list.
-    pinned_assets_dir = args.assets_dir
-    if args.assets_dir is None:
-        args.assets_dir = default_assets_dir()
-
+    # ``args.assets_dir`` is the folder the user pinned, or None. A pinned run
+    # reads every bank there, and a missing one is an error rather than a
+    # silent fall-through; otherwise each probe reads its own assets.
+    if args.assets_dir is not None:
+        args.assets_dir = args.assets_dir.resolve()
     if args.locale and args.num_rows is None:
         raise SystemExit("--locale requires --num-rows")
 
     if args.materialize_inputs:
-        return _materialize_inputs(args, models, probe_mix, pinned_assets_dir)
+        return _materialize_inputs(args, models, probe_mix)
 
     if args.dry_run:
         run_locales = (
@@ -379,10 +376,10 @@ def run(args: argparse.Namespace) -> int:
         )
         # Resolved before anything is printed so a bad config fails cleanly
         # instead of interleaving with a half-written plan.
-        verify_probe_assets(probe_mix, run_locales, pinned_assets_dir)
+        verify_probe_assets(probe_mix, run_locales, args.assets_dir)
         seed = resolve_toolset_seed_for_mix(
             probe_mix,
-            pinned_assets_dir,
+            args.assets_dir,
             args.toolset_seed_path,
         )
         # Reported, not refused: the offline check a new install runs comes
@@ -403,12 +400,12 @@ def run(args: argparse.Namespace) -> int:
         print(f"  max_assistant_attempts: {args.max_assistant_attempts}")
         print(f"  random_seed:   {args.random_seed}")
         print(f"  models config: {models_path}")
-        if pinned_assets_dir is not None:
+        if args.assets_dir is not None:
             print(f"  assets_dir:    {args.assets_dir}")
         else:
             from usersim.engine.core._assets import asset_search_path
 
-            print(f"  asset path:    {', '.join(str(r) for r in asset_search_path())}")
+            print(f"  asset path:    {', '.join([*map(str, asset_search_path()), _OWN_ASSETS])}")
         print(f"  match_persona_language: {args.match_persona_language}")
         print(f"  toolset_seed_path: {seed or '(not used)'}")
         print(f"  output:        {args.out}")
@@ -430,7 +427,6 @@ def run(args: argparse.Namespace) -> int:
         num_rows=args.num_rows,
         out=args.out,
         assets_dir=args.assets_dir,
-        pinned_assets_dir=pinned_assets_dir,
         match_persona_language=args.match_persona_language,
         toolset_seed_path=args.toolset_seed_path,
         max_turns=args.max_turns,
@@ -471,7 +467,7 @@ def run(args: argparse.Namespace) -> int:
     return status.exit_code or 0
 
 
-def _materialize_inputs(args, models, probe_mix: dict[str, float], pinned_assets_dir) -> int:
+def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
     """CLI adapter for the public no-model-call materialization seam."""
     import json
 
@@ -480,7 +476,7 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float], pinned_assets
     from usersim.cli._pipeline import materialize_episode_inputs
 
     locales = _locales_from_panel(args.panel) if args.panel else list(args.locale or [])
-    verify_probe_assets(probe_mix, locales, pinned_assets_dir)
+    verify_probe_assets(probe_mix, locales, args.assets_dir)
     if (report := persona_dataset_report(locales)) is not None:
         raise ConfigError(report)
     rows = []
@@ -491,7 +487,7 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float], pinned_assets
                 locale=locale,
                 num_rows=count,
                 models=models,
-                assets_dir=Path(args.assets_dir).resolve(),
+                assets_dir=args.assets_dir,
                 probe_mix=probe_mix,
                 random_seed=args.random_seed,
                 toolset_seed_path=args.toolset_seed_path,
@@ -556,7 +552,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
             for key in ("max_turns", "max_assistant_attempts", "random_seed", "store_reasoning")
         )
     )
-    print(f"  assets_dir:    {inputs.assets_dir}")
+    print(f"  assets_dir:    {inputs.assets_dir or _OWN_ASSETS}")
     print(f"  models config: {models_path}")
     print(f"  setup:         {plan.fingerprint[:12]}")
     if plan.matching_run is not None:
@@ -601,7 +597,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         "inputs": str(args.inputs),
         "out": str(args.out),
         "models_path": str(models_path),
-        "assets_dir": str(inputs.assets_dir),
+        "assets_dir": str(inputs.assets_dir) if inputs.assets_dir is not None else None,
         "skip_existing": not args.no_skip_existing,
     }
     handle = backend.submit(JobSpec(name="simulate-inputs", params=params, callable_=job))
@@ -623,7 +619,6 @@ def _simulate_to_parquet(
     num_rows,
     out,
     assets_dir,
-    pinned_assets_dir=None,
     max_turns,
     match_persona_language=False,
     toolset_seed_path=None,
@@ -683,7 +678,7 @@ def _simulate_to_parquet(
     # the exact file used and keeps non-tool runs independent of toolset assets.
     toolset_seed_path = resolve_toolset_seed_for_mix(
         probe_mix,
-        pinned_assets_dir,
+        assets_dir,
         toolset_seed_path,
     )
 
@@ -696,7 +691,7 @@ def _simulate_to_parquet(
 
     # Fail before any model call rather than from inside a loader mid-run.
     # Checked here, where the run executes, since that host holds the datasets.
-    verify_probe_assets(probe_mix, run_locales, pinned_assets_dir)
+    verify_probe_assets(probe_mix, run_locales, assets_dir)
     if (report := persona_dataset_report(run_locales)) is not None:
         raise ConfigError(report)
 
@@ -727,7 +722,7 @@ def _simulate_to_parquet(
         data_designer, builder = build_simulator_config_builder(
             locale=locale,
             models=models,
-            assets_dir=Path(assets_dir).resolve(),
+            assets_dir=assets_dir,
             max_turns=max_turns,
             max_assistant_attempts=max_assistant_attempts,
             store_reasoning=store_reasoning,
@@ -805,7 +800,7 @@ def _simulate_to_parquet(
             tool_calling_themes=DEFAULT_TOOL_CALLING_THEMES,
             toolset_seed_path=toolset_seed_path,
             panel_path=Path(panel) if panel else None,
-            assets_dir=Path(assets_dir).resolve(),
+            assets_dir=Path(assets_dir).resolve() if assets_dir is not None else None,
             trajectories_requested=requested_per_locale,
             persona_language_filters=applied_language_filters,
         )

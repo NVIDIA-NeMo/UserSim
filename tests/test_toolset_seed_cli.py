@@ -27,7 +27,7 @@ from usersim.cli._pipeline import (
     TOOLSET_SEED_SUFFIXES,
     resolve_toolset_seed_path,
 )
-from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.probes.tool_calling.probe import _normalize_tool_list
 
 
@@ -305,7 +305,7 @@ class TestPipelineRejectsToolCallingWithoutASeed:
         return build_simulator_config_builder(
             locale="en_US",
             models=load_models_config(default_models_path()),
-            assets_dir=Path(assets_dir).resolve() if assets_dir else packaged_assets_dir(),
+            assets_dir=Path(assets_dir).resolve() if assets_dir else None,
             probe_mix=mix,
             toolset_seed_path=seed,
         )

@@ -171,8 +171,8 @@ class MyProbe(BaseProbe):
 ```
 
 The probe then finds its banks wherever the package is installed. That root
-is searched after `$USERSIM_ASSET_PATH` and before the packaged banks, so a
-deployment can override it and the shipped banks remain reachable.
+is searched after `$USERSIM_ASSET_PATH`, so a deployment can override it, and
+an override without the probe's folder leaves its shipped banks in reach.
 `@register_probe` refuses a relative `assets_root`, which would resolve against
 the working directory. The probe's bank loader reads under `MyProbe.assets_dir()`,
 its folder on that search, so an override reaches the loader too.

@@ -72,8 +72,8 @@ class EpisodeInputs:
     #: The ``usersim_config`` every row shares, apart from ``_PER_ROW_SETTINGS``
     #: and ``_RUN_SETTINGS``, which the run settles (see :func:`_run_config`).
     config: dict[str, Any]
-    #: The asset root the rows run against.
-    assets_dir: Path
+    #: The asset root the rows run against, or ``None`` to read each probe's own.
+    assets_dir: Path | None
     #: The file the rows came from, when they came from one.
     source: Path | None = None
 
@@ -208,22 +208,29 @@ def _shared_config(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return dict(rows[0]["usersim_config"])
 
 
-def _resolve_assets_dir(rows: list[dict[str, Any]], given: str | Path | None) -> Path:
-    """``--assets-dir`` when given, else the one asset root the rows were stored with."""
-    from usersim.engine.core._assets import packaged_assets_dir
+def _resolve_assets_dir(rows: list[dict[str, Any]], given: str | Path | None) -> Path | None:
+    """``--assets-dir`` when given, else the asset root the rows were stored with.
 
+    ``None`` when the rows name none: they were stored by a run that named no
+    folder, so each probe reads its own assets.
+    """
     if given is not None:
         path = Path(given).resolve()
         if not path.is_dir():
             raise ValueError(f"--assets-dir {path} is not a directory")
         return path
     stored = {row["usersim_config"].get("assets_dir") for row in rows}
-    hint = f"pass --assets-dir (the assets that ship with User Sim are at {packaged_assets_dir()})"
-    if len(stored) != 1 or None in stored:
-        raise ValueError(f"the rows do not name one asset folder; {hint}")
-    path = Path(stored.pop())
+    if len(stored) != 1:
+        raise ValueError("the rows were stored with different asset folders; pass --assets-dir to name one")
+    folder = stored.pop()
+    if folder is None:
+        return None
+    path = Path(folder)
     if not path.is_dir():
-        raise ValueError(f"the asset folder the rows were stored with, {path}, does not exist here; {hint}")
+        raise ValueError(
+            f"the asset folder the rows were stored with, {path}, does not exist here; pass --assets-dir to "
+            "name one, or store the rows again without --assets-dir so each probe reads its own assets"
+        )
     return path
 
 
@@ -288,7 +295,7 @@ def _model_settings(models: Any, aliases: list[str]) -> tuple[dict[str, Any], di
     return readable, hashed
 
 
-def _asset_roots_digest(assets_dir: Path) -> list[str]:
+def _asset_roots_digest(assets_dir: Path | None) -> list[str]:
     """The contents of every asset root a run can read, in priority order.
 
     The search path, then the ``assets_root`` each registered probe declares.
@@ -520,7 +527,11 @@ def _column_config(inputs: EpisodeInputs, locale: str, models: Any):
     from usersim.engine.config import ConversationSimulatorConfig
 
     return ConversationSimulatorConfig.model_validate(
-        {**_run_config(inputs, models), "locale": locale, "assets_dir": str(inputs.assets_dir)}
+        {
+            **_run_config(inputs, models),
+            "locale": locale,
+            "assets_dir": str(inputs.assets_dir) if inputs.assets_dir is not None else None,
+        }
     )
 
 

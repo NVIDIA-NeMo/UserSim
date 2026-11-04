@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for ``usersim.engine.core._assets`` — resolution of the
-packaged asset banks.
+"""Tests for ``usersim.engine.core._assets`` — resolution of each probe's
+asset banks.
 
-The banks are package data under ``usersim/engine/assets/``, resolved
-through :mod:`importlib.resources`.
+A built-in probe's banks are package data in its own folder, under
+``usersim/engine/probes/<folder>/assets/``, resolved through
+:mod:`importlib.resources`.
 
 The invariants here fall into two groups: that resolution works and honours
 its overrides and a probe's declared ``assets_root``, and that the probe
@@ -28,8 +29,6 @@ import usersim
 from usersim.engine.core._assets import (
     asset_roots_in_use,
     asset_search_path,
-    default_assets_dir,
-    packaged_assets_dir,
     probe_asset_roots,
     probe_assets_dir,
     reset_runtime_assets_dir,
@@ -38,56 +37,64 @@ from usersim.engine.core._assets import (
 from usersim.engine.core.probes import resolve_probe
 
 
-class TestPackagedResolution:
+class TestOwnFolderResolution:
     def test_resolves_inside_the_package(self) -> None:
-        path = packaged_assets_dir()
+        path = probe_assets_dir("sov_ai_facts")
         assert path.is_dir(), f"{path} is not a directory"
-        assert path.parent.name == "engine", f"assets must be package data, resolved {path}"
+        assert path.is_relative_to(Path(usersim.__file__).parent / "engine" / "probes"), path
 
     def test_independent_of_cwd(self, tmp_path: Path, monkeypatch) -> None:
         """Resolution must not depend on where the process was started."""
-        baseline = default_assets_dir()
+        baseline = probe_assets_dir("sov_ai_facts")
         monkeypatch.chdir(tmp_path)
-        assert default_assets_dir() == baseline
+        assert probe_assets_dir("sov_ai_facts") == baseline
 
     def test_no_cwd_fallback_even_with_a_decoy(self, tmp_path: Path, monkeypatch) -> None:
-        """A directory named ``assets`` in the CWD must not be picked up."""
-        decoy = tmp_path / "assets"
-        (decoy / "sov_ai_facts").mkdir(parents=True)
+        """A directory named after the probe in the CWD must not be picked up."""
+        (tmp_path / "sov_ai_facts").mkdir()
         monkeypatch.chdir(tmp_path)
-        assert default_assets_dir() != decoy
-        assert default_assets_dir() == packaged_assets_dir()
+        assert probe_assets_dir("sov_ai_facts") == resolve_probe("sov_ai_facts").assets_root / "sov_ai_facts"
+        assert probe_assets_dir("no_such_probe").is_absolute()
+
+    def test_the_package_ships_no_shared_assets_folder(self) -> None:
+        """Every probe reads its own folder, so banks placed in a shared folder would reach no probe."""
+        assert not (Path(usersim.__file__).parent / "engine" / "assets").exists()
 
 
 class TestOverrides:
+    def test_no_override_leaves_the_search_path_empty(self, monkeypatch) -> None:
+        monkeypatch.delenv("USERSIM_ASSET_PATH", raising=False)
+        monkeypatch.delenv("USERSIM_ASSETS_DIR", raising=False)
+        assert asset_search_path() == ()
+
     def test_env_var_takes_precedence(self, tmp_path: Path, monkeypatch) -> None:
         monkeypatch.setenv("USERSIM_ASSETS_DIR", str(tmp_path))
-        assert default_assets_dir() == tmp_path
+        assert asset_search_path()[0] == tmp_path
 
     def test_runtime_context_beats_env(self, tmp_path: Path, monkeypatch) -> None:
         monkeypatch.setenv("USERSIM_ASSETS_DIR", str(tmp_path / "env"))
         ctx = tmp_path / "ctx"
         token = set_runtime_assets_dir(ctx)
         try:
-            assert default_assets_dir() == ctx
+            assert asset_search_path()[0] == ctx
         finally:
             reset_runtime_assets_dir(token)
-        assert default_assets_dir() == tmp_path / "env"
+        assert asset_search_path()[0] == tmp_path / "env"
 
     def test_runtime_override_is_restored(self, tmp_path: Path) -> None:
-        baseline = default_assets_dir()
+        baseline = asset_search_path()
         token = set_runtime_assets_dir(tmp_path)
         reset_runtime_assets_dir(token)
-        assert default_assets_dir() == baseline
+        assert asset_search_path() == baseline
 
     def test_explicit_root_wins_in_probe_assets_dir(self, tmp_path: Path) -> None:
         assert probe_assets_dir("sov_ai_facts", assets_root=tmp_path) == (tmp_path / "sov_ai_facts")
 
 
 class TestRegistryAndLayoutInvariants:
-    """Every registered probe resolves to an asset folder, and every packaged
-    folder belongs to a registered probe. Importing the generator triggers the
-    probe bootstrap that populates the registry."""
+    """Every registered probe resolves to an asset folder, and every built-in
+    probe's folder belongs to a registered probe. Importing the generator
+    triggers the probe bootstrap that populates the registry."""
 
     @staticmethod
     def _labels() -> set[str]:
@@ -103,7 +110,7 @@ class TestRegistryAndLayoutInvariants:
         assert not unresolved, f"registered probes without an asset folder: {unresolved}"
 
     def test_every_built_in_probe_ships_its_folder_in_the_package(self) -> None:
-        """In the packaged banks or in the probe's own folder, so a plain install has it."""
+        """In the probe's own folder in the package, so a plain install has it."""
         package = Path(usersim.__file__).parent
         outside = {
             label: probe_assets_dir(label)
@@ -128,31 +135,14 @@ class TestRegistryAndLayoutInvariants:
             assert Path(cls.assets_root) == folder / "assets", label
             assert (folder / "assets" / label).is_dir(), label
 
-    def test_packaged_tree_has_no_stray_top_level_entries(self) -> None:
-        """Everything shipped under assets/ should be a probe folder. Catches
-        a doc image or scratch file riding into the wheel, and a folder left
-        behind by a renamed probe."""
-        labels = self._labels()
-        stray = [
-            p.name
-            for p in packaged_assets_dir().iterdir()
-            if p.name not in labels and p.name != "README.md" and not p.name.startswith("__")
-        ]
-        assert not stray, f"unexpected entries in packaged assets/: {stray}"
-
 
 class TestAssetSearchPath:
     """Assets resolve along an ordered path, so a package can contribute one
     probe's banks without restating the shipped ones."""
 
-    def test_packaged_root_is_always_last(self, monkeypatch, tmp_path) -> None:
-        from usersim.engine.core._assets import (
-            asset_search_path,
-            packaged_assets_dir,
-        )
-
+    def test_a_probe_s_own_root_comes_after_the_search_path(self, monkeypatch, tmp_path) -> None:
         monkeypatch.setenv("USERSIM_ASSET_PATH", str(tmp_path))
-        assert asset_search_path()[-1] == packaged_assets_dir()
+        assert probe_asset_roots("sov_ai_facts") == (tmp_path, resolve_probe("sov_ai_facts").assets_root)
 
     def test_entries_are_searched_in_order(self, monkeypatch, tmp_path) -> None:
         from usersim.engine.core._assets import asset_search_path
@@ -195,7 +185,7 @@ class TestAssetSearchPath:
 
     def test_explicit_root_is_pinned_not_searched(self, tmp_path) -> None:
         """A user who named a directory is told when assets are absent
-        rather than quietly served the packaged copies."""
+        rather than quietly served the probe's own copies."""
         from usersim.engine.core._assets import probe_assets_dir
 
         resolved = probe_assets_dir("tool_calling", assets_root=tmp_path)
@@ -223,14 +213,12 @@ class TestDeclaredAssetsRoot:
 
         assert probe_assets_dir("ext_probe") == tmp_path / "ext_probe"
 
-    def test_it_is_searched_after_the_overrides_and_before_the_packaged_banks(
-        self, register_test_probe, monkeypatch, tmp_path
-    ) -> None:
+    def test_it_is_searched_after_the_overrides(self, register_test_probe, monkeypatch, tmp_path) -> None:
         override = tmp_path / "override"
         monkeypatch.setenv("USERSIM_ASSET_PATH", str(override))
         register_test_probe("ext_probe", assets_root=tmp_path / "declared")
 
-        assert probe_asset_roots("ext_probe") == (override, tmp_path / "declared", packaged_assets_dir())
+        assert probe_asset_roots("ext_probe") == (override, tmp_path / "declared")
 
     def test_a_deliberate_override_wins_over_the_declared_root(
         self, register_test_probe, monkeypatch, tmp_path
@@ -296,40 +284,11 @@ class TestProbeAssetsDir:
         assert probe.assets_dir() == override / "ext_probe"
 
 
-class TestPinnedPackagedRoot:
-    """Pinning the packaged directory pins the assets that ship with User Sim."""
+class TestPinnedRoot:
+    """A pinned root is strict for every probe, one that declares its own root included."""
 
-    @staticmethod
-    def _package(monkeypatch, tmp_path: Path) -> Path:
-        """A stand-in ``usersim`` package whose packaged banks are at ``engine/assets/``."""
-        import usersim.engine.core._assets as assets
-
-        package = tmp_path / "usersim"
-        (package / "engine" / "assets").mkdir(parents=True)
-        monkeypatch.setattr(assets, "packaged_assets_dir", lambda: package / "engine" / "assets")
-        return package
-
-    def test_it_reaches_a_probe_whose_banks_are_in_its_own_folder_in_the_package(
-        self, register_test_probe, monkeypatch, tmp_path
-    ) -> None:
-        package = self._package(monkeypatch, tmp_path)
-        own = package / "engine" / "probes" / "ext_probe" / "assets"
-        (own / "ext_probe").mkdir(parents=True)
-        register_test_probe("ext_probe", assets_root=own)
-
-        assert probe_assets_dir("ext_probe", assets_root=package / "engine" / "assets") == own / "ext_probe"
-
-    def test_it_stays_strict_for_a_root_outside_the_package(self, register_test_probe, monkeypatch, tmp_path) -> None:
-        package = self._package(monkeypatch, tmp_path)
-        (tmp_path / "extension" / "ext_probe").mkdir(parents=True)
-        register_test_probe("ext_probe", assets_root=tmp_path / "extension")
-
-        pinned = package / "engine" / "assets"
-        assert probe_assets_dir("ext_probe", assets_root=pinned) == pinned / "ext_probe"
-
-    def test_any_other_pinned_root_stays_strict(self, register_test_probe, monkeypatch, tmp_path) -> None:
-        package = self._package(monkeypatch, tmp_path)
-        own = package / "engine" / "probes" / "ext_probe" / "assets"
+    def test_a_probe_that_declares_a_root_is_read_from_the_pinned_one(self, register_test_probe, tmp_path) -> None:
+        own = tmp_path / "own"
         (own / "ext_probe").mkdir(parents=True)
         register_test_probe("ext_probe", assets_root=own)
 

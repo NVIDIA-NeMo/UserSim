@@ -109,7 +109,8 @@ print(result.run_id, result.written, result.skipped)
   stored with. The rows in one call must share their settings apart from
   locale, asset folder and that replay setting.
   `--assets-dir` replaces the asset folder the rows were stored with, and is
-  required when that folder doesn't exist on this machine.
+  required when that folder doesn't exist on this machine. Rows stored by a
+  run that named no folder read each probe's own assets.
 - **Concurrent writers.** Writes into `--out` take a lock, so two calls can
   share it. On a filesystem without file locks, or whose locks don't reach
   every node (Lustre mounted without `flock` or with `localflock`, NFS with

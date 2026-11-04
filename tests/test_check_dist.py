@@ -18,7 +18,7 @@ _spec = importlib.util.spec_from_file_location("check_dist", _SCRIPT)
 check_dist = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(check_dist)
 
-_PACKAGE = ["usersim/__init__.py", "usersim/engine/assets/probe/bank.yaml"]
+_PACKAGE = ["usersim/__init__.py", "usersim/engine/probes/probe/assets/probe/bank.yaml"]
 
 
 def _sdist(path: Path, files: list[str], root: str = "usersim-1.0") -> Path:
@@ -54,13 +54,19 @@ def test_a_matching_pair_passes(tmp_path: Path) -> None:
         (None, [*_PACKAGE, "usersim/stale.py"], "the sdist doesn't"),
         (None, ["usersim/__init__.py"], "no asset banks"),
         (
-            ["pyproject.toml", *(f"src/{f}" for f in [*_PACKAGE, "usersim/engine/assets/x/embeddings.parquet"])],
-            [*_PACKAGE, "usersim/engine/assets/x/embeddings.parquet"],
+            [
+                "pyproject.toml",
+                *(f"src/{f}" for f in [*_PACKAGE, "usersim/engine/probes/x/assets/x/embeddings.parquet"]),
+            ],
+            [*_PACKAGE, "usersim/engine/probes/x/assets/x/embeddings.parquet"],
             "embeddings.parquet",
         ),
         (
-            ["pyproject.toml", *(f"src/{f}" for f in [*_PACKAGE, "usersim/engine/assets/x/_eval_scorecard.parquet"])],
-            [*_PACKAGE, "usersim/engine/assets/x/_eval_scorecard.parquet"],
+            [
+                "pyproject.toml",
+                *(f"src/{f}" for f in [*_PACKAGE, "usersim/engine/probes/x/assets/x/_eval_scorecard.parquet"]),
+            ],
+            [*_PACKAGE, "usersim/engine/probes/x/assets/x/_eval_scorecard.parquet"],
             "scorecard",
         ),
         (["pyproject.toml", "tests/test_x.py", *(f"src/{f}" for f in _PACKAGE)], None, "under tests/"),
@@ -78,12 +84,8 @@ def test_a_package_file_missing_from_the_wheel_is_reported(tmp_path: Path) -> No
     assert len(problems) == 1 and "lacks 1 package file" in problems[0] and spec in problems[0]
 
 
-@pytest.mark.parametrize(
-    "schema",
-    ["usersim/engine/assets/probe/SCHEMA.md", "usersim/engine/probes/probe/assets/probe/SCHEMA.md"],
-    ids=["shared-assets-folder", "probe-folder"],
-)
-def test_a_bank_schema_must_ship(tmp_path: Path, schema: str) -> None:
+def test_a_bank_schema_must_ship(tmp_path: Path) -> None:
+    schema = "usersim/engine/probes/probe/assets/probe/SCHEMA.md"
     problems = check_dist.check_archives(*_pair(tmp_path), package_files=[*_PACKAGE, schema])
     assert len(problems) == 1 and schema in problems[0]
 

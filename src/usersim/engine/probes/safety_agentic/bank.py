@@ -211,7 +211,7 @@ def _persona_tags_match(
 
 def _default_action_taxonomy_path() -> Path:
     """Discover the shipped ``assets/safety_agentic/action_taxonomy.yaml``
-    from the packaged asset tree. Resolution is independent of CWD; set
+    in the probe's own assets. Resolution is independent of CWD; set
     ``USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`` to override."""
     from usersim.engine.core._assets import probe_assets_dir
 

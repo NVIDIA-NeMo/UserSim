@@ -41,7 +41,6 @@ from usersim.cli._pipeline import (
 )
 from usersim.cli.evaluate import _parse_csv_or_none, _parse_judges
 from usersim.cli.simulate import _parse_probe_mix
-from usersim.engine.core._assets import packaged_assets_dir
 
 # ---------------------------------------------------------------------------
 # Top-level parser
@@ -389,7 +388,6 @@ class TestPipelineFactory:
         data_designer, builder = build_simulator_config_builder(
             locale="en_US",
             models=models,
-            assets_dir=packaged_assets_dir(),
             probe_mix={probe: 1.0},
         )
         assert data_designer is not None
@@ -401,7 +399,6 @@ class TestPipelineFactory:
             build_simulator_config_builder(
                 locale="en_US",
                 models=models,
-                assets_dir=packaged_assets_dir(),
                 probe_mix={"made_up": 1.0},
             )
 
@@ -410,7 +407,6 @@ class TestPipelineFactory:
         data_designer, builder = build_simulator_config_builder(
             locale="en_US",
             models=models,
-            assets_dir=packaged_assets_dir(),
             probe_mix={
                 "tool_calling": 0.4,
                 "safety_agentic": 0.3,
@@ -838,7 +834,7 @@ class TestAssetCommandDefaults:
             "evaluate-assets": evaluate_assets,
             "gen-assets": gen_assets,
         }[command]
-        default = module.probe_assets_dir("financial_services", assets_root=module.packaged_assets_dir()) / "en_US"
+        default = module.shipped_assets_dir("financial_services") / "en_US"
         assert default.is_dir(), f"{command} default resolves to a missing dir: {default}"
         assert (default / "region_meta.yaml").exists() or any(default.iterdir())
 

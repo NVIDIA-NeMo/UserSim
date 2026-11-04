@@ -9,7 +9,7 @@ This is the test that would have caught the regression where
 ``core/probing_taxonomy.py`` returned ``assets/sov_ai_dynamic/<locale>/categories.yaml``
 while the on-disk directory was still ``assets/population_probing/``.
 The per-loader unit-test files all bypass ``default_*_path()`` — they
-either write tmp_path fixtures or hardcode ``(packaged_assets_dir() / "...")``
+either write tmp_path fixtures or hardcode ``(probe_assets_dir(probe) / "...")``
 strings — so a default-path constant could point at ``/nonexistent``
 and every per-loader suite would still be green.
 

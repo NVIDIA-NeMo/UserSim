@@ -50,7 +50,6 @@ from __future__ import annotations
 
 import json
 from contextlib import contextmanager
-from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
@@ -60,7 +59,7 @@ import pytest
 # self-registers every probe class.
 import usersim.engine.generator  # noqa: F401
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
 from usersim.engine.core.probes import known_probes, resolve_probe
 
@@ -209,15 +208,13 @@ def _cli_built_simulator_config(probe_type: str, locale: str) -> ConversationSim
         resolve_toolset_seed_for_mix,
     )
 
-    assets_dir = (packaged_assets_dir()).resolve()
     models = load_models_config(default_models_path())
 
     probe_mix = {probe_type: 1.0}
-    toolset_seed = resolve_toolset_seed_for_mix(probe_mix, assets_dir)
+    toolset_seed = resolve_toolset_seed_for_mix(probe_mix)
     _, builder = build_simulator_config_builder(
         locale=locale,
         models=models,
-        assets_dir=assets_dir,
         max_turns=1,
         probe_mix=probe_mix,
         toolset_seed_path=toolset_seed,
@@ -254,7 +251,7 @@ def _synthetic_row_data(
         cfg.theme_column: _theme_for(probe_type),
     }
     if cfg.tools_column is not None:
-        data[cfg.tools_column] = _toolset_for_test(repo_root_assets())
+        data[cfg.tools_column] = _toolset_for_test()
         data[cfg.toolset_name_column] = "weather_tools"
     return data
 
@@ -274,11 +271,7 @@ def _theme_for(probe_type: str) -> str:
     return "__not_used__"
 
 
-def repo_root_assets() -> Path:
-    return packaged_assets_dir()
-
-
-def _toolset_for_test(assets_dir: Path) -> list[dict[str, Any]]:
+def _toolset_for_test() -> list[dict[str, Any]]:
     """Read one row from the shipped ``toolsets_seed.parquet`` to use
     as the synthetic ``tools`` column value. Reads only the first
     row's ``tools`` field — keeps the test small and avoids
@@ -286,7 +279,7 @@ def _toolset_for_test(assets_dir: Path) -> list[dict[str, Any]]:
     """
     import pyarrow.parquet as pq
 
-    toolset_path = probe_assets_dir("tool_calling", assets_root=assets_dir) / "toolsets_seed.parquet"
+    toolset_path = probe_assets_dir("tool_calling") / "toolsets_seed.parquet"
     table = pq.read_table(toolset_path).slice(0, 1).to_pylist()
     raw = table[0]["tools"]
     if isinstance(raw, str):

@@ -36,13 +36,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 def in_a_bank(path: str) -> bool:
     """Whether a package file is in an asset bank.
 
-    Banks live under ``usersim/engine/assets/``, or in the ``assets/`` folder
-    of a probe kept in its own folder, ``usersim/engine/probes/<label>/assets/``.
+    Banks live in the ``assets/`` folder of each built-in probe's own folder,
+    ``usersim/engine/probes/<folder>/assets/``.
     """
     parts = path.split("/")
-    return path.startswith("usersim/engine/assets/") or (
-        parts[:3] == ["usersim", "engine", "probes"] and parts[4:5] == ["assets"]
-    )
+    return parts[:3] == ["usersim", "engine", "probes"] and parts[4:5] == ["assets"]
 
 
 def ships(path: str) -> bool:

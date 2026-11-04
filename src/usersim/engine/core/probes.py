@@ -293,13 +293,12 @@ class BaseProbe:
     # itself which rows it applies to. Empty adds none.
     default_scorers: tuple[str, ...] = ()
 
-    # The directory that holds this probe's ``<label>/`` asset folder, for a
-    # probe whose assets are outside the packaged banks, in its own package or
-    # its own folder: an absolute path, such as ``Path(__file__).parent /
-    # "assets"`` (``@register_probe`` refuses a relative one). Searched after
-    # the deliberate overrides (the runtime override, ``USERSIM_ASSET_PATH``
-    # and ``USERSIM_ASSETS_DIR``) and before the packaged banks. ``None``
-    # searches the overrides and the packaged banks only.
+    # The directory that holds this probe's ``<label>/`` asset folder, in its own
+    # package or, for a built-in, its own folder: an absolute path, such as
+    # ``Path(__file__).parent / "assets"`` (``@register_probe`` refuses a
+    # relative one). Searched after the deliberate overrides (the runtime
+    # override, ``USERSIM_ASSET_PATH`` and ``USERSIM_ASSETS_DIR``). ``None``
+    # searches the overrides only.
     assets_root: Path | None = None
 
     @classmethod
@@ -307,9 +306,9 @@ class BaseProbe:
         """This probe's asset folder, ``<root>/<label>/``, where its bank loader reads.
 
         Resolved as every bank loader in this package resolves its folder: the
-        deliberate overrides first, then the class's ``assets_root``, then the
-        packaged banks. A probe shipped in its own package calls this from its
-        loader, so an override reaches its banks too.
+        deliberate overrides first, then the class's ``assets_root``. A probe
+        shipped in its own package calls this from its loader, so an override
+        reaches its banks too.
         """
         # _assets imports this module at its top, so importing it here at the
         # top would be circular.

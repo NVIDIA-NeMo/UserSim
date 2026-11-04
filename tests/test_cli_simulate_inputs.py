@@ -49,7 +49,7 @@ from usersim.cli._models import ModelsConfig, ProviderSpec, default_models_path,
 from usersim.cli._models import to_model_configs as _real_to_model_configs
 from usersim.cli._pipeline import materialize_episode_inputs
 from usersim.engine import generator as generator_module
-from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.manifest import load_run_manifest
 from usersim.engine.core.missing import none_for_missing
 from usersim.engine.core.storage import list_runs, read_partitioned_dataset
@@ -122,7 +122,6 @@ def _materialize(probe_mix: dict[str, float], num_rows: int, seed: int = 1, max_
         locale="en_US",
         num_rows=num_rows,
         models=_models(),
-        assets_dir=packaged_assets_dir(),
         probe_mix=probe_mix,
         random_seed=seed,
         max_turns=max_turns,
@@ -316,8 +315,8 @@ def test_a_providers_own_request_settings_are_part_of_the_setup(rows, monkeypatc
 
 def test_changed_assets_are_a_new_setup_and_moved_ones_are_not(rows, tmp_path):
     first, second = tmp_path / "assets", tmp_path / "elsewhere"
-    shutil.copytree(packaged_assets_dir(), first)
-    shutil.copytree(packaged_assets_dir(), second)
+    shutil.copytree(probe_assets_dir("tool_calling").parent, first)
+    shutil.copytree(probe_assets_dir("tool_calling").parent, second)
     moved = _fingerprint(rows, assets_dir=first)
     readme = next(first.rglob("README.md"))
     readme.write_text(readme.read_text() + "\nedited\n")
@@ -345,10 +344,10 @@ def test_a_change_under_a_probe_declared_assets_root_is_a_new_setup(register_tes
     bank.parent.mkdir(parents=True)
     bank.write_text("items: []\n")
     register_test_probe("ext_probe", assets_root=tmp_path / "pkg")
-    before = _inputs._asset_roots_digest(packaged_assets_dir())
+    before = _inputs._asset_roots_digest(None)
     bank.write_text("items: [edited]\n")
 
-    assert _inputs._asset_roots_digest(packaged_assets_dir()) != before
+    assert _inputs._asset_roots_digest(None) != before
 
 
 def test_a_data_designer_release_is_part_of_the_setup(rows, monkeypatch):
@@ -593,7 +592,7 @@ def test_saved_rows_have_a_plain_runs_columns_plus_input_id(probe_type, tmp_path
             locales=["en_US"],
             num_rows=2,
             out=plain_out,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={probe_type: 1.0},
             random_seed=1,
@@ -682,7 +681,7 @@ def test_a_plain_run_records_when_it_started_and_leaves_no_artifacts(tmp_path, m
             locales=["en_US"],
             num_rows=2,
             out=tmp_path / "plain",
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=1,
@@ -840,12 +839,17 @@ def test_rows_that_cannot_run_are_refused(rows, edit, message):
         prepare_episode_inputs(_edited(rows, edit))
 
 
-def test_a_missing_stored_asset_folder_is_an_error_until_one_is_given(rows):
+def test_rows_stored_without_an_asset_folder_read_each_probe_s_own(rows):
+    assert {row["usersim_config"]["assets_dir"] for row in rows} == {None}
+    assert prepare_episode_inputs(rows).assets_dir is None
+
+
+def test_a_missing_stored_asset_folder_is_an_error_until_one_is_given(rows, tmp_path):
     moved = _edited(rows, lambda r: [row["usersim_config"].update(assets_dir="/no/such/assets") for row in r])
 
     with pytest.raises(ValueError, match="--assets-dir"):
         prepare_episode_inputs(moved)
-    assert prepare_episode_inputs(moved, assets_dir=packaged_assets_dir()).assets_dir == packaged_assets_dir()
+    assert prepare_episode_inputs(moved, assets_dir=tmp_path).assets_dir == tmp_path.resolve()
 
 
 def _write(rows, path: Path) -> Path:

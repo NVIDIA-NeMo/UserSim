@@ -15,7 +15,7 @@ import argparse
 from pathlib import Path
 
 from usersim.asset_gen.registry import domain_names, get_domain
-from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir
+from usersim.engine.core._assets import shipped_assets_dir
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:
@@ -86,7 +86,7 @@ def run(args: argparse.Namespace) -> int:
     if dom.evaluate is None:
         print(f"  domain {args.domain!r} has no evaluator")
         return 2
-    bank_dir = args.dir or (probe_assets_dir(args.domain, assets_root=packaged_assets_dir()) / args.locale)
+    bank_dir = args.dir or (shipped_assets_dir(args.domain) / args.locale)
     spec_path = args.region_spec or (dom.region_spec_dir / f"{args.locale}.yaml")
 
     print(f"usersim evaluate-assets [{args.domain}] — {args.locale}")

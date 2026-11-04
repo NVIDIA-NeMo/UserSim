@@ -12,40 +12,37 @@ Markdown outside the banks.
 
 ## Resolution
 
-Assets resolve along an ordered **search path**, highest priority first:
+Each probe keeps its banks in the `<label>/` folder of the root its class
+declares as `assets_root`. A built-in probe declares its own folder in the
+package, `engine/probes/<folder>/assets/`. A probe shipped in its own package
+points it inside that package, such as `Path(__file__).parent / "assets"`, so
+the probe finds its banks wherever the package is installed, with no
+environment variable to set. Registration refuses a relative root. The lookup
+finds a built-in's folder before the probe's module is imported: a prompt read
+while the module loads, or a scorer in a process that never imports the probe,
+reaches the probe's assets.
+
+Ahead of a probe's own root, assets resolve along an ordered **search path**
+of deliberate overrides, highest priority first:
 
 1. the per-context override set by `set_runtime_assets_dir`
 2. each entry of `$USERSIM_ASSET_PATH` (`os.pathsep`-separated)
 3. `$USERSIM_ASSETS_DIR`
-4. the packaged `usersim/engine/assets/` directory
 
-`probe_assets_dir()` walks that path and takes the first root holding the
-probe. The packaged directory is always last, so prepending a root never
-hides the shipped banks, which is what lets a package contribute one
-probe's assets without restating the rest.
-
-A probe class can also declare `assets_root`, the directory that holds its
-`<label>/` folder. A probe shipped in its own package points it inside that
-package, such as `Path(__file__).parent / "assets"`, so the probe finds its
-banks wherever the package is installed, with no environment variable to
-set. Registration refuses a relative root. That root is searched for that
-probe only, after the first three entries and before the packaged directory,
-so a deliberate override wins over it. A built-in probe kept in its own
-folder declares one too, that folder's `assets/`, and the lookup finds that
-folder before the probe's module is imported: a prompt read while the module
-loads, or a scorer in a process that never imports the probe, reaches the
-probe's assets. A probe's bank loader reads
-under its class's `assets_dir()`, the folder this search finds for the probe,
-and its `prompts.yaml` is read from that folder too.
+`probe_assets_dir()` walks those roots, then the probe's own, and takes the
+first that holds the probe. An override without a probe's folder leaves that
+probe's own banks in reach, which is what lets a package contribute one
+probe's assets without restating the rest. A probe's bank loader reads under
+its class's `assets_dir()`, the folder this search finds for the probe, and
+its `prompts.yaml` is read from that folder too.
 
 An explicit `--assets-dir` is **not** part of the search. It pins resolution
 to exactly that directory, for every probe in the run, including one that
 declares `assets_root`, because a user who named a location should be told
-when the assets are not there rather than quietly served another copy.
-Pinning the packaged directory pins the assets that ship with User Sim, so it
-also reaches a built-in probe whose banks are in its own folder.
-`simulate --inputs` pins the folder its rows were stored with: the packaged
-directory, for rows stored by a run that named no folder and set no override.
+when the assets are not there rather than quietly served another copy. A run
+without it records no asset folder. `simulate --inputs` reads stored rows
+from the folder they were stored with, or from each probe's own assets when
+they name none.
 
 There is no fallback to the working directory. Resolving against wherever the
 process happened to start makes a broken install look healthy from a source

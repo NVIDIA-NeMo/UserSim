@@ -29,7 +29,6 @@ from usersim.cli._models import (
 )
 from usersim.cli._pipeline import build_simulator_config_builder
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.episode_input import construct_episode_preamble
 from usersim.engine.core.manifest import SimulationConfigSnapshot, build_run_manifest
 
@@ -85,7 +84,7 @@ def test_the_run_config_carries_the_switch(tmp_path):
         _, builder = build_simulator_config_builder(
             locale="en_US",
             models=models,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             probe_mix={"general_open_ended": 1.0},
             **kwargs,
         )
@@ -203,7 +202,7 @@ def test_a_plain_run_records_the_switch_in_its_manifest(tmp_path):
             locales=["en_US"],
             num_rows=1,
             out=tmp_path,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=1,
@@ -223,7 +222,7 @@ def test_materialized_rows_carry_the_switch_to_a_host(monkeypatch):
         locale="en_US",
         num_rows=1,
         models=_models(**_REPLAY),
-        assets_dir=packaged_assets_dir(),
+        assets_dir=None,
         probe_mix={"general_open_ended": 1.0},
     )
 

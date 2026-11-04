@@ -129,7 +129,7 @@ than into a branch on its label.
 | `description` | `""` | the per-row preview and the capability report, beside the probe's rows |
 | `preview_fields` | `()` | the per-row preview's Probe Inputs panel |
 | `default_scorers` | `()` | `usersim eval --scorers auto`, for a run that holds the probe's rows |
-| `assets_root` | `None`: the packaged banks | `assets_dir()`, and through it the probe's loaders, the pre-flight and smoke |
+| `assets_root` | `None`: the override roots only | `assets_dir()`, and through it the probe's loaders, the pre-flight and smoke |
 | `locale_bank_check` | `None`: the asset folder holds bank files | the pre-flight, for each run locale |
 | `bank_locale` | an India variant's own bank when it has one, else its base locale's | the pre-flight |
 | `authoring_guide` | `None` | the pre-flight, when a run asks for a locale the probe has no bank for |

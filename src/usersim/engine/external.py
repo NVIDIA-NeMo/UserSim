@@ -75,13 +75,12 @@ def materialize_episode_inputs(
     """
     from usersim.cli._models import default_models_path, load_models_config
     from usersim.cli._pipeline import materialize_episode_inputs as _materialize
-    from usersim.engine.core._assets import default_assets_dir
 
     return _materialize(
         locale=locale,
         num_rows=num_rows,
         models=load_models_config(models_path or default_models_path()),
-        assets_dir=(assets_dir or default_assets_dir()).resolve(),
+        assets_dir=assets_dir.resolve() if assets_dir is not None else None,
         probe_mix=probe_mix,
         random_seed=random_seed,
         toolset_seed_path=toolset_seed_path,

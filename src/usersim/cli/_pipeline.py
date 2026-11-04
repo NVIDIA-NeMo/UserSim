@@ -76,11 +76,12 @@ DEFAULT_PROBE_MIX: dict[str, float] = {
 _NO_THEME_PLACEHOLDER: str = "__not_used__"
 
 
-def _probe_themes(probe: str, locale: str, assets_dir: Path) -> list[str]:
+def _probe_themes(probe: str, locale: str, assets_dir: Path | None) -> list[str]:
     """``probe``'s themes in ``locale``, JSON-encoded for the sampler.
 
     Read with ``assets_dir`` installed as the run installs it for each row, so
-    a probe finds its themes where its rows find their banks. ``ensure_ascii``
+    a probe finds its themes where its rows find their banks. ``None`` reads
+    each probe's own assets. ``ensure_ascii``
     is off so non-Latin descriptions stay readable in the stored column.
     """
     from usersim.engine.core._assets import reset_runtime_assets_dir, set_runtime_assets_dir
@@ -426,11 +427,16 @@ def known_probes() -> tuple[str, ...]:
     return _known()
 
 
+def _recorded_assets_dir(assets_dir: Path | str | None) -> str | None:
+    """The asset root a run's config records: the pinned folder, or ``None`` for each probe's own."""
+    return str(Path(assets_dir).resolve()) if assets_dir is not None else None
+
+
 def build_simulator_config_builder(
     *,
     locale: str,
     models: ModelsConfig,
-    assets_dir: Path,
+    assets_dir: Path | None = None,
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
@@ -483,7 +489,7 @@ def build_simulator_config_builder(
             theme_column="theme",
             **toolset_kwargs,
             locale=locale,
-            assets_dir=str(Path(assets_dir).resolve()),
+            assets_dir=_recorded_assets_dir(assets_dir),
             max_turns=max_turns,
             max_assistant_attempts=max_assistant_attempts,
             store_reasoning=store_reasoning,
@@ -506,7 +512,7 @@ def _add_episode_input_columns(
     dd: Any,
     *,
     locale: str,
-    assets_dir: Path,
+    assets_dir: Path | None,
     probe_mix: dict[str, float],
     tool_calling_themes: tuple[str, ...] | None,
     toolset_seed_path: Path | None,
@@ -566,8 +572,8 @@ def materialize_episode_inputs(
     locale: str,
     num_rows: int,
     models: ModelsConfig,
-    assets_dir: Path,
     probe_mix: dict[str, float],
+    assets_dir: Path | None = None,
     random_seed: int | None = None,
     tool_calling_themes: tuple[str, ...] | None = None,
     toolset_seed_path: Path | None = None,
@@ -602,7 +608,7 @@ def materialize_episode_inputs(
     config = ConversationSimulatorConfig(
         name="conversation_messages",
         locale=locale,
-        assets_dir=str(assets_dir.resolve()),
+        assets_dir=_recorded_assets_dir(assets_dir),
         random_seed=random_seed,
         max_turns=max_turns,
         max_assistant_attempts=max_assistant_attempts,

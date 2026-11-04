@@ -41,7 +41,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.storage import (
     list_runs,
     new_run_id,
@@ -268,7 +267,7 @@ class TestNewRunIdWiring:
                 locales=["en_US"],
                 num_rows=1,
                 out=out,
-                assets_dir=packaged_assets_dir(),
+                assets_dir=None,
                 max_turns=1,
                 probe_mix={"general_open_ended": 1.0},
                 random_seed=42,
@@ -355,7 +354,7 @@ class TestNewRunIdWiring:
                 locales=["en_US"],
                 num_rows=1,
                 out=out,
-                assets_dir=packaged_assets_dir(),
+                assets_dir=None,
                 max_turns=1,
                 probe_mix={"general_open_ended": 1.0},
                 random_seed=42,
@@ -399,7 +398,7 @@ def test_context_failure_row_survives_cli_storage(tmp_path: Path) -> None:
             locales=["en_US"],
             num_rows=1,
             out=out,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"financial_services": 1.0},
             random_seed=42,
@@ -451,7 +450,7 @@ def test_each_batch_gets_its_own_artifacts_and_the_manifest_its_start(tmp_path: 
             locales=["en_US"],
             num_rows=1,
             out=out,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=42,
@@ -499,7 +498,7 @@ def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path:
             locales=["en_US"],
             num_rows=1,
             out=out,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=42,
