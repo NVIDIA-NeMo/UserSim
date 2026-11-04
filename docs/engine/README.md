@@ -431,7 +431,8 @@ hook), see the source-of-truth docstrings in
 **Assistant evaluation is configured separately** via
 `TrajectoryEvaluatorConfig` (see Trajectory Evaluator section). Add
 new axes to `evaluator/axes.py::PROBE_SCORES` if needed; add a
-scorer under `evaluator/scorers/your_probe.py` and include it in
+scorer as `scorer.py` in the probe's package
+(`engine/probes/your_probe/scorer.py`) and include its module path in
 `DEFAULT_SCORER_MODULES` to register it on import; name it in `--scorers` to
 run it, or list it in the probe's `default_scorers` so `--scorers auto` runs
 it.

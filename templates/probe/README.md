@@ -106,10 +106,11 @@ See the per-shape generator file in this directory for a copy-pasteable starter.
   rubric, the optional assistant-quality flag, the early-stop signal.
   Their job is to keep the conversation coherent so the trajectory is
   worth scoring at all.
-- **Out-of-sim judges** (live in
-  `evaluator/scorers/<your_probe>.py`): any LLM- or rule-based
+- **Out-of-sim judges** (live in the probe's own package, as
+  `engine/probes/<your_probe>/scorer.py`): any LLM- or rule-based
   scoring that judges the *assistant under test*. The simulator never
-  runs these. Register your probe's scorer in
+  runs these. Add the module path,
+  `usersim.engine.probes.<your_probe>.scorer`, to
   `evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES` so the
   auto-load path picks it up.
 
