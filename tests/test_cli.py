@@ -1232,10 +1232,11 @@ class TestConfigErrorPresentation:
         """The real path: an explicit ``--toolset-seed-path`` that is not
         there is a user error, not a crash."""
         from usersim.cli._errors import ConfigError
-        from usersim.cli._pipeline import resolve_toolset_seed_path
+        from usersim.cli._pipeline import resolve_seed_dataset_path
 
-        with pytest.raises(ConfigError, match="toolset seed not found"):
-            resolve_toolset_seed_path(
+        with pytest.raises(ConfigError, match="seed table not found"):
+            resolve_seed_dataset_path(
+                "tool_calling",
                 toolset_seed_path=tmp_path / "absent.parquet",
             )
 

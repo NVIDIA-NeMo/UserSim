@@ -438,7 +438,7 @@ def _check_probe_registry(report: SmokeReport) -> None:
 
 
 def _check_probe_assets(report: SmokeReport) -> None:
-    """Run every registered probe's ``asset_problems`` check.
+    """Run every registered probe's ``asset_problems`` check, and check the seed table it declares.
 
     Each probe checks the assets it ships, such as a bank per locale, so a
     missing or broken bank fails at install time rather than partway through
@@ -447,7 +447,7 @@ def _check_probe_assets(report: SmokeReport) -> None:
     package is checked the same way as a built-in one.
     """
     try:
-        from usersim.engine.core.probes import BaseProbe, known_probes, resolve_probe
+        from usersim.engine.core.probes import BaseProbe, known_probes, resolve_probe, seed_dataset_problems
 
         labels = known_probes()
     except Exception as e:
@@ -460,10 +460,12 @@ def _check_probe_assets(report: SmokeReport) -> None:
     for label in labels:
         try:
             cls = resolve_probe(label)
-            if inspect.getattr_static(cls, "asset_problems") is default_check:
+            own_check = inspect.getattr_static(cls, "asset_problems") is not default_check
+            if not own_check and cls.seed_dataset is None:
                 continue
             checked.append(label)
-            problems.extend(f"{label}: {problem}" for problem in cls.asset_problems())
+            found = [*(cls.asset_problems() if own_check else []), *seed_dataset_problems(cls)]
+            problems.extend(f"{label}: {problem}" for problem in found)
         except Exception as e:  # smoke reports, never raises
             problems.append(f"{label}: asset_problems raised {type(e).__name__}: {e}")
 

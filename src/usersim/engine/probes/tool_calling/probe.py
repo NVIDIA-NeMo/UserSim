@@ -117,6 +117,11 @@ def _build_tool_context(tool_subset: list) -> str:
     return "\n".join(lines) if lines else "No tools available."
 
 
+def _tools_column(cfg: Any) -> str:
+    """The row column holding the toolset's tools: the run's ``tools_column``, else the catalog's ``tools``."""
+    return getattr(cfg, "tools_column", None) or "tools"
+
+
 def _row_identity(data: dict) -> str:
     """The row's identity, which seeds its tool draw and the credentials its user holds.
 
@@ -270,6 +275,9 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
     label = "tool_calling"
     assets_root = Path(__file__).parent / "assets"
+    # The toolset catalog: each row draws one toolset and reads its tools from
+    # the ``tools`` column.
+    seed_dataset = "toolsets_seed"
     description = (
         "Tests the assistant's ability to invoke tools correctly in response to user "
         "requests, including argument shaping, schema validation, and recovery from "
@@ -290,7 +298,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
     @classmethod
     def asset_problems(cls) -> list[str]:
-        """The prompts file the prompt defaults would mask, the themes, and the toolset seed rows draw their tools from."""
+        """The prompts file the prompt defaults would mask, and the themes."""
         problems = []
         if not load_prompt_file(_SCENARIO):
             problems.append(f"{_SCENARIO}/prompts.yaml is missing or empty")
@@ -298,20 +306,16 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             cls.themes("en_US")
         except FileNotFoundError as error:
             problems.append(f"no themes: {error}")
-        toolsets = cls.assets_dir() / "toolsets_seed.parquet"
-        if not toolsets.exists():
-            problems.append(f"no toolset seed at {toolsets}, so every row would fail at construction")
         return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         cfg = self._cfg
-        if not getattr(cfg, "tools_column", None):
-            raise ValueError("tool_calling: cfg.tools_column not configured")
-        if cfg.tools_column not in self._data:
-            raise ValueError(f"tool_calling: column {cfg.tools_column!r} missing in data")
+        tools_column = _tools_column(cfg)
+        if tools_column not in self._data:
+            raise ValueError(f"tool_calling: column {tools_column!r} missing in data")
 
-        tools_raw = self._data[cfg.tools_column]
+        tools_raw = self._data[tools_column]
         all_tools = _normalize_tool_list(tools_raw)
         # Drawn from the row's own identity rather than the process RNG. The
         # subset shapes the entire conversation but is not part of the
@@ -513,12 +517,10 @@ async def simulate_tool_calling(
     tests that import the symbol. Returns a structured failure record
     on missing-tools-column rather than raising.
     """
-    if not getattr(cfg, "tools_column", None):
-        logger.warning("  |-- tool_calling: tools_column not configured")
-        return make_failed("tools_column not configured")
-    if cfg.tools_column not in data:
-        logger.warning(f"  |-- tool_calling: column '{cfg.tools_column}' not found in data")
-        return make_failed(f"tools_column '{cfg.tools_column}' missing in data")
+    tools_column = _tools_column(cfg)
+    if tools_column not in data:
+        logger.warning(f"  |-- tool_calling: column '{tools_column}' not found in data")
+        return make_failed(f"tools_column '{tools_column}' missing in data")
 
     probe = ToolCallingProbe(
         persona=persona,

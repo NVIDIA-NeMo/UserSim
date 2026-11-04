@@ -88,77 +88,50 @@ def _probe_themes(probe: str, locale: str, assets_dir: Path | None) -> list[str]
     return [json.dumps(theme, ensure_ascii=False) for theme in themes]
 
 
-#: Seed-file suffixes the ``tool_calling`` toolset seed may use. Both are
-#: accepted by Data Designer's
-#: ``LocalFileSeedSource`` (``VALID_DATASET_FILE_EXTENSIONS``); parquet is
-#: what ships, jsonl is the hand-editable alternative.
-TOOLSET_SEED_SUFFIXES: tuple[str, ...] = (".parquet", ".jsonl")
-
-
-def resolve_toolset_seed_path(
+def resolve_seed_dataset_path(
+    probe: str,
     assets_dir: Path | str | None = None,
     toolset_seed_path: Path | str | None = None,
 ) -> Path | None:
-    """The ``tool_calling`` toolset seed to use, or ``None`` if there isn't one.
+    """The seed table ``probe`` reads, or ``None`` if its asset folder holds none.
 
-    Two sources, at least one of which must be given:
+    ``probe`` must declare a ``seed_dataset``. Two sources:
 
-    - ``toolset_seed_path`` — an explicit file, which wins when both are
-      passed.
-      It must exist: you named a path, and a run that silently ignores it
-      is worse than one that stops.
-    - ``assets_dir`` — the asset root to look under, accepting
-      ``toolsets_seed.parquet`` or ``toolsets_seed.jsonl``
-      (``TOOLSET_SEED_SUFFIXES``).
+    - ``toolset_seed_path`` — an explicit file, which wins when given. It
+      must exist: you named a path, and a run that silently ignores it is
+      worse than one that stops.
+    - the probe's asset folder, under ``assets_dir`` when it is given and
+      along the asset search path otherwise, holding ``<seed_dataset>.parquet``
+      or ``<seed_dataset>.jsonl`` (``SEED_DATASET_SUFFIXES``).
 
-    Lives here rather than in the CLI because ``assets_dir`` is already a
-    builder argument: any caller that names an asset root can have its
-    toolset found for it, including the notebooks.
-    Passing ``toolset_seed_path`` is an override, not a requirement.
-
-    Returns ``None`` only when ``assets_dir`` holds neither suffix.
-    Absence is a resolution result; whether it matters depends on the
-    probe mix, which ``_wire_toolsets`` decides.
-
-    Raises ``ConfigError`` (a ``ValueError``) — never ``SystemExit`` — so
+    Raises ``ConfigError`` (a ``ValueError``), never ``SystemExit``, so
     library callers can handle it and ``cli.main`` can present it as a
-    message rather than a traceback, when an explicit path is unusable or an
-    asset root holds BOTH suffixes. That last is a configuration error rather
+    message rather than a traceback, when an explicit path is unusable or the
+    folder holds both suffixes. That last is a configuration error rather
     than a precedence question, since silently preferring one would make an
-    edit to the other look like it had no effect. Passing neither source
-    searches the configured asset path, which is how an unpinned run finds
-    the shipped seed.
-
-    Routes through ``probe_assets_dir`` so the path is composed against the
-    same source-of-truth helper the asset loaders use, rather than a string
-    literal that can drift from the real layout.
+    edit to the other look like it had no effect.
     """
+    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.engine.core.probes import SEED_DATASET_SUFFIXES, resolve_probe
 
     if toolset_seed_path is not None:
         resolved = Path(toolset_seed_path).resolve()
         if not resolved.is_file():
-            raise ConfigError(f"toolset seed not found: {resolved}")
-        if resolved.suffix not in TOOLSET_SEED_SUFFIXES:
+            raise ConfigError(f"seed table not found: {resolved}")
+        if resolved.suffix not in SEED_DATASET_SUFFIXES:
             raise ConfigError(
-                f"unsupported toolset seed suffix {resolved.suffix!r}: "
-                f"{resolved}. Expected one of {TOOLSET_SEED_SUFFIXES}."
+                f"unsupported seed table suffix {resolved.suffix!r}: {resolved}. Expected one of {SEED_DATASET_SUFFIXES}."
             )
         return resolved
 
-    from usersim.engine.core._assets import probe_assets_dir
-
-    # ``None`` means the caller did not pin a root, so the seed is looked
-    # for along the same search path the loaders use.
-    probe_dir = probe_assets_dir(
-        "tool_calling",
-        assets_root=Path(assets_dir).resolve() if assets_dir is not None else None,
-    )
-    candidates = [probe_dir / f"toolsets_seed{sfx}" for sfx in TOOLSET_SEED_SUFFIXES]
-    present = [p for p in candidates if p.is_file()]
+    stem = resolve_probe(probe).seed_dataset
+    probe_dir = probe_assets_dir(probe, assets_root=Path(assets_dir).resolve() if assets_dir is not None else None)
+    present = [probe_dir / f"{stem}{suffix}" for suffix in SEED_DATASET_SUFFIXES]
+    present = [path for path in present if path.is_file()]
     if len(present) > 1:
         raise ConfigError(
-            "ambiguous tool_calling toolset seed: "
-            + ", ".join(p.name for p in present)
+            f"ambiguous {probe} seed table: "
+            + ", ".join(path.name for path in present)
             + f" both exist in {probe_dir}. Keep exactly one."
         )
     return present[0] if present else None
@@ -298,80 +271,62 @@ def _runnable_locales(runnable: Sequence[str], bank_locale: Callable[[str], str]
     return described
 
 
-def resolve_toolset_seed_for_mix(
-    probe_mix: dict[str, float],
+def seed_dataset_probe(probe_mix: Mapping[str, float]) -> str | None:
+    """The probe in ``probe_mix`` that reads a seed table, or ``None`` when none does.
+
+    A run attaches one seed table, so a mix with two such probes is a
+    ``ConfigError``: run them separately.
+    """
+    from usersim.engine.core.probes import resolve_probe
+
+    readers = [probe for probe in probe_mix if resolve_probe(probe).seed_dataset is not None]
+    if len(readers) > 1:
+        raise ConfigError(
+            f"{', '.join(readers)} each read a seed table, and a run attaches one. Run them in separate runs."
+        )
+    return readers[0] if readers else None
+
+
+def resolve_seed_dataset_for_mix(
+    probe_mix: Mapping[str, float],
     assets_dir: Path | str | None = None,
     toolset_seed_path: Path | str | None = None,
 ) -> Path | None:
-    """Resolve a toolset only when the run actually includes ``tool_calling``.
+    """The seed table a run of ``probe_mix`` attaches, or ``None`` when no probe in it reads one.
 
-    A non-tool run must not be blocked by an ambiguous or missing toolset in
-    an otherwise valid asset tree, and its manifest must not claim it used a
-    file that never entered the pipeline. A tool run must resolve a real seed.
-    Conversely, an explicit override on a non-tool run is rejected rather than
-    silently ignored.
+    A run without such a probe is not blocked by an ambiguous or missing
+    table in an otherwise valid asset tree, and its manifest does not claim
+    it used a file that never entered the pipeline; an explicit
+    ``toolset_seed_path`` for it is refused rather than silently ignored. A
+    run with one must resolve a real table.
     """
-    if "tool_calling" not in probe_mix:
+    probe = seed_dataset_probe(probe_mix)
+    if probe is None:
         if toolset_seed_path is not None:
             raise ConfigError(
-                "toolset_seed_path was provided, but probe_mix does not "
-                "include tool_calling. Add tool_calling or remove the override."
+                "toolset_seed_path was provided, but no probe in probe_mix reads a seed table. "
+                "Add the probe it is for, or remove the override."
             )
         return None
-    resolved = resolve_toolset_seed_path(assets_dir, toolset_seed_path)
+    resolved = resolve_seed_dataset_path(probe, assets_dir, toolset_seed_path)
     if resolved is None:
+        from usersim.engine.core.probes import resolve_probe
+
+        stem = resolve_probe(probe).seed_dataset
         raise ConfigError(
-            "probe_mix includes tool_calling but no toolset seed is available. "
-            "Pass toolset_seed_path=<path>, point assets_dir at a tree with "
-            "tool_calling/toolsets_seed.{parquet,jsonl}, or drop tool_calling "
-            "from the mix."
+            f"probe_mix includes {probe}, which reads the seed table {stem}.parquet or {stem}.jsonl, and none is "
+            f"available. Pass toolset_seed_path=<path>, point assets_dir at a tree with {probe}/{stem}.parquet or "
+            f"{probe}/{stem}.jsonl, or drop {probe} from the mix."
         )
     return resolved
 
 
-def _wire_toolsets(
-    config_builder: Any,
-    dd: Any,
-    toolset_seed_path: Path | None,
-) -> dict[str, Any]:
-    """Attach ``tool_calling``'s toolset seed and return its config keys.
-
-    Both halves of the wiring — the builder mutation and the
-    ``ConversationSimulatorConfig`` keys — are decided here together, so the
-    two cannot drift apart: a run that attaches the seed dataset always gets
-    the matching tool columns, and one that does not always leaves them
-    unset.
-
-    Called only from the ``tool_calling`` branch. The mix-aware resolver
-    normally rejects a missing file first; the check here is a defensive
-    invariant. Failing at config-build time rather than letting the run start
-    is the point: with the columns unset, every ``tool_calling`` row aborts at
-    probe construction, so the whole partition comes back failed and the
-    cause is visible only by reading ``simulation_outcome`` afterwards.
-
-    ``ConfigError`` matches this module's other user-fixable errors (see
-    the ``probe_mix`` validation above) and guards every caller — the CLI,
-    and the notebooks — rather than just the one that
-    happens to resolve the path. ``cli.main`` catches it and prints the
-    message alone, so this text is the entire error output a user sees.
-
-    Takes an already-resolved path: the caller resolves only after confirming
-    that ``tool_calling`` is in the mix, so this function needs no
-    ``assets_dir``.
-    """
-    if toolset_seed_path is None or not Path(toolset_seed_path).is_file():
-        raise ConfigError(
-            "probe_mix includes tool_calling but no toolset seed is "
-            f"available (resolved to {toolset_seed_path!r}). Pass "
-            "toolset_seed_path=<path>, point assets_dir at a tree with "
-            "tool_calling/toolsets_seed.{parquet,jsonl}, or drop "
-            "tool_calling from the mix."
-        )
+def _wire_seed_dataset(config_builder: Any, dd: Any, seed_path: Path) -> None:
+    """Attach ``seed_path`` as the run's seed dataset, one shuffled row per row the run makes."""
     config_builder.with_seed_dataset(
-        dd.LocalFileSeedSource(path=str(toolset_seed_path)),
+        dd.LocalFileSeedSource(path=str(seed_path)),
         sampling_strategy=dd.SamplingStrategy.SHUFFLE,
     )
-    return {"tools_column": "tools", "toolset_name_column": "toolset_name"}
 
 
 def _set_run_config(data_designer, dd) -> None:
@@ -457,7 +412,7 @@ def build_simulator_config_builder(
     data_designer = DataDesigner(**dd_kwargs)
     _set_run_config(data_designer, dd)
     config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
-    toolset_kwargs = _add_episode_input_columns(
+    _add_episode_input_columns(
         config_builder,
         dd,
         locale=locale,
@@ -474,7 +429,6 @@ def build_simulator_config_builder(
             persona_column="persona",
             probe_type_column="probe_type",
             theme_column="theme",
-            **toolset_kwargs,
             locale=locale,
             assets_dir=_recorded_assets_dir(assets_dir),
             max_turns=max_turns,
@@ -504,15 +458,15 @@ def _add_episode_input_columns(
     toolset_seed_path: Path | None,
     match_persona_language: bool,
     drop_persona: bool,
-) -> dict[str, Any]:
-    """Install the one canonical persona/probe/theme/toolset sampler graph."""
+) -> None:
+    """Install the one canonical persona, probe, theme and seed-table sampler graph."""
     from usersim.engine.core.locale import persona_dataset_locale
 
     persona_locale = persona_dataset_locale(locale, datasets_dir=DEFAULT_PERSONA_DATASETS_DIR)
     unknown = [key for key in probe_mix if key not in set(known_probes())]
     if unknown:
         raise ConfigError(f"Unknown probe_type(s) in probe_mix: {unknown}. Registered: {sorted(known_probes())}.")
-    resolved_toolset_seed = resolve_toolset_seed_for_mix(probe_mix, assets_dir, toolset_seed_path)
+    seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, toolset_seed_path)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="persona",
@@ -534,12 +488,9 @@ def _add_episode_input_columns(
             params=dd.CategorySamplerParams(values=list(probe_mix), weights=list(probe_mix.values())),
         )
     )
-    themes: dict[str, list[str]] = {}
-    toolset_kwargs: dict[str, Any] = {}
-    for probe in probe_mix:
-        themes[probe] = _probe_themes(probe, locale, assets_dir)
-        if probe == "tool_calling":
-            toolset_kwargs = _wire_toolsets(config_builder, dd, resolved_toolset_seed)
+    themes = {probe: _probe_themes(probe, locale, assets_dir) for probe in probe_mix}
+    if seed_path is not None:
+        _wire_seed_dataset(config_builder, dd, seed_path)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="theme",
@@ -547,7 +498,6 @@ def _add_episode_input_columns(
             params=dd.SubcategorySamplerParams(category="probe_type", values=themes),
         )
     )
-    return toolset_kwargs
 
 
 def materialize_episode_inputs(
@@ -576,7 +526,7 @@ def materialize_episode_inputs(
     designer = DataDesigner(**to_data_designer_kwargs(models))
     _set_run_config(designer, dd)
     builder = dd.DataDesignerConfigBuilder()
-    toolset_kwargs = _add_episode_input_columns(
+    _add_episode_input_columns(
         builder,
         dd,
         locale=locale,
@@ -597,7 +547,6 @@ def materialize_episode_inputs(
         replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
         finance_tier_mix=finance_tier_mix,
         finance_retrieval_mode=finance_retrieval_mode,
-        **toolset_kwargs,
     )
     model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}
     sampled = designer.preview(builder, num_records=num_rows).dataset

@@ -20,9 +20,11 @@ What ``ToolCallingMixin`` does:
   ``after_assistant_turn``.)
 
 What you provide:
-- ``__init__(...)`` — sample tools from ``self._data[cfg.tools_column]``
-  (typically a CLI-provided tool registry), validate, store on
-  ``self``.
+- ``seed_dataset`` — the name of the tool table in your asset folder
+  (``<name>.parquet`` or ``<name>.jsonl``); a run gives each row the
+  columns of one of its rows, and ``--toolset-seed-path`` swaps in another.
+- ``__init__(...)`` — sample tools from the row's ``tools`` column,
+  validate, store on ``self``.
 - ``get_user_system_prompt`` — typical persona-grounded user prompt.
 - ``get_tools_for_assistant`` — returns the sampled OpenAI tool specs.
 - ``after_assistant_turn`` — intercepts tool calls, executes them
@@ -58,15 +60,17 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
     """Tool-calling capability probe with mid-loop tool execution."""
 
     label = "demo_tool_calling"
+    # assets/demo_tool_calling/toolsets.parquet (or .jsonl): one row per
+    # toolset, with a ``tools`` column of OpenAI-style function specs.
+    seed_dataset = "toolsets"
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        cfg = self._cfg
-        if not getattr(cfg, "tools_column", None):
-            raise ValueError("demo_tool_calling: cfg.tools_column not configured")
-        # Real probe: parse self._data[cfg.tools_column], validate,
-        # sample subset. See tool_calling/probe.py for the
-        # canonical tool-sampling logic.
+        if "tools" not in self._data:
+            raise ValueError("demo_tool_calling: the row has no tools column; is the seed table attached?")
+        # Real probe: parse self._data["tools"], validate, sample a
+        # subset. See tool_calling/probe.py for the canonical
+        # tool-sampling logic.
         self._tools: list[dict] = []  # populated from row
 
     def get_user_system_prompt(self) -> str:

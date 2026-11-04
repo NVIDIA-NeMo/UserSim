@@ -43,7 +43,7 @@ from pathlib import Path
 
 from usersim.cli._errors import ConfigError
 from usersim.cli._persona_language import persona_dataset_report
-from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets, verify_probe_locales
+from usersim.cli._pipeline import resolve_seed_dataset_for_mix, verify_probe_assets, verify_probe_locales
 
 logger = logging.getLogger("usersim.cli.simulate")
 
@@ -147,14 +147,14 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         type=Path,
         default=None,
         help=(
-            "Toolset file for the tool_calling probe (.parquet or .jsonl), "
-            "one row per toolset with columns toolset_source, "
-            "toolset_category, toolset_name, num_tools and tools (JSON list "
-            "of OpenAI-style function specs) -- see the Schema section of "
+            "Seed table (.parquet or .jsonl) for the probe in --probe-mix that "
+            "reads one, in place of the table it declares in its assets. For "
+            "tool_calling, its toolset catalog: one row per toolset with columns "
+            "toolset_source, toolset_category, toolset_name, num_tools and tools "
+            "(JSON list of OpenAI-style function specs) -- see the Schema section of "
             "engine/probes/tool_calling/assets/tool_calling/README.md in the package. "
-            "Defaults to toolsets_seed.{parquet,jsonl} in the tool_calling assets, under --assets-dir when given. "
-            "Requires tool_calling in --probe-mix; a missing or unsupported "
-            "explicit file is an error."
+            "Requires a probe in --probe-mix that reads a seed table; a missing or "
+            "unsupported explicit file is an error."
         ),
     )
     p.add_argument(
@@ -377,7 +377,7 @@ def run(args: argparse.Namespace) -> int:
         # Resolved before anything is printed so a bad config fails cleanly
         # instead of interleaving with a half-written plan.
         verify_probe_assets(probe_mix, run_locales, args.assets_dir)
-        seed = resolve_toolset_seed_for_mix(
+        seed = resolve_seed_dataset_for_mix(
             probe_mix,
             args.assets_dir,
             args.toolset_seed_path,
@@ -670,10 +670,10 @@ def _simulate_to_parquet(
             len(already_done),
         )
 
-    # Resolve only for a run that includes tool_calling. The builder also
+    # Resolve only for a run whose mix reads a seed table. The builder also
     # enforces this for library callers, while doing it here gives the manifest
-    # the exact file used and keeps non-tool runs independent of toolset assets.
-    toolset_seed_path = resolve_toolset_seed_for_mix(
+    # the exact file used and keeps other runs independent of seed tables.
+    toolset_seed_path = resolve_seed_dataset_for_mix(
         probe_mix,
         assets_dir,
         toolset_seed_path,

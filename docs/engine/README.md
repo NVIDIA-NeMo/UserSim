@@ -454,10 +454,10 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `persona_column` | str | `"persona"` | Column containing persona dict |
 | `probe_type_column` | str | `"probe_type"` | Column carrying the probe label that the dispatcher resolves through `_PROBE_REGISTRY` |
 | `theme_column` | str | `"theme"` | Column with theme/topic |
-| `tools_column` | str? | `None` | Tool definitions (tool_calling only) |
-| `toolset_name_column` | str? | `None` | Toolset name (tool_calling only) |
+| `tools_column` | str? | `None` | The column `tool_calling` reads its tools from; `None` reads `tools`, the column of its seed table |
+| `toolset_name_column` | str? | `None` | Read by no probe; a stored config may set it |
 | `locale` | str | `"en_US"` | Locale for conversation language |
-| `assets_dir` | str? | `None` | Optional override for the asset-bank root (defaults to repo `assets/`); per-probe env vars also work |
+| `assets_dir` | str? | `None` | The asset root every probe is pinned to (`--assets-dir`); `None` reads each probe's own assets, after any `USERSIM_ASSET_PATH` or `USERSIM_ASSETS_DIR` override |
 | `max_tools` | int | `5` | Max tools sampled per row (tool_calling) |
 | `max_turns` | int | `5` | Max conversation turns |
 | `max_steps` | int | `10` | Max tool steps per turn |

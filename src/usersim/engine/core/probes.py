@@ -246,6 +246,41 @@ class PreviewField:
     from_metadata: bool = False
 
 
+#: The suffixes a probe's ``seed_dataset`` table may have; both are files Data
+#: Designer's ``LocalFileSeedSource`` reads. A folder holding both for one
+#: table is refused, so an edit to the one a run ignores cannot look like an
+#: edit that had no effect.
+SEED_DATASET_SUFFIXES: tuple[str, ...] = (".parquet", ".jsonl")
+
+
+def seed_dataset_problems(cls: type) -> list[str]:
+    """What is wrong with the seed table ``cls.seed_dataset`` names; empty when it names none.
+
+    The name must be a file name without its suffix, and the probe's asset
+    folder must hold exactly one of ``<name>.parquet`` and ``<name>.jsonl``.
+    """
+    seed = getattr(cls, "seed_dataset", None)
+    if seed is None:
+        return []
+    if not (isinstance(seed, str) and seed and Path(seed).name == seed and not Path(seed).suffix):
+        return [
+            f"{cls.__qualname__}.seed_dataset must be None or a file name without its suffix, such as "
+            f"'toolsets_seed'; got {seed!r}"
+        ]
+    # _assets imports this module at its top, so importing it here at the top would be circular.
+    from usersim.engine.core._assets import probe_assets_dir
+
+    folder = probe_assets_dir(cls.label)
+    names = [f"{seed}{suffix}" for suffix in SEED_DATASET_SUFFIXES]
+    present = [name for name in names if (folder / name).is_file()]
+    if len(present) != 1:
+        return [
+            f"{cls.__qualname__}.seed_dataset is {seed!r}, and {folder} holds "
+            f"{'neither' if not present else 'both'} of {', '.join(names)}; it must hold one."
+        ]
+    return []
+
+
 class BaseProbe:
     """Concrete probe with sensible defaults for every optional hook.
 
@@ -326,6 +361,14 @@ class BaseProbe:
     # Where to read how to build this probe's bank for another locale. The
     # pre-flight links it when a run asks for a locale the probe has no bank for.
     authoring_guide: str | None = None
+
+    # The name, without its suffix, of a table in this probe's asset folder,
+    # ``<name>.parquet`` or ``<name>.jsonl`` (``SEED_DATASET_SUFFIXES``), that a
+    # run samples one row of for every row it makes, so each column of the
+    # table is a column of the row the probe reads. A run attaches one such
+    # table, so a probe mix with two probes that declare one is refused before
+    # any model call. ``None`` reads no table.
+    seed_dataset: str | None = None
 
     @classmethod
     def bank_locale(cls, locale: str, probe_dir: Path) -> str:

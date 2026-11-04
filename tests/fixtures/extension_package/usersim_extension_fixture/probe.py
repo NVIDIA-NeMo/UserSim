@@ -22,6 +22,7 @@ class FixtureProbe(BaseProbe):
     default_scorers = ("fixture_scorer",)
     locale_bank_check = staticmethod(_check_locale_bank)
     authoring_guide = "https://example.com/fixture-probe/locales"
+    seed_dataset = "fixture_seed"
 
     @classmethod
     def model_aliases(cls, cfg) -> tuple[str, ...]:

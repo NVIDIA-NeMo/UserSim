@@ -33,4 +33,4 @@ fixture-cmd = "usersim_extension_fixture.command:register"
 include = ["usersim_extension_fixture*"]
 
 [tool.setuptools.package-data]
-usersim_extension_fixture = ["assets/**/*.yaml"]
+usersim_extension_fixture = ["assets/**/*.yaml", "assets/**/*.jsonl"]

@@ -138,6 +138,17 @@ check(
     str(themes),
 )
 
+# A contributed probe's seed table resolves from its installed assets, as a run
+# that holds the probe attaches it.
+from usersim.cli._pipeline import resolve_seed_dataset_for_mix  # noqa: E402
+
+seed = resolve_seed_dataset_for_mix({"fixture_probe": 1.0})
+check(
+    "seed_dataset resolves a contributed seed table",
+    seed is not None and seed.name == "fixture_seed.jsonl" and "usersim_extension_fixture" in seed.parts,
+    str(seed),
+)
+
 # A model a contributed probe declares joins the models every row resolves.
 from usersim.engine.core.probes import declared_model_aliases  # noqa: E402
 

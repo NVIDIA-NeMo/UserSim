@@ -135,6 +135,7 @@ than into a branch on its label.
 | `authoring_guide` | `None` | the pre-flight, when a run asks for a locale the probe has no bank for |
 | `asset_problems` | no problems | `usersim smoke` and `assert_probe_conforms` |
 | `themes` | `None`: no theme | run setup, which draws one per row into the `theme` column |
+| `seed_dataset` | `None`: no seed table | run setup, which attaches `<seed_dataset>.parquet` or `.jsonl` from the probe's asset folder and gives each row the columns of one of its rows; a mix with two such probes is refused; smoke and `assert_probe_conforms` check the table is there |
 | `model_aliases` | `()` | run setup, which adds each alias the models file defines to every row's models |
 | `output_columns` | `()` | the run's `side_effect_columns`; a column left out is dropped |
 | `supports_assistant_resampling` | `True`; `False` with the tool mixins | judge-gated assistant resampling (`max_assistant_attempts > 1`) |

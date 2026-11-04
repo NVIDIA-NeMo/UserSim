@@ -170,10 +170,15 @@ call.
 
 ### Using your own catalog
 
-A run reads `<assets-dir>/tool_calling/toolsets_seed.parquet` by default, or
-`toolsets_seed.jsonl` if that is what is present. Keep exactly one: both
-suffixes in the same directory is an error rather than a precedence rule,
-so that editing the one the run ignores cannot look like an edit that had no effect.
+The probe declares the catalog as its seed table (`seed_dataset =
+"toolsets_seed"`), so a run reads `toolsets_seed.parquet` from the probe's
+asset folder, or `toolsets_seed.jsonl` if that is what is present, and gives
+each row the columns of one catalog row. Under `--assets-dir`, the folder is
+`<assets-dir>/tool_calling/`. Keep exactly one: both suffixes in the same
+directory is an error rather than a precedence rule, so that editing the one
+the run ignores cannot look like an edit that had no effect. A run holds one
+seed table, so `tool_calling` cannot share a run with another probe that
+reads one.
 
 To point a run at a file somewhere else, without touching this tree:
 

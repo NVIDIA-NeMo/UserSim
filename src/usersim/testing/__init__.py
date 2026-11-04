@@ -96,6 +96,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         BaseProbe,
         PreviewField,
         known_probes,
+        seed_dataset_problems,
     )
 
     problems: list[str] = []
@@ -219,6 +220,8 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"{cls.__qualname__}.authoring_guide must be None or an https:// URL, which works from an "
             f"installed package; got {guide!r}"
         )
+
+    problems.extend(seed_dataset_problems(cls))
 
     for klass, key in _reserved_metadata_writes(cls):
         problems.append(

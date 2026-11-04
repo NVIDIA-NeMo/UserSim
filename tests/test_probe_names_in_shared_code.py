@@ -28,7 +28,7 @@ _PROBE_PACKAGES = _SRC / "engine" / "probes"
 #: How many built-in probe labels each file outside ``engine/probes/`` may
 #: write as strings, by path under ``src/usersim/``.
 _ALLOWED: dict[str, int] = {
-    "cli/_pipeline.py": 7,
+    "cli/_pipeline.py": 4,
     "cli/smoke.py": 2,
     "engine/core/preview.py": 3,
     "engine/evaluator/axes.py": 6,
