@@ -1251,8 +1251,8 @@ covers the setup.
 ## Wiring the out-of-sim scorer
 
 The probe simulator only PRODUCES trajectories. The matching scorer
-that JUDGES the assistant's responses lives separately under
-[`evaluator/scorers/<your_probe>.py`](../../src/usersim/engine/evaluator/scorers/).
+that JUDGES the assistant's responses runs separately, after the simulation,
+and lives in the probe's own package as `src/usersim/engine/probes/<your_probe>/scorer.py`.
 This is the in-sim / out-of-sim boundary the architecture
 deliberately enforces.
 
@@ -1277,7 +1277,7 @@ column that is empty on a row arrives present and `None`, so handle `None`
 wherever you read one; `usersim.testing.assert_scorer_conforms` checks that
 when you pass it a `sample_row`.
 
-Add the module path to
+Add the module path, `usersim.engine.probes.<your_probe>.scorer`, to
 [`evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES`](../../src/usersim/engine/evaluator/scorers/__init__.py)
 so the auto-load path picks it up. After that, name it at evaluation time
 (`usersim eval --scorers your_probe`), or list it in the probe's
@@ -1297,18 +1297,17 @@ evaluator calls each scorer it runs on every row, so return early for rows from
 other probes, for example when your probe's join key is missing, as the
 `safety_agentic` scorer does with `action_request_id`.
 
-A scorer registered under your probe's label writes that label in a module
-outside `engine/probes/`.
+A scorer in your probe's package may write its label;
 [`tests/test_probe_names_in_shared_code.py`](../../tests/test_probe_names_in_shared_code.py)
-allows each such file a fixed number of probe labels, so add the new module to
-its `_ALLOWED` in the same change. Anything else the core needs from your probe
-goes on the class: see
+counts labels only in shared code outside `engine/probes/`. Anything else the
+core needs from your probe goes on the class: see
 [What a probe declares](../../architecture/probes.md#what-a-probe-declares).
 
 The scorer is its own design exercise (axis definition, rubric
 authoring, threshold gating). See
 [`probes/sov_ai_facts/scorer.py`](../../src/usersim/engine/probes/sov_ai_facts/scorer.py)
-or `safety_chat_pressure.py` for canonical examples.
+or [`probes/safety_chat_pressure/scorer.py`](../../src/usersim/engine/probes/safety_chat_pressure/scorer.py)
+for canonical examples.
 
 ## Adding the capabilities your probe provides evidence for
 
