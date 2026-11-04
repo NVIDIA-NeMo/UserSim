@@ -87,6 +87,7 @@ dev = ["pytest", "pytest-asyncio", "pytest-env"]
 [tool.pytest.ini_options]
 env = ["USERSIM_DISABLE_EXTENSIONS=1"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 ```
 
 - **`dependencies`** names a range of User Sim releases: `X.Y` is the first
@@ -95,8 +96,9 @@ asyncio_mode = "auto"
 - **The entry points** name the probe class and the scorer's module.
 - **`package-data`** ships the banks in the wheel; without it, an installed
   package has no assets.
-- **The pytest settings** turn extension discovery off under test and run
-  `async def` tests without a marker (see [Tests](#tests)).
+- **The pytest settings** turn extension discovery off under test, run
+  `async def` tests without a marker, and give each async fixture its test's
+  event loop (see [Tests](#tests)).
 
 ## The probe
 

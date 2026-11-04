@@ -25,3 +25,4 @@ dev = ["pytest", "pytest-asyncio", "pytest-env"]
 [tool.pytest.ini_options]
 env = ["USERSIM_DISABLE_EXTENSIONS=1"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
