@@ -155,6 +155,9 @@ class CodeInfo:
     code_sha: str | None = None
     conversation_plugin_version: str | None = None
     data_designer_version: str | None = None
+    #: Each installed package that advertises a User Sim entry point, with its
+    #: version: the extensions that could contribute to the run.
+    extensions: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -208,6 +211,9 @@ class AssetVersionsInfo:
     """Aggregated asset / prompt / variant lineage across the run."""
 
     assets_dir: str | None = None
+    #: The folder each probe in the run's mix read its assets from, so a run
+    #: that read a probe's banks from an override shows it.
+    probe_assets: dict[str, str] = field(default_factory=dict)
     nemotron_personas_version: str | None = None
     bank_versions: dict[str, str] = field(default_factory=dict)
     prompt_versions: dict[str, str] = field(default_factory=dict)
@@ -326,6 +332,7 @@ def _code_from_dict(d: Mapping[str, Any]) -> CodeInfo:
         code_sha=d.get("code_sha"),
         conversation_plugin_version=d.get("conversation_plugin_version"),
         data_designer_version=d.get("data_designer_version"),
+        extensions=dict(d.get("extensions") or {}),
     )
 
 
@@ -364,6 +371,7 @@ def _scope_from_dict(d: Mapping[str, Any]) -> ScopeInfo:
 def _asset_versions_from_dict(d: Mapping[str, Any]) -> AssetVersionsInfo:
     return AssetVersionsInfo(
         assets_dir=d.get("assets_dir"),
+        probe_assets=dict(d.get("probe_assets") or {}),
         nemotron_personas_version=d.get("nemotron_personas_version"),
         bank_versions=dict(d.get("bank_versions") or {}),
         prompt_versions=dict(d.get("prompt_versions") or {}),
@@ -466,12 +474,14 @@ def _detect_code_info() -> CodeInfo:
     development checkouts may resolve to ``None`` if the package isn't
     installed; that's fine, the manifest records the gap honestly.
     """
+    from usersim.engine.core._extensions import extension_distributions
     from usersim.engine.core.provenance import get_code_sha
 
     return CodeInfo(
         code_sha=get_code_sha(),
         conversation_plugin_version=_own_version(),
         data_designer_version=_pkg_version("data_designer"),
+        extensions=extension_distributions(),
     )
 
 
@@ -797,6 +807,7 @@ def build_run_manifest(
 
     asset_versions = AssetVersionsInfo(
         assets_dir=str(assets_dir) if assets_dir is not None else None,
+        probe_assets=_probe_assets(probe_mix, assets_dir),
         nemotron_personas_version=_nemotron_version(),
         bank_versions=aggregates["bank_versions"],
         prompt_versions=aggregates["prompt_versions"],
@@ -829,6 +840,16 @@ def build_run_manifest(
             matched_pair_group_id=matched_pair_group_id,
         ),
     )
+
+
+def _probe_assets(probe_mix: Mapping[str, float], assets_dir: Path | None) -> dict[str, str]:
+    """The folder each probe in ``probe_mix`` reads its assets from: under ``assets_dir`` when the run pinned one."""
+    from usersim.engine.core._assets import probe_assets_dir
+
+    return {
+        probe: str(probe_assets_dir(probe, assets_root=Path(assets_dir) if assets_dir is not None else None))
+        for probe in sorted(probe_mix)
+    }
 
 
 def _nemotron_version() -> str | None:

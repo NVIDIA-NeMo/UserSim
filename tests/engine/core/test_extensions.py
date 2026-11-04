@@ -17,6 +17,7 @@ from usersim.engine.core._extensions import (
     ENTRY_POINT_GROUPS,
     PROBES,
     clear_extension_cache,
+    extension_distributions,
     extension_records,
     extensions_disabled,
     load_extensions,
@@ -194,3 +195,20 @@ class TestRecords:
         load_extensions(PROBES)
         clear_extension_cache()
         assert extension_records() == ()
+
+
+class TestExtensionDistributions:
+    """The packages a run's manifest records as the extensions that could reach it."""
+
+    def test_none_while_discovery_is_off(self, monkeypatch) -> None:
+        _fake_entry_points(monkeypatch, ("p", "json:dumps"))
+        assert extension_distributions() == {}
+
+    def test_each_advertising_distribution_with_its_version(self, monkeypatch, discovery_enabled) -> None:
+        class _Dist:
+            name, version = "my-bookings", "0.1.0"
+
+        ep = EntryPoint(name="my_bookings", value="json:dumps", group=PROBES)
+        object.__setattr__(ep, "dist", _Dist())
+        monkeypatch.setattr(_extensions, "entry_points", lambda group: [ep] if group == PROBES else [])
+        assert extension_distributions() == {"my-bookings": "0.1.0"}

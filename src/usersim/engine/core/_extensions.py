@@ -116,6 +116,22 @@ def _select(group: str) -> tuple[EntryPoint, ...]:
     return tuple(sorted(entry_points(group=group), key=lambda ep: ep.name))
 
 
+def extension_distributions() -> dict[str, str]:
+    """Each installed distribution that advertises a User Sim entry point, with its version.
+
+    Empty when discovery is off, since no extension then reaches a run.
+    """
+    if extensions_disabled():
+        return {}
+    found: dict[str, str] = {}
+    for group in ENTRY_POINT_GROUPS:
+        for ep in _select(group):
+            dist = getattr(ep, "dist", None)
+            if dist is not None:
+                found[dist.name] = dist.version
+    return dict(sorted(found.items()))
+
+
 def _package(ep: EntryPoint) -> str:
     """The installed distribution that advertises ``ep``, with its version."""
     dist = getattr(ep, "dist", None)

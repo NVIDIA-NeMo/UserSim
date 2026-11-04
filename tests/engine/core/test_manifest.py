@@ -580,11 +580,47 @@ class TestBuildRunManifest:
         assert manifest.scope.trajectories_completed == {"en_US": 1}
         assert manifest.outcome_summary.status_counts == {"ok": 1}
         assert manifest.asset_versions.prompt_versions == {"tool_calling": "v1.0"}
+        # The run pinned /repo/assets, so the probe read its assets there.
+        assert manifest.asset_versions.probe_assets == {"tool_calling": str(Path("/repo/assets") / "tool_calling")}
         identity = manifest.models["assistant_model"]
         assert identity.model == "nvidia/nemotron-3-super-v3"
         assert identity.endpoint == "https://gateway.example/v1"
         assert identity.api_key_env_var == "GATEWAY_API_KEY"
         assert manifest.replay == ReplayInfo()  # reserved fields default null
+
+    def test_an_unpinned_run_records_each_probe_s_own_assets(self) -> None:
+        from usersim.engine.core._assets import probe_assets_dir
+
+        manifest = build_run_manifest(
+            run_id="1700000005",
+            started_at_epoch=1700000005,
+            finished_at_epoch=1700000006,
+            models_config=_StubModelsConfig(),
+            sim_config=_StubSimConfig(),
+            locales_requested=["en_US"],
+            probe_mix={"tool_calling": 0.5, "general_open_ended": 0.5},
+            trajectory_df=None,
+        )
+        assert manifest.asset_versions.assets_dir is None
+        assert manifest.asset_versions.probe_assets == {
+            probe: str(probe_assets_dir(probe)) for probe in ("general_open_ended", "tool_calling")
+        }
+
+    def test_records_the_installed_extensions(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        from usersim.engine.core import _extensions
+
+        monkeypatch.setattr(_extensions, "extension_distributions", lambda: {"my-bookings": "0.1.0"})
+        manifest = build_run_manifest(
+            run_id="1700000007",
+            started_at_epoch=1700000007,
+            finished_at_epoch=1700000008,
+            models_config=_StubModelsConfig(),
+            sim_config=_StubSimConfig(),
+            locales_requested=["en_US"],
+            probe_mix={},
+            trajectory_df=None,
+        )
+        assert manifest.code.extensions == {"my-bookings": "0.1.0"}
 
     def test_empty_trajectory_df_renders_zeros(self) -> None:
         manifest = build_run_manifest(
