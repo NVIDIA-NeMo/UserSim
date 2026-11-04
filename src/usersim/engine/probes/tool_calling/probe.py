@@ -79,10 +79,7 @@ PROBE_FAMILY: str = "tool_calling"
 PROBE_VARIANTS: list[str] = ["default"]  # tool-category via toolset_category column; single variant today
 PROMPT_VERSION: str = "v1.2"
 
-MODEL_USER = "user_model"
-MODEL_ASSISTANT = "assistant_model"
 MODEL_API_RESPONSE = "api_response_model"
-MODEL_JUDGE = "judge_model"
 
 
 def _derive_tool_theme(data: dict) -> dict:

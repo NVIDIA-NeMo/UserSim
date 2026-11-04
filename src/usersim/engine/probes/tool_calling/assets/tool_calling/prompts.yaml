@@ -139,17 +139,6 @@ tool_relevance_success: |
 tool_relevance_failure: |
   - The request can be fully answered from general knowledge or opinion alone,
     without needing any of the available tools.
-trajectory_judge_prompt: |-
-  Evaluate the assistant's tool-calling performance in this conversation.
-
-  The user interacted with an AI assistant that had access to the following tools: <TOOLS> {tools} </TOOLS>
-
-  <CONVERSATION> {conversation} </CONVERSATION>
-
-  Evaluate the assistant's performance on each axis according to the scoring rubric. Consider the full trajectory — not just individual calls, but the overall approach to solving the user's request.
-
-  For each axis, provide: - A score from the defined options - Detailed reasoning explaining your assessment
-
 assistant_judge_prompt: |-
   You are an expert evaluator. Judge the assistant's response in this conversation.
 

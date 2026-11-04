@@ -31,14 +31,6 @@ def format_tools_for_prompt(tools: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def format_themes_for_prompt(themes: list[dict[str, Any]]) -> str:
-    """Format a list of theme dicts into a human-readable prompt block."""
-    lines = []
-    for theme in themes:
-        lines.append(f"- {theme.get('type', 'Unknown')}: {theme.get('description', 'No description')}")
-    return "\n".join(lines)
-
-
 def format_conversation_history_for_prompt(messages: list[dict[str, Any]]) -> str:
     """Format conversation messages into a text block for judge prompts."""
     lines = []

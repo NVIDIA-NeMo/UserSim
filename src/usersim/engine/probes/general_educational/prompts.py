@@ -68,38 +68,6 @@ Criteria for failure:
 - The learner references the conversation itself, the simulation, or how messages are being constructed — this is a fourth-wall break."""
 
 
-_DEFAULT_TRAJECTORY_RUBRIC = """Evaluate the overall quality of this tutoring conversation.
-
-SUCCESS criteria:
-- The tutor adapted explanations to the learner's level.
-- The tutor used appropriate scaffolding and examples.
-- The conversation progressed the learner's understanding.
-- The tutor was encouraging without being condescending.
-- When the learner's question was vague or overly broad, the tutor asked what
-  specifically they wanted to learn instead of providing an overwhelming overview.
-- The learner-LLM stayed in character as a realistic learner — only asking
-  questions, attempting exercises, expressing confusion, and providing requested info.
-
-FAILURE criteria:
-- The tutor provided incorrect information.
-- The tutor was condescending, dismissive, or unhelpful.
-- Explanations were consistently too complex or too simple for the learner.
-- The conversation went in circles without progress.
-- The tutor dumped an excessive amount of information instead of narrowing down
-  a vague or overly broad question from the learner.
-- The tutor produced an unintelligible, empty, or non-responsive reply to the
-  learner's question in any turn.
-- Role inversion: the learner-LLM took over the tutor's job — e.g., explaining
-  concepts, providing structured data, or teaching the tutor. A real learner
-  asks for help; they do not lecture back.
-- The learner-LLM offered help or expertise to the tutor, reversing the
-  learner/teacher dynamic.
-- The learner-LLM broke the fourth wall by referencing the conversation structure,
-  the simulation, or how messages should be written.
-- The learner-LLM broke character (gave tutor-like responses, used structured
-  output, markdown, tables, or numbered lists)."""
-
-
 _INLINE_JUDGE_RESPONSE_FORMAT = """
 Strictly respond in the following format:
 <explanation>
@@ -114,8 +82,6 @@ Strictly respond in the following format:
 EDUCATIONAL_USER_AGENT_SYSTEM_PROMPT = get_prompt(_SCENARIO, "user_agent_system_prompt", _DEFAULT_USER_AGENT)
 
 EDUCATIONAL_USER_JUDGE_RUBRIC = get_prompt(_SCENARIO, "user_judge_rubric", _DEFAULT_USER_JUDGE_RUBRIC)
-
-EDUCATIONAL_TRAJECTORY_RUBRIC = get_prompt(_SCENARIO, "trajectory_rubric", _DEFAULT_TRAJECTORY_RUBRIC)
 
 
 USER_JUDGE_TURN_PROMPT = (
@@ -134,23 +100,6 @@ Learner message to judge:
 <RUBRIC>
 """
     + EDUCATIONAL_USER_JUDGE_RUBRIC
-    + """
-</RUBRIC>
-"""
-    + _INLINE_JUDGE_RESPONSE_FORMAT
-)
-
-
-TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT = (
-    """You are an expert evaluator. Judge this entire tutoring conversation.
-
-<CONVERSATION>
-{conversation_history}
-</CONVERSATION>
-
-<RUBRIC>
-"""
-    + EDUCATIONAL_TRAJECTORY_RUBRIC
     + """
 </RUBRIC>
 """
@@ -192,16 +141,6 @@ def user_judge_rubric() -> str:
     return get_prompt(_SCENARIO, "user_judge_rubric", _DEFAULT_USER_JUDGE_RUBRIC)
 
 
-def trajectory_rubric() -> str:
-    """Resolve ``trajectory_rubric`` against the currently-active asset root."""
-    return get_prompt(_SCENARIO, "trajectory_rubric", _DEFAULT_TRAJECTORY_RUBRIC)
-
-
 def user_judge_turn_prompt() -> str:
     """``USER_JUDGE_TURN_PROMPT`` with the rubric resolved at call time."""
     return USER_JUDGE_TURN_PROMPT.replace(EDUCATIONAL_USER_JUDGE_RUBRIC, user_judge_rubric())
-
-
-def trajectory_level_judge_turn_prompt() -> str:
-    """``TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT`` with the rubric resolved at call time."""
-    return TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT.replace(EDUCATIONAL_TRAJECTORY_RUBRIC, trajectory_rubric())

@@ -6,7 +6,6 @@
 from usersim.engine.core.messages import (
     _parse_theme,
     format_conversation_history_for_prompt,
-    format_themes_for_prompt,
     format_tools_for_prompt,
     project_public_dialogue,
 )
@@ -28,13 +27,6 @@ class TestFormatToolsForPrompt:
             "(needs the user's WeatherCo API key and WeatherCo API secret)",
             "- search_recipes: Search for recipes by ingredient",
         ]
-
-
-class TestFormatThemes:
-    def test_formats_themes(self):
-        themes = [{"type": "health", "description": "Health topics"}]
-        result = format_themes_for_prompt(themes)
-        assert "health" in result
 
 
 class TestParseTheme:

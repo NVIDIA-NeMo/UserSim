@@ -150,9 +150,9 @@ class TestAccessorsResolveAtCallTime:
         """A prompts.yaml that omits a key must not blank the prompt."""
         from usersim.engine.probes.general_open_ended import prompts as oe
 
-        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="R"))
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", user_judge_rubric="R"))
         assert oe.user_agent_system_prompt().strip()
-        assert oe.trajectory_rubric() == "R"
+        assert oe.user_judge_rubric() == "R"
 
 
 class TestPromptFileIsReadWhereTheBanksAre:
@@ -357,7 +357,7 @@ class TestAssistantJudgePrompt:
         """No asset key present -> the compiled default, interpolated."""
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
 
-        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="x"))
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", user_judge_rubric="x"))
         probe = _open_ended_probe({"uuid": "u", "theme": "{}"})
         assert probe.format_assistant_judge_prompt("R", "H") == (
             ASSISTANT_JUDGE_PROMPT.format(assistant_response="R", conversation_history="H")
