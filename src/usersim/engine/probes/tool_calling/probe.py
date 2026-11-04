@@ -29,39 +29,7 @@ import random
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.behavioral import (
-    ChatRealism,
-    format_behavioral_profile_for_prompt,
-    format_disclosure_instructions,
-    format_interaction_style_instructions,
-)
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.messages import (
-    _parse_theme,
-    format_conversation_history_for_prompt,
-    format_tools_for_prompt,
-)
-from usersim.engine.core.outcomes import (
-    SimulationTrace,
-    TraceKind,
-)
-from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import (
-    BaseProbe,
-    PreviewField,
-    ToolCallingMixin,
-    ToolExecutionMixin,
-    dispatch_episode,
-    register_probe,
-)
-from usersim.engine.core.prompt_loader import load_prompt_file, render_prompt
-from usersim.engine.core.simulation import (
-    ConversationState,
-    make_failed,
-)
-from usersim.engine.core.simulation import (
-    language_instruction as _language_instruction,
-)
+from usersim.engine.core.messages import _parse_theme
 from usersim.engine.probes.tool_calling.credentials import (
     declared_credentials,
     draw_credentials,
@@ -80,6 +48,29 @@ from usersim.engine.probes.tool_calling.prompts import (
     user_judge_prompt,
 )
 from usersim.engine.probes.tool_calling.verifiers import ToolCallVerifier
+from usersim.extension import (
+    BaseProbe,
+    ChatRealism,
+    ConversationState,
+    PreviewField,
+    SimulationTrace,
+    ToolCallingMixin,
+    ToolExecutionMixin,
+    TraceKind,
+    acall_llm,
+    dispatch_episode,
+    format_behavioral_profile_for_prompt,
+    format_conversation_history_for_prompt,
+    format_disclosure_instructions,
+    format_interaction_style_instructions,
+    format_persona_for_prompt,
+    format_tools_for_prompt,
+    load_prompt_file,
+    make_failed,
+    register_probe,
+    render_prompt,
+)
+from usersim.extension import language_instruction as _language_instruction
 
 logger = logging.getLogger("usersim.engine")
 

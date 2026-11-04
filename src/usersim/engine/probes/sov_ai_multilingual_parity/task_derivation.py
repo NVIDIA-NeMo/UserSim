@@ -34,8 +34,8 @@ import json
 import random
 from typing import Any, Iterable
 
-from usersim.engine.core.persona_tags import persona_to_tags
 from usersim.engine.probes.sov_ai_multilingual_parity.bank import Query, QueryBank
+from usersim.extension import persona_to_tags
 
 __all__ = ["persona_to_tags", "derive_task"]
 

@@ -22,17 +22,17 @@ _PUBLIC = frozenset({"usersim.extension", "usersim.testing"})
 #: How many distinct ``(module, name)`` imports from internal ``usersim`` modules
 #: each built-in package holds.
 _ALLOWED: dict[str, int] = {
-    "financial_services": 40,
-    "general_educational": 14,
-    "general_open_ended": 14,
-    "health_disclosure": 15,
-    "identity_disclosure": 27,
-    "safety_agentic": 30,
-    "safety_chat_pressure": 23,
-    "sov_ai_dynamic": 29,
-    "sov_ai_facts": 22,
-    "sov_ai_multilingual_parity": 22,
-    "tool_calling": 23,
+    "financial_services": 12,
+    "general_educational": 0,
+    "general_open_ended": 0,
+    "health_disclosure": 0,
+    "identity_disclosure": 6,
+    "safety_agentic": 3,
+    "safety_chat_pressure": 0,
+    "sov_ai_dynamic": 7,
+    "sov_ai_facts": 0,
+    "sov_ai_multilingual_parity": 0,
+    "tool_calling": 1,
 }
 
 

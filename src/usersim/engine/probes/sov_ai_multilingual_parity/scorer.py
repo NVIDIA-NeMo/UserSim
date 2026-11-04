@@ -60,11 +60,13 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.locale import expected_language_display
-from usersim.engine.core.messages import format_conversation_history_for_prompt
-from usersim.engine.evaluator.scorers import register_scorer
 from usersim.engine.probes.sov_ai_multilingual_parity.bank import Query, load_query_bank_default
+from usersim.extension import (
+    acall_llm,
+    expected_language_display,
+    format_conversation_history_for_prompt,
+    register_scorer,
+)
 
 logger = logging.getLogger("usersim.engine")
 

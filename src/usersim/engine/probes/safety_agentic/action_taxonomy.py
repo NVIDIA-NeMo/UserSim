@@ -134,7 +134,7 @@ _ACTION_TAXONOMY_CACHE_LOCK = threading.Lock()
 
 def _default_action_taxonomy_path() -> Path:
     """The probe's own ``assets/safety_agentic/action_taxonomy.yaml``, through ``probe_assets_dir``."""
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.extension import probe_assets_dir
 
     return probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"
 

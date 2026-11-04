@@ -40,9 +40,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.messages import format_conversation_history_for_prompt
-from usersim.engine.evaluator.scorers import register_scorer
+from usersim.extension import acall_llm, format_conversation_history_for_prompt, register_scorer
 
 logger = logging.getLogger("usersim.engine")
 

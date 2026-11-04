@@ -183,7 +183,7 @@ def load_clinical_profile_bank(path: str | Path) -> ClinicalProfileBank:
 # ---------------------------------------------------------------------------
 def default_clinical_profile_bank_path(client: str) -> Path:
     """Bundled bank path: ``assets/<client>/sample.yaml`` (locale-independent)."""
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.extension import probe_assets_dir
 
     if client not in CLIENT_PROBE_LABELS:
         raise ClinicalProfileBankError(f"unknown client probe label: {client!r}")

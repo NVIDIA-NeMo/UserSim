@@ -228,7 +228,7 @@ def default_fact_bank_path(locale: str) -> Path:
     ``assets/sov_ai_facts/<locale>/sample.yaml`` wherever the package is
     installed, unless an asset root ahead of it holds ``sov_ai_facts/``.
     """
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.extension import probe_assets_dir
 
     return probe_assets_dir("sov_ai_facts") / locale / "sample.yaml"
 

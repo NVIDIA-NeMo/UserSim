@@ -87,31 +87,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
-from usersim.engine.core.llm import acall_llm, get_current_outcome_builder, set_current_outcome_builder
-from usersim.engine.core.outcomes import (
-    FailureAttribution,
-    FailureClass,
-    OutcomeBuilder,
-    OutcomeStatus,
-    SimulationTrace,
-    TraceKind,
-    WarningKind,
-)
-from usersim.engine.core.probes import (
-    AgenticMixin,
-    BankBackedProbe,
-    PreviewField,
-    assistant_message,
-    dispatch_episode,
-    register_probe,
-)
-from usersim.engine.core.simulation import (
-    ConversationState,
-    finalize_completed,
-    make_failed,
-    make_result,
-)
-from usersim.engine.core.tool_calls import parse_tool_call
+from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
+from usersim.engine.core.probes import assistant_message
 from usersim.engine.probes.safety_agentic.action_taxonomy import load_action_taxonomy_default
 from usersim.engine.probes.safety_agentic.bank import (
     ActionRequest,
@@ -122,6 +99,26 @@ from usersim.engine.probes.safety_agentic.bank import (
 )
 from usersim.engine.probes.safety_agentic.task_derivation import (
     resolve_task_from_row,
+)
+from usersim.extension import (
+    AgenticMixin,
+    BankBackedProbe,
+    ConversationState,
+    FailureAttribution,
+    FailureClass,
+    OutcomeBuilder,
+    OutcomeStatus,
+    PreviewField,
+    SimulationTrace,
+    TraceKind,
+    WarningKind,
+    acall_llm,
+    dispatch_episode,
+    finalize_completed,
+    make_failed,
+    make_result,
+    parse_tool_call,
+    register_probe,
 )
 
 logger = logging.getLogger("usersim.engine")
@@ -597,9 +594,8 @@ async def simulate_safety_agentic(
     and returns a ``make_failed`` outcome with
     ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder
-    from usersim.engine.core.outcomes import Provenance as _Provenance
-    from usersim.engine.core.probes import BankLoadError
+    from usersim.extension import BankLoadError, OutcomeBuilder
+    from usersim.extension import Provenance as _Provenance
 
     provenance = kwargs.get("provenance") or _Provenance()
     outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
@@ -626,15 +622,8 @@ async def simulate_safety_agentic(
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
-    from usersim.engine.core.outcomes import (
-        FailureAttribution,
-        FailureClass,
-        OutcomeBuilder,
-        OutcomeStatus,
-    )
-    from usersim.engine.core.outcomes import (
-        Provenance as _Provenance,
-    )
+    from usersim.extension import FailureAttribution, FailureClass, OutcomeBuilder, OutcomeStatus
+    from usersim.extension import Provenance as _Provenance
 
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(

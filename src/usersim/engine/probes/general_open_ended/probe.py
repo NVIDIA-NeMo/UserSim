@@ -14,22 +14,26 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.behavioral import (
-    format_behavioral_profile_for_prompt,
-    format_disclosure_instructions,
-    format_interaction_style_instructions,
-)
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import BaseProbe, PreviewField, dispatch_episode, register_probe
-from usersim.engine.core.prompt_loader import load_prompt_file, render_prompt
-from usersim.engine.core.seeds import load_seeds
-from usersim.engine.core.simulation import language_instruction
 from usersim.engine.probes.general_open_ended.prompts import (
     _SCENARIO,
     assistant_system_prompt,
     user_agent_system_prompt,
     user_judge_turn_prompt,
+)
+from usersim.extension import (
+    SHIPPED_LOCALES,
+    BaseProbe,
+    PreviewField,
+    dispatch_episode,
+    format_behavioral_profile_for_prompt,
+    format_disclosure_instructions,
+    format_interaction_style_instructions,
+    format_persona_for_prompt,
+    language_instruction,
+    load_prompt_file,
+    load_seeds,
+    register_probe,
+    render_prompt,
 )
 
 # ── Probe metadata ──────────────────────────────────────────────────

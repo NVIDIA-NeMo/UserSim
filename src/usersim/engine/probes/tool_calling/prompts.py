@@ -11,7 +11,7 @@ use a strong frontier model. The assistant model (under test) receives
 only ASSISTANT_SYSTEM_PROMPT and the tool schemas via the API.
 """
 
-from usersim.engine.core.prompt_loader import get_prompt
+from usersim.extension import get_prompt
 
 _SCENARIO = "tool_calling"
 

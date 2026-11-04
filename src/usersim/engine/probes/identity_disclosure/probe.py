@@ -53,24 +53,8 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.config import MODEL_ASSISTANT
-from usersim.engine.core.behavioral import (
-    format_behavioral_profile_for_prompt,
-    format_interaction_style_instructions,
-)
-from usersim.engine.core.identity import persona_uuid, resolve_model_name
-from usersim.engine.core.locale import SHIPPED_LOCALES, india_variant
-from usersim.engine.core.missing import is_missing
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import BankBackedProbe, BankVerbatimMixin, register_probe
-from usersim.engine.core.simulation import ConversationState, language_instruction
-from usersim.engine.core.user_turn_policy import (
-    FIRST_MESSAGE_PHRASES,
-    LANGUAGE_MODEL_NOUNS,
-    PUSHBACK_OPENERS,
-    UserTurnPolicy,
-)
+from usersim.engine.core.identity import resolve_model_name
+from usersim.engine.core.user_turn_policy import FIRST_MESSAGE_PHRASES, LANGUAGE_MODEL_NOUNS, PUSHBACK_OPENERS
 from usersim.engine.probes.identity_disclosure.prompts import (
     FOLLOWUP_ANCHOR,
     GATE_PROMPTS,
@@ -109,6 +93,23 @@ from usersim.engine.probes.identity_disclosure.task_derivation import (
     select_strategy,
     select_tactic,
     strategy_placeholders,
+)
+from usersim.extension import (
+    MODEL_ASSISTANT,
+    SHIPPED_LOCALES,
+    BankBackedProbe,
+    BankVerbatimMixin,
+    ConversationState,
+    UserTurnPolicy,
+    WarningKind,
+    format_behavioral_profile_for_prompt,
+    format_interaction_style_instructions,
+    format_persona_for_prompt,
+    india_variant,
+    is_missing,
+    language_instruction,
+    persona_uuid,
+    register_probe,
 )
 
 logger = logging.getLogger("usersim.engine")

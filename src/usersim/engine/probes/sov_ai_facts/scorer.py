@@ -46,10 +46,8 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.messages import format_conversation_history_for_prompt
-from usersim.engine.evaluator.scorers import register_scorer
 from usersim.engine.probes.sov_ai_facts.bank import Fact, load_fact_bank_for_locale
+from usersim.extension import acall_llm, format_conversation_history_for_prompt, register_scorer
 
 logger = logging.getLogger("usersim.engine")
 
@@ -291,8 +289,8 @@ async def score_sov_ai_facts_trajectory(
 
     # India language-variants reuse the en_IN fact bank (presence-aware:
     # a native per-variant bank is used if it has been authored).
-    from usersim.engine.core.locale import asset_locale
     from usersim.engine.probes.sov_ai_facts.bank import default_fact_bank_path
+    from usersim.extension import asset_locale
 
     bank_locale = asset_locale(locale, exists=lambda l: default_fact_bank_path(l).exists())
 

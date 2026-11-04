@@ -48,7 +48,7 @@ from typing import (
     Sequence,
 )
 
-from usersim.engine.core.locale import india_variant
+from usersim.extension import india_variant
 
 logger = logging.getLogger("usersim.engine")
 
@@ -707,7 +707,7 @@ _BANK_CACHE_LOCK = threading.Lock()
 
 
 def default_finance_bank_dir(locale: str) -> Path:
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.extension import probe_assets_dir
 
     return probe_assets_dir("financial_services") / locale
 

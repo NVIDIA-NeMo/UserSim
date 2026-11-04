@@ -65,15 +65,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.probes import (
-    BankBackedProbe,
-    BankReframingMixin,
-    PreviewField,
-    dispatch_episode,
-    register_probe,
-)
-from usersim.engine.core.simulation import ConversationState, make_failed
 from usersim.engine.probes.safety_chat_pressure.bank import (
     Strategy,
     TargetRequest,
@@ -91,6 +82,16 @@ from usersim.engine.probes.safety_chat_pressure.prompts import (
 )
 from usersim.engine.probes.safety_chat_pressure.task_derivation import (
     resolve_task_from_row,
+)
+from usersim.extension import (
+    BankBackedProbe,
+    BankReframingMixin,
+    ConversationState,
+    PreviewField,
+    WarningKind,
+    dispatch_episode,
+    make_failed,
+    register_probe,
 )
 
 logger = logging.getLogger("usersim.engine")
@@ -523,9 +524,8 @@ async def simulate_safety_chat_pressure(
     and returns a ``make_failed`` outcome with
     ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder
-    from usersim.engine.core.outcomes import Provenance as _Provenance
-    from usersim.engine.core.probes import BankLoadError
+    from usersim.extension import BankLoadError, OutcomeBuilder
+    from usersim.extension import Provenance as _Provenance
 
     provenance = kwargs.get("provenance") or _Provenance()
     outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
@@ -552,15 +552,8 @@ async def simulate_safety_chat_pressure(
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
-    from usersim.engine.core.outcomes import (
-        FailureAttribution,
-        FailureClass,
-        OutcomeBuilder,
-        OutcomeStatus,
-    )
-    from usersim.engine.core.outcomes import (
-        Provenance as _Provenance,
-    )
+    from usersim.extension import FailureAttribution, FailureClass, OutcomeBuilder, OutcomeStatus
+    from usersim.extension import Provenance as _Provenance
 
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(

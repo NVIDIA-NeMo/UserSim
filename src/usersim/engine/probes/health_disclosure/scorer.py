@@ -88,14 +88,13 @@ import json
 import logging
 from typing import Any
 
-from usersim.engine.core.missing import is_missing
-from usersim.engine.evaluator.scorers import register_scorer
 from usersim.engine.probes.health_disclosure.realized_audit import (
     DISCLOSURE_CREDIT,
     pair_realized_turns,
     reconcile_realized,
     verify_realized_transcript,
 )
+from usersim.extension import is_missing, register_scorer
 
 logger = logging.getLogger("usersim.engine")
 

@@ -32,10 +32,7 @@ import logging
 import os
 from typing import Any
 
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.probes import LocalePromptPack
-from usersim.engine.core.tool_calls import recover_tool_call
+from usersim.extension import SHIPPED_LOCALES, LocalePromptPack, acall_llm, recover_tool_call
 
 logger = logging.getLogger("usersim.engine")
 

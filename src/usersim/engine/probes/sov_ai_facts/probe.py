@@ -51,17 +51,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import (
-    BankBackedProbe,
-    BankVerbatimMixin,
-    PreviewField,
-    dispatch_episode,
-    register_probe,
-)
-from usersim.engine.core.simulation import ConversationState, make_failed
 from usersim.engine.probes.sov_ai_facts.bank import (
     Fact,
     default_fact_bank_path,
@@ -76,6 +65,18 @@ from usersim.engine.probes.sov_ai_facts.prompts import (
 )
 from usersim.engine.probes.sov_ai_facts.task_derivation import (
     derive_task,
+)
+from usersim.extension import (
+    SHIPPED_LOCALES,
+    BankBackedProbe,
+    BankVerbatimMixin,
+    ConversationState,
+    PreviewField,
+    WarningKind,
+    dispatch_episode,
+    format_persona_for_prompt,
+    make_failed,
+    register_probe,
 )
 
 logger = logging.getLogger("usersim.engine")
@@ -320,9 +321,8 @@ async def simulate_sov_ai_facts(
     prompt-pack-missing) and returns a ``make_failed`` outcome with
     ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder
-    from usersim.engine.core.outcomes import Provenance as _Provenance
-    from usersim.engine.core.probes import BankLoadError
+    from usersim.extension import BankLoadError, OutcomeBuilder
+    from usersim.extension import Provenance as _Provenance
 
     provenance = kwargs.get("provenance") or _Provenance()
     # Construct an OutcomeBuilder so placeholder warnings + bank-version
@@ -356,15 +356,8 @@ async def simulate_sov_ai_facts(
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
-    from usersim.engine.core.outcomes import (
-        FailureAttribution,
-        FailureClass,
-        OutcomeBuilder,
-        OutcomeStatus,
-    )
-    from usersim.engine.core.outcomes import (
-        Provenance as _Provenance,
-    )
+    from usersim.extension import FailureAttribution, FailureClass, OutcomeBuilder, OutcomeStatus
+    from usersim.extension import Provenance as _Provenance
 
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(

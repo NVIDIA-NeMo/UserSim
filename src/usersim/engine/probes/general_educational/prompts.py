@@ -7,7 +7,7 @@ Templates are loaded from assets/general_educational/prompts.yaml when available
 falling back to the compiled-in defaults below.
 """
 
-from usersim.engine.core.prompt_loader import get_prompt
+from usersim.extension import get_prompt
 
 _SCENARIO = "general_educational"
 

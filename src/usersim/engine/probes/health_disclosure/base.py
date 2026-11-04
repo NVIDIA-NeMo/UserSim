@@ -22,15 +22,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Mapping
 
-from usersim.engine.core.behavioral import (
-    format_behavioral_profile_for_prompt,
-    format_disclosure_instructions,
-    format_interaction_style_instructions,
-)
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import BankBackedProbe
-from usersim.engine.core.simulation import language_instruction
 from usersim.engine.probes.health_disclosure.bank import (
     DEFAULT_PROFILE_ID,
     ClinicalProfile,
@@ -38,6 +29,15 @@ from usersim.engine.probes.health_disclosure.bank import (
 from usersim.engine.probes.health_disclosure.mixin import (
     GuardedMoveMixin,
     env_override,
+)
+from usersim.extension import (
+    BankBackedProbe,
+    WarningKind,
+    format_behavioral_profile_for_prompt,
+    format_disclosure_instructions,
+    format_interaction_style_instructions,
+    format_persona_for_prompt,
+    language_instruction,
 )
 
 # Local-dev override for the guarded move-space (primary switch is the ``guarded``

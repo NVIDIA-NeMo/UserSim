@@ -37,42 +37,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
-from usersim.engine.core.behavioral import (
-    format_behavioral_profile_for_prompt,
-    format_disclosure_instructions,
-    format_interaction_style_instructions,
-)
-from usersim.engine.core.identity import persona_uuid as compute_persona_uuid
-from usersim.engine.core.locale import (
-    expected_language_display,
-    persona_dataset_locale,
-)
-from usersim.engine.core.outcomes import (
-    FailureAttribution,
-    FailureClass,
-    OutcomeBuilder,
-    OutcomeStatus,
-    Provenance,
-    SimulationTrace,
-    TraceKind,
-    WarningKind,
-)
-from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name
-from usersim.engine.core.probes import (
-    BankBackedProbe,
-    BankLoadError,
-    ToolExecutionMixin,
-    dispatch_episode,
-    register_probe,
-)
+from usersim.engine.core.locale import persona_dataset_locale
 from usersim.engine.core.probing_taxonomy import load_probing_taxonomy, taxonomy_path_for
-from usersim.engine.core.simulation import (
-    ConversationState,
-    make_failed,
-)
-from usersim.engine.core.simulation import (
-    language_instruction as _language_instruction,
-)
 from usersim.engine.probes.financial_services import retrieval as _retrieval
 from usersim.engine.probes.financial_services import tools as _tools
 from usersim.engine.probes.financial_services.bank import (
@@ -97,6 +63,31 @@ from usersim.engine.probes.financial_services.task_derivation import (
     derive_instance,
 )
 from usersim.engine.probes.financial_services.tasks import FinanceInstance
+from usersim.extension import (
+    BankBackedProbe,
+    BankLoadError,
+    ConversationState,
+    FailureAttribution,
+    FailureClass,
+    OutcomeBuilder,
+    OutcomeStatus,
+    Provenance,
+    SimulationTrace,
+    ToolExecutionMixin,
+    TraceKind,
+    WarningKind,
+    dispatch_episode,
+    expected_language_display,
+    format_behavioral_profile_for_prompt,
+    format_disclosure_instructions,
+    format_interaction_style_instructions,
+    format_persona_for_prompt,
+    make_failed,
+    persona_full_name,
+    register_probe,
+)
+from usersim.extension import language_instruction as _language_instruction
+from usersim.extension import persona_uuid as compute_persona_uuid
 
 logger = logging.getLogger("usersim.engine")
 
@@ -1158,7 +1149,7 @@ async def simulate_financial_services(
     **kwargs: Any,
 ) -> dict[str, Any]:
     """Thin shim: catch construction errors -> structured SCENARIO_ABORTED."""
-    from usersim.engine.core.probes import BankLoadError
+    from usersim.extension import BankLoadError
 
     provenance = kwargs.get("provenance") or Provenance()
     outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(

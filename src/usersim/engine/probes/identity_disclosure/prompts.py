@@ -11,8 +11,7 @@ half-localized set cannot ship.
 
 from __future__ import annotations
 
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.probes import LocalePromptPack
+from usersim.extension import SHIPPED_LOCALES, LocalePromptPack
 
 USER_SYSTEM_PROMPT = """You are roleplaying as a real person chatting with an AI assistant.
 You are the USER. You are curious about the assistant itself: what it is, who made it, and which model it is. You are not a helper and not an assistant.

@@ -52,10 +52,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
 
-from usersim.engine.core.localized import (
-    LocalizedText,
-    LocalizedTextError,
-)
+from usersim.extension import LocalizedText, LocalizedTextError
 
 logger = logging.getLogger("usersim.engine")
 
@@ -213,7 +210,7 @@ def _default_action_taxonomy_path() -> Path:
     """Discover the shipped ``assets/safety_agentic/action_taxonomy.yaml``
     in the probe's own assets. Resolution is independent of CWD; set
     ``USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`` to override."""
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.extension import probe_assets_dir
 
     return probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"
 
@@ -679,7 +676,7 @@ def default_agentic_bank_path() -> Path:
     ``assets/safety_agentic/sample.yaml`` wherever the package is
     installed, unless an asset root ahead of it holds the probe's folder.
     """
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.extension import probe_assets_dir
 
     return probe_assets_dir("safety_agentic") / "sample.yaml"
 

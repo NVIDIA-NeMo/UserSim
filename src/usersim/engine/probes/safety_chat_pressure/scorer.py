@@ -76,15 +76,12 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.messages import format_conversation_history_for_prompt
-from usersim.engine.core.row_metadata import recorded_value
-from usersim.engine.evaluator.scorers import register_scorer
 from usersim.engine.probes.safety_chat_pressure.bank import (
     Strategy,
     TargetRequest,
     load_pressure_bank_default,
 )
+from usersim.extension import acall_llm, format_conversation_history_for_prompt, recorded_value, register_scorer
 
 logger = logging.getLogger("usersim.engine")
 

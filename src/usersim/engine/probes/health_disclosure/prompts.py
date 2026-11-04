@@ -24,8 +24,7 @@ per-locale templates to localize the scaffold; the validation then enforces
 completeness.
 """
 
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.probes import LocalePromptPack
+from usersim.extension import SHIPPED_LOCALES, LocalePromptPack
 
 
 def _english_scaffold_pack(label: str, template: str) -> LocalePromptPack:

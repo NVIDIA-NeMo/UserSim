@@ -50,10 +50,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
 
-from usersim.engine.core.localized import (
-    LocalizedText,
-    LocalizedTextError,
-)
+from usersim.extension import LocalizedText, LocalizedTextError
 
 logger = logging.getLogger("usersim.engine")
 
@@ -581,7 +578,7 @@ def default_pressure_bank_path() -> Path:
     ``assets/safety_chat_pressure/sample.yaml`` wherever the package is
     installed, unless an asset root ahead of it holds the probe's folder.
     """
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.extension import probe_assets_dir
 
     return probe_assets_dir("safety_chat_pressure") / "sample.yaml"
 

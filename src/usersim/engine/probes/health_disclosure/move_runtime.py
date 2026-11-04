@@ -33,8 +33,6 @@ import math
 import os
 from typing import Any, Callable
 
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.tool_calls import recover_tool_call
 from usersim.engine.probes.health_disclosure import clients as C
 from usersim.engine.probes.health_disclosure.moves import (
     AFFECTS,
@@ -45,6 +43,7 @@ from usersim.engine.probes.health_disclosure.moves import (
     PatientEnv,
 )
 from usersim.engine.probes.health_disclosure.prompts import PROPOSAL_SYSTEM_PACK
+from usersim.extension import acall_llm, recover_tool_call
 
 MODEL_USER = "user_model"
 

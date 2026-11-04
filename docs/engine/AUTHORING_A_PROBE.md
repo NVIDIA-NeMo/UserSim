@@ -563,7 +563,8 @@ each name it takes from another `usersim` module is an import to change if it
 ever leaves this repository.
 `tests/test_probe_private_imports.py` counts the names each built-in package
 imports from other `usersim` modules and fails when the count grows; a new
-package adds its count to that test's `_ALLOWED`.
+package adds its count to that test's `_ALLOWED`, which is 0 for a package that
+imports everything from `usersim.extension`.
 
 ### Declare every column your probe writes
 

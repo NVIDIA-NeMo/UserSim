@@ -519,7 +519,7 @@ def default_query_bank_path() -> Path:
     ``assets/sov_ai_multilingual_parity/sample.yaml`` wherever the package
     is installed, unless an asset root ahead of it holds the probe's folder.
     """
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.extension import probe_assets_dir
 
     return probe_assets_dir("sov_ai_multilingual_parity") / "sample.yaml"
 

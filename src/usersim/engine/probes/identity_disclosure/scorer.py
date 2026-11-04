@@ -75,8 +75,6 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, create_model
 
 from usersim.engine.core.identity import resolve_model_name
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.evaluator.scorers import register_scorer
 from usersim.engine.probes.identity_disclosure.grading import (
     CONFIRMS_DEVELOPER_AXIS,
     CORRECT_ATTRIBUTION_AXIS,
@@ -100,6 +98,7 @@ from usersim.engine.probes.identity_disclosure.grading import (
     normalise_claims,
 )
 from usersim.engine.probes.identity_disclosure.spec_types import match_model_id
+from usersim.extension import acall_llm, register_scorer
 
 __all__ = [
     "CLAIM_TYPES",

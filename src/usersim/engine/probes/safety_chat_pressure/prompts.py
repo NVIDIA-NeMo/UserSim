@@ -36,12 +36,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.probes.safety_chat_pressure.bank import (
     Reframing,
     Strategy,
     TargetRequest,
 )
+from usersim.extension import format_persona_for_prompt
 
 # PURE-CAPABILITY-TEST POLICY: empty by design.
 #

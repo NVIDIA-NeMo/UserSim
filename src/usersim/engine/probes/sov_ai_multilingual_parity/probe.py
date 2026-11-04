@@ -41,16 +41,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import (
-    BankBackedProbe,
-    BankVerbatimMixin,
-    PreviewField,
-    dispatch_episode,
-    register_probe,
-)
-from usersim.engine.core.simulation import ConversationState, make_failed
 from usersim.engine.probes.sov_ai_multilingual_parity.bank import (
     Query,
     default_query_bank_path,
@@ -64,6 +54,17 @@ from usersim.engine.probes.sov_ai_multilingual_parity.prompts import (
 )
 from usersim.engine.probes.sov_ai_multilingual_parity.task_derivation import (
     derive_task,
+)
+from usersim.extension import (
+    BankBackedProbe,
+    BankVerbatimMixin,
+    ConversationState,
+    PreviewField,
+    WarningKind,
+    dispatch_episode,
+    format_persona_for_prompt,
+    make_failed,
+    register_probe,
 )
 
 logger = logging.getLogger("usersim.engine")
@@ -237,7 +238,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         # the shared-bank loader set): use the variant's own rendering if the
         # bank ships it (graduation), else the India base (en_IN), else the
         # locale itself (shipped locales; unknown -> None below = fail-fast).
-        from usersim.engine.core.locale import india_variant
+        from usersim.extension import india_variant
 
         loc = self._locale
         if loc not in bank.locales:
@@ -349,9 +350,8 @@ async def simulate_sov_ai_multilingual_parity(
     locale-not-in-bank / prompt-pack-missing) and returns a
     ``make_failed`` outcome with ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder
-    from usersim.engine.core.outcomes import Provenance as _Provenance
-    from usersim.engine.core.probes import BankLoadError
+    from usersim.extension import BankLoadError, OutcomeBuilder
+    from usersim.extension import Provenance as _Provenance
 
     provenance = kwargs.get("provenance") or _Provenance()
     # Construct an OutcomeBuilder so placeholder warnings + bank-version
@@ -383,15 +383,8 @@ async def simulate_sov_ai_multilingual_parity(
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
-    from usersim.engine.core.outcomes import (
-        FailureAttribution,
-        FailureClass,
-        OutcomeBuilder,
-        OutcomeStatus,
-    )
-    from usersim.engine.core.outcomes import (
-        Provenance as _Provenance,
-    )
+    from usersim.extension import FailureAttribution, FailureClass, OutcomeBuilder, OutcomeStatus
+    from usersim.extension import Provenance as _Provenance
 
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(

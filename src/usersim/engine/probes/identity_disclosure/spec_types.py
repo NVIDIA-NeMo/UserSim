@@ -17,7 +17,7 @@ from enum import Enum
 from functools import cache, cached_property
 from typing import Any, Iterable, Mapping
 
-from usersim.engine.core.localized import LocalizedText
+from usersim.extension import LocalizedText
 
 #: Characters after which a model family name may start inside a model id:
 #: path segments, tags and versions (``:``, ``@``), vendor prefixes

@@ -68,11 +68,9 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.core.probing_taxonomy import Category
-from usersim.engine.evaluator.scorers import register_scorer
 from usersim.engine.probes.sov_ai_dynamic.taxonomy import load_probing_taxonomy_for_locale
+from usersim.extension import acall_llm, format_conversation_history_for_prompt, register_scorer
 
 logger = logging.getLogger("usersim.engine")
 
@@ -273,8 +271,8 @@ async def score_sov_ai_dynamic_trajectory(
 
     # India language-variants reuse the en_IN taxonomy (presence-aware:
     # a native per-variant taxonomy is used if it has been authored).
-    from usersim.engine.core.locale import asset_locale
     from usersim.engine.probes.sov_ai_dynamic.taxonomy import default_probing_taxonomy_path
+    from usersim.extension import asset_locale
 
     taxonomy_locale = asset_locale(locale, exists=lambda l: default_probing_taxonomy_path(l).exists())
 
