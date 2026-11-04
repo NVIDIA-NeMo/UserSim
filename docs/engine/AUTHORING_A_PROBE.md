@@ -1282,7 +1282,11 @@ rows, beside the rule-based `language_compliance`, `refusal_basics` and
 reports a name in `default_scorers` that no registered scorer holds. The
 evaluator calls each scorer it runs on every row, so return early for rows from
 other probes, for example when your probe's join key is missing, as the
-`safety_agentic` scorer does with `action_request_id`.
+`safety_agentic` scorer does with `action_request_id`. Return an empty mapping,
+or an `error` that starts with `no ` and contains `scorer skipped`: the
+capability report counts the row as not applicable rather than as evidence.
+[`tests/engine/evaluator/test_scorers_skip_other_probes.py`](../../tests/engine/evaluator/test_scorers_skip_other_probes.py)
+checks that every built-in probe's scorer skips another probe's row.
 
 A scorer in your probe's package may write its label;
 [`tests/test_probe_names_in_shared_code.py`](../../tests/test_probe_names_in_shared_code.py)

@@ -44,7 +44,9 @@ under; `auto` combines with scorer names. Over a run holding every built-in
 probe it runs every scorer the capability report reads. A capability whose
 scorer was not dispatched renders as *untested* rather than as a failure, and
 `capabilities_missing_scorer()` exists so a run can warn about that instead
-of silently producing an empty column.
+of silently producing an empty column. The evaluator calls every scorer it runs
+on every row, so a probe's scorer skips the rows of other probes, and the
+capability report counts a skipped row as not applicable.
 
 ## The evaluation cell
 
