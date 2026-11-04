@@ -251,7 +251,7 @@ other changes are listed per source:
   all 95 toolsets in
   [`Tool_Library`](https://github.com/Junjie-Ye/ToolEyes/tree/c818fcebe017951570a25e552a7984e40093fd52/Tool_Library)
   (commit `c818fce`), read from each toolset's `config_gpt4.json` and named
-  after its folders. Specs are unchanged and keep their upstream order. The two
+  after its folders. Specs keep their upstream order. The two
   agent-control functions that every upstream toolset includes, `ask_to_user`
   and `finish`, are removed. Three toolsets repeat a name upstream: the second
   `drivers` in `API F1` is `teams` and the second `blacklist_ip` in
@@ -260,7 +260,20 @@ other changes are listed per source:
   identical `classify_grocery_product` specs. In `Execute`, two parameter names
   are the ones the functions' signatures in `tool.py` use: `code` in
   `execute_pycode` (upstream `code:`) and `return_err_output` in
-  `execute_bash_code` (upstream `return_err_outputpersistent=False`).
+  `execute_bash_code` (upstream `return_err_outputpersistent=False`). Each
+  spec is checked against the function of the same name in its toolset's
+  `tool.py`, the code that calls the API:
+  - A parameter that upstream types `string` has the type the function's
+    signature gives it, or that its use shows where the signature gives none
+    (669 parameters, most of them integers and booleans), and each array
+    declares its item type (80).
+  - A tool or parameter description that contradicts the function, such as the
+    nine CoinMarketCap tools that share one tool's text or Ergast's ids
+    described as names, or that is empty, such as 13 search tools, is written
+    from the endpoint the function calls (228 descriptions).
+  - `required` follows the signature where upstream's list differs from it
+    (14 tools), five parameters the functions take are added, and `random`,
+    which `search_recipes_by_ingredients` does not take, is removed.
 - **API-Bank** ([Li et al., 2023](https://aclanthology.org/2023.emnlp-main.187/)):
   100 of the 101 APIs listed in
   [`api-bank/data/all_apis.csv`](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/faf754671f5b850e1b4d1ff870db37a6a2480df6/api-bank/data/all_apis.csv)
