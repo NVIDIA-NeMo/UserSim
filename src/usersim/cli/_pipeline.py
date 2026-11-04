@@ -47,6 +47,7 @@ from usersim.cli._persona_language import (
     DEFAULT_PERSONA_DATASETS_DIR,
     persona_sampler_params,
 )
+from usersim.engine.core.probes import NO_THEME
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
 
 if TYPE_CHECKING:
@@ -59,10 +60,6 @@ DEFAULT_PROBE_MIX: dict[str, float] = {
     "general_open_ended": 1 / 3,
     "general_educational": 1 / 3,
 }
-
-# The ``theme`` value of a row whose probe reads no theme. The probe never
-# reads it; it exists so DD's SubcategorySampler has a value to draw.
-_NO_THEME_PLACEHOLDER: str = "__not_used__"
 
 
 def _probe_themes(probe: str, locale: str, assets_dir: Path | None) -> list[str]:
@@ -82,7 +79,7 @@ def _probe_themes(probe: str, locale: str, assets_dir: Path | None) -> list[str]
     finally:
         reset_runtime_assets_dir(token)
     if themes is None:
-        return [_NO_THEME_PLACEHOLDER]
+        return [NO_THEME]
     if not themes:
         raise ConfigError(f"{probe} has no themes for {locale}, so none of its rows can be sampled.")
     return [json.dumps(theme, ensure_ascii=False) for theme in themes]

@@ -76,7 +76,7 @@ Two helpers are for the probe to call:
 
 | Helper | Gives |
 |---|---|
-| `theme` | the row's theme, one of those `themes` lists |
+| `theme` | the row's theme, one of those `themes` lists; `{}` for a probe that lists none |
 | `assets_dir` | the probe's asset folder, `<root>/<label>/`, where its bank loaders read |
 
 Anything a probe does not override inherits a default, so a new probe declares
@@ -187,5 +187,6 @@ finds. See [assets.md](assets.md).
 A probe whose conversations vary by topic lists its themes in a `themes`
 classmethod, read under its asset folder. A run draws one per row into the
 `theme` column, and the probe reads it back with `theme()`. A probe that lists
-none gets a placeholder it never reads. `tool_calling` lists none: a row's
-theme is the toolset it draws from its seed table.
+none gets the placeholder `NO_THEME` in that column, which `theme()` reads as
+`{}`. `tool_calling` lists none: a row's theme is the toolset it draws from its
+seed table.

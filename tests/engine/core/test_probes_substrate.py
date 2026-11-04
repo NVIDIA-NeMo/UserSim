@@ -133,6 +133,13 @@ class TestBaseProbeDefaults:
     def test_a_row_without_a_theme_reads_as_empty(self) -> None:
         assert self._build().theme() == {}
 
+    def test_a_row_of_a_probe_that_reads_no_theme_reads_as_empty(self) -> None:
+        """A run stores ``NO_THEME`` for a probe whose ``themes`` is None; it is not a theme."""
+        from usersim.engine.core.probes import NO_THEME
+
+        probe = _MinimalProbe(persona={}, locale="en_US", language="English", models={}, data={"theme": NO_THEME})
+        assert probe.theme() == {}
+
     def test_a_probe_reads_no_theme_by_default(self) -> None:
         assert _MinimalProbe.themes("en_US") is None
 

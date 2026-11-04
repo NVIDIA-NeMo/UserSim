@@ -252,6 +252,11 @@ class PreviewField:
 #: edit that had no effect.
 SEED_DATASET_SUFFIXES: tuple[str, ...] = (".parquet", ".jsonl")
 
+#: The ``theme`` a run stores for a row whose probe reads no theme (its
+#: ``themes`` returns ``None``). Data Designer draws a theme for every row, so
+#: such a row needs a value; ``BaseProbe.theme`` reads it as no theme.
+NO_THEME: str = "__not_used__"
+
 
 def seed_dataset_problems(cls: type) -> list[str]:
     """What is wrong with the seed table ``cls.seed_dataset`` names; empty when it names none.
@@ -481,9 +486,11 @@ class BaseProbe:
         """This row's theme, the one the run drew from ``themes``, as a mapping.
 
         A run stores it as JSON text, and ``run_episode`` passes the value it is
-        given; both read back the same. A row without one reads as ``{}``.
+        given; both read back the same. A row without one, or with ``NO_THEME``,
+        reads as ``{}``.
         """
-        return _parse_theme(self._data.get(getattr(self._cfg, "theme_column", "theme"), "{}"))
+        stored = self._data.get(getattr(self._cfg, "theme_column", "theme"), "{}")
+        return {} if stored == NO_THEME else _parse_theme(stored)
 
     # ── Required hooks (must be overridden) ─────────────────────────
 
