@@ -521,7 +521,7 @@ Related code elsewhere:
 | Inner tool-loop scaffold (shared) | `core/probes.py` (`ToolExecutionMixin`) |
 | Query embedding (dense retrieval) | `probes/financial_services/embeddings.py` |
 | Scorer | `probes/financial_services/scorer.py` |
-| Capabilities | `taxonomy/capabilities.py` |
+| Capabilities | `probes/financial_services/capabilities.py` |
 | Training-export columns | `selection/schemas.py` (`finance` group) |
 | Assets + schema | `assets/financial_services/<locale>/` + `assets/financial_services/SCHEMA.md` |
 | Offline generation | `asset_gen/` + `asset_gen/notebooks/finance_assets.ipynb` |

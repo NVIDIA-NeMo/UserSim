@@ -1310,6 +1310,47 @@ authoring, threshold gating). See
 [`probes/sov_ai_facts/scorer.py`](../../src/usersim/engine/probes/sov_ai_facts/scorer.py)
 or `safety_chat_pressure.py` for canonical examples.
 
+## Adding the capabilities your probe provides evidence for
+
+The capability report is built from capability definitions, not from
+trajectories, so a probe without one simulates and evaluates and is then absent
+from the report. Declare the rows your probe's evidence feeds in
+`src/usersim/engine/probes/<your_probe>/capabilities.py`, as `CAPABILITIES`, a
+tuple of `CapabilityDefinition`:
+
+```python
+from usersim.extension import CapabilityDefinition, EvidenceSource
+
+CAPABILITIES: tuple[CapabilityDefinition, ...] = (
+    CapabilityDefinition(
+        id="booking_argument_accuracy",
+        label="Booking arguments",
+        description="Does the assistant book the date and time the user asked for?",
+        sources=(EvidenceSource(probe="your_probe", scorer="your_probe", axes=("your_probe.argument_match_rate",)),),
+        threshold=0.9,
+        scale="rate",
+        aggregation_policy="mean",
+        next_action="Read the failing rows and compare the user's words with the tool call.",
+    ),
+)
+
+#: What each rate axis your scorer computes measures, in a reviewer's terms.
+AXIS_DESCRIPTIONS: dict[str, str] = {
+    "your_probe.argument_match_rate": "Share of bookings whose date, time and party size match what the user asked for.",
+}
+```
+
+Then add the module, `usersim.engine.probes.<your_probe>.capabilities`, to
+`BUILTIN_CAPABILITY_MODULES` in
+[`taxonomy/capabilities.py`](../../src/usersim/taxonomy/capabilities.py), at
+the place its rows belong in the report. The module holds definitions only and
+imports nothing from the probe, so the report reads it without importing your
+probe. `AXIS_DESCRIPTIONS` is optional: it explains a rate axis in an evidence
+card, where a judge axis carries its own reasoning. A probe shipped as an
+extension contributes the same definitions through the `usersim.capabilities`
+entry point instead
+([`architecture/plugins.md`](../../architecture/plugins.md#capabilities-the-seam-that-is-easy-to-miss)).
+
 ---
 
 ## See also

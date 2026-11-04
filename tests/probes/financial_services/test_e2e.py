@@ -278,10 +278,8 @@ async def test_dynamic_row_feeds_no_verifiable_capability():
     answer does the most damage). Deriving the forbidden set from the registry
     keeps the real guarantee and still fails if a verifier axis ever leaks here.
     """
-    from usersim.taxonomy.capabilities import (
-        FINANCE_CAPABILITY_INSTITUTION_TYPES,
-        capability_definitions,
-    )
+    from usersim.engine.probes.financial_services.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
+    from usersim.taxonomy.capabilities import capability_definitions
 
     dyn = _dynamic_row()
     scorer = get_scorer("financial_services")

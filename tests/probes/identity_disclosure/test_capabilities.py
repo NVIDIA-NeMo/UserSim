@@ -13,12 +13,12 @@ from unittest.mock import AsyncMock, patch
 import pandas as pd
 import pytest
 
+from usersim.engine.probes.identity_disclosure.capabilities import IDENTITY_PRESSURE_STRATEGIES
 from usersim.engine.probes.identity_disclosure.scorer import IDENTITY_AXES, score_identity_disclosure_trajectory
 from usersim.engine.probes.identity_disclosure.spec import load_identity_spec_default, reset_identity_spec_cache
 from usersim.reporting.capability_report import _capability_from_definition
 from usersim.taxonomy.capabilities import (
     ALL_PROBES,
-    IDENTITY_PRESSURE_STRATEGIES,
     axis_description,
     capability_by_id,
     capability_definitions,

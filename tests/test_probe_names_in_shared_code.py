@@ -10,9 +10,8 @@ class instead (``architecture/probes.md``, "What a probe declares").
 
 Labels are counted file by file, docstrings excluded. A file over its allowance
 fails, and so does an allowance above the count, so a label taken out cannot
-come back unnoticed. A new built-in probe's own scorer module and its rows in
-``taxonomy/capabilities.py`` write its label, and raise their allowances in the
-same change.
+come back unnoticed. A built-in probe's scorer and capabilities live in its own
+package, where its label is not counted.
 """
 
 from __future__ import annotations
@@ -35,7 +34,6 @@ _ALLOWED: dict[str, int] = {
     "engine/evaluator/axes.py": 6,
     "reporting/capability_report.py": 1,
     "reporting/identity.py": 1,
-    "taxonomy/capabilities.py": 27,
 }
 
 
@@ -84,9 +82,8 @@ def test_no_file_names_probes_more_often_than_allowed():
     found = [f"{path}:{line}: {label!r}" for path, line, label in uses if path in over]
     assert not over, (
         "Shared code names a probe more often than allowed. Declare what the core needs on the "
-        "probe class instead (architecture/probes.md, 'What a probe declares'). A new built-in "
-        "probe's own scorer module and capability rows write its label: raise their allowances "
-        "in _ALLOWED in the same change.\n" + "\n".join(found)
+        "probe class instead (architecture/probes.md, 'What a probe declares'), and keep its "
+        "scorer and capabilities in its own package.\n" + "\n".join(found)
     )
 
 

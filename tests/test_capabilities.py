@@ -5,10 +5,13 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from pathlib import Path
 
 from usersim.taxonomy.capabilities import (
     ALL_PROBES,
+    BUILTIN_CAPABILITY_MODULES,
     _probe_ref,
     _scorer_ref,
     capabilities_missing_scorer,
@@ -67,7 +70,7 @@ def test_finance_verifiable_capability_is_stratified_by_institution_type() -> No
     """A per-institution-type verifiable capability exists for each shipped
     finance institution type, scoped via row_filter to that type but reusing
     the aggregate capability's axes/policy."""
-    from usersim.taxonomy.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
+    from usersim.engine.probes.financial_services.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
 
     ids = {d.id for d in capability_definitions()}
     assert "financial_task_success" in ids  # aggregate stays
@@ -93,7 +96,7 @@ def test_finance_retrieval_recall_is_decoupled_from_task_success() -> None:
     assert recall.scale == "rate"
 
     # The recall axis must NOT appear in task-success (aggregate or per-type).
-    from usersim.taxonomy.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
+    from usersim.engine.probes.financial_services.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
 
     success_ids = ["financial_task_success"] + [
         f"financial_task_success_{itype}" for itype in FINANCE_CAPABILITY_INSTITUTION_TYPES
@@ -292,3 +295,30 @@ def test_missing_scorer_map_names_the_capabilities_that_go_untested() -> None:
     assert len(missing["financial_services"]) == sum(
         1 for d in capability_definitions() if any(s.scorer == "financial_services" for s in d.sources)
     )
+
+
+def test_every_built_in_package_s_capabilities_module_is_listed() -> None:
+    """A built-in package's capability rows reach the report only through ``BUILTIN_CAPABILITY_MODULES``."""
+    probes = Path(__file__).resolve().parents[1] / "src" / "usersim" / "engine" / "probes"
+    on_disk = {f"usersim.engine.probes.{path.parent.name}.capabilities" for path in probes.glob("*/capabilities.py")}
+    assert on_disk, "no built-in probe package declares capabilities"
+    assert len(BUILTIN_CAPABILITY_MODULES) == len(set(BUILTIN_CAPABILITY_MODULES)), "a module is listed twice"
+    assert set(BUILTIN_CAPABILITY_MODULES) == on_disk, (
+        f"listed without a file: {sorted(set(BUILTIN_CAPABILITY_MODULES) - on_disk)}; "
+        f"not listed: {sorted(on_disk - set(BUILTIN_CAPABILITY_MODULES))}"
+    )
+
+
+def test_reading_the_capabilities_loads_no_probe() -> None:
+    """The report reads every capability without importing a probe, so a probe that fails
+    to import still leaves its capability rows, and every other, in the report."""
+    code = (
+        "import sys\n"
+        "from usersim.taxonomy.capabilities import axis_description, capability_definitions\n"
+        "capability_definitions(); axis_description('finance.tool_selection_rate')\n"
+        "loaded = sorted(m for m in sys.modules if m.startswith('usersim.engine.probes.') and m.count('.') > 3)\n"
+        "print([m for m in loaded if not m.endswith('.capabilities')], len(loaded))\n"
+    )
+    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == f"[] {len(BUILTIN_CAPABILITY_MODULES)}", result.stdout
