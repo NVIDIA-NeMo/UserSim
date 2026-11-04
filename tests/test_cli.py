@@ -817,25 +817,13 @@ class TestEvalCliJudgesDefault:
 
 
 class TestAssetCommandDefaults:
-    """The three asset commands must default to where the banks actually are.
+    """With no ``--dir`` or ``--out``, the asset commands use the bank the domain's probe ships."""
 
-    Each resolved its default from a path relative to ``cli/``, which pointed
-    at a directory that does not exist, so running any of them without an
-    explicit ``--dir`` or ``--out`` failed to find the shipped banks. Nothing
-    caught it because every test passed a path.
-    """
+    def test_the_default_folder_is_the_probes_shipped_bank(self):
+        from usersim.cli._bank_dir import default_bank_dir
 
-    @pytest.mark.parametrize("command", ["validate-assets", "evaluate-assets", "gen-assets"])
-    def test_default_asset_dir_exists(self, command):
-        from usersim.cli import evaluate_assets, gen_assets, validate_assets
-
-        module = {
-            "validate-assets": validate_assets,
-            "evaluate-assets": evaluate_assets,
-            "gen-assets": gen_assets,
-        }[command]
-        default = module.shipped_assets_dir("financial_services") / "en_US"
-        assert default.is_dir(), f"{command} default resolves to a missing dir: {default}"
+        default = default_bank_dir("financial_services", "en_US", flag="--dir")
+        assert default.is_dir(), f"the default bank folder is missing: {default}"
         assert (default / "region_meta.yaml").exists() or any(default.iterdir())
 
     def test_validate_assets_finds_the_shipped_bank(self, capsys):

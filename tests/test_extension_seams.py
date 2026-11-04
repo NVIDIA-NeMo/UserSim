@@ -260,6 +260,25 @@ def factory():
         finally:
             clear_domain_cache()
 
+    @pytest.mark.parametrize(("command", "flag"), [("validate-assets", "--dir"), ("evaluate-assets", "--dir")])
+    def test_a_domain_with_no_probe_of_its_name_is_asked_for_a_folder(self, extension, caplog, command, flag) -> None:
+        """A domain's default bank is its probe's asset folder; without that probe the command asks for one."""
+        from usersim import cli
+        from usersim.asset_gen.registry import clear_domain_cache
+
+        extension(
+            "ext_domain_mod4.py",
+            self.SOURCE,
+            ("partner_domain", "ext_domain_mod4:DOMAIN", ASSET_DOMAINS),
+        )
+        clear_domain_cache()
+        try:
+            with caplog.at_level(logging.ERROR):
+                assert cli.main([command, "--domain", "partner_domain", "--locale", "en_US"]) == 2
+        finally:
+            clear_domain_cache()
+        assert f"pass {flag}" in caplog.text
+
 
 class TestCapabilityDiscovery:
     """A probe that simulates and evaluates must also be able to reach the report.

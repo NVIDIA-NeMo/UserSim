@@ -89,6 +89,11 @@ Each domain's region specs (`<locale>.yaml`, one per locale it can generate)
 ship as package data, so all three commands find them from an installed
 package without `--region-spec`.
 
+A domain builds the bank of the probe that shares its name. Without `--out`
+(`gen-assets`) or `--dir` (`validate-assets`, `evaluate-assets`), the commands
+use that probe's own asset folder, `<assets_root>/<domain>/<locale>/`. A domain
+with no probe of its name has no such folder, and the commands ask for one.
+
 A built-in domain's generator lives beside the probe whose banks it builds:
 `financial_services` keeps its generator, region specs and asset notebook in
 its folder's `asset_gen/`. Other domains are discovered through the
