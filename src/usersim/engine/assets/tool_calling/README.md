@@ -307,14 +307,27 @@ other changes are listed per source:
   path, and the fields of its JSON request body; a body field that repeats a
   query parameter appears once, as the query parameter. A parameter is
   required when upstream marks it so, and the Spotify spec writes that mark as
-  the string `"true"` or `"false"`. Parameter schemas keep their type, `enum`,
-  `default` and `items`. Descriptions are joined onto one line; each tool
+  the string `"true"` or `"false"`. Three tools differ: `uris` in
+  `post_playlists_playlist_id_tracks` and each track's `uri` in
+  `delete_playlists_playlist_id_tracks` are required, and `get_recommendations`
+  requires none of its three seeds, since it needs at least one, as its
+  description says. Parameter schemas keep their type, `enum` and `items`, and
+  each `default` has its parameter's type (21 Spotify `limit` and `offset`
+  defaults that upstream writes as strings).
+  Descriptions are joined onto one line; each tool
   description ends with the operation's method and URL, and each parameter
   description ends with its location (for example `Location: query` or
   `Location: body`). One operation and 16 parameters that have no upstream
   description were given a short one: four query parameters and the 12 TMDB
   path parameters. In TMDB's `get_discover_tv`, the values that `with_status`
-  and `with_type` list for a string parameter are written as strings.
+  and `with_type` list for a string parameter are written as strings, and
+  `with_release_type`, which takes several release types, is a string. 13
+  parameters that an operation's description promises and its spec omits are
+  added, typed and worded as elsewhere in the same spec: `include_image_language`
+  on the TMDB TV, season and episode images tools, `timezone` on
+  `get_tv_airing_today`, `append_to_response` on four details tools, and
+  `language` on the person and images tools. Eight descriptions that name the
+  wrong resource, such as the TV filters of `get_discover_tv`, are rewritten.
 - **AutoTools** ([Shi et al., 2025](https://arxiv.org/abs/2405.16533)):
   all 83 endpoints in the `food`, `game`, `music` and `weather` files under
   [`tools`](https://github.com/mangopy/AutoTools/tree/09c88df0959b2baf03e570aeff4365ea9f4d8b64/tools)
@@ -325,12 +338,20 @@ other changes are listed per source:
   Parameters come from each endpoint's `parameters` list, which the `game`
   file names `params`. Descriptions are trimmed; each tool description ends
   with the endpoint's method and URL, and each parameter description ends with
-  its location (for example `Location: query`). Parameter types are written in
-  lower case, `float` as `number` and an empty type as `string`; a parameter
-  named in the endpoint's URL is required; and the sample responses are
-  removed. One `game` endpoint, `get_game_reviewed_today`, has its description
-  in the upstream `url` field, so its tool description ends with that text and
-  the API's host.
+  where it is sent, `Location: query` or `Location: path`. Upstream's `in`
+  field marks a needed parameter `query` or `required` and an optional one
+  `optional`: a parameter is required when it fills the endpoint's URL or, in
+  the `music`, `game` and `weather` files, when its `in` marks it needed (the
+  `food` file marks every parameter `query`). Parameter types are written in
+  lower case, `float` as `number` and an empty type as `string`, apart from
+  four numeric parameters that are integers, and each default has its
+  parameter's type. Parameter descriptions that upstream copies from another
+  parameter, such as a menu item's `item_id` described as a page number, are
+  written from the endpoint. The sample responses are removed. One `game`
+  endpoint, `get_game_reviewed_today`, has its description in the upstream
+  `url` field; its tool description is that text followed by
+  `HTTP GET https://opencritic-api.p.rapidapi.com/game/reviewed-today`, the
+  path the API's other game lists follow.
 
 ### Toolsets written for this project
 
