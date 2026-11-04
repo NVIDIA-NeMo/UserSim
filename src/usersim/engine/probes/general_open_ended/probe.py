@@ -3,10 +3,8 @@
 
 """Open-ended probe (info-seeking, Q&A, recommendations).
 
-A thin probe class plus a shim function: ``OpenEndedProbe`` defines the
-user-agent prompt and delegates everything else to ``BaseProbe`` +
-``ConversationLoop``; ``simulate_general_open_ended`` is the back-compat
-shim that constructs the probe and runs it through ``run_dispatch``.
+A thin probe class: ``OpenEndedProbe`` defines the user-agent prompt and
+delegates everything else to ``BaseProbe`` and ``ConversationLoop``.
 """
 
 from __future__ import annotations
@@ -24,7 +22,6 @@ from usersim.extension import (
     SHIPPED_LOCALES,
     BaseProbe,
     PreviewField,
-    dispatch_episode,
     format_behavioral_profile_for_prompt,
     format_disclosure_instructions,
     format_interaction_style_instructions,
@@ -124,36 +121,3 @@ class OpenEndedProbe(BaseProbe):
             conversation_history=conversation_history,
             user_turn_to_evaluate=user_query,
         )
-
-
-async def simulate_general_open_ended(
-    models: dict,
-    data: dict,
-    persona: dict,
-    profile: dict,
-    locale: str,
-    language: str,
-    cfg: Any,
-    **kwargs: Any,
-) -> dict:
-    """Thin shim for callers that import ``simulate_general_open_ended`` directly.
-
-    The dispatcher in ``usersim.engine.generator`` instantiates
-    ``OpenEndedProbe`` and calls ``probe.run_dispatch`` directly; this
-    function exists for backward compatibility with per-probe tests
-    that import the symbol.
-    Constructs a probe instance and routes through the standard
-    ``run_dispatch`` so behavior is identical to the dispatcher path.
-    """
-    probe = OpenEndedProbe(
-        persona=persona,
-        locale=locale,
-        language=language,
-        models=models,
-        cfg=cfg,
-        provenance=kwargs.get("provenance"),
-        profile=profile,
-        data=data,
-        outcome_builder=kwargs.get("outcome_builder"),
-    )
-    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)

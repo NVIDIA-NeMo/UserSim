@@ -9,7 +9,7 @@ Three layers (parallel to ``sov_ai_facts/test_probe.py``):
    functions that pick a category + sub-topic hint deterministically
    from a probing taxonomy.
 2. **Taxonomy caching** — process-local cache + env-override.
-3. **End-to-end probe** — ``simulate_sov_ai_dynamic``
+3. **End-to-end probe** — ``SovAiDynamicProbe`` through ``run_probe``
    with a mocked ``acall_llm`` so no real network calls happen.
 
 No live LLM. No real Nemotron-Personas dataset. Everything here runs
@@ -27,6 +27,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from _probe_run import run_probe
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.core._assets import probe_assets_dir
@@ -97,7 +98,7 @@ def _reset_taxonomy_cache_between_tests():
 
 @pytest.fixture
 def simulator_cfg():
-    """Minimal cfg stub that ``simulate_sov_ai_dynamic`` reads from."""
+    """Minimal cfg stub with the settings the probe reads."""
 
     class _Cfg:
         random_seed = 42
@@ -384,7 +385,7 @@ class TestPrompts:
 
 
 # ---------------------------------------------------------------------------
-# End-to-end simulate_sov_ai_dynamic (mocked LLM)
+# End-to-end episode (mocked LLM)
 # ---------------------------------------------------------------------------
 
 
@@ -423,7 +424,8 @@ class TestSimulateSovAiDynamic:
                 )
             ),
         ):
-            result = await probe_gen.simulate_sov_ai_dynamic(
+            result = await run_probe(
+                probe_gen.SovAiDynamicProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -494,7 +496,8 @@ class TestSimulateSovAiDynamic:
                 )
             ),
         ):
-            result = await probe_gen.simulate_sov_ai_dynamic(
+            result = await run_probe(
+                probe_gen.SovAiDynamicProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -555,7 +558,8 @@ class TestSimulateSovAiDynamic:
                 )
             ),
         ):
-            result = await probe_gen.simulate_sov_ai_dynamic(
+            result = await run_probe(
+                probe_gen.SovAiDynamicProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -596,7 +600,8 @@ class TestSimulateSovAiDynamic:
             ),
             _patched_call_llm(RuntimeError("rate limited")),
         ):
-            result = await probe_gen.simulate_sov_ai_dynamic(
+            result = await run_probe(
+                probe_gen.SovAiDynamicProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -650,7 +655,8 @@ class TestSimulateSovAiDynamic:
             ),
             _patched_call_llm(_side_effect),
         ):
-            result = await probe_gen.simulate_sov_ai_dynamic(
+            result = await run_probe(
+                probe_gen.SovAiDynamicProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),

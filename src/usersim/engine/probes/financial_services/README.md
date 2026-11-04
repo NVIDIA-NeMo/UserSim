@@ -505,7 +505,7 @@ Files in this package:
 
 | File | Responsibility |
 | --- | --- |
-| `generator.py` | The probe class + its hooks, the trajectory-column contract, and the entry-point shim. |
+| `probe.py` | The probe class + its hooks, and the trajectory-column contract. |
 | `tools.py` | Offered-tool schemas and the discoverable-tool gate helpers. |
 | `retrieval.py` | Institution-scoped whole-document retrieval: `hybrid` (default), `dense` and `golden`, with a lexical fallback. |
 | `task_derivation.py` | Persona → tags + financial-literacy, tier choice, and institution/category selection with population weighting. |

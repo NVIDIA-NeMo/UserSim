@@ -3,10 +3,8 @@
 
 """Educational probe (tutoring, explanation, practice).
 
-A thin probe class plus a shim function: ``EducationalProbe`` defines
-the user-agent prompt and delegates everything else to ``BaseProbe`` +
-``ConversationLoop``; ``simulate_general_educational`` is the back-compat
-shim that constructs the probe and runs it through ``run_dispatch``.
+A thin probe class: ``EducationalProbe`` defines the user-agent prompt and
+delegates everything else to ``BaseProbe`` and ``ConversationLoop``.
 """
 
 from __future__ import annotations
@@ -24,7 +22,6 @@ from usersim.extension import (
     SHIPPED_LOCALES,
     BaseProbe,
     PreviewField,
-    dispatch_episode,
     format_behavioral_profile_for_prompt,
     format_disclosure_instructions,
     format_interaction_style_instructions,
@@ -125,33 +122,3 @@ class EducationalProbe(BaseProbe):
             conversation_history=conversation_history,
             user_turn_to_evaluate=user_query,
         )
-
-
-async def simulate_general_educational(
-    models: dict,
-    data: dict,
-    persona: dict,
-    profile: dict,
-    locale: str,
-    language: str,
-    cfg: Any,
-    **kwargs: Any,
-) -> dict:
-    """Thin shim for callers that import ``simulate_general_educational`` directly.
-
-    See ``usersim.engine.probes.general_open_ended.probe.simulate_general_open_ended``
-    for the rationale; preserved for backward-compat with the dispatcher
-    bootstrap and per-probe tests.
-    """
-    probe = EducationalProbe(
-        persona=persona,
-        locale=locale,
-        language=language,
-        models=models,
-        cfg=cfg,
-        provenance=kwargs.get("provenance"),
-        profile=profile,
-        data=data,
-        outcome_builder=kwargs.get("outcome_builder"),
-    )
-    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)

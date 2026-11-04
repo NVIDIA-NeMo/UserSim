@@ -73,11 +73,9 @@ from usersim.extension import (
     ConversationState,
     PreviewField,
     WarningKind,
-    dispatch_episode,
     format_persona_for_prompt,
     get_conversation_language,
     language_instruction,
-    make_failed,
     register_probe,
 )
 
@@ -131,8 +129,7 @@ def should_succeed(state: ConversationState) -> bool:
 class SovAiDynamicProbeError(ValueError):
     """Raised when the probe cannot construct (no category, missing prompts).
 
-    The shim ``simulate_sov_ai_dynamic`` catches this and returns
-    a structured ``make_failed`` outcome with
+    The generator records it as a failed row with
     ``failure_class=SCENARIO_ABORTED``.
     """
 
@@ -349,68 +346,3 @@ def _pin_bank_version_override(self, locale: str) -> None:
 
 
 SovAiDynamicProbe._pin_bank_version = _pin_bank_version_override  # type: ignore[method-assign]
-
-
-# ---------------------------------------------------------------------------
-# Public entry point — thin shim around SovAiDynamicProbe
-# ---------------------------------------------------------------------------
-
-
-async def simulate_sov_ai_dynamic(
-    models: dict[str, Any],
-    data: dict[str, Any],
-    persona: dict[str, Any],
-    profile: dict[str, Any],
-    locale: str,
-    language: str,
-    cfg: Any,
-    **kwargs: Any,
-) -> dict[str, Any]:
-    """Thin shim for callers that import ``simulate_sov_ai_dynamic``.
-
-    Catches construction exceptions (taxonomy-load / no-usable-category
-    / prompt-pack-missing) and returns a ``make_failed`` outcome with
-    ``failure_class=SCENARIO_ABORTED``.
-    """
-    from usersim.extension import BankLoadError, OutcomeBuilder
-    from usersim.extension import Provenance as _Provenance
-
-    provenance = kwargs.get("provenance") or _Provenance()
-    outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
-        provenance=provenance,
-    )
-    try:
-        probe = SovAiDynamicProbe(
-            persona=persona,
-            locale=locale,
-            language=language,
-            models=models,
-            cfg=cfg,
-            provenance=provenance,
-            profile=profile,
-            data=data,
-            outcome_builder=outcome_builder,
-        )
-    except BankLoadError as e:
-        return _aborted(
-            f"probing-taxonomy load failed for locale={locale}: {e}",
-            provenance,
-        )
-    except SovAiDynamicProbeError as e:
-        return _aborted(str(e), provenance)
-    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
-
-
-def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
-    """Build a structured SCENARIO_ABORTED failure result."""
-    from usersim.extension import FailureAttribution, FailureClass, OutcomeBuilder, OutcomeStatus
-    from usersim.extension import Provenance as _Provenance
-
-    builder = OutcomeBuilder(provenance=provenance or _Provenance())
-    outcome = builder.finalize(
-        status=OutcomeStatus.FAILED,
-        failure_class=FailureClass.SCENARIO_ABORTED,
-        failure_attribution=FailureAttribution.SCENARIO_LOGIC,
-        failure_detail=reason,
-    )
-    return make_failed(reason, outcome=outcome, traces=[])

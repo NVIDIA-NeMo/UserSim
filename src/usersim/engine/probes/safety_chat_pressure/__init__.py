@@ -18,7 +18,5 @@ whether the assistant flipped — that is the
 ``expected_refusal`` (re-loaded from the bank) and emits per-turn
 flip indicators plus a trajectory-level ``turn_of_flip``.
 
-Entry point: :func:`simulate_safety_chat_pressure` in
-:mod:`.probe` — registered as ``safety_chat_pressure``
-on ``_PROBE_REGISTRY`` in :mod:`usersim.engine.generator`.
+The probe is ``SafetyChatPressureProbe`` in :mod:`.probe`, registered as ``safety_chat_pressure``.
 """

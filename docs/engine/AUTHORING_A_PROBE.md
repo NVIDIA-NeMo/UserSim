@@ -828,11 +828,8 @@ from usersim.engine.probes.bookings.bank import LOCALES, Booking, draw_booking, 
 from usersim.engine.probes.bookings.prompts import BOOKINGS_USER_PROMPTS
 from usersim.extension import (
     BankBackedProbe,
-    OutcomeBuilder,
-    Provenance,
     ToolExecutionMixin,
     WarningKind,
-    dispatch_episode,
     format_persona_for_prompt,
     persona_uuid,
     register_probe,
@@ -933,37 +930,6 @@ class BookingsProbe(ToolExecutionMixin, BankBackedProbe):
             "booking_id": task.id,
             "booking": json.dumps(booking, ensure_ascii=False),
         }
-
-
-# Optional thin shim for callers that import simulate_bookings.
-async def simulate_bookings(
-    models,
-    data,
-    persona,
-    profile,
-    locale,
-    language,
-    cfg,
-    **kwargs,
-):
-    provenance = kwargs.get("provenance") or Provenance()
-    outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
-        provenance=provenance,
-    )
-    probe = BookingsProbe(
-        persona=persona,
-        locale=locale,
-        language=language,
-        models=models,
-        cfg=cfg,
-        provenance=provenance,
-        profile=profile,
-        data=data,
-        outcome_builder=outcome_builder,
-    )
-    # dispatch_episode installs the run's per-episode settings (reasoning
-    # replay) around run_dispatch, as the generator does.
-    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
 ```
 
 - `assets_root` names the folder beside the module that holds `bookings/`, so
@@ -1041,9 +1007,9 @@ usersim simulate --locale pt_BR --num-rows 5 \
   --probe-mix 'bookings=1.0' --out output/bookings # end-to-end
 ```
 
-That is the whole probe: two banks and their loader, the user's prompts, the
-probe class with its tool, and the shim. Everything about how the conversation
-runs comes from the shared loop.
+That is the whole probe: two banks and their loader, the user's prompts, and
+the probe class with its tool. Everything about how the conversation runs
+comes from the shared loop.
 
 ---
 
@@ -1155,9 +1121,9 @@ the result on `self._task`. If `derive_task` returns `None` (no
 matching asset), `self._task` is `None` and your prompt-formatting
 hooks crash on `self._task.question`. Either:
 
-- Override `__init__` to raise a `MyProbeError` after `super().__init__()`
-  if `self._task is None`: the shim catches the exception and returns
-  `SCENARIO_ABORTED`. (This is the canonical pattern; see every
+- Override `__init__` to raise a `MyProbeError` (a `ValueError` subclass)
+  after `super().__init__()` if `self._task is None`: the generator records the
+  row as `SCENARIO_ABORTED`. (This is the canonical pattern; see every
   inclusion / safety probe.)
 - Make every prompt-formatting hook tolerant of `self._task is None`
   and let `should_succeed` flag the failure. Less common because the

@@ -32,6 +32,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from _probe_run import run_probe
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.core._assets import probe_assets_dir
@@ -491,7 +492,8 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -550,7 +552,8 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -590,7 +593,8 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -657,7 +661,8 @@ class TestSimulateAgenticSafety:
         ):
             # Patched bank load doesn't touch the cache, so we don't need
             # to reset. Call directly.
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -705,7 +710,8 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -732,7 +738,8 @@ class TestSimulateAgenticSafety:
             os.environ,
             {"USERSIM_SAFETY_AGENTIC_BANK": "/nonexistent/bank.yaml"},
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={},
                 data={},
                 persona=en_persona,
@@ -746,7 +753,8 @@ class TestSimulateAgenticSafety:
         outcome = json.loads(result["simulation_outcome"])
         assert outcome["status"] == OutcomeStatus.FAILED.value
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
-        assert "agentic-bank load failed" in outcome["failure_detail"]
+        # The recorded reason names the bank file that did not load.
+        assert "/nonexistent/bank.yaml" in outcome["failure_detail"]
 
     async def test_panel_override_with_unknown_id_returns_failure(
         self,
@@ -759,7 +767,8 @@ class TestSimulateAgenticSafety:
                 "usersim.engine.probes.safety_agentic.probe.acall_llm",
             ) as mock_call,
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={},
                 data={"action_request_id": "AR-DOES-NOT-EXIST"},
                 persona=en_persona,
@@ -789,7 +798,8 @@ class TestSimulateAgenticSafety:
                 "usersim.engine.probes.safety_agentic.probe.acall_llm",
             ) as mock_call,
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={},
                 data={},
                 persona=en_persona,
@@ -819,7 +829,8 @@ class TestSimulateAgenticSafety:
                 side_effect=_raises,
             ),
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -860,7 +871,8 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -894,7 +906,8 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -927,7 +940,8 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = await probe_gen.simulate_safety_agentic(
+            result = await run_probe(
+                probe_gen.SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,

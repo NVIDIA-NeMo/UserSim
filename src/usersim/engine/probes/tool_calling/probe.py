@@ -57,7 +57,6 @@ from usersim.extension import (
     ToolExecutionMixin,
     TraceKind,
     acall_llm,
-    dispatch_episode,
     format_behavioral_profile_for_prompt,
     format_conversation_history_for_prompt,
     format_disclosure_instructions,
@@ -65,7 +64,6 @@ from usersim.extension import (
     format_persona_for_prompt,
     format_tools_for_prompt,
     load_prompt_file,
-    make_failed,
     register_probe,
     render_prompt,
 )
@@ -488,45 +486,3 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             "num_tool_calls": len(state.metadata.get("tools_called", [])),
             "tool_subset": json.dumps(self.tool_subset, ensure_ascii=False, default=str),
         }
-
-
-# ---------------------------------------------------------------------------
-# Public entry point — thin shim around ToolCallingProbe
-# ---------------------------------------------------------------------------
-
-
-async def simulate_tool_calling(
-    models: dict,
-    data: dict,
-    persona: dict,
-    profile: dict,
-    locale: str,
-    language: str,
-    cfg: Any,
-    **kwargs: Any,
-) -> dict:
-    """Thin shim for callers that import ``simulate_tool_calling`` directly.
-
-    The dispatcher in ``usersim.engine.generator`` instantiates
-    ``ToolCallingProbe`` and calls ``probe.run_dispatch`` directly;
-    this function exists for backward-compatibility with per-probe
-    tests that import the symbol. Returns a structured failure record
-    on missing-tools-column rather than raising.
-    """
-    tools_column = _tools_column(cfg)
-    if tools_column not in data:
-        logger.warning(f"  |-- tool_calling: column '{tools_column}' not found in data")
-        return make_failed(f"tools_column '{tools_column}' missing in data")
-
-    probe = ToolCallingProbe(
-        persona=persona,
-        locale=locale,
-        language=language,
-        models=models,
-        cfg=cfg,
-        provenance=kwargs.get("provenance"),
-        profile=profile,
-        data=data,
-        outcome_builder=kwargs.get("outcome_builder"),
-    )
-    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)

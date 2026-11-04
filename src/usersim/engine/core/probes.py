@@ -1765,10 +1765,10 @@ async def dispatch_episode(
 ) -> dict:
     """Run one episode through ``probe.run_dispatch`` with ``cfg``'s per-episode settings installed.
 
-    The generator, the hosted runtime and every ``simulate_<probe>`` shortcut
-    run their episodes through here, so a setting that holds for one episode
-    (today: reasoning replay) is installed in this one place. The settings are
-    context variables, so call it in the task that runs the episode.
+    The generator and the hosted runtime run their episodes through here, so a
+    setting that holds for one episode (reasoning replay) is installed in this
+    one place. The settings are context variables, so call it in the task that
+    runs the episode.
     ``dispatch_kwargs`` (``state``, ``seed_state``) pass through to
     ``run_dispatch``.
     """

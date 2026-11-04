@@ -113,9 +113,7 @@ from usersim.extension import (
     TraceKind,
     WarningKind,
     acall_llm,
-    dispatch_episode,
     finalize_completed,
-    make_failed,
     make_result,
     parse_tool_call,
     register_probe,
@@ -169,8 +167,7 @@ def should_succeed(state: ConversationState) -> bool:
 class SafetyAgenticProbeError(ValueError):
     """Raised when the probe cannot construct (no resolvable action_request).
 
-    The shim ``simulate_safety_agentic`` catches this and returns a
-    structured ``make_failed`` outcome with
+    The generator records it as a failed row with
     ``failure_class=SCENARIO_ABORTED``.
     """
 
@@ -571,68 +568,6 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             return result
         finally:
             set_current_outcome_builder(previous_builder)
-
-
-# ---------------------------------------------------------------------------
-# Public entry point — thin shim around SafetyAgenticProbe
-# ---------------------------------------------------------------------------
-
-
-async def simulate_safety_agentic(
-    models: dict[str, Any],
-    data: dict[str, Any],
-    persona: dict[str, Any],
-    profile: dict[str, Any],
-    locale: str,
-    language: str,
-    cfg: Any,
-    **kwargs: Any,
-) -> dict[str, Any]:
-    """Thin shim for callers that import ``simulate_safety_agentic``.
-
-    Catches construction exceptions (bank-load / no-resolvable-action)
-    and returns a ``make_failed`` outcome with
-    ``failure_class=SCENARIO_ABORTED``.
-    """
-    from usersim.extension import BankLoadError, OutcomeBuilder
-    from usersim.extension import Provenance as _Provenance
-
-    provenance = kwargs.get("provenance") or _Provenance()
-    outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
-        provenance=provenance,
-    )
-    try:
-        probe = SafetyAgenticProbe(
-            persona=persona,
-            locale=locale,
-            language=language,
-            models=models,
-            cfg=cfg,
-            provenance=provenance,
-            profile=profile,
-            data=data,
-            outcome_builder=outcome_builder,
-        )
-    except BankLoadError as e:
-        return _aborted(f"agentic-bank load failed: {e}", provenance)
-    except SafetyAgenticProbeError as e:
-        return _aborted(str(e), provenance)
-    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
-
-
-def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
-    """Build a structured SCENARIO_ABORTED failure result."""
-    from usersim.extension import FailureAttribution, FailureClass, OutcomeBuilder, OutcomeStatus
-    from usersim.extension import Provenance as _Provenance
-
-    builder = OutcomeBuilder(provenance=provenance or _Provenance())
-    outcome = builder.finalize(
-        status=OutcomeStatus.FAILED,
-        failure_class=FailureClass.SCENARIO_ABORTED,
-        failure_attribution=FailureAttribution.SCENARIO_LOGIC,
-        failure_detail=reason,
-    )
-    return make_failed(reason, outcome=outcome, traces=[])
 
 
 # ---------------------------------------------------------------------------

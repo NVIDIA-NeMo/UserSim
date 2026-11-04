@@ -396,9 +396,9 @@ def _make_aborted_result(
     INFRASTRUCTURE): a probe abort is a SCENARIO_ABORTED outcome
     attributed to SCENARIO_LOGIC — the asset bank failed to load,
     no resolvable task for the persona, prompt pack missing for the
-    locale, etc. The matching probe shim raises one of these errors
-    at construction time; the dispatcher catches and surfaces a
-    structured outcome rather than crashing the row.
+    locale, etc. A probe raises one of these errors at construction
+    time; the generator catches it and records a structured outcome
+    rather than crashing the row.
     """
     from usersim.engine.core.outcomes import (
         FailureAttribution,

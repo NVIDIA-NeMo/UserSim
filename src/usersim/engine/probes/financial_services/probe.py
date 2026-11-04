@@ -67,22 +67,15 @@ from usersim.extension import (
     BankBackedProbe,
     BankLoadError,
     ConversationState,
-    FailureAttribution,
-    FailureClass,
-    OutcomeBuilder,
-    OutcomeStatus,
-    Provenance,
     SimulationTrace,
     ToolExecutionMixin,
     TraceKind,
     WarningKind,
-    dispatch_episode,
     expected_language_display,
     format_behavioral_profile_for_prompt,
     format_disclosure_instructions,
     format_interaction_style_instructions,
     format_persona_for_prompt,
-    make_failed,
     persona_full_name,
     register_probe,
 )
@@ -1131,58 +1124,6 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             f"{self._bank.format_money(a['balance'])}). If the agent needs specific account details, use "
             "THESE exact ones — never invent a different account number or last-4."
         )
-
-
-# ---------------------------------------------------------------------------
-# Public shim
-# ---------------------------------------------------------------------------
-
-
-async def simulate_financial_services(
-    models: dict[str, Any],
-    data: dict[str, Any],
-    persona: dict[str, Any],
-    profile: dict[str, Any],
-    locale: str,
-    language: str,
-    cfg: Any,
-    **kwargs: Any,
-) -> dict[str, Any]:
-    """Thin shim: catch construction errors -> structured SCENARIO_ABORTED."""
-    from usersim.extension import BankLoadError
-
-    provenance = kwargs.get("provenance") or Provenance()
-    outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
-        provenance=provenance,
-    )
-    try:
-        probe = FinancialServicesProbe(
-            persona=persona,
-            locale=locale,
-            language=language,
-            models=models,
-            cfg=cfg,
-            provenance=provenance,
-            profile=profile,
-            data=data,
-            outcome_builder=outcome_builder,
-        )
-    except BankLoadError as e:
-        return _aborted(f"financial_services bank load failed: {e}", provenance)
-    except FinancialServicesProbeError as e:
-        return _aborted(str(e), provenance)
-    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
-
-
-def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
-    builder = OutcomeBuilder(provenance=provenance or Provenance())
-    outcome = builder.finalize(
-        status=OutcomeStatus.FAILED,
-        failure_class=FailureClass.SCENARIO_ABORTED,
-        failure_attribution=FailureAttribution.SCENARIO_LOGIC,
-        failure_detail=reason,
-    )
-    return make_failed(reason, outcome=outcome, traces=[])
 
 
 # ---------------------------------------------------------------------------

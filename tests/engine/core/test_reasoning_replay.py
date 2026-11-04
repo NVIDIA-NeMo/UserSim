@@ -155,31 +155,6 @@ async def test_a_hosted_episode_replays_as_a_local_one_does(probe_type):
     assert any(_replayed(messages) for messages in hosted)
 
 
-async def test_a_probe_shortcut_replays_as_the_generator_does():
-    """The public ``simulate_<probe>`` functions promise the dispatcher path's behaviour."""
-    from usersim.engine.core.episode_input import construct_episode_preamble
-    from usersim.engine.probes.general_open_ended.probe import simulate_general_open_ended
-
-    cfg = _config("general_open_ended", replay_assistant_reasoning=True)
-    prompts: list[dict[str, Any]] = []
-    models = {alias: _Continuing(role, prompts) for alias, role in _ALIASES.items()}
-    preamble = construct_episode_preamble(
-        _synthetic_row_data("general_open_ended", "en_US", cfg), config=cfg, models=models
-    )
-
-    await simulate_general_open_ended(
-        models=models,
-        data=preamble.data,
-        persona=preamble.persona,
-        profile=preamble.behavioral_profile,
-        locale=preamble.locale,
-        language=preamble.language,
-        cfg=cfg,
-    )
-
-    assert any(_replayed(p["messages"]) for p in prompts if p["role"] == "assistant")
-
-
 class _RunDispatchCalls(ast.NodeVisitor):
     """Each ``run_dispatch`` call, other than ``super().run_dispatch(...)``, by its enclosing function."""
 

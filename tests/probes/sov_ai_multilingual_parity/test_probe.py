@@ -13,7 +13,7 @@ Layered the same way as ``sov_ai_facts/test_probe.py`` and
 2. **Query-bank cache** — process-local cache + env override.
 3. **Prompts** — every supported locale has both system prompt + follow-up
    instruction; no half-shipped locales.
-4. **End-to-end probe** — ``simulate_sov_ai_multilingual_parity``
+4. **End-to-end probe** — ``SovAiMultilingualParityProbe`` through ``run_probe``
    with mocked ``acall_llm``; covers single-turn, multi-turn, verbatim
    injection, placeholder warning, structured failure paths
    (bank-load / no-matching-query / locale-not-in-bank / assistant-error).
@@ -33,6 +33,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from _probe_run import run_probe
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.core._assets import probe_assets_dir
@@ -518,7 +519,8 @@ class TestSimulateSovAiMultilingualParity:
                 )
             ),
         ):
-            result = await probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await run_probe(
+                probe_gen.SovAiMultilingualParityProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -582,7 +584,8 @@ class TestSimulateSovAiMultilingualParity:
                 )
             ),
         ):
-            result = await probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await run_probe(
+                probe_gen.SovAiMultilingualParityProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -631,7 +634,8 @@ class TestSimulateSovAiMultilingualParity:
                 )
             ),
         ):
-            result = await probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await run_probe(
+                probe_gen.SovAiMultilingualParityProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -661,7 +665,8 @@ class TestSimulateSovAiMultilingualParity:
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
-            result = await probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await run_probe(
+                probe_gen.SovAiMultilingualParityProbe,
                 models={},
                 data={},
                 persona=br_persona_southeast,
@@ -715,7 +720,8 @@ class TestSimulateSovAiMultilingualParity:
             mock_call as mc,
             mock_judge_call as mjc,
         ):
-            result = await probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await run_probe(
+                probe_gen.SovAiMultilingualParityProbe,
                 models={},
                 data={},
                 persona={"age": 30, "education_level": "high school"},
@@ -748,7 +754,8 @@ class TestSimulateSovAiMultilingualParity:
                 _raises,
             ),
         ):
-            result = await probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await run_probe(
+                probe_gen.SovAiMultilingualParityProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -784,7 +791,8 @@ class TestSimulateSovAiMultilingualParity:
             os.environ,
             {"USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK": "/nonexistent/query_bank.yaml"},
         ):
-            result = await probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await run_probe(
+                probe_gen.SovAiMultilingualParityProbe,
                 models={},
                 data={},
                 persona=br_persona_southeast,
@@ -797,7 +805,9 @@ class TestSimulateSovAiMultilingualParity:
         assert result["conversation_status"] is False
         outcome = json.loads(result["simulation_outcome"])
         assert outcome["status"] == OutcomeStatus.FAILED.value
-        assert "query-bank load failed" in outcome["failure_detail"]
+        assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
+        # The recorded reason names the bank file that did not load.
+        assert "/nonexistent/query_bank.yaml" in outcome["failure_detail"]
 
     async def test_non_placeholder_query_does_not_emit_placeholder_warning(
         self,
@@ -830,7 +840,8 @@ class TestSimulateSovAiMultilingualParity:
                 )
             ),
         ):
-            result = await probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await run_probe(
+                probe_gen.SovAiMultilingualParityProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),

@@ -36,6 +36,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from _probe_run import run_probe
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.config import ConversationSimulatorConfig
@@ -678,7 +679,8 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -764,7 +766,8 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -811,7 +814,8 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -869,7 +873,8 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -902,7 +907,8 @@ class TestSimulateSafetyChatPressure:
             os.environ,
             {"USERSIM_SAFETY_CHAT_PRESSURE_BANK": "/nonexistent/bank.yaml"},
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={},
                 data={},
                 persona=en_persona,
@@ -916,7 +922,8 @@ class TestSimulateSafetyChatPressure:
         outcome = json.loads(result["simulation_outcome"])
         assert outcome["status"] == OutcomeStatus.FAILED.value
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
-        assert "pressure-bank load failed" in outcome["failure_detail"]
+        # The recorded reason names the bank file that did not load.
+        assert "/nonexistent/bank.yaml" in outcome["failure_detail"]
 
     async def test_panel_override_with_unknown_target_returns_failure(
         self,
@@ -926,7 +933,8 @@ class TestSimulateSafetyChatPressure:
         sim_patch = patch("usersim.engine.core.simulation.acall_llm")
         judge_patch = patch("usersim.engine.core.judges.acall_llm")
         with patch.dict(os.environ, _shipped_bank_env()), sim_patch as mc_sim, judge_patch as mc_judge:
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={},
                 data={
                     "pressure_strategy_id": "persistence",
@@ -958,7 +966,8 @@ class TestSimulateSafetyChatPressure:
         sim_patch = patch("usersim.engine.core.simulation.acall_llm")
         judge_patch = patch("usersim.engine.core.judges.acall_llm")
         with patch.object(probe_gen, "_load_bank", return_value=synth), sim_patch as mc_sim, judge_patch as mc_judge:
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={},
                 data={},
                 persona=en_persona,
@@ -989,7 +998,8 @@ class TestSimulateSafetyChatPressure:
                 _raises,
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -1038,7 +1048,8 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -1093,7 +1104,8 @@ class TestSimulateSafetyChatPressure:
                 _side_effect,
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -1189,7 +1201,8 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1236,7 +1249,8 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1282,7 +1296,8 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1327,7 +1342,8 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1377,7 +1393,8 @@ class TestCapitulationStopHook:
             raise AssertionError(f"unexpected alias: {alias!r}")
 
         with patch.dict(os.environ, _shipped_bank_env()), _patched_call_llm(_side_effect):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1422,7 +1439,8 @@ class TestCapitulationStopHook:
                 random_seed = 42
                 max_turns = 2
 
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1482,7 +1500,8 @@ class TestCapitulationStopHook:
                 random_seed = 42
                 max_turns = 2
 
-            await probe_gen.simulate_safety_chat_pressure(
+            await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1544,7 +1563,8 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = await probe_gen.simulate_safety_chat_pressure(
+            result = await run_probe(
+                probe_gen.SafetyChatPressureProbe,
                 models=self._models(),
                 data={},
                 persona=en_persona,

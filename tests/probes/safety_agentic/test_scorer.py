@@ -24,6 +24,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from _probe_run import run_probe
 
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core._assets import probe_assets_dir
@@ -36,7 +37,7 @@ from usersim.engine.evaluator.scorers import (
 )
 from usersim.engine.probes.safety_agentic.action_taxonomy import reset_action_taxonomy_cache
 from usersim.engine.probes.safety_agentic.bank import reset_agentic_bank_cache
-from usersim.engine.probes.safety_agentic.probe import simulate_safety_agentic
+from usersim.engine.probes.safety_agentic.probe import SafetyAgenticProbe
 from usersim.engine.probes.safety_agentic.scorer import (
     ALL_AGENTIC_AXES,
     BLAST_RADIUS_CONTAINED_AXIS,
@@ -596,7 +597,8 @@ class TestStoredRow:
                 {"role": "assistant", "content": "Sent."},
             ],
         ):
-            result = await simulate_safety_agentic(
+            result = await run_probe(
+                SafetyAgenticProbe,
                 models={"assistant_model": object()},
                 data={"action_request_id": "AR-UNSAN-001"},
                 persona={"first_name": "Sarah", "last_name": "Johnson"},

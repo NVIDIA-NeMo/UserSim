@@ -73,9 +73,7 @@ from usersim.extension import (
     ConversationState,
     PreviewField,
     WarningKind,
-    dispatch_episode,
     format_persona_for_prompt,
-    make_failed,
     register_probe,
 )
 
@@ -144,8 +142,7 @@ def should_succeed(state: ConversationState) -> bool:
 class SovAiFactsProbeError(ValueError):
     """Raised when the probe cannot construct (no fact, missing prompts).
 
-    The shim ``simulate_sov_ai_facts`` catches this and returns
-    a structured ``make_failed`` outcome with
+    The generator records it as a failed row with
     ``failure_class=SCENARIO_ABORTED``.
     """
 
@@ -199,8 +196,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
         super().__init__(**kwargs)
         # Fail-fast contract: ``derive_task`` returns None when the
         # persona's tags match no shipped fact. This is a structural
-        # SCENARIO_ABORTED — the shim catches and turns it into a
-        # make_failed outcome.
+        # SCENARIO_ABORTED, which the generator records as a failed row.
         if self._task is None:
             raise SovAiFactsProbeError(
                 f"no fact in {self._bank.bank_id} v{self._bank.bank_version} "
@@ -293,77 +289,3 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
             extras["probe_variant"] = self._task.category
             extras["sovereign_facts_probed"] = list(state.metadata.get("facts_probed") or [])
         return extras
-
-
-# ---------------------------------------------------------------------------
-# Public entry point — thin shim around SovAiFactsProbe
-# ---------------------------------------------------------------------------
-
-
-async def simulate_sov_ai_facts(
-    models: dict[str, Any],
-    data: dict[str, Any],
-    persona: dict[str, Any],
-    profile: dict[str, Any],
-    locale: str,
-    language: str,
-    cfg: Any,
-    **kwargs: Any,
-) -> dict[str, Any]:
-    """Thin shim for callers that import ``simulate_sov_ai_facts``.
-
-    The dispatcher in ``usersim.engine.generator`` instantiates
-    ``SovAiFactsProbe`` and calls ``probe.run_dispatch`` directly;
-    this function exists for backward compat with per-probe tests that
-    import the symbol.
-
-    Catches construction exceptions (bank-load / no-matching-fact /
-    prompt-pack-missing) and returns a ``make_failed`` outcome with
-    ``failure_class=SCENARIO_ABORTED``.
-    """
-    from usersim.extension import BankLoadError, OutcomeBuilder
-    from usersim.extension import Provenance as _Provenance
-
-    provenance = kwargs.get("provenance") or _Provenance()
-    # Construct an OutcomeBuilder so placeholder warnings + bank-version
-    # pins emitted at probe construction time survive into the final
-    # outcome. The dispatcher in ``usersim.engine.generator`` does
-    # this itself; the shim mirrors the contract for direct callers.
-    outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
-        provenance=provenance,
-    )
-    try:
-        probe = SovAiFactsProbe(
-            persona=persona,
-            locale=locale,
-            language=language,
-            models=models,
-            cfg=cfg,
-            provenance=provenance,
-            profile=profile,
-            data=data,
-            outcome_builder=outcome_builder,
-        )
-    except BankLoadError as e:
-        return _aborted(
-            f"fact-bank load failed for locale={locale}: {e}",
-            provenance,
-        )
-    except SovAiFactsProbeError as e:
-        return _aborted(str(e), provenance)
-    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
-
-
-def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
-    """Build a structured SCENARIO_ABORTED failure result."""
-    from usersim.extension import FailureAttribution, FailureClass, OutcomeBuilder, OutcomeStatus
-    from usersim.extension import Provenance as _Provenance
-
-    builder = OutcomeBuilder(provenance=provenance or _Provenance())
-    outcome = builder.finalize(
-        status=OutcomeStatus.FAILED,
-        failure_class=FailureClass.SCENARIO_ABORTED,
-        failure_attribution=FailureAttribution.SCENARIO_LOGIC,
-        failure_detail=reason,
-    )
-    return make_failed(reason, outcome=outcome, traces=[])
