@@ -151,6 +151,21 @@ def test_a_tool_calling_row_stores_no_drawn_theme() -> None:
     assert row["toolset_category"]
 
 
+def test_materialized_rows_keep_the_seed_table_to_the_probe_that_reads_it() -> None:
+    """A host gets the toolset columns on the tool_calling rows only, as a simulate run stores them."""
+    rows = materialize_episode_inputs(
+        locale="en_US", num_rows=4, probe_mix={"tool_calling": 0.5, "general_open_ended": 0.5}, random_seed=3
+    )
+    columns = ("toolset_source", "toolset_category", "toolset_name", "num_tools", "tools")
+    by_probe = {
+        probe: [row for row in rows if row["probe_type"] == probe] for probe in ("tool_calling", "general_open_ended")
+    }
+
+    assert by_probe["tool_calling"] and by_probe["general_open_ended"]
+    assert all(row["tools"] and row["toolset_category"] for row in by_probe["tool_calling"])
+    assert all(row.get(column) is None for row in by_probe["general_open_ended"] for column in columns)
+
+
 def _themes_from_its_folder(cls: type, locale: str) -> list[dict]:
     return json.loads((cls.assets_dir() / locale / "themes.json").read_text(encoding="utf-8"))
 

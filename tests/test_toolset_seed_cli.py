@@ -19,11 +19,17 @@ import json
 import shutil
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from usersim import cli
 from usersim.cli._errors import ConfigError
-from usersim.cli._pipeline import resolve_seed_dataset_path, seed_dataset_probe
+from usersim.cli._pipeline import (
+    clear_seed_columns_of_other_probes,
+    resolve_seed_dataset_path,
+    seed_dataset_columns,
+    seed_dataset_probe,
+)
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.probes import SEED_DATASET_SUFFIXES, resolve_probe
 from usersim.engine.probes.tool_calling.probe import _normalize_tool_list
@@ -139,6 +145,122 @@ class TestOneSeedTablePerRun:
         monkeypatch.setattr(resolve_probe("sov_ai_facts"), "seed_dataset", "facts_seed")
         with pytest.raises(ConfigError, match="a run attaches one"):
             seed_dataset_probe({"tool_calling": 0.5, "sov_ai_facts": 0.5})
+
+
+_SEED_COLUMNS = ("toolset_source", "toolset_category", "toolset_name", "num_tools", "tools")
+
+
+def _mixed_rows() -> pd.DataFrame:
+    """A tool_calling row and a general_open_ended row, each with the catalog row Data Designer gave it."""
+    return pd.DataFrame(
+        [
+            {
+                "trajectory_id": "T-TOOL",
+                "persona_uuid": "p-1",
+                "locale": "en_US",
+                "probe_type": "tool_calling",
+                "probe_family": "tool_calling",
+                "probe_variant": "default",
+                "theme": "__not_used__",
+                "conversation_messages": "[]",
+                "toolset_source": "ToolEyes",
+                "toolset_category": "Search",
+                "toolset_name": "EngineSearch",
+                "num_tools": 12,
+                "tools": "[]",
+            },
+            {
+                "trajectory_id": "T-GENERAL",
+                "persona_uuid": "p-2",
+                "locale": "en_US",
+                "probe_type": "general_open_ended",
+                "probe_family": "general_open_ended",
+                "probe_variant": "default",
+                "theme": '{"type": "cooking"}',
+                "conversation_messages": "[]",
+                "toolset_source": "ToolEyes",
+                "toolset_category": "Competition",
+                "toolset_name": "Ergast F1",
+                "num_tools": 12,
+                "tools": "[]",
+            },
+        ]
+    )
+
+
+_MIX = {"tool_calling": 0.5, "general_open_ended": 0.5}
+
+
+class TestSeedColumnsStayWithTheirReader:
+    """Data Designer gives every row of a run a seed-table row; only the reading probe's rows keep it."""
+
+    def test_another_probes_row_holds_the_columns_empty(self):
+        tool, general = clear_seed_columns_of_other_probes(_mixed_rows(), probe_mix=_MIX).to_dict(orient="records")
+
+        assert (tool["toolset_name"], tool["num_tools"]) == ("EngineSearch", 12)
+        assert type(tool["num_tools"]) is int
+        assert {column: general[column] for column in _SEED_COLUMNS} == dict.fromkeys(_SEED_COLUMNS)
+        assert general["theme"] == '{"type": "cooking"}'
+
+    def test_the_columns_are_the_attached_tables(self, tmp_path):
+        seed = tmp_path / "catalog.jsonl"
+        lines = [{"tools": [], "toolset_category": "Weather"}, {"tools": [], "region": "EU"}]
+        seed.write_text("".join(json.dumps(line) + "\n" for line in lines), encoding="utf-8")
+        rows = _mixed_rows().assign(region="EU")
+
+        assert seed_dataset_columns(seed) == ["tools", "toolset_category", "region"]
+        _, general = clear_seed_columns_of_other_probes(rows, probe_mix=_MIX, toolset_seed_path=seed).to_dict(
+            orient="records"
+        )
+        assert (general["region"], general["toolset_category"], general["tools"]) == (None, None, None)
+        assert general["toolset_name"] == "Ergast F1"  # not a column of this table
+
+    def test_a_mix_without_a_reader_comes_back_unchanged(self):
+        rows = _mixed_rows()
+
+        assert clear_seed_columns_of_other_probes(rows, probe_mix={"general_open_ended": 1.0}) is rows
+
+    def test_simulate_stores_them_only_on_the_readers_rows(self, tmp_path, monkeypatch):
+        import sys
+        from unittest.mock import patch
+
+        from usersim.cli._models import default_models_path, load_models_config
+        from usersim.cli.simulate import _simulate_to_parquet
+        from usersim.engine.core.storage import list_runs, read_partitioned_dataset
+
+        class _Result:
+            def load_dataset(self):
+                return _mixed_rows()
+
+        class _DataDesigner:
+            def create(self, builder, num_records=None, artifact_path=None):
+                return _Result()
+
+        monkeypatch.setattr(sys, "argv", ["usersim", "simulate", "--locale", "en_US", "--num-rows", "2"])
+        monkeypatch.delenv("SLURM_JOB_ID", raising=False)
+        monkeypatch.setattr("usersim.engine.core.manifest._is_running_in_notebook", lambda: False)
+        out = tmp_path / "trajectories"
+        with patch("usersim.cli._pipeline.build_simulator_config_builder", lambda **_: (_DataDesigner(), object())):
+            rc = _simulate_to_parquet(
+                models=load_models_config(default_models_path()),
+                models_path=default_models_path(),
+                panel=None,
+                locales=["en_US"],
+                num_rows=2,
+                out=out,
+                assets_dir=None,
+                max_turns=1,
+                probe_mix=_MIX,
+                random_seed=42,
+                skip_existing=False,
+                store_reasoning=False,
+            )
+
+        assert rc == 0
+        (run,) = list_runs(out)
+        stored = read_partitioned_dataset(out, run=run).set_index("trajectory_id")
+        assert stored.loc["T-TOOL", "toolset_name"] == "EngineSearch"
+        assert stored.loc["T-GENERAL", list(_SEED_COLUMNS)].isna().all()
 
 
 class TestJsonlSeedContract:

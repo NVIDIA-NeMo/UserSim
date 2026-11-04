@@ -131,7 +131,8 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
 
 One row per toolset. The same columns apply whether the file is
 `toolsets_seed.parquet` or `toolsets_seed.jsonl`: jsonl being one JSON object
-per line, with these keys:
+per line, with these keys. A run stores them on its `tool_calling` rows, and
+leaves them empty on the rows of the other probes in its mix.
 
 | Column | Type | Description |
 |---|---|---|

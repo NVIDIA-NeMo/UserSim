@@ -43,7 +43,12 @@ from pathlib import Path
 
 from usersim.cli._errors import ConfigError
 from usersim.cli._persona_language import persona_dataset_report
-from usersim.cli._pipeline import resolve_seed_dataset_for_mix, verify_probe_assets, verify_probe_locales
+from usersim.cli._pipeline import (
+    clear_seed_columns_of_other_probes,
+    resolve_seed_dataset_for_mix,
+    verify_probe_assets,
+    verify_probe_locales,
+)
 
 logger = logging.getLogger("usersim.cli.simulate")
 
@@ -739,6 +744,9 @@ def _simulate_to_parquet(
         # folder, removed once its rows are loaded.
         with tempfile.TemporaryDirectory(prefix="usersim_simulate_") as artifacts:
             df = data_designer.create(builder, num_records=n, artifact_path=artifacts).load_dataset()
+        df = clear_seed_columns_of_other_probes(
+            df, probe_mix=probe_mix, assets_dir=assets_dir, toolset_seed_path=toolset_seed_path
+        )
         # Per-locale atomic write: this locale's partition lands on
         # disk before the next locale starts. A crash mid-run leaves
         # earlier locales' partitions intact and resumable (within

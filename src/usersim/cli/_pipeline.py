@@ -321,6 +321,53 @@ def resolve_seed_dataset_for_mix(
     return resolved
 
 
+def seed_dataset_columns(seed_path: Path) -> list[str]:
+    """The columns of the seed table at ``seed_path``: a parquet file's schema, or every key of a JSONL file."""
+    if seed_path.suffix == ".parquet":
+        import pyarrow.parquet as pq
+
+        return list(pq.read_schema(seed_path).names)
+    columns: dict[str, None] = {}
+    with seed_path.open(encoding="utf-8") as lines:
+        for line in lines:
+            if line.strip():
+                columns.update(dict.fromkeys(json.loads(line)))
+    return list(columns)
+
+
+def clear_seed_columns_of_other_probes(
+    df: Any,
+    *,
+    probe_mix: Mapping[str, float],
+    assets_dir: Path | str | None = None,
+    toolset_seed_path: Path | str | None = None,
+) -> Any:
+    """``df`` with the seed table's columns emptied on every row of a probe that does not read the table.
+
+    Data Designer gives each row of a run the columns of one seed-table row,
+    whatever the row's probe, so without this a row of another probe in the
+    mix would record the seed row it drew: a toolset its conversation never
+    offered, say. The table is the one the run attaches, resolved from the
+    same arguments, and ``df`` comes back unchanged when no probe in the mix
+    reads one.
+    """
+    seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, toolset_seed_path)
+    reader = seed_dataset_probe(probe_mix)
+    if seed_path is None or reader is None or "probe_type" not in df.columns:
+        return df
+    columns = [column for column in seed_dataset_columns(seed_path) if column in df.columns]
+    others = df["probe_type"].astype(str) != reader
+    if not columns or not others.any():
+        return df
+    df = df.copy()
+    for column in columns:
+        # Object dtype keeps the reader's values as they are (an integer stays
+        # an integer) when the other rows are emptied.
+        df[column] = df[column].astype(object)
+        df.loc[others, column] = None
+    return df
+
+
 def _wire_seed_dataset(config_builder: Any, dd: Any, seed_path: Path) -> None:
     """Attach ``seed_path`` as the run's seed dataset, one shuffled row per row the run makes."""
     config_builder.with_seed_dataset(
@@ -552,6 +599,9 @@ def materialize_episode_inputs(
     sampled = designer.preview(builder, num_records=num_rows).dataset
     if sampled is None:
         return []
+    sampled = clear_seed_columns_of_other_probes(
+        sampled, probe_mix=probe_mix, assets_dir=assets_dir, toolset_seed_path=toolset_seed_path
+    )
     # ``usersim_config`` rides on the materialized row only. It is what lets a
     # host restore the episode with ProbeEpisodeRuntime.from_resolved_row; the
     # simulator's own trajectory rows do not repeat it.
