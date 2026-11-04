@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from usersim.asset_gen.registry import AssetDomain
     from usersim.cli._models import require_aliases, to_data_designer_kwargs, to_model_configs
     from usersim.engine.config import MODEL_ASSISTANT, MODEL_JUDGE, MODEL_USER, ConversationSimulatorConfig
+    from usersim.engine.core._assets import probe_assets_dir
     from usersim.engine.core.backends import ExecutionBackend, JobHandle, JobSpec, JobStatus
     from usersim.engine.core.behavioral import (
         ChatRealism,
@@ -35,7 +36,8 @@ if TYPE_CHECKING:
     )
     from usersim.engine.core.identity import persona_uuid
     from usersim.engine.core.llm import acall_llm
-    from usersim.engine.core.locale import SHIPPED_LOCALES, expected_language_display
+    from usersim.engine.core.locale import SHIPPED_LOCALES, asset_locale, expected_language_display, india_variant
+    from usersim.engine.core.localized import LocalizedText, LocalizedTextError
     from usersim.engine.core.messages import format_conversation_history_for_prompt, format_tools_for_prompt
     from usersim.engine.core.missing import is_missing, none_for_missing
     from usersim.engine.core.outcomes import (
@@ -49,6 +51,7 @@ if TYPE_CHECKING:
         WarningKind,
     )
     from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name
+    from usersim.engine.core.persona_tags import persona_to_tags
     from usersim.engine.core.probes import (
         AgenticMixin,
         BankBackedProbe,
@@ -62,9 +65,12 @@ if TYPE_CHECKING:
         ProbeRegistrationError,
         ToolCallingMixin,
         ToolExecutionMixin,
+        dispatch_episode,
         register_probe,
     )
     from usersim.engine.core.prompt_loader import get_prompt, load_prompt_file, render_prompt
+    from usersim.engine.core.row_metadata import recorded_value
+    from usersim.engine.core.seeds import load_seeds
     from usersim.engine.core.simulation import (
         ConversationState,
         finalize_completed,
@@ -95,6 +101,7 @@ __all__ = [
     "register_probe",
     # Conversations and outcomes
     "ConversationState",
+    "dispatch_episode",
     "FailureAttribution",
     "FailureClass",
     "OutcomeBuilder",
@@ -125,10 +132,18 @@ __all__ = [
     "persona_full_name",
     "persona_uuid",
     "render_prompt",
+    # Banks and assets
+    "LocalizedText",
+    "LocalizedTextError",
+    "load_seeds",
+    "persona_to_tags",
+    "probe_assets_dir",
     # Locales and languages
     "SHIPPED_LOCALES",
+    "asset_locale",
     "expected_language_display",
     "get_conversation_language",
+    "india_variant",
     "language_instruction",
     # Tool calls
     "parse_tool_call",
@@ -138,6 +153,7 @@ __all__ = [
     "ScorerRegistrationError",
     "is_missing",
     "none_for_missing",
+    "recorded_value",
     "register_scorer",
     # Capabilities, asset domains and backends
     "AssetDomain",
@@ -157,6 +173,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "usersim.asset_gen.registry": ("AssetDomain",),
     "usersim.cli._models": ("require_aliases", "to_data_designer_kwargs", "to_model_configs"),
     "usersim.engine.config": ("MODEL_ASSISTANT", "MODEL_JUDGE", "MODEL_USER", "ConversationSimulatorConfig"),
+    "usersim.engine.core._assets": ("probe_assets_dir",),
     "usersim.engine.core.backends": ("ExecutionBackend", "JobHandle", "JobSpec", "JobStatus"),
     "usersim.engine.core.behavioral": (
         "ChatRealism",
@@ -167,7 +184,8 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     ),
     "usersim.engine.core.identity": ("persona_uuid",),
     "usersim.engine.core.llm": ("acall_llm",),
-    "usersim.engine.core.locale": ("SHIPPED_LOCALES", "expected_language_display"),
+    "usersim.engine.core.locale": ("SHIPPED_LOCALES", "asset_locale", "expected_language_display", "india_variant"),
+    "usersim.engine.core.localized": ("LocalizedText", "LocalizedTextError"),
     "usersim.engine.core.messages": ("format_conversation_history_for_prompt", "format_tools_for_prompt"),
     "usersim.engine.core.missing": ("is_missing", "none_for_missing"),
     "usersim.engine.core.outcomes": (
@@ -181,6 +199,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "WarningKind",
     ),
     "usersim.engine.core.persona": ("format_persona_for_prompt", "persona_full_name"),
+    "usersim.engine.core.persona_tags": ("persona_to_tags",),
     "usersim.engine.core.probes": (
         "AgenticMixin",
         "BankBackedProbe",
@@ -194,9 +213,12 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "ProbeRegistrationError",
         "ToolCallingMixin",
         "ToolExecutionMixin",
+        "dispatch_episode",
         "register_probe",
     ),
     "usersim.engine.core.prompt_loader": ("get_prompt", "load_prompt_file", "render_prompt"),
+    "usersim.engine.core.row_metadata": ("recorded_value",),
+    "usersim.engine.core.seeds": ("load_seeds",),
     "usersim.engine.core.simulation": (
         "ConversationState",
         "finalize_completed",

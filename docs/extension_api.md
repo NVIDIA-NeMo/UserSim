@@ -49,6 +49,7 @@ does not load the conversation loop.
 | Name | What it is |
 |---|---|
 | `ConversationState` | The conversation so far, as the hooks receive it, with its messages, metadata and `OutcomeBuilder` |
+| `dispatch_episode` | Runs one episode through a probe's `run_dispatch` with the run's per-episode settings installed, as `usersim simulate` runs it |
 | `make_result` | Builds the row a conversation produces, for a probe that writes its own `run_dispatch` |
 | `make_failed` | Builds the row for a conversation that failed |
 | `finalize_completed` | Finishes a conversation that ran to its end, failing it when the probe did not complete its protocol |
@@ -88,11 +89,23 @@ does not load the conversation loop.
 | `load_prompt_file` | A probe's `prompts.yaml` as a mapping, read from the folder its banks resolve to; empty when there is none |
 | `get_prompt` | One prompt from a probe's `prompts.yaml`, or the default it is given when the file or the key is missing |
 
+### Banks and assets
+
+| Name | What it is |
+|---|---|
+| `probe_assets_dir` | The folder a probe's assets resolve to: the first override root that holds them, else the root its class declares |
+| `load_seeds` | A probe's seeds of one kind for a locale, such as its topics, from `<probe>/<locale>/<kind>.json`, or the `en_US` file when the locale has none |
+| `LocalizedText` | Bank text with a rendering per locale, read with `for_locale`, which falls back to `en_US` |
+| `LocalizedTextError` | Raised when a bank value cannot be read as `LocalizedText` |
+| `persona_to_tags` | The tags a persona matches bank entries on, such as its region, age and occupation, for a locale |
+
 ### Locales and languages
 
 | Name | What it is |
 |---|---|
 | `SHIPPED_LOCALES` | The locales User Sim ships |
+| `asset_locale` | The locale whose banks a conversation locale reads: an India language variant reads its base locale's unless it has its own |
+| `india_variant` | The India language variant a locale is, with its base locale, language and script, or None for any other locale |
 | `get_conversation_language` | The language a locale's conversations are in |
 | `expected_language_display` | A locale's language as a label for prompts |
 | `language_instruction` | The prompt block telling a model which language, and for some locales which script, to write in |
@@ -113,6 +126,7 @@ does not load the conversation loop.
 | `ScorerRegistrationError` | Raised when `register_scorer` refuses a name |
 | `is_missing` | Whether a table cell is empty: None, NaN, `pd.NA` or `pd.NaT` |
 | `none_for_missing` | A copy of a row with every empty cell as None |
+| `recorded_value` | A value a probe recorded for a row, from the row or from its `conversation_metadata` |
 
 ### Capabilities, asset domains and backends
 

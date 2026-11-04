@@ -823,7 +823,6 @@ import random
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.probes import dispatch_episode
 from usersim.engine.probes.bookings.bank import LOCALES, Booking, draw_booking, read_booking_bank
 from usersim.engine.probes.bookings.prompts import BOOKINGS_USER_PROMPTS
 from usersim.extension import (
@@ -832,6 +831,7 @@ from usersim.extension import (
     Provenance,
     ToolExecutionMixin,
     WarningKind,
+    dispatch_episode,
     format_persona_for_prompt,
     persona_uuid,
     register_probe,
