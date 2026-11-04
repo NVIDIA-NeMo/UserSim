@@ -241,12 +241,27 @@ other changes are listed per source:
   every distinct tool spec in the English `dev.json` split of
   [`data/English-dataset`](https://github.com/JoeYing1019/UltraTool/tree/5d340adc26d5881725308398dd5dfc6441eb0156/data/English-dataset)
   (commit `5d340ad`), with one toolset per upstream `domain` label. Tool names
-  and descriptions are unchanged. The `arguments` field is renamed
-  `parameters`, and the `results` (output) schema is removed, including where
-  upstream nests it in the arguments of `seat_preference_query` and
-  `select_and_change_ticket`. Argument schemas are otherwise unchanged, except
-  that `population_growth_rate` in `analyze_impact_on_economy` has type
-  `number`, where upstream writes `float`, which is not a JSON Schema type.
+  are unchanged. The `arguments` field is renamed `parameters`, and the
+  `results` (output) schema is removed, including where upstream nests it in
+  the arguments of `seat_preference_query` and `select_and_change_ticket`.
+  UltraTool's tools have no implementation, so each spec is checked against its
+  own description, the `dev.json` plan steps that call it and the `results` of
+  the tools that feed it:
+  - Every array declares its item type (179 parameters). A parameter whose
+    description, examples or plan calls show a number, a boolean or a list has
+    that type (98), among them `population_growth_rate` in
+    `analyze_impact_on_economy`, where upstream writes `float`.
+  - 103 parameters that a call needs and its schema lacks, such as the origin
+    and destination of `book_best_flight`, are added, named and typed after the
+    matching parameter of a related tool, and 33 tools require the inputs they
+    cannot run without.
+  - `example` is written `examples`, `min` is `minimum`, `dependencies` is
+    `dependentRequired`, `nullable` is removed, an enum lists each value once
+    and the values the tool's plans use, and a `format` outside JSON Schema becomes a `pattern`, a JSON Schema
+    format or text in the description (32 formats).
+  - Every nested field has a description (29 added), and 72 descriptions that
+    contradict their tool, or that leave a list's layout unstated, are
+    rewritten.
 - **ToolEyes** ([Ye et al., 2025](https://aclanthology.org/2025.coling-main.12/)):
   all 95 toolsets in
   [`Tool_Library`](https://github.com/Junjie-Ye/ToolEyes/tree/c818fcebe017951570a25e552a7984e40093fd52/Tool_Library)
