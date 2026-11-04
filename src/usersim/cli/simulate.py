@@ -636,10 +636,7 @@ def _simulate_to_parquet(
         log_persona_language_population,
         persona_language_filter,
     )
-    from usersim.cli._pipeline import (
-        DEFAULT_TOOL_CALLING_THEMES,
-        build_simulator_config_builder,
-    )
+    from usersim.cli._pipeline import build_simulator_config_builder
     from usersim.engine.core.locale import persona_dataset_locale
     from usersim.engine.core.manifest import write_simulator_manifest
     from usersim.engine.core.storage import (
@@ -797,7 +794,6 @@ def _simulate_to_parquet(
             sim_config=sim_cfg_for_manifest,
             locales_requested=run_locales,
             probe_mix=probe_mix,
-            tool_calling_themes=DEFAULT_TOOL_CALLING_THEMES,
             toolset_seed_path=toolset_seed_path,
             panel_path=Path(panel) if panel else None,
             assets_dir=Path(assets_dir).resolve() if assets_dir is not None else None,

@@ -54,17 +54,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("usersim.cli.pipeline")
 
-DEFAULT_TOOL_CALLING_THEMES: tuple[str, ...] = (
-    '{"type": "Weather & Location Lookup", "description": "Look up current weather, forecasts, or location-based info.", "tool_expected": true}',
-    '{"type": "Calendar & Scheduling", "description": "Create, modify, or check calendar events and availability.", "tool_expected": true}',
-    '{"type": "Data Retrieval & Search", "description": "Search databases, look up records, or retrieve structured data.", "tool_expected": true}',
-    '{"type": "Financial Operations", "description": "Check balances, make transactions, or calculate financial metrics.", "tool_expected": true}',
-    '{"type": "Communication & Messaging", "description": "Send emails, messages, or notifications on behalf of the user.", "tool_expected": true}',
-    '{"type": "Multi-Step Workflow", "description": "Complete a task requiring multiple sequential tool calls.", "tool_expected": true}',
-    '{"type": "General Knowledge Question", "description": "Answer a factual question that requires no tools.", "tool_expected": false}',
-    '{"type": "Opinion or Advice Request", "description": "Ask for subjective advice or opinions where tools are unnecessary.", "tool_expected": false}',
-)
-
 DEFAULT_PROBE_MIX: dict[str, float] = {
     "tool_calling": 1 / 3,
     "general_open_ended": 1 / 3,
@@ -441,7 +430,6 @@ def build_simulator_config_builder(
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
     probe_mix: dict[str, float] | None = None,
-    tool_calling_themes: tuple[str, ...] | None = None,
     toolset_seed_path: Path | None = None,
     match_persona_language: bool = False,
     verbosity: int = 1,
@@ -475,7 +463,6 @@ def build_simulator_config_builder(
         locale=locale,
         assets_dir=assets_dir,
         probe_mix=probe_mix,
-        tool_calling_themes=tool_calling_themes,
         toolset_seed_path=toolset_seed_path,
         match_persona_language=match_persona_language,
         drop_persona=True,
@@ -514,7 +501,6 @@ def _add_episode_input_columns(
     locale: str,
     assets_dir: Path | None,
     probe_mix: dict[str, float],
-    tool_calling_themes: tuple[str, ...] | None,
     toolset_seed_path: Path | None,
     match_persona_language: bool,
     drop_persona: bool,
@@ -551,12 +537,9 @@ def _add_episode_input_columns(
     themes: dict[str, list[str]] = {}
     toolset_kwargs: dict[str, Any] = {}
     for probe in probe_mix:
+        themes[probe] = _probe_themes(probe, locale, assets_dir)
         if probe == "tool_calling":
-            # Its themes and toolsets are settings of the run.
-            themes[probe] = list(tool_calling_themes or DEFAULT_TOOL_CALLING_THEMES)
             toolset_kwargs = _wire_toolsets(config_builder, dd, resolved_toolset_seed)
-        else:
-            themes[probe] = _probe_themes(probe, locale, assets_dir)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="theme",
@@ -575,7 +558,6 @@ def materialize_episode_inputs(
     probe_mix: dict[str, float],
     assets_dir: Path | None = None,
     random_seed: int | None = None,
-    tool_calling_themes: tuple[str, ...] | None = None,
     toolset_seed_path: Path | None = None,
     match_persona_language: bool = False,
     max_turns: int = 5,
@@ -600,7 +582,6 @@ def materialize_episode_inputs(
         locale=locale,
         assets_dir=assets_dir,
         probe_mix=probe_mix,
-        tool_calling_themes=tool_calling_themes,
         toolset_seed_path=toolset_seed_path,
         match_persona_language=match_persona_language,
         drop_persona=False,

@@ -65,6 +65,7 @@ from usersim.extension import (
     format_persona_for_prompt,
     format_tools_for_prompt,
     load_prompt_file,
+    load_seeds,
     make_failed,
     register_probe,
     render_prompt,
@@ -283,11 +284,20 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     )
 
     @classmethod
+    def themes(cls, locale: str) -> list[dict[str, Any]]:
+        """The themes in ``locale``'s ``themes.json``, or in the ``en_US`` file when the locale has none."""
+        return load_seeds(locale, cls.label, "themes")
+
+    @classmethod
     def asset_problems(cls) -> list[str]:
-        """The prompts file the prompt defaults would mask, and the toolset seed rows draw their tools from."""
+        """The prompts file the prompt defaults would mask, the themes, and the toolset seed rows draw their tools from."""
         problems = []
         if not load_prompt_file(_SCENARIO):
             problems.append(f"{_SCENARIO}/prompts.yaml is missing or empty")
+        try:
+            cls.themes("en_US")
+        except FileNotFoundError as error:
+            problems.append(f"no themes: {error}")
         toolsets = cls.assets_dir() / "toolsets_seed.parquet"
         if not toolsets.exists():
             problems.append(f"no toolset seed at {toolsets}, so every row would fail at construction")

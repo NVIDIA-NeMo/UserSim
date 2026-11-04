@@ -1,0 +1,42 @@
+[
+  {
+    "type": "Weather & Location Lookup",
+    "description": "Look up current weather, forecasts, or location-based info.",
+    "tool_expected": true
+  },
+  {
+    "type": "Calendar & Scheduling",
+    "description": "Create, modify, or check calendar events and availability.",
+    "tool_expected": true
+  },
+  {
+    "type": "Data Retrieval & Search",
+    "description": "Search databases, look up records, or retrieve structured data.",
+    "tool_expected": true
+  },
+  {
+    "type": "Financial Operations",
+    "description": "Check balances, make transactions, or calculate financial metrics.",
+    "tool_expected": true
+  },
+  {
+    "type": "Communication & Messaging",
+    "description": "Send emails, messages, or notifications on behalf of the user.",
+    "tool_expected": true
+  },
+  {
+    "type": "Multi-Step Workflow",
+    "description": "Complete a task requiring multiple sequential tool calls.",
+    "tool_expected": true
+  },
+  {
+    "type": "General Knowledge Question",
+    "description": "Answer a factual question that requires no tools.",
+    "tool_expected": false
+  },
+  {
+    "type": "Opinion or Advice Request",
+    "description": "Ask for subjective advice or opinions where tools are unnecessary.",
+    "tool_expected": false
+  }
+]

@@ -182,7 +182,6 @@ class ScopeInfo:
     locales: list[str]
     probes: list[str]
     probe_mix: dict[str, float]
-    tool_calling_themes: list[str] = field(default_factory=list)
     toolset_seed_path: str | None = None
     toolset_content_hash: str | None = None
     panel_path: str | None = None
@@ -352,7 +351,6 @@ def _scope_from_dict(d: Mapping[str, Any]) -> ScopeInfo:
         locales=list(d.get("locales") or []),
         probes=list(d.get("probes") or []),
         probe_mix=dict(d.get("probe_mix") or {}),
-        tool_calling_themes=list(d.get("tool_calling_themes") or []),
         toolset_seed_path=d.get("toolset_seed_path"),
         toolset_content_hash=d.get("toolset_content_hash"),
         panel_path=d.get("panel_path"),
@@ -724,7 +722,6 @@ def build_run_manifest(
     sim_config: Any,
     locales_requested: Sequence[str],
     probe_mix: Mapping[str, float],
-    tool_calling_themes: Sequence[str] = (),
     toolset_seed_path: Path | None = None,
     panel_path: Path | None = None,
     assets_dir: Path | None = None,
@@ -789,7 +786,6 @@ def build_run_manifest(
         locales=sorted(set(list(locales_run) + list(locales_requested))),
         probes=list(aggregates["probes"]) or sorted(probe_mix.keys()),
         probe_mix=dict(probe_mix),
-        tool_calling_themes=list(tool_calling_themes),
         toolset_seed_path=str(toolset_seed_path) if toolset_seed_path else None,
         toolset_content_hash=_file_content_hash(toolset_seed_path) if toolset_seed_path else None,
         panel_path=str(panel_path) if panel_path else None,
@@ -916,7 +912,6 @@ def write_simulator_manifest(
     sim_config: Any,
     locales_requested: Sequence[str],
     probe_mix: Mapping[str, float],
-    tool_calling_themes: Sequence[str] = (),
     toolset_seed_path: Path | None = None,
     panel_path: Path | None = None,
     assets_dir: Path | None = None,
@@ -954,7 +949,6 @@ def write_simulator_manifest(
         sim_config=sim_config,
         locales_requested=locales_requested,
         probe_mix=probe_mix,
-        tool_calling_themes=tool_calling_themes,
         toolset_seed_path=toolset_seed_path,
         panel_path=panel_path,
         assets_dir=assets_dir,

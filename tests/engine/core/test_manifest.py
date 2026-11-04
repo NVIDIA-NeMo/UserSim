@@ -158,7 +158,6 @@ class TestRoundTrip:
                 locales=["en_US", "ja_JP"],
                 probes=["tool_calling", "general_open_ended"],
                 probe_mix={"tool_calling": 0.5, "general_open_ended": 0.5},
-                tool_calling_themes=["weather", "calendar"],
                 trajectories_requested={"en_US": 2, "ja_JP": 2},
                 trajectories_completed={"en_US": 2, "ja_JP": 2},
             ),
@@ -283,6 +282,16 @@ class TestLoader:
         write_run_manifest(m, tmp_path)
         loaded = load_run_manifest("1700000000", tmp_path)
         assert loaded == m
+
+    def test_loads_a_manifest_with_a_scope_key_it_no_longer_reads(self, tmp_path: Path) -> None:
+        """A manifest whose scope holds a key the loader does not read, such as tool_calling_themes, still loads."""
+        m = _minimal_manifest("1700000000")
+        write_run_manifest(m, tmp_path)
+        path = manifest_path(tmp_path, "1700000000")
+        payload = json.loads(path.read_text())
+        payload["scope"]["tool_calling_themes"] = ['{"type": "Weather & Location Lookup"}']
+        path.write_text(json.dumps(payload))
+        assert load_run_manifest("1700000000", tmp_path) == m
 
     def test_returns_none_for_run_without_manifest(self, tmp_path: Path) -> None:
         # No manifest written. Old-run handling depends on this contract.
@@ -557,7 +566,6 @@ class TestBuildRunManifest:
             sim_config=_StubSimConfig(random_seed=42),
             locales_requested=["en_US"],
             probe_mix={"tool_calling": 1.0},
-            tool_calling_themes=("weather",),
             assets_dir=Path("/repo/assets"),
             trajectories_requested={"en_US": 1},
             trajectory_df=traj,

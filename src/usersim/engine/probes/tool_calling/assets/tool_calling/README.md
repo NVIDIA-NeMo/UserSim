@@ -120,9 +120,10 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
 - A call that breaks its tool's schema gets a `400` response instead of a
   simulated one, and a call without the user's key for a tool that takes one
   gets a `401` (see [Credentials](#credentials)).
-- Conversation themes (some tool-expected, some not) come from
-  `DEFAULT_TOOL_CALLING_THEMES` in `cli/_pipeline.py`, exercising the
-  call/clarify/refuse decision.
+- A conversation's theme is its toolset's category and name. A row whose
+  toolset has no `toolset_category` uses the theme the run drew from
+  [`en_US/themes.json`](en_US/themes.json) instead, which every locale reads
+  unless it has a `themes.json` of its own.
 
 ## Schema
 
