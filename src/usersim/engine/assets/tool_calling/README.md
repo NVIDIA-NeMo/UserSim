@@ -62,7 +62,7 @@ tool-selection behaviour rather than to reach any of these services.
 | Food | 84 |
 | Alarm | 70 |
 
-The remaining ~64 categories (Calendar, Database, Smart Home & IoT, Health &
+The remaining 64 categories (Calendar, Database, Smart Home & IoT, Health &
 Medical, Music, News, Translation, Stock, Weather, Hospital Ward Manager,
 Library Management System, …) make up the long tail.
 
@@ -101,7 +101,7 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
                                                    │ emits tool call(s)
                                                    ▼
                                      api_response_model synthesizes a
-                                     deterministic, schema-shaped response
+                                     schema-shaped response
                                                    │
                                                    ▼
                               tool_use scorer grades the trajectory
@@ -116,7 +116,7 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   decides whether/which to call.
 - There is **no real execution**: the `api_response_model` alias (see
   [`cli/models_default.toml`](../../../cli/models_default.toml)) synthesizes the
-  tool's response from the schema, so behavior is reproducible.
+  tool's response from the schema, so a run needs no live service.
 - Conversation themes (some tool-expected, some not) come from
   `DEFAULT_TOOL_CALLING_THEMES` in `cli/_pipeline.py`, exercising the
   call/clarify/refuse decision.
@@ -131,7 +131,7 @@ per line, with these keys:
 |---|---|---|
 | `toolset_source` | str | Provenance (`UltraTools`, `ToolEyes`, `API-Bank`, `Custom`, `RestGPT`, `AutoTools`). |
 | `toolset_category` | str | Coarse domain label (e.g. `Weather`, `Finance`). |
-| `toolset_name` | str | Bundle name (e.g. `openweathermap`). |
+| `toolset_name` | str | Bundle name (e.g. `openweathermap`). The shipped catalog sets it on the `ToolEyes` rows and leaves it empty on the others. |
 | `num_tools` | int | Number of functions in the bundle. |
 | `tools` | str (JSON) or list | List of OpenAI-style function specs (`{"type": "function", "function": {"name", "description", "parameters"}}`). |
 
@@ -167,6 +167,8 @@ error because the override would otherwise be silently unused.
 
 ### Example tool spec (`ToolEyes / Trend / Google Trends`)
 
+Abridged to two of its 11 parameters; the wording is the upstream text.
+
 ```json
 {
   "type": "function",
@@ -178,13 +180,14 @@ error because the override would otherwise be silently unused.
       "properties": {
         "query": {
           "type": "string",
-          "description": "The query or queries to search (up to 5 for some data types)."
+          "description": "Parameter defines the query or queries you want to search. You can use anything that you would use in a regular Google Trends search. The maximum number of queries per search is 5 (this only applies to \"Interest over time\" and \"Compared breakdown by region\" data_type, other types of data will only accept 1 query per search)."
         },
         "geo": {
           "type": "string",
-          "description": "Two-letter country code to scope the trend (e.g. US)."
+          "description": "Parameter defines the location from where you want the search to originate. It defaults to Worldwide (activated when the value of geo parameter is not set or empty). Head to the Google Trends Locations for a full list of supported Google Trends locations."
         }
-      }
+      },
+      "required": ["query"]
     }
   }
 }
