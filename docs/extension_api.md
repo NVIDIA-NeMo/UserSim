@@ -94,6 +94,8 @@ does not load the conversation loop.
 | Name | What it is |
 |---|---|
 | `probe_assets_dir` | The folder a probe's assets resolve to: the first override root that holds them, else the root its class declares |
+| `probe_asset_roots` | The roots searched for a probe's assets, highest priority first, for assets layered across them |
+| `asset_roots_in_use` | Every root an asset lookup can read, for keying a cache by the roots a run uses |
 | `load_seeds` | A probe's seeds of one kind for a locale, such as its topics, from `<probe>/<locale>/<kind>.json`, or the `en_US` file when the locale has none |
 | `LocalizedText` | Bank text with a rendering per locale, read with `for_locale`, which falls back to `en_US` |
 | `LocalizedTextError` | Raised when a bank value cannot be read as `LocalizedText` |
@@ -134,6 +136,7 @@ does not load the conversation loop.
 |---|---|
 | `CapabilityDefinition` | A row of the capability report and the evidence it is scored from |
 | `EvidenceSource` | One probe, scorer and set of axes a capability reads |
+| `ALL_PROBES` | The probe an `EvidenceSource` names to read the rows of every probe |
 | `AssetDomain` | A domain `usersim gen-assets` can build banks for |
 | `to_model_configs` | The Data Designer model configs for the models an asset domain receives |
 | `to_data_designer_kwargs` | The `DataDesigner` keyword arguments for those models' providers |

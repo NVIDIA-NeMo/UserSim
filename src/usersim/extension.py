@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from usersim.asset_gen.registry import AssetDomain
     from usersim.cli._models import require_aliases, to_data_designer_kwargs, to_model_configs
     from usersim.engine.config import MODEL_ASSISTANT, MODEL_JUDGE, MODEL_USER, ConversationSimulatorConfig
-    from usersim.engine.core._assets import probe_assets_dir
+    from usersim.engine.core._assets import asset_roots_in_use, probe_asset_roots, probe_assets_dir
     from usersim.engine.core.backends import ExecutionBackend, JobHandle, JobSpec, JobStatus
     from usersim.engine.core.behavioral import (
         ChatRealism,
@@ -81,7 +81,7 @@ if TYPE_CHECKING:
     from usersim.engine.core.tool_calls import parse_tool_call, recover_tool_call
     from usersim.engine.core.user_turn_policy import UserTurnPolicy
     from usersim.engine.evaluator.scorers import ScorerFn, ScorerRegistrationError, register_scorer
-    from usersim.taxonomy.capabilities import CapabilityDefinition, EvidenceSource
+    from usersim.taxonomy.capabilities import ALL_PROBES, CapabilityDefinition, EvidenceSource
 
 __all__ = [
     # Probes
@@ -136,7 +136,9 @@ __all__ = [
     "LocalizedText",
     "LocalizedTextError",
     "load_seeds",
+    "asset_roots_in_use",
     "persona_to_tags",
+    "probe_asset_roots",
     "probe_assets_dir",
     # Locales and languages
     "SHIPPED_LOCALES",
@@ -156,6 +158,7 @@ __all__ = [
     "recorded_value",
     "register_scorer",
     # Capabilities, asset domains and backends
+    "ALL_PROBES",
     "AssetDomain",
     "CapabilityDefinition",
     "EvidenceSource",
@@ -173,7 +176,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "usersim.asset_gen.registry": ("AssetDomain",),
     "usersim.cli._models": ("require_aliases", "to_data_designer_kwargs", "to_model_configs"),
     "usersim.engine.config": ("MODEL_ASSISTANT", "MODEL_JUDGE", "MODEL_USER", "ConversationSimulatorConfig"),
-    "usersim.engine.core._assets": ("probe_assets_dir",),
+    "usersim.engine.core._assets": ("asset_roots_in_use", "probe_asset_roots", "probe_assets_dir"),
     "usersim.engine.core.backends": ("ExecutionBackend", "JobHandle", "JobSpec", "JobStatus"),
     "usersim.engine.core.behavioral": (
         "ChatRealism",
@@ -229,7 +232,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "usersim.engine.core.tool_calls": ("parse_tool_call", "recover_tool_call"),
     "usersim.engine.core.user_turn_policy": ("UserTurnPolicy",),
     "usersim.engine.evaluator.scorers": ("ScorerFn", "ScorerRegistrationError", "register_scorer"),
-    "usersim.taxonomy.capabilities": ("CapabilityDefinition", "EvidenceSource"),
+    "usersim.taxonomy.capabilities": ("ALL_PROBES", "CapabilityDefinition", "EvidenceSource"),
 }
 
 _MODULE_OF = {name: module for module, names in _EXPORTS.items() for name in names}
