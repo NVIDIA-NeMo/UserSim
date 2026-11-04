@@ -13,7 +13,7 @@ authoritative per-tool descriptions live inside each tool's JSON spec.
 
 ## Catalog at a glance
 
-**143 toolsets · 3,407 tools · 79 categories.** A "toolset" is a named bundle
+**143 toolsets · 3,406 tools · 79 categories.** A "toolset" is a named bundle
 of related tools (e.g. `openweathermap` → `current_weather`); `num_tools`
 counts the functions in that bundle.
 
@@ -25,11 +25,11 @@ auto-generated set. Counts:
 | Source | Toolsets | Tools |
 |---|---:|---:|
 | `UltraTools` | 22 | 2,328 |
-| `ToolEyes` | 95 | 568 |
+| `ToolEyes` | 95 | 567 |
 | `API-Bank` | 10 | 225 |
 | `Auto-generated` | 6 | 177 |
 | `Custom` | 10 | 109 |
-| **Total** | **143** | **3,407** |
+| **Total** | **143** | **3,406** |
 
 > `UltraTools` dominates the raw tool count; `ToolEyes` contributes the most
 > distinct toolsets (95). Per-toolset size ranges from 1 to 354 functions
@@ -71,7 +71,7 @@ reach any of these services.
 | Competition | 95 |
 | Account | 87 |
 | Train | 86 |
-| Food | 85 |
+| Food | 84 |
 | Alarm | 70 |
 
 The remaining ~64 categories (Calendar, Database, Smart Home & IoT, Health &
@@ -84,7 +84,7 @@ Library Management System, …) make up the long tail.
 
 ```
 UltraTools      ████████████████████████████████████████ 2328
-ToolEyes        ██████████ 568
+ToolEyes        ██████████ 567
 API-Bank        ████ 225
 Auto-generated  ███ 177
 Custom          ██ 109
