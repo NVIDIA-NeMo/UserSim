@@ -63,9 +63,6 @@ _KEPT_INTERNAL_IMPORTS = {
     ("usersim.engine.probes.my_probe.bank", "load_my_bank_default"),
     ("usersim.engine.templates.probe.prompts", "DEMO_GATE_PROMPT_TEMPLATE"),
     ("usersim.engine.templates.probe.prompts", "DEMO_USER_AGENT_PROMPTS"),
-    # The test template's standard tests, which load the probe registry before
-    # patching the loop's model calls.
-    ("usersim.engine.generator", None),
     # The fixture's probe that layers a spec over a shipped probe's.
     ("usersim.engine.probes.identity_disclosure.probe", "IdentityDisclosureProbe"),
 }

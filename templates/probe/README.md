@@ -164,21 +164,26 @@ When porting one of the templates into a new module:
       absent by your scorer, which reports the trajectory as having
       nothing to score while the run looks fine. See step 6 of
       `docs/engine/AUTHORING_A_PROBE.md`.
-- [ ] Add a scorer under
-      `evaluator/scorers/<your_probe>.py` and include the module
-      path in `DEFAULT_SCORER_MODULES`. Register it with
+- [ ] Add a scorer as `scorer.py` in the probe's package and include
+      its module path, `usersim.engine.probes.<your_probe>.scorer`, in
+      `DEFAULT_SCORER_MODULES`. Register it with
       `deterministic=True` when it never calls a model, and list it in
       the class's `default_scorers` so `usersim eval --scorers auto`
       runs it.
-- [ ] Write tests from `test_probe.py.template`. Its first test runs
-      the probe end to end with `usersim.testing.run_episode` and
-      scripted models. The standard tests after it control each reply:
-      `_patched_call_llm` patches BOTH `core.simulation.acall_llm` AND
-      `core.judges.acall_llm`, and the alias-dispatching mock returns
-      XML-shaped judge verdicts. See
-      [`tests/probes/sov_ai_facts/test_probe.py`](../../tests/probes/sov_ai_facts/test_probe.py)
-      for a real reference. The tests run under `usersim.testing.pytest_plugin`,
-      so a model call nothing mocked fails with `BlockedNetworkCall`.
+- [ ] Declare the capability rows your probe's evidence feeds in
+      `capabilities.py` in its package, and add the module to
+      `BUILTIN_CAPABILITY_MODULES` in `taxonomy/capabilities.py`; without
+      them the probe's rows are absent from the capability report. See
+      "Adding the capabilities your probe provides evidence for" in
+      `docs/engine/AUTHORING_A_PROBE.md`.
+- [ ] Write tests from `test_probe.py.template`. Each runs the probe
+      through `usersim.testing.run_episode` with scripted models, with
+      nothing patched; a `ScriptedModel` subclass scripts the replies a
+      test needs. See
+      [`tests/engine/test_hosted_parity_contract.py`](../../tests/engine/test_hosted_parity_contract.py),
+      which runs every built-in this way. The tests run under
+      `usersim.testing.pytest_plugin`, so a model call nothing scripted
+      fails with `BlockedNetworkCall`.
 - [ ] Update `docs/engine/README.md`'s probe table and the catalog in
       `docs/probes.md`; `tests/test_security_defaults.py` checks the probe
       count there.

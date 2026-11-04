@@ -1029,8 +1029,8 @@ transcript positions.
 ### File 8: tests at `tests/probes/bookings/test_probe.py`
 
 Copy [`templates/probe/test_probe.py.template`](../../templates/probe/test_probe.py.template)
-there, beside an `__init__.py`, substitute `bookings` for `YOUR_PROBE`, fill in the 8 standard
-test stubs.
+there, beside an `__init__.py`, substitute `bookings` for `YOUR_PROBE`, and fill in the
+marked parts: the probe's class, a column it writes and its placeholder warning.
 
 ### Run it
 
@@ -1094,10 +1094,10 @@ lists every request the models received, in order, with its role and messages.
 To script other replies, subclass `ScriptedModel`, override `CONTENT`, and pass
 the class as `model_factory`.
 
-A test that controls each reply turn by turn can patch `acall_llm` instead. Two
-modules import it, `core.simulation` and `core.judges`, so patch both, as the
-template's `_patched_call_llm` does. Those are internal modules, so a probe
-shipped in its own package tests with `run_episode`.
+Some built-in probes' tests patch `acall_llm` in `core.simulation` and
+`core.judges`, the two modules that call it, to control each reply turn by
+turn. Those are internal modules, so a new probe's tests script replies with a
+`ScriptedModel` subclass instead, in tree or in its own package.
 
 ### 3. Judge replies carry an XML verdict
 
@@ -1198,44 +1198,31 @@ def test_my_probe_conforms():
 ## Test authoring
 
 [`templates/probe/test_probe.py.template`](../../templates/probe/test_probe.py.template)
-is the canonical scaffold. Copy it and substitute your probe's name. Its
-first test runs the probe end to end with `run_episode` (gotcha 2); then fill
-in the 8 standard test stubs:
+is the canonical scaffold. Copy it and substitute your probe's name. Every
+episode in it runs through `run_episode` with scripted models (gotcha 2), and
+each test checks one thing the probe guarantees:
 
-1. **Registry registration**: the probe label is in `_PROBE_REGISTRY` and
-   resolves to a class whose `family`, `prompt_version` and `variants` are
-   set.
-2. **Single-turn end-to-end**: minimal mocked-LLM run produces a
-   trajectory with `conversation_status=True`.
-3. **First user turn shape** (verbatim probes only):
-   `msgs[0]["content"] == bank.<your_task>.<verbatim_field>` exactly.
-   Conversation messages are dicts, so index them rather than using
-   attribute access.
-4. **Two-turn follow-up**: provide 2 assistant responses, drive
-   turn 2 via the user-agent + judge gate.
-5. **`probe_variant` overridden**: assert `result["probe_variant"]`
-   is the probe-specific value, not the registry default `"default"`.
-6. **Placeholder warning emitted**: bank with `placeholder=True`
-   triggers the warning kind on the outcome.
-7. **Bank-load failure aborts cleanly**: env override pointed at a
-   nonexistent file produces `SCENARIO_ABORTED`.
-8. **No-matching-task aborts cleanly**: synthetic bank with
-   persona-tag mismatch produces `SCENARIO_ABORTED` without any LLM
-   calls.
+1. **Registered and conforming**: `assert_probe_conforms` passes, and the
+   class's `family` is its label.
+2. **End to end**: the row completes, so `should_succeed` holds, after as many
+   user turns as `max_turns`.
+3. **The user explores the row's area**: the user model's instructions hold
+   the row's area, and turn 1 is what the user model wrote. A probe whose
+   exact wording is under test asserts its bank's text instead; conversation
+   messages are dicts, so index them.
+4. **What the row records**: each column `build_result_extras` writes, and
+   `probe_variant` when the probe sets its own.
+5. **A declining assistant**: a `ScriptedModel` subclass scripts the reply, and
+   the row is still scoreable.
+6. **The placeholder warning**: a task marked placeholder records the kind the
+   class's `placeholder_warning_kind` names.
+7. **Hosted parity**: `assert_hosted_parity` runs the episode alone and through
+   a host, and the two match.
 
-Plus the **`should_succeed` invariant** test: the canonical pattern
-is two assertions: empty-state returns False, populated-metadata
-state returns True.
-
-The test_probe_invariants.py file at the cross-probe level already
-covers (1) for you parametrically. So your per-probe file can focus
-on (2)-(8) plus the should_succeed contract: the cross-cutting
-checks come for free.
-
-For real working examples: `tests/probes/sov_ai_facts/test_probe.py`
-(verbatim), `tests/probes/safety_chat_pressure/test_probe.py` (reframings and
-abort policy), `tests/probes/safety_agentic/test_probe.py` (custom
-run_dispatch and a simpler mock).
+Add a test for each further guarantee, such as a row that cannot run failing
+with a reason. `tests/engine/probes/test_probe_invariants.py` already checks
+what every probe shares, and `tests/engine/test_hosted_parity_contract.py` runs
+every built-in through `run_episode`.
 
 Every test under `tests/` runs inside the hermetic harness that
 `usersim.testing.pytest_plugin` provides, which the root `conftest.py` loads.
