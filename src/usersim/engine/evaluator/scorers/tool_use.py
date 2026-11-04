@@ -111,7 +111,9 @@ TRAJECTORY_SCORES: list[Score] = [
             "architecture to the user? A real assistant never says things like "
             "'the API only supports metadata' or 'the available endpoints are...' "
             "or names specific tool functions in its responses. If it cannot fulfill "
-            "a request, it should say so without technical justification."
+            "a request, it should say so without technical justification. Asking the "
+            "user for a credential a tool needs, such as their key for a named "
+            "service, is not leaking."
         ),
         options={
             1: "Fail — named tools, APIs, or endpoints",

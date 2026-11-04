@@ -128,7 +128,7 @@ _PINNED_TRAJECTORY_IDS = {
     "sov_ai_dynamic": "f2fb3d9172800ca5",
     "sov_ai_facts": "dfc5df24a426aad0",
     "sov_ai_multilingual_parity": "6d1ca33ea06f0977",
-    "tool_calling": "820a7661b9bde4d2",
+    "tool_calling": "5630556a85d11e4d",
 }
 
 

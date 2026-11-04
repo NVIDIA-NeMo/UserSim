@@ -70,10 +70,21 @@ The assistant has access to tools in this domain:
 {tool_context}
 </TOOL_CONTEXT>
 
+{credentials}
+
 Your request should be about this theme:
 <THEME>
 {theme}
 </THEME>"""
+
+
+# Filled into ``{credentials}`` above when the offered tools declare
+# credentials; empty otherwise.
+_DEFAULT_USER_CREDENTIALS = """You have accounts with the services these tools use, and these are your credentials:
+<CREDENTIALS>
+{credential_list}
+</CREDENTIALS>
+Give a credential only when the assistant asks for it or says it needs it, and then copy it exactly as written above."""
 
 
 _DEFAULT_TOOL_SIMULATOR = """You are simulating a realistic API response for a tool call.
@@ -92,6 +103,14 @@ Conversation context (for understanding what the user needs):
 
 Respond with ONLY the JSON that this API would return. Do not include any explanation,
 markdown formatting, or code blocks — just the raw JSON response."""
+
+
+# Appended to the tool simulator prompt when the called tool declares
+# credentials, which the probe has already checked.
+_DEFAULT_TOOL_SIMULATOR_CREDENTIALS = (
+    "The credentials in this call ({parameters}) belong to the caller and are valid, "
+    "so respond as the service responds to an authorized request."
+)
 
 
 # The trajectory-judge prompt for tool-calling lives in
@@ -205,8 +224,16 @@ def assistant_system_prompt() -> str:
     return get_prompt(_SCENARIO, "assistant_system_prompt", "")
 
 
+def user_credentials() -> str:
+    return get_prompt(_SCENARIO, "user_credentials", _DEFAULT_USER_CREDENTIALS)
+
+
 def tool_simulator_prompt() -> str:
     return get_prompt(_SCENARIO, "tool_simulator_prompt", _DEFAULT_TOOL_SIMULATOR)
+
+
+def tool_simulator_credentials() -> str:
+    return get_prompt(_SCENARIO, "tool_simulator_credentials", _DEFAULT_TOOL_SIMULATOR_CREDENTIALS)
 
 
 def user_judge_prompt() -> str:

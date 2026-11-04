@@ -117,6 +117,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
 - There is **no real execution**: the `api_response_model` alias (see
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
   tool's response from the schema, so a run needs no live service.
+- A call that breaks its tool's schema gets a `400` response instead of a
+  simulated one, and a call without the user's key for a tool that takes one
+  gets a `401` (see [Credentials](#credentials)).
 - Conversation themes (some tool-expected, some not) come from
   `DEFAULT_TOOL_CALLING_THEMES` in `cli/_pipeline.py`, exercising the
   call/clarify/refuse decision.
@@ -142,6 +145,27 @@ accepts both (`json.loads` when it is a string, normalized to a Python list
 when Data Designer loads it as a nested array), so a hand-written jsonl catalog
 does not need its tool specs
 double-encoded.
+
+### Credentials
+
+A tool entry may declare `credentials` beside its function spec: a mapping
+from a parameter of the function to the credential that parameter takes,
+named the way its user knows it.
+
+```json
+{"type": "function", "function": {"name": "google_trends_search", "...": "..."}, "credentials": {"api_key": "SerpApi key"}}
+```
+
+Each conversation draws one random value for every credential its tools
+declare, so tools that share a credential take the same value and no two
+conversations share one. The simulated user holds those values and gives one
+when the assistant asks for it. A call whose argument is not the value the
+user holds, because it is empty or made up, gets a `401` response, and nothing
+is simulated for it; a call that leaves out a required parameter gets a `400`,
+as any call that breaks its schema does. The declaration stays out of the
+request the assistant's API receives, and the tool list each judge reads names
+the credentials a tool needs, so asking the user for one counts as part of the
+call.
 
 ### Using your own catalog
 

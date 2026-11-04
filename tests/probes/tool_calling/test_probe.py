@@ -8,10 +8,14 @@ The 8-axis trajectory judge lives in
 evaluation), and its tests live in ``test_evaluator_scorer_tool_use.py``.
 """
 
+import copy
 import json
 import types
+from collections.abc import Callable
 from contextlib import ExitStack
 from unittest.mock import patch
+
+import pytest
 
 from usersim.engine.core.llm import ContextWindowError
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
@@ -41,6 +45,7 @@ class TestPromptTemplates:
             "{behavioral_instructions}",
             "{disclosure_instructions}",
             "{interaction_style_instructions}",
+            "{credentials}",
         ]
         for placeholder in required:
             assert placeholder in USER_AGENT_SYSTEM_PROMPT, f"Missing: {placeholder}"
@@ -79,6 +84,16 @@ class TestToolHelpers:
             assert t["type"] == "function"
             assert "function" in t
             assert "name" in t["function"]
+
+    def test_format_tools_for_api_leaves_credentials_out(self, sample_tools):
+        tools = _with_weather_key(sample_tools)
+        flat = [
+            {"type": "function", "function": t["tool"]["function"], "credentials": t.get("credentials")} for t in tools
+        ]
+        for given in (tools, flat):
+            api_tools = _format_tools_for_api(given)
+            assert all(set(t) == {"type", "function"} for t in api_tools)
+            assert api_tools[0]["function"] == tools[0]["tool"]["function"]
 
     def test_find_tool_spec_found(self, sample_tools):
         spec = _find_tool_spec("get_weather", sample_tools)
@@ -133,7 +148,23 @@ class TestToolHelpers:
         assert '"prior_secret":"rain"' in captured["prompt"]
 
 
-async def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
+def _with_weather_key(sample_tools):
+    """``sample_tools`` with a WeatherCo key that ``get_weather`` requires and declares."""
+    tools = copy.deepcopy(sample_tools)
+    weather = tools[0]
+    parameters = weather["tool"]["function"]["parameters"]
+    parameters["properties"]["api_key"] = {"type": "string", "description": "Your WeatherCo API key."}
+    parameters["required"].append("api_key")
+    weather["credentials"] = {"api_key": "WeatherCo API key"}
+    return tools
+
+
+async def _run_concrete_tool_probe(
+    sample_tools,
+    *,
+    api_context_error=False,
+    arguments: Callable[[ToolCallingProbe], str] = lambda probe: '{"location":"Tokyo"}',
+):
     from usersim.engine.core.behavioral import compute_behavioral_profile
 
     persona = {"first_name": "A", "last_name": "User", "age": 35}
@@ -201,7 +232,7 @@ async def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
                             "id": "weather-call",
                             "function": {
                                 "name": weather_tool["function"]["name"],
-                                "arguments": '{"location":"Tokyo"}',
+                                "arguments": arguments(probe),
                             },
                         }
                     ],
@@ -343,3 +374,67 @@ class TestToolSubsetIsRowDerived:
         a = self._subset(trajectory_id="traj-a")
         b = self._subset(trajectory_id="traj-b")
         assert a != b, f"two rows drew the same subset {a}, so the draw is not derived from the row"
+
+
+class TestCredentials:
+    """The user holds the key a tool declares, and only a call carrying it reaches the simulated service."""
+
+    @staticmethod
+    def _tool_reply(result) -> dict:
+        exported = json.loads(result["conversation_messages"])
+        return json.loads(next(message["content"] for message in exported if message.get("role") == "tool"))
+
+    @staticmethod
+    def _verifier_ratings(result) -> list[str]:
+        traces = json.loads(result["simulation_traces"])
+        return [trace["rating"] for trace in traces if trace["kind"] == "tool_call_verifier"]
+
+    async def test_the_call_with_the_held_key_is_simulated(self, sample_tools):
+        held = {}
+
+        def with_held_key(probe):
+            held.update(probe.held_credentials)
+            return json.dumps({"location": "Tokyo", "api_key": probe.held_credentials["WeatherCo API key"]})
+
+        result, _assistant, user_inputs, judge_inputs, api_inputs = await _run_concrete_tool_probe(
+            _with_weather_key(sample_tools),
+            arguments=with_held_key,
+        )
+
+        key = held["WeatherCo API key"]
+        user_system_prompt = user_inputs[0][0]["content"]
+        assert f"- WeatherCo API key: {key}" in user_system_prompt
+        assert "<CREDENTIALS>" in user_system_prompt
+        assert len(api_inputs) == 1
+        assert "`api_key`" in api_inputs[0][0]["content"]
+        assert "are valid" in api_inputs[0][0]["content"]
+        assert self._tool_reply(result) == {"temp": 22, "raw_secret": "x"}
+        assert self._verifier_ratings(result) == ["success"]
+        assert any("needs the user's WeatherCo API key" in m["content"] for call in judge_inputs for m in call)
+
+    @pytest.mark.parametrize("key", ["YOUR_API_KEY", ""])
+    async def test_a_made_up_or_empty_key_gets_a_401_and_no_simulated_response(self, sample_tools, key):
+        result, _assistant, _user, _judge, api_inputs = await _run_concrete_tool_probe(
+            _with_weather_key(sample_tools),
+            arguments=lambda probe: json.dumps({"location": "Tokyo", "api_key": key}),
+        )
+
+        reply = self._tool_reply(result)
+        assert reply["status"] == 401
+        assert "WeatherCo API key" in reply["error"]
+        assert api_inputs == []
+        assert self._verifier_ratings(result) == ["failure"]
+
+    async def test_a_call_without_the_key_gets_a_400(self, sample_tools):
+        result, _assistant, _user, _judge, api_inputs = await _run_concrete_tool_probe(_with_weather_key(sample_tools))
+
+        reply = self._tool_reply(result)
+        assert reply["status"] == 400
+        assert "`api_key`" in reply["error"]
+        assert api_inputs == []
+
+    async def test_tools_without_credentials_give_the_user_none(self, sample_tools):
+        _result, _assistant, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
+
+        assert "<CREDENTIALS>" not in user_inputs[0][0]["content"]
+        assert "are valid" not in api_inputs[0][0]["content"]

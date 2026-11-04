@@ -52,10 +52,18 @@ user_agent_system_prompt: |-
   {tool_context}
   </TOOL_CONTEXT>
 
+  {credentials}
+
   Your request should be about this theme:
   <THEME>
   {theme}
   </THEME>
+user_credentials: |-
+  You have accounts with the services these tools use, and these are your credentials:
+  <CREDENTIALS>
+  {credential_list}
+  </CREDENTIALS>
+  Give a credential only when the assistant asks for it or says it needs it, and then copy it exactly as written above.
 assistant_system_prompt: ''
 tool_simulator_prompt: |-
   You are simulating a realistic API response for a tool call.
@@ -74,6 +82,9 @@ tool_simulator_prompt: |-
 
   Respond with ONLY the JSON that this API would return. Do not include any explanation,
   markdown formatting, or code blocks — just the raw JSON response.
+tool_simulator_credentials: >-
+  The credentials in this call ({parameters}) belong to the caller and are valid,
+  so respond as the service responds to an authorized request.
 user_judge_prompt: |-
   You are an expert evaluator. Judge the user's message in this conversation.
 

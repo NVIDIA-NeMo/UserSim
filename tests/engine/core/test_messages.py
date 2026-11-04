@@ -21,6 +21,14 @@ class TestFormatToolsForPrompt:
     def test_empty_tools(self):
         assert format_tools_for_prompt([]) == ""
 
+    def test_names_the_credentials_a_tool_declares(self, sample_tools):
+        sample_tools[0]["credentials"] = {"api_key": "WeatherCo API key", "api_secret": "WeatherCo API secret"}
+        assert format_tools_for_prompt(sample_tools).splitlines() == [
+            "- get_weather: Get current weather for a location "
+            "(needs the user's WeatherCo API key and WeatherCo API secret)",
+            "- search_recipes: Search for recipes by ingredient",
+        ]
+
 
 class TestFormatThemes:
     def test_formats_themes(self):

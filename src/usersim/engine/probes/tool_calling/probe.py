@@ -10,6 +10,9 @@ persona-grounded, realistic user requests. Key design choices:
 - No correction loops -- invalid tool calls get API-like error responses
 - Verifier kept as diagnostic tool -- validates structurally, returns
   realistic error messages instead of triggering retries
+- Credentials a tool declares are held by the simulated user, one random
+  value per credential and conversation (``credentials.py``); a call that
+  passes any other value gets a 401 response
 
 The 8-axis trajectory judge lives in ``evaluator/scorers/tool_use.py``
 and is invoked by the ``trajectory-evaluator`` plugin. This module only
@@ -59,13 +62,21 @@ from usersim.engine.core.simulation import (
 from usersim.engine.core.simulation import (
     language_instruction as _language_instruction,
 )
+from usersim.engine.probes.tool_calling.credentials import (
+    declared_credentials,
+    draw_credentials,
+    format_held_credentials,
+    rejected_credential,
+)
 from usersim.engine.probes.tool_calling.prompts import (
     _SCENARIO,
     assistant_system_prompt,
     tool_relevance_failure,
     tool_relevance_success,
+    tool_simulator_credentials,
     tool_simulator_prompt,
     user_agent_system_prompt,
+    user_credentials,
     user_judge_prompt,
 )
 from usersim.engine.probes.tool_calling.verifiers import ToolCallVerifier
@@ -78,7 +89,7 @@ logger = logging.getLogger("usersim.engine")
 
 PROBE_FAMILY: str = "tool_calling"
 PROBE_VARIANTS: list[str] = ["default"]  # tool-category via toolset_category column; single variant today
-PROMPT_VERSION: str = "v1.1"
+PROMPT_VERSION: str = "v1.2"
 
 MODEL_USER = "user_model"
 MODEL_ASSISTANT = "assistant_model"
@@ -99,25 +110,34 @@ def _derive_tool_theme(data: dict, cfg: Any) -> dict:
     return _parse_theme(data.get(cfg.theme_column, "{}"))
 
 
+def _function_spec(tool_data: dict) -> dict:
+    """The function spec inside a tool entry, whichever envelope the entry uses."""
+    return tool_data["tool"]["function"] if "tool" in tool_data else tool_data.get("function", tool_data)
+
+
 def _build_tool_context(tool_subset: list) -> str:
     lines = []
     for tool_data in tool_subset:
-        spec = tool_data["tool"]["function"] if "tool" in tool_data else tool_data.get("function", tool_data)
+        spec = _function_spec(tool_data)
         name = spec.get("name", "unknown")
         desc = spec.get("description", "No description available.")
         lines.append(f"- {name}: {desc}")
     return "\n".join(lines) if lines else "No tools available."
 
 
-def _tool_subset_seed(data: dict) -> int:
-    """Derive a stable seed for a row's tool draw.
+def _row_identity(data: dict) -> str:
+    """The row's identity, which seeds its tool draw and the credentials its user holds.
 
     Prefers the trajectory identity so two configurations over one persona
     draw independently, and falls back to the persona when a caller builds a
     probe without one.
     """
-    key = str(data.get("trajectory_id") or data.get("persona_uuid") or "")
-    return int(hashlib.sha256(key.encode()).hexdigest(), 16) & 0xFFFFFFFF
+    return str(data.get("trajectory_id") or data.get("persona_uuid") or "")
+
+
+def _tool_subset_seed(data: dict) -> int:
+    """Derive a stable seed for a row's tool draw."""
+    return int(hashlib.sha256(_row_identity(data).encode()).hexdigest(), 16) & 0xFFFFFFFF
 
 
 def _normalize_tool_list(tools_raw: Any) -> list[dict]:
@@ -143,6 +163,11 @@ def _normalize_tool_list(tools_raw: Any) -> list[dict]:
 
 
 def _format_tools_for_api(tools: list) -> list:
+    """The tools as the assistant's API receives them: each function spec unchanged.
+
+    A tool's ``credentials`` declaration is for the simulation, so it stays out
+    of the request.
+    """
     openai_tools = []
     for tool_data in tools:
         if "tool" in tool_data:
@@ -150,13 +175,13 @@ def _format_tools_for_api(tools: list) -> list:
         elif "function" in tool_data and "type" not in tool_data:
             openai_tools.append({"type": "function", "function": tool_data["function"]})
         else:
-            openai_tools.append(tool_data)
+            openai_tools.append({key: value for key, value in tool_data.items() if key != "credentials"})
     return openai_tools
 
 
 def _find_tool_spec(tool_name: str, tools: list) -> dict | None:
     for t in tools:
-        spec = t["tool"]["function"] if "tool" in t else t.get("function", t)
+        spec = _function_spec(t)
         if spec.get("name") == tool_name:
             return spec
     return None
@@ -181,11 +206,16 @@ async def _simulate_tool_response(
     tool_spec: dict,
     tool_call: dict,
     conversation_messages: list,
+    *,
+    credential_parameters: tuple[str, ...] = (),
 ) -> tuple[str, bool]:
     """Use the strong frontier model to simulate a realistic API response.
 
     Includes prior tool responses as context so the simulator maintains
-    internal consistency across calls within a conversation.
+    internal consistency across calls within a conversation. The probe
+    checks a call's credentials before this runs, so when
+    ``credential_parameters`` names any, the simulator is told they are
+    valid rather than left to judge a random value.
 
     Returns ``(content, did_reroll)``. ``did_reroll`` is True if the
     first response was invalid JSON and a second call was needed; this
@@ -198,6 +228,10 @@ async def _simulate_tool_response(
         tool_args=json.dumps(tool_call.get("function", {}).get("arguments", "{}"), default=str),
         conversation_context=format_conversation_history_for_prompt(conversation_messages[-6:]),
     )
+    if credential_parameters:
+        prompt += "\n\n" + tool_simulator_credentials().format(
+            parameters=", ".join(f"`{parameter}`" for parameter in credential_parameters),
+        )
     if prior_context:
         prompt += prior_context
     msgs = [{"role": "user", "content": prompt}]
@@ -290,6 +324,15 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         theme = _derive_tool_theme(self._data, cfg)
         logger.info(f"  |-- tool_calling: {len(self.tool_subset)} tools, theme={theme.get('type', '?')}")
 
+        # The credentials each offered tool declares, by tool name, and the one
+        # value per credential that this conversation's user holds.
+        self.declared_credentials = {
+            _function_spec(entry).get("name"): declared
+            for entry in self.tool_subset
+            if (declared := declared_credentials(entry))
+        }
+        self.held_credentials = draw_credentials(self.tool_subset, _row_identity(self._data))
+
         self.openai_tools = _format_tools_for_api(self.tool_subset)
         self.tools_for_judge = format_tools_for_prompt(self.tool_subset)
         self.verifier = ToolCallVerifier()
@@ -301,6 +344,11 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             self._data,
             persona=format_persona_for_prompt(self._persona),
             tool_context=_build_tool_context(self.tool_subset),
+            credentials=(
+                user_credentials().format(credential_list=format_held_credentials(self.held_credentials))
+                if self.held_credentials
+                else ""
+            ),
             theme=json.dumps(self._theme, default=str),
             language_instruction=_language_instruction(self._language, self._locale),
             behavioral_instructions=format_behavioral_profile_for_prompt(
@@ -358,8 +406,20 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         ``ToolExecutionMixin`` drives the message plumbing + the single
         synthesis pass. ``name`` is the parsed function name; ``tc`` is the
         raw tool-call dict the verifier + simulator need.
+
+        A call that fails the schema check gets a 400 response. One that
+        passes it but does not carry the credential the user holds for a
+        parameter the tool declares gets a 401, as the service would answer
+        a missing or wrong key.
         """
+        declared = self.declared_credentials.get(name, {})
         tc_ok, tc_err = self.verifier.verify_single_tool_call(tc, self.tool_subset)
+        unauthorized = None
+        if tc_ok:
+            unauthorized = rejected_credential(declared, args, self.held_credentials)
+            if unauthorized is not None:
+                parameter, credential = unauthorized
+                tc_ok, tc_err = False, f"`{parameter}` is not the {credential} the user holds."
         state.metadata.setdefault("verifier_results", []).append(
             {
                 "tool_name": name,
@@ -378,6 +438,13 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             )
         )
 
+        if unauthorized is not None:
+            return json.dumps(
+                {
+                    "error": f"Unauthorized: the {unauthorized[1]} is missing or invalid.",
+                    "status": 401,
+                }
+            )
         if not tc_ok:
             return json.dumps(
                 {
@@ -393,6 +460,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 tool_spec,
                 tc,
                 state.messages,
+                credential_parameters=tuple(declared),
             )
             if did_reroll:
                 state.outcome.inc_api_response_rerolls()
