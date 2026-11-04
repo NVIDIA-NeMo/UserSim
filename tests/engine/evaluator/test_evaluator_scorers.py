@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 from usersim.engine.evaluator import scorers as scorers_module
@@ -75,8 +77,15 @@ class TestScorerRegistry:
         scorers_module.clear_registry()
         assert scorers_module.list_scorers() == []
 
-    def test_reload_scorers_imports(self) -> None:
-        # reload_scorers should not raise on a valid module path even
-        # if it doesn't define any scorers (e.g., the scorers package
-        # __init__ itself).
-        scorers_module.reload_scorers(["usersim.engine.evaluator.scorers"])
+    def test_reload_scorers_reruns_a_module_that_registers_nothing(self, tmp_path, monkeypatch) -> None:
+        # A throwaway module: reloading a real one replaces the objects it
+        # defines while other modules keep references to the old ones.
+        name = "usersim_test_registers_no_scorer"
+        (tmp_path / f"{name}.py").write_text("RUNS = globals().get('RUNS', 0) + 1\n", encoding="utf-8")
+        monkeypatch.syspath_prepend(str(tmp_path))
+        try:
+            scorers_module.reload_scorers([name])
+            assert sys.modules[name].RUNS == 2
+        finally:
+            sys.modules.pop(name, None)
+        assert scorers_module.list_scorers() == []
