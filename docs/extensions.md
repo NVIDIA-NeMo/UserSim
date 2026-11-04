@@ -13,7 +13,9 @@ point groups and how discovery behaves,
 hook a probe can implement, and [`extension_api.md`](extension_api.md) lists
 every name the package can import from `usersim`. When a package needs a hook
 User Sim does not have,
-[Adding a hook](../CONTRIBUTING.md#adding-a-hook) says how to ask for one.
+[Adding a hook](../CONTRIBUTING.md#adding-a-hook) says how to ask for one, and
+[When the package needs a change in User Sim](#when-the-package-needs-a-change-in-user-sim)
+how to build against it before a release has it.
 
 ## Layout
 
@@ -534,3 +536,32 @@ it. A new locale is a folder holding a `bookings.yaml` written in its language,
 plus an entry in `LOCALES`. `--assets-dir` pins every probe in a run to the
 folder it names, this one included, so a run that passes it needs
 `my_bookings/` there too.
+
+## When the package needs a change in User Sim
+
+Ask for the hook, attribute or fix in general terms first, through the
+[Extension hook form](https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=extension-hook.yml)
+or an issue, so the change serves other packages too.
+
+To build against the change before it is released, install a User Sim
+checkout into the package's environment without recording it:
+
+```bash
+uv pip install -e ../UserSim
+```
+
+Keep it out of `pyproject.toml` and the lock file: a path dependency installs
+only on your machine. Once the change is merged, the package can depend on that
+commit of `main` until a release includes it, then on a range that starts at
+that release:
+
+```toml
+dependencies = ["usersim @ git+https://github.com/NVIDIA-NeMo/UserSim@<commit>"]
+```
+
+While you wait, work around the gap only with what `usersim.extension` offers:
+subclass or wrap a public class, or keep per-row data in `state.metadata` under
+your prefix. Mark each workaround with the issue it waits on, so it goes when
+the change lands. A copied or edited User Sim file, a change to `usersim` at
+import time, or a fork of the repository breaks with the next release and
+hides the need from everyone else.

@@ -294,6 +294,8 @@ full plan and exits before the first network call.
 
 **Extending it**
 
+- [`docs/extensions.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/extensions.md): a probe and a scorer in a package of your own, installed next to `usersim`
+- [`docs/extension_api.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/extension_api.md): every name an extension imports from `usersim`
 - [`docs/engine/AUTHORING_A_PROBE.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/engine/AUTHORING_A_PROBE.md): end-to-end tutorial for a new probe
 - [`docs/engine/README.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/engine/README.md): the substrate's full API surface
 - [`templates/probe/`](https://github.com/NVIDIA-NeMo/UserSim/tree/main/templates/probe/): copy-and-edit starters, one per probe shape
