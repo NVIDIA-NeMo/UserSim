@@ -657,3 +657,6 @@ The tables describe the main files.
 | `health_disclosure/test_bank.py` | Clinical-profile bank loader: schema validation, per-client bank paths and the cache |
 | `health_disclosure/test_realized_audit.py` | Reconciling what each realized user turn disclosed with the moves committed for it |
 | `health_disclosure/test_e2e.py` | The probe's real columns through the store to the concealment scorer |
+| `tool_calling/test_probe.py` | `tool_calling` probe: prompt templates, the tool helpers, the simulated API response, the row-derived tool draw, and conversations through the loop with mocked models |
+| `tool_calling/test_verifiers.py` | Tool-call JSON-schema validator |
+| `tool_calling/test_catalog.py` | The shipped tool catalog: every spec is valid JSON Schema that providers accept, with typed items, defaults, examples and enums, and every tool and parameter described |
