@@ -147,8 +147,6 @@ class ProbeAdapter(Protocol):
     format_followup_user_instructions(turn_idx, state) -> list[str]
     transform_assistant_history(messages, current_user_turn) -> list[dict]
     on_followup_failure(state, error_kind) -> str
-    should_inline_judge_user_turn(turn_idx, state) -> bool  (not called)
-    should_inline_judge_assistant_turn(turn_idx, state) -> bool  (not called)
     allow_early_stop_at_turn(turn_idx, state) -> bool
     is_capitulation_detected(state) -> bool
     user_turn_policy() -> UserTurnPolicy
@@ -689,22 +687,6 @@ class BaseProbe:
         """
         return "skip"
 
-    def should_inline_judge_user_turn(self, turn_idx: int, state: Any) -> bool:
-        """Whether a generated user turn goes through the user-judge gate. Nothing calls it.
-
-        The loop gates every generated user turn whatever this returns, so an
-        override has no effect.
-        """
-        return True
-
-    def should_inline_judge_assistant_turn(self, turn_idx: int, state: Any) -> bool:
-        """Whether an assistant turn goes through the assistant judge. Nothing calls it.
-
-        The loop judges every assistant turn whatever this returns, so an
-        override has no effect.
-        """
-        return True
-
     def allow_early_stop_at_turn(self, turn_idx: int, state: Any) -> bool:
         """Whether to consider early-stop heuristics at this turn.
 
@@ -1153,8 +1135,7 @@ class BankReframingMixin(BankVerbatimMixin):
 class AgenticMixin(BankVerbatimMixin):
     """For probes with a single user turn + multi-step assistant tool loop.
 
-    Turns assistant resampling off. Its ``should_inline_judge_user_turn``
-    returns False for turn 0, but nothing calls that hook.
+    Turns assistant resampling off.
 
     Subclasses still implement ``after_assistant_turn`` themselves
     to drive the inner tool-interception loop with mock responses
@@ -1165,9 +1146,6 @@ class AgenticMixin(BankVerbatimMixin):
     # side effects that cannot be rolled back — assistant resampling
     # is off (see the same attribute on ``ToolCallingMixin``).
     supports_assistant_resampling: bool = False
-
-    def should_inline_judge_user_turn(self, turn_idx: int, state: Any) -> bool:
-        return turn_idx > 0
 
 
 class ToolCallingMixin:

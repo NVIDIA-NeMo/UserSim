@@ -36,7 +36,6 @@ from usersim.engine.core.outcomes import (
 )
 from usersim.engine.core.probes import (
     _PROBE_REGISTRY,
-    AgenticMixin,
     BankBackedProbe,
     BankLoadError,
     BankReframingMixin,
@@ -185,8 +184,6 @@ class TestBaseProbeDefaults:
         assert probe.get_user_query_instruction(5) is None
         assert await probe.format_followup_user_instructions(1, state) == []
         assert probe.on_followup_failure(state, "gate_exhausted") == "skip"
-        assert probe.should_inline_judge_user_turn(0, state) is True
-        assert probe.should_inline_judge_assistant_turn(0, state) is True
         assert probe.allow_early_stop_at_turn(0, state) is True
         assert probe.user_turn_policy() == UserTurnPolicy()
 
@@ -515,28 +512,6 @@ class TestBankReframingMixin:
     async def test_inherits_bank_verbatim_first_turn(self) -> None:
         probe = self._build()
         assert await probe.get_verbatim_first_user_turn(_StubState()) == "Initial pressure question?"
-
-
-class _AgenticProbe(AgenticMixin, _SubclassedBankProbe):
-    label = "agentic_test"
-
-
-class TestAgenticMixin:
-    def _build(self) -> _AgenticProbe:
-        return _AgenticProbe(
-            persona={},
-            locale="en_US",
-            language="English",
-            models={},
-            outcome_builder=OutcomeBuilder(),
-            provenance=Provenance(),
-        )
-
-    def test_skips_user_judge_for_turn_zero(self) -> None:
-        probe = self._build()
-        state = _StubState()
-        assert probe.should_inline_judge_user_turn(0, state) is False
-        assert probe.should_inline_judge_user_turn(1, state) is True
 
 
 class _ToolCallingMixinProbe(ToolCallingMixin, _MinimalProbe):

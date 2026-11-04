@@ -64,13 +64,6 @@ mixin that adds them.
 | `on_tool_round_complete` | `ToolExecutionMixin`: after each round of tool calls |
 | `on_tool_call_executed` | after each tool call runs: `ToolExecutionMixin` calls it, and a probe that runs tool calls itself must |
 | `set_tool_call_observer` | an external host, to watch the tool calls the probe runs |
-| `should_inline_judge_user_turn` | never (see below) |
-| `should_inline_judge_assistant_turn` | never (see below) |
-
-`should_inline_judge_user_turn` and `should_inline_judge_assistant_turn` are
-defined on `BaseProbe`, but nothing calls them: every generated user turn goes
-through the gate and every assistant turn through the judge, whatever they
-return.
 
 Two helpers are for the probe to call:
 
