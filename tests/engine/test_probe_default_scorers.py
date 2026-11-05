@@ -15,7 +15,7 @@ import logging
 import pytest
 
 from usersim.cli.evaluate import _resolve_scorers
-from usersim.engine.core.probes import known_probes, resolve_probe
+from usersim.engine.core.probes import known_probes
 from usersim.engine.evaluator.scorers import GENERIC_SCORERS
 from usersim.taxonomy.capabilities import ALL_PROBES, capabilities_missing_scorer, capability_definitions
 
@@ -52,17 +52,15 @@ def test_a_blank_family_adds_no_scorer_and_no_warning(caplog) -> None:
     assert not caplog.records
 
 
-def test_a_probe_is_found_by_the_family_its_rows_are_stored_under(register_test_probe) -> None:
-    register_test_probe("ext_recipes", family="ext_cooking", default_scorers=("tool_use",))
+def test_a_probe_is_found_by_the_label_its_rows_are_stored_under(register_test_probe) -> None:
+    register_test_probe("ext_recipes", default_scorers=("tool_use",))
 
-    assert _resolve_scorers(["auto"], ["ext_cooking"]) == [*GENERIC_SCORERS, "tool_use"]
-    assert _resolve_scorers(["auto"], ["ext_recipes"]) == list(GENERIC_SCORERS)
+    assert _resolve_scorers(["auto"], ["ext_recipes"]) == [*GENERIC_SCORERS, "tool_use"]
+    assert _resolve_scorers(["auto"], ["ext_cooking"]) == list(GENERIC_SCORERS)
 
 
 def test_auto_over_every_built_in_probe_runs_every_scorer_the_capability_report_reads() -> None:
-    families = [resolve_probe(label).family or label for label in known_probes()]
-
-    assert capabilities_missing_scorer(_resolve_scorers(["auto"], families)) == {}
+    assert capabilities_missing_scorer(_resolve_scorers(["auto"], known_probes())) == {}
 
 
 @pytest.mark.parametrize(
@@ -77,4 +75,4 @@ def test_auto_over_every_built_in_probe_runs_every_scorer_the_capability_report_
     ),
 )
 def test_auto_over_one_probe_runs_the_scorers_its_capabilities_read(probe: str, scorer: str) -> None:
-    assert scorer in _resolve_scorers(["auto"], [resolve_probe(probe).family or probe])
+    assert scorer in _resolve_scorers(["auto"], [probe])

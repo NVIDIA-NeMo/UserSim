@@ -125,7 +125,6 @@ def _probe(
 class TestRegistration:
     def test_registered_under_its_label(self) -> None:
         assert resolve_probe("identity_disclosure") is IdentityDisclosureProbe
-        assert IdentityDisclosureProbe.family == "identity_disclosure"
 
     def test_placeholder_content_is_flagged_on_the_outcome(self) -> None:
         _, builder = _probe()
@@ -734,9 +733,7 @@ class TestBuildingOnTop:
         class DerivedIdentityProbe(IdentityDisclosureProbe):
             label = "derived_identity_fixture"
 
-        register_probe(family="derived_identity_fixture", prompt_version="v1.0", variants=("default",))(
-            DerivedIdentityProbe
-        )
+        register_probe(prompt_version="v1.0", variants=("default",))(DerivedIdentityProbe)
         assert DerivedIdentityProbe.bank_version_key == "derived_identity_fixture"
         assert spec_env_var("derived_identity_fixture") == "USERSIM_DERIVED_IDENTITY_FIXTURE_SPEC"
 

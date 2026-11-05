@@ -258,12 +258,12 @@ The per-client judge axes are authored defaults on a generic 1-5 ladder.
 A clinical deployment should replace them with a rubric validated by its own
 clinicians; the axes are declared in one place to make that a single edit.
 
-They live inline in **`evaluator/axes.py`** (`PROBE_SCORES`, keyed by the client
-`family`): the same place every other probe declares its axes, so the evaluator
+They live inline in **`evaluator/axes.py`** (`PROBE_SCORES`, keyed by the probe's
+label): the same place every other probe declares its axes, so the evaluator
 never imports a probe package. Each axis is a name + a description on a generic
 1–5 ladder (`_md_axis(...)`). To change them:
 
-1. Edit the family's list in `evaluator/axes.py::PROBE_SCORES` (add/remove/reword axes).
+1. Edit the probe's list in `evaluator/axes.py::PROBE_SCORES` (add/remove/reword axes).
 2. At eval time, restrict to specific axes with `--axes name1,name2` if desired.
 
 To replace the option ladder (the 1–5 wording), edit `_MD_LADDER` in `evaluator/axes.py`.

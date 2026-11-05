@@ -11,7 +11,7 @@ Two derived IDs identify personas and trajectories:
   or via reload from a prior trajectory parquet) get the same UUID.
 - ``trajectory_id`` is the SHA-256 (16 hex chars) of all the inputs
   that determine what a row's content depends on: persona, probe
-  family + variant, ``scenario_seed`` (the per-row seed input column),
+  label + variant, ``scenario_seed`` (the per-row seed input column),
   the resolved user and assistant model ids, the probe's
   ``prompt_version``, and any ``extra_keys`` (the simulator adds the
   row's locale, and a flag when the assistant's reasoning is replayed).

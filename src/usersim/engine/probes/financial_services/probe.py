@@ -87,7 +87,6 @@ from usersim.extension import persona_uuid as compute_persona_uuid
 
 logger = logging.getLogger("usersim.engine")
 
-PROBE_FAMILY: str = "financial_services"
 PROBE_VARIANTS: list[str] = ["default"]
 PROMPT_VERSION: str = "v1.2"
 
@@ -301,7 +300,6 @@ class _PickedTask:
 
 
 @register_probe(
-    family=PROBE_FAMILY,
     prompt_version=PROMPT_VERSION,
     variants=tuple(PROBE_VARIANTS),
 )

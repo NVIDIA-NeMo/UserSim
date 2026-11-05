@@ -427,23 +427,22 @@ def register_test_probe(restored_registries) -> Callable[..., type]:
     """Register throwaway ``BaseProbe`` subclasses for one test.
 
     ``register_test_probe("ext_probe", assets_root=root)`` registers a class
-    labelled ``ext_probe`` with the given class attributes, in the family
-    ``family`` or, by default, its label's, so the asset lookup sees it as it
-    sees any registered probe. The registry's entries are restored after the
-    test, so nothing registered here reaches another test.
+    labelled ``ext_probe`` with the given class attributes, so the asset
+    lookup sees it as it sees any registered probe. The registry's entries
+    are restored after the test, so nothing registered here reaches another
+    test.
     """
     from usersim.engine.core import probes
 
     def register(
         label: str,
         *,
-        family: str | None = None,
         prompt_version: str = "v1.0",
         variants: tuple[str, ...] = ("default",),
         **attributes: Any,
     ) -> type:
         cls = type(label, (probes.BaseProbe,), {"label": label, **attributes})
-        return probes.register_probe(family=family or label, prompt_version=prompt_version, variants=variants)(cls)
+        return probes.register_probe(prompt_version=prompt_version, variants=variants)(cls)
 
     return register
 

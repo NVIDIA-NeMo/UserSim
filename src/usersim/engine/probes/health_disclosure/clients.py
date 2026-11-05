@@ -16,7 +16,7 @@ entry in ``CLIENTS`` plus a class in ``probe.py`` that registers it.
     └─────────────────────────────────────────────────────────────────────────┘
 
 The (PROVISIONAL) judge axes for each client live inline in
-``evaluator/axes.py::PROBE_SCORES`` (keyed by ``family``), like every other
+``evaluator/axes.py::PROBE_SCORES`` (keyed by label), like every other
 probe — the evaluator does not import this package. See this probe's README
 ("Changing the judge axes").
 """
@@ -71,7 +71,6 @@ CLIENTS: dict[str, dict] = {
     # -----------------------------------------------------------------------
     "health_therapy_disclosure": {
         "label": "health_therapy_disclosure",
-        "family": "health_therapy_disclosure",
         "prompt_version": "v1.1",
         "profiles_env": "USERSIM_THERAPY_PROFILES",
         "user_role_noun": "therapy client",
@@ -116,7 +115,6 @@ CLIENTS: dict[str, dict] = {
     # -----------------------------------------------------------------------
     "health_triage_disclosure": {
         "label": "health_triage_disclosure",
-        "family": "health_triage_disclosure",
         "prompt_version": "v1.0",
         "profiles_env": "USERSIM_TRIAGE_PROFILES",
         "user_role_noun": "patient contacting a care-navigation assistant",
@@ -162,7 +160,6 @@ CLIENTS: dict[str, dict] = {
     # -----------------------------------------------------------------------
     "health_decision_support_disclosure": {
         "label": "health_decision_support_disclosure",
-        "family": "health_decision_support_disclosure",
         "prompt_version": "v1.0",
         "profiles_env": "USERSIM_CDS_PROFILES",
         "user_role_noun": "clinician presenting a patient case",
@@ -212,7 +209,6 @@ CLIENTS: dict[str, dict] = {
     # -----------------------------------------------------------------------
     "health_general_disclosure": {
         "label": "health_general_disclosure",
-        "family": "health_general_disclosure",
         "prompt_version": "v1.0",
         "profiles_env": "USERSIM_GENERIC_HEALTH_PROFILES",
         "user_role_noun": "patient contacting a health assistant",

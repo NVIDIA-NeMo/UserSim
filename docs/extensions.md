@@ -48,7 +48,7 @@ names belong to the built-ins:
 
 | Name | In `my-bookings` |
 |---|---|
-| Probe label and family | `my_bookings` |
+| Probe label | `my_bookings` |
 | Scorer | `my_bookings` |
 | Result columns | `my_booking_id`, `my_booking` |
 | Placeholder warning | `my_used_placeholder_booking` |
@@ -202,7 +202,7 @@ def draw_booking(appointment: Appointment, rng: random.Random) -> Booking:
     )
 
 
-@register_probe(family="my_bookings", prompt_version="v1.0", variants=("default",))
+@register_probe(prompt_version="v1.0", variants=("default",))
 class BookingProbe(ToolExecutionMixin, BankBackedProbe):
     label = "my_bookings"
     description = (

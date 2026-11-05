@@ -28,7 +28,7 @@ def test_what_the_block_registers_is_gone_after_it():
     labels, names, deterministic = known_probes(), list_scorers(), deterministic_scorers()
 
     with registry_snapshot():
-        register_probe(family="my_snapshot_probe", prompt_version="v1.0", variants=("default",))(
+        register_probe(prompt_version="v1.0", variants=("default",))(
             type("MySnapshotProbe", (BaseProbe,), {"label": "my_snapshot_probe"})
         )
         register_scorer("my_snapshot_scorer", _score, deterministic=True)

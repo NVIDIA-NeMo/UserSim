@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import pytest
 
-from usersim.engine.core.probes import default_scorers_by_family
+from usersim.engine.core.probes import default_scorers_by_probe
 from usersim.engine.evaluator.scorers import GENERIC_SCORERS, get_scorer, list_scorers
 from usersim.taxonomy.eval_cell import scorer_state
 
@@ -44,11 +44,11 @@ def _general_open_ended_row() -> dict:
 
 
 def test_every_scorer_a_probe_asks_for_is_checked() -> None:
-    asked_for = {name for names in default_scorers_by_family().values() for name in names}
+    asked_for = {name for names in default_scorers_by_probe().values() for name in names}
     assert asked_for, "no probe asks for a scorer"
     assert asked_for - set(GENERIC_SCORERS) <= set(_PROBE_SCORERS)
     # The row the scorers are given belongs to general_open_ended, which asks for none of them.
-    assert not default_scorers_by_family().get("general_open_ended")
+    assert not default_scorers_by_probe().get("general_open_ended")
 
 
 @pytest.mark.parametrize("scorer", _PROBE_SCORERS)

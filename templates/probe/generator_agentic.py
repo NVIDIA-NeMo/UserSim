@@ -78,7 +78,6 @@ def _demo_agentic_loader():
 
 
 @register_probe(
-    family="demo_agentic",
     prompt_version="v1.0",
     variants=("default",),
 )

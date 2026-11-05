@@ -28,8 +28,8 @@ Public surface for new probe authors:
   or-fail validation at construction time. Replaces the per-probe
   ``_SYSTEM_PROMPTS: dict`` + ``PromptsUnavailableError`` boilerplate.
 - ``@register_probe`` — single-annotation registration. Sets the
-  class's ``family`` / ``prompt_version`` / ``variants`` AND registers
-  the class in ``_PROBE_REGISTRY`` in one call.
+  class's ``prompt_version`` / ``variants`` AND registers the class
+  in ``_PROBE_REGISTRY`` under its label in one call.
 - ``known_probes()`` / ``resolve_probe()`` — the public read surface
   on the registry.
 
@@ -289,8 +289,7 @@ class BaseProbe:
 
     Subclassing pattern (the minimum-viable probe is ~10 lines)::
 
-        @register_probe(family="general", prompt_version="v1.0",
-                        variants=("default",))
+        @register_probe(prompt_version="v1.0", variants=("default",))
         class MyProbe(BaseProbe):
             label = "my_probe"
             def __init__(self, *, persona, locale, language, models,
@@ -307,11 +306,12 @@ class BaseProbe:
     (the dispatcher calls every probe class with the same kwarg set).
     """
 
+    # The probe's name, which ``--probe-mix`` selects and each of its rows
+    # stores as ``probe_type`` and ``probe_family``.
     label: str = "<unset>"
-    # Set by ``@register_probe``. The family, the first variant and the
-    # prompt version go into ``trajectory_id``; the prompt version is also
-    # recorded in provenance.
-    family: str = ""
+    # Set by ``@register_probe``. The label, the first variant and the prompt
+    # version go into ``trajectory_id``; the prompt version is also recorded
+    # in provenance.
     prompt_version: str = ""
     variants: tuple[str, ...] = ()
 
@@ -1472,20 +1472,18 @@ def _definition(cls: type) -> str:
 
 def register_probe(
     *,
-    family: str,
     prompt_version: str,
     variants: Sequence[str],
 ) -> Callable[[type[BaseProbe]], type[BaseProbe]]:
     """Single-annotation registration of a ``BaseProbe`` subclass.
 
-    Sets ``family`` / ``prompt_version`` / ``variants`` on the class (the
-    attributes the dispatcher reads) AND adds the class to
-    ``_PROBE_REGISTRY`` keyed by ``cls.label``.
+    Sets ``prompt_version`` / ``variants`` on the class (the attributes the
+    dispatcher reads) AND adds the class to ``_PROBE_REGISTRY`` keyed by
+    ``cls.label``. The probe's rows are stored under its label.
 
     The same values are also set on the class's module as
-    ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS``. Two probes
-    defined in one module overwrite each other's module constants, so
-    read the class.
+    ``PROMPT_VERSION`` / ``PROBE_VARIANTS``. Two probes defined in one
+    module overwrite each other's module constants, so read the class.
 
     A label belongs to one probe. Registering the same class again, or the
     class a reloaded module redefines, updates the entry; a different class
@@ -1502,11 +1500,7 @@ def register_probe(
 
     Example::
 
-        @register_probe(
-            family="general",
-            prompt_version="v1.0",
-            variants=("default",),
-        )
+        @register_probe(prompt_version="v1.0", variants=("default",))
         class OpenEndedProbe(BaseProbe):
             label = "general_open_ended"
             ...
@@ -1540,13 +1534,11 @@ def register_probe(
             if problem:
                 raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.placeholder_warning_kind {problem}")
 
-        cls.family = family
         cls.prompt_version = prompt_version
         cls.variants = tuple(variants)
 
         module = sys.modules.get(cls.__module__)
         if module is not None:
-            module.PROBE_FAMILY = family
             module.PROMPT_VERSION = prompt_version
             module.PROBE_VARIANTS = tuple(variants)
 
@@ -1623,18 +1615,9 @@ def probe_preview_fields(label: str) -> tuple[PreviewField, ...]:
     return _PROBE_REGISTRY[label].preview_fields
 
 
-def default_scorers_by_family() -> dict[str, tuple[str, ...]]:
-    """Each ``probe_family`` a registered probe stores its rows under, with the ``default_scorers`` of those probes.
-
-    A row's ``probe_family`` is its probe's ``family``, or its label when the
-    probe sets none. Families come in label order, and so do the scorers of
-    two probes sharing one, each name once.
-    """
-    scorers: dict[str, dict[str, None]] = {}
-    for label in known_probes():
-        cls = _PROBE_REGISTRY[label]
-        scorers.setdefault(cls.family or label, {}).update(dict.fromkeys(cls.default_scorers))
-    return {family: tuple(names) for family, names in scorers.items()}
+def default_scorers_by_probe() -> dict[str, tuple[str, ...]]:
+    """Each registered probe's label, which its rows store as ``probe_family``, with its ``default_scorers``."""
+    return {label: tuple(_PROBE_REGISTRY[label].default_scorers) for label in known_probes()}
 
 
 def declared_model_aliases(cfg: Any) -> tuple[str, ...]:

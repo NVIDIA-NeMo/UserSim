@@ -173,11 +173,6 @@ class TestProbeMetadata:
     """Each registered probe class carries well-formed metadata."""
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
-    def test_family_is_non_empty_string(self, label: str) -> None:
-        family = resolve_probe(label).family
-        assert isinstance(family, str) and family, f"{label}: family missing or non-string"
-
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_prompt_version_is_non_empty_string(self, label: str) -> None:
         prompt_version = resolve_probe(label).prompt_version
         assert isinstance(prompt_version, str) and prompt_version, f"{label}: prompt_version missing or non-string"

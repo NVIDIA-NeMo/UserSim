@@ -131,7 +131,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         )
 
     # @register_probe sets these on the class, where the dispatcher reads them.
-    for attr in ("family", "prompt_version", "variants"):
+    for attr in ("prompt_version", "variants"):
         if getattr(cls, attr, None) in (None, "", ()):
             problems.append(
                 f"{cls.__qualname__}.{attr} is unset. Use @register_probe rather than assigning to the registry directly."

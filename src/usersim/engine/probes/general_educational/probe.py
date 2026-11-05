@@ -38,12 +38,11 @@ from usersim.extension import (
 # re-run, since the dedup key includes it. Bump on any semantic change
 # to the probe's prompts or task derivation.
 
-PROBE_FAMILY: str = "general_educational"
 PROBE_VARIANTS: list[str] = ["default"]  # subject-conditioned via theme; single variant today
 PROMPT_VERSION: str = "v1.0"
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class EducationalProbe(BaseProbe):
     """Educational / tutoring probe.
 

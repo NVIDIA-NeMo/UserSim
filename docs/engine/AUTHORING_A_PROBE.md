@@ -516,7 +516,6 @@ from usersim.extension import register_probe
 
 
 @register_probe(
-    family="my_probe",         # MyProbe.family
     prompt_version="v1.0",     # MyProbe.prompt_version
     variants=("default",),     # MyProbe.variants
 )
@@ -527,14 +526,15 @@ class MyProbe(BankBackedProbe):
 
 The decorator does TWO things in one call:
 
-1. Sets `family` / `prompt_version` / `variants` on the class, where
-   the dispatcher and the smoke check read them. It also sets them on
-   the class's module as `PROBE_FAMILY` / `PROMPT_VERSION` /
-   `PROBE_VARIANTS`; with two probes in one module, those hold whichever
-   was registered last.
+1. Sets `prompt_version` / `variants` on the class, where the dispatcher
+   and the smoke check read them. It also sets them on the class's module
+   as `PROMPT_VERSION` / `PROBE_VARIANTS`; with two probes in one module,
+   those hold whichever was registered last.
 2. Adds the class to `_PROBE_REGISTRY` keyed by `cls.label`. Pick a label
    no other probe uses: registering a second class under a label that is
-   already taken raises `ProbeRegistrationError`, naming both classes.
+   already taken raises `ProbeRegistrationError`, naming both classes. The
+   probe's rows are stored under its label, in their `probe_family` column
+   and their `probe_family=` folder.
 
 Both surfaces are what the dispatcher reads.
 
@@ -636,7 +636,7 @@ Every check should report `[OK]`. Confirm your probe appears in the
 ```
 
 If your probe doesn't show up, a package missing from `BUILTIN_PACKAGES`
-is the most likely cause. If it shows up but `family missing` fires, the
+is the most likely cause. If it shows up but `prompt_version missing` fires, the
 `@register_probe` decorator didn't run (check for an import-time
 exception in your module).
 
@@ -839,7 +839,6 @@ from usersim.extension import (
     register_probe,
 )
 
-PROBE_FAMILY = "bookings"
 PROBE_VARIANTS = ["default"]
 PROMPT_VERSION = "v1.0"
 
@@ -865,7 +864,6 @@ def _bank_loader(locale: str):
 
 
 @register_probe(
-    family=PROBE_FAMILY,
     prompt_version=PROMPT_VERSION,
     variants=tuple(PROBE_VARIANTS),
 )
@@ -984,7 +982,7 @@ wrapping: the substrate handles it.
 Every registered probe is also constructible through
 `construct_probe_episode()`. Do not add a separate hosted-runtime constructor:
 the public constructor resolves the locale-aware persona settings, provenance,
-probe family/variant and trajectory identity, then initializes the native
+probe label/variant and trajectory identity, then initializes the native
 probe once for both `ConversationSimulatorGenerator` and
 `ProbeEpisodeRuntime`.
 
@@ -1104,9 +1102,9 @@ mixin's hooks silently never fire.
 
 ### 5. `@register_probe` sets the class metadata AND the registry entry
 
-The decorator does both in one call. Pass the family, prompt version
-and variants to it rather than assigning `family` / `prompt_version` /
-`variants` on the class: the decorator overwrites them. That keeps one
+The decorator does both in one call. Pass the prompt version and
+variants to it rather than assigning `prompt_version` / `variants` on
+the class: the decorator overwrites them. That keeps one
 place to bump `prompt_version`. Read them from the class
 (`MyProbe.prompt_version`), not from the module's `PROMPT_VERSION`,
 which two probes in one module overwrite.
@@ -1177,8 +1175,7 @@ is the canonical scaffold. Copy it and substitute your probe's name. Every
 episode in it runs through `run_episode` with scripted models (gotcha 2), and
 each test checks one thing the probe guarantees:
 
-1. **Registered and conforming**: `assert_probe_conforms` passes, and the
-   class's `family` is its label.
+1. **Registered and conforming**: `assert_probe_conforms` passes.
 2. **End to end**: the row completes, so `should_succeed` holds, after as many
    user turns as `max_turns`.
 3. **The user explores the row's area**: the user model's instructions hold

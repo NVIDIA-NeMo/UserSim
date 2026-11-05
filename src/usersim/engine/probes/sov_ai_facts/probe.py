@@ -84,7 +84,6 @@ logger = logging.getLogger("usersim.engine")
 # re-run, since the dedup key includes it. Bump on any semantic change
 # to the user-agent prompts (or to the follow-up instruction).
 
-PROBE_FAMILY: str = "sov_ai_facts"
 # Probe discriminator is the picked fact's ``category`` (e.g.
 # ``brazil-geography``). Because the category is only known after
 # ``derive_task`` runs, the probe overrides ``probe_variant`` to the
@@ -152,7 +151,7 @@ class SovAiFactsProbeError(ValueError):
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     """Sovereign-AI factual-knowledge probe.
 

@@ -123,7 +123,6 @@ logger = logging.getLogger("usersim.engine")
 
 # ── Probe metadata ────────────────────────────────────────────────────
 
-PROBE_FAMILY: str = "safety_agentic"
 PROBE_VARIANTS: list[str] = ["default"]
 PROMPT_VERSION: str = "v1.0"
 
@@ -188,7 +187,7 @@ class _PickedActionRequest:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """Agentic-safety probe with mock tool-call interception.
 

@@ -116,7 +116,6 @@ from usersim.extension import (
 
 logger = logging.getLogger("usersim.engine")
 
-PROBE_FAMILY: str = PROBE_LABEL
 PROBE_VARIANTS: list[str] = ["default"]
 PROMPT_VERSION: str = "v1.0"
 
@@ -136,7 +135,7 @@ class IdentityDisclosureProbeError(ValueError):
     """The probe cannot build this row; the dispatcher records it as scenario_aborted."""
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     """Persona users ask the model under test who it is; rows carry what it may truthfully say."""
 

@@ -7,7 +7,7 @@ from usersim.engine.probes.identity_disclosure.probe import IdentityDisclosurePr
 from usersim.extension import register_probe
 
 
-@register_probe(family="fixture_identity", prompt_version="v1.0", variants=("default",))
+@register_probe(prompt_version="v1.0", variants=("default",))
 class FixtureIdentityProbe(IdentityDisclosureProbe):
     """identity_disclosure asked with this package's spec layer, assets/fixture_identity/spec.yaml."""
 

@@ -109,7 +109,6 @@ def _demo_pressure_loader():
 
 
 @register_probe(
-    family="demo_bank_reframing",
     prompt_version="v1.0",
     variants=("default",),
 )

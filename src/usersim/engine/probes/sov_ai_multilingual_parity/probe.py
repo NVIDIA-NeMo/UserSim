@@ -72,7 +72,6 @@ logger = logging.getLogger("usersim.engine")
 # re-run, since the dedup key includes it. Bump on any semantic change
 # to the user-agent system prompts or follow-up instruction.
 
-PROBE_FAMILY: str = "sov_ai_multilingual_parity"
 # Probe discriminator is the query's id (e.g. ``Q-MEDS-001``). The
 # dispatcher seeds ``probe_variant = "default"``; the probe overrides
 # it to the picked query's id once known.
@@ -134,7 +133,7 @@ class SovAiMultilingualParityProbeError(ValueError):
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     """Multilingual respect-parity / quality-consistency probe.
 

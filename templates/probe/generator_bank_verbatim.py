@@ -91,7 +91,6 @@ def _demo_locale_bank_check(locale_dir: Path) -> None:
 
 
 @register_probe(
-    family="demo_bank_verbatim",
     prompt_version="v1.0",
     variants=("default",),
 )

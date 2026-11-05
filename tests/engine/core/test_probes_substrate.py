@@ -742,7 +742,7 @@ class TestRegisterProbe:
     def test_registers_class_under_label_and_sets_its_metadata(self) -> None:
         mod = self._make_module()
 
-        @register_probe(family="general", prompt_version="v1.2", variants=("default", "alt"))
+        @register_probe(prompt_version="v1.2", variants=("default", "alt"))
         class _Decorated(BaseProbe):
             label = "_decorated_probe"
 
@@ -757,17 +757,14 @@ class TestRegisterProbe:
         # the module we just constructed (the original decoration ran
         # before we reassigned __module__).
         _Decorated = register_probe(
-            family="general",
             prompt_version="v1.2",
             variants=("default", "alt"),
         )(_Decorated)
 
         assert "_decorated_probe" in known_probes()
         assert resolve_probe("_decorated_probe") is _Decorated
-        assert _Decorated.family == "general"
         assert _Decorated.prompt_version == "v1.2"
         assert _Decorated.variants == ("default", "alt")
-        assert mod.PROBE_FAMILY == "general"
         assert mod.PROMPT_VERSION == "v1.2"
         assert mod.PROBE_VARIANTS == ("default", "alt")
 
@@ -787,7 +784,7 @@ class TestRegisterProbe:
 
     def test_a_second_class_under_a_taken_label_is_refused(self) -> None:
         mod = self._make_module()
-        first = register_probe(family="general", prompt_version="v1.0", variants=("default",))(
+        first = register_probe(prompt_version="v1.0", variants=("default",))(
             self._probe_class("_First", "_contested_probe", mod.__name__)
         )
         second = self._probe_class("_Second", "_contested_probe", mod.__name__)
@@ -797,7 +794,7 @@ class TestRegisterProbe:
             match=r"'_contested_probe' is already registered by _probe_test_module\._First, "
             r"so _probe_test_module\._Second cannot take it",
         ):
-            register_probe(family="general", prompt_version="v2.0", variants=("default",))(second)
+            register_probe(prompt_version="v2.0", variants=("default",))(second)
         assert resolve_probe("_contested_probe") is first
         assert first.prompt_version == "v1.0"
         assert second.prompt_version == ""
@@ -805,19 +802,19 @@ class TestRegisterProbe:
 
     def test_two_probes_in_one_module_keep_their_own_metadata(self) -> None:
         mod = self._make_module()
-        first = register_probe(family="first", prompt_version="v1.0", variants=("alpha",))(
+        first = register_probe(prompt_version="v1.0", variants=("alpha",))(
             self._probe_class("_First", "_first_probe", mod.__name__)
         )
-        second = register_probe(family="second", prompt_version="v2.0", variants=("beta",))(
+        second = register_probe(prompt_version="v2.0", variants=("beta",))(
             self._probe_class("_Second", "_second_probe", mod.__name__)
         )
 
-        assert (first.family, first.prompt_version, first.variants) == ("first", "v1.0", ("alpha",))
-        assert (second.family, second.prompt_version, second.variants) == ("second", "v2.0", ("beta",))
+        assert (first.prompt_version, first.variants) == ("v1.0", ("alpha",))
+        assert (second.prompt_version, second.variants) == ("v2.0", ("beta",))
 
     def test_a_redefined_class_updates_its_entry(self) -> None:
         mod = self._make_module()
-        register = register_probe(family="general", prompt_version="v1.0", variants=("default",))
+        register = register_probe(prompt_version="v1.0", variants=("default",))
         register(self._probe_class("_Reloaded", "_reloaded_probe", mod.__name__))
         reloaded = register(self._probe_class("_Reloaded", "_reloaded_probe", mod.__name__))
         assert resolve_probe("_reloaded_probe") is reloaded
@@ -828,7 +825,6 @@ class TestRegisterProbe:
 
         with pytest.raises(ProbeRegistrationError, match="not a subclass"):
             register_probe(
-                family="general",
                 prompt_version="v1.0",
                 variants=("default",),
             )(_NotAProbe)
@@ -839,7 +835,6 @@ class TestRegisterProbe:
 
         with pytest.raises(ProbeRegistrationError, match="label"):
             register_probe(
-                family="general",
                 prompt_version="v1.0",
                 variants=("default",),
             )(_NoLabel)
@@ -851,9 +846,9 @@ class TestRegisterProbe:
         relative.assets_root = Path("assets")
 
         with pytest.raises(ProbeRegistrationError, match=r"_Relative declares the relative assets_root 'assets'"):
-            register_probe(family="general", prompt_version="v1.0", variants=("default",))(relative)
+            register_probe(prompt_version="v1.0", variants=("default",))(relative)
         assert "_relative_root_probe" not in known_probes()
-        assert relative.family == ""
+        assert relative.prompt_version == ""
 
     def test_rejects_an_output_column_the_engine_writes(self) -> None:
         """A core column is written for every probe; a probe declaring one would collide with it."""
@@ -862,7 +857,7 @@ class TestRegisterProbe:
         clashing.output_columns = ("my_score", "trajectory_id")
 
         with pytest.raises(ProbeRegistrationError, match=r"_Clashing\.output_columns names \['trajectory_id'\]"):
-            register_probe(family="general", prompt_version="v1.0", variants=("default",))(clashing)
+            register_probe(prompt_version="v1.0", variants=("default",))(clashing)
         assert "_clashing_columns_probe" not in known_probes()
 
     def test_accepts_a_prefixed_placeholder_warning_kind(self) -> None:
@@ -870,7 +865,7 @@ class TestRegisterProbe:
         bank_probe = self._probe_class("_Recipes", "_recipe_bank_probe", mod.__name__)
         bank_probe.placeholder_warning_kind = "my_used_placeholder_booking"
 
-        registered = register_probe(family="general", prompt_version="v1.0", variants=("default",))(bank_probe)
+        registered = register_probe(prompt_version="v1.0", variants=("default",))(bank_probe)
 
         assert resolve_probe("_recipe_bank_probe") is registered
 
@@ -881,7 +876,7 @@ class TestRegisterProbe:
         bank_probe.placeholder_warning_kind = "my_slow_tool"
 
         with pytest.raises(ProbeRegistrationError, match="placeholder_warning_kind must mark placeholder content"):
-            register_probe(family="general", prompt_version="v1.0", variants=("default",))(bank_probe)
+            register_probe(prompt_version="v1.0", variants=("default",))(bank_probe)
         assert "_mislabelled_bank_probe" not in known_probes()
 
     def test_rejects_output_columns_given_as_one_string(self) -> None:
@@ -891,14 +886,14 @@ class TestRegisterProbe:
         bare.output_columns = "my_score"
 
         with pytest.raises(ProbeRegistrationError, match="must be a tuple of column names"):
-            register_probe(family="general", prompt_version="v1.0", variants=("default",))(bare)
+            register_probe(prompt_version="v1.0", variants=("default",))(bare)
 
     def test_resolve_probe_raises_keyerror_for_unknown(self) -> None:
         with pytest.raises(KeyError, match="bogus_probe"):
             resolve_probe("bogus_probe")
 
     def test_known_probes_returns_sorted_tuple(self) -> None:
-        @register_probe(family="general", prompt_version="v1.0", variants=("default",))
+        @register_probe(prompt_version="v1.0", variants=("default",))
         class _Z(BaseProbe):
             label = "z_probe"
 
@@ -908,7 +903,7 @@ class TestRegisterProbe:
             def get_assistant_system_prompt(self) -> str:
                 return ""
 
-        @register_probe(family="general", prompt_version="v1.0", variants=("default",))
+        @register_probe(prompt_version="v1.0", variants=("default",))
         class _A(BaseProbe):
             label = "a_probe"
 

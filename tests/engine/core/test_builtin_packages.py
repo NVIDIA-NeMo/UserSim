@@ -63,7 +63,7 @@ _THROWAWAY = {
         from usersim.extension import BaseProbe, register_probe
 
 
-        @register_probe(family="throwaway_probe", prompt_version="v1.0", variants=("default",))
+        @register_probe(prompt_version="v1.0", variants=("default",))
         class ThrowawayProbe(BaseProbe):
             label = "throwaway_probe"
 

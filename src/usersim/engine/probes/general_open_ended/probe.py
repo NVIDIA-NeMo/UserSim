@@ -37,12 +37,11 @@ from usersim.extension import (
 # Bumping ``PROMPT_VERSION`` invalidates prior evaluator rows on
 # re-run, since the dedup key includes it.
 
-PROBE_FAMILY: str = "general_open_ended"
 PROBE_VARIANTS: list[str] = ["default"]  # topic-conditioned via theme; single variant today
 PROMPT_VERSION: str = "v1.0"
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class OpenEndedProbe(BaseProbe):
     """Open-ended conversation probe.
 

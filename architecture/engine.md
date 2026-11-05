@@ -24,7 +24,7 @@ Two derived identifiers, both in `core/identity.py`, make runs comparable:
 **`persona_uuid`** is a content hash of the persona. The same person is the
 same id in every run, forever.
 
-**`trajectory_id`** hashes the persona together with the probe (family and
+**`trajectory_id`** hashes the persona together with the probe (label and
 variant), the scenario seed, the user and assistant models, the prompt version
 and the locale, plus the reasoning-replay setting when it is on.
 

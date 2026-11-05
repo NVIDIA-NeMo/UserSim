@@ -5,8 +5,8 @@
 
 ``HealthDisclosureProbe`` holds ALL the behavior; each client is a thin
 subclass that sets ``label`` + ``CLIENT`` (a config dict from ``clients.py``)
-and carries its own ``@register_probe`` (so it gets its own ``family`` →
-its own judge axes). The four clients' classes are in ``probe.py``.
+and carries its own ``@register_probe`` (so its rows are stored under its
+own label, which gives it its own judge axes). The four clients' classes are in ``probe.py``.
 
 The auditable move + Guard layer is provided by the reusable
 :class:`~usersim.engine.probes.health_disclosure.mixin.GuardedMoveMixin`

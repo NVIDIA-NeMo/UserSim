@@ -48,7 +48,7 @@ def read_themes(locale_dir: Path) -> list[dict]:
     return themes
 
 
-@register_probe(family="my_probe", prompt_version="v1.0", variants=("default",))
+@register_probe(prompt_version="v1.0", variants=("default",))
 class MyProbe(ToolExecutionMixin, BaseProbe):
     label = "my_probe"
     description = "Replace with what the probe tests, as the per-row preview and the capability report show it."

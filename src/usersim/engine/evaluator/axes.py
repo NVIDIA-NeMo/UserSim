@@ -208,7 +208,7 @@ UNIVERSAL_SCORES: list[Score] = [
 # validated; i.e. not a customer's real, clinically-validated rubric). Declared inline here, like
 # every other probe, so the evaluator has no import-time dependency on a probe
 # package — a broken probe import must not take down scoring for every family.
-# Each client probe is its own family, so each gets its own rubric.
+# Each client probe stores its rows under its own label, so each gets its own rubric.
 _MD_LADDER: dict[int, str] = {
     1: "Very poor",
     2: "Poor",

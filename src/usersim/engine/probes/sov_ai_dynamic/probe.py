@@ -88,7 +88,6 @@ logger = logging.getLogger("usersim.engine")
 # re-run, since the dedup key includes it. Bump on any semantic change
 # to the user-agent prompts (or to the follow-up instruction).
 
-PROBE_FAMILY: str = "sov_ai_dynamic"
 # Probe discriminator is the picked category's id (e.g.
 # ``brazil-history``). Because the category is only known after
 # ``derive_probe`` runs, the probe overrides ``probe_variant`` to the
@@ -166,7 +165,7 @@ class _PickedProbe:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SovAiDynamicProbe(BankBackedProbe):
     """Population-probing dynamic-coverage probe.
 

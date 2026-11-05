@@ -184,17 +184,18 @@ def _parse_csv_or_none(spec: str | None) -> list[str] | None:
 def _resolve_scorers(requested: list[str], families: Iterable[str]) -> list[str]:
     """``requested`` with ``auto`` replaced by the generic scorers and the ``default_scorers`` of the run's probes.
 
-    ``families`` are the ``probe_family`` values of the rows being evaluated.
-    Each name appears once, where it first occurs. A family no installed probe
-    stores its rows under adds no scorer of its own, and a warning names it. A
-    blank family names no probe, so it adds none and goes unnamed.
+    ``families`` are the ``probe_family`` values of the rows being evaluated,
+    each the label of the probe that wrote the row. Each name appears once,
+    where it first occurs. A family that is no installed probe's label adds no
+    scorer of its own, and a warning names it. A blank family names no probe,
+    so it adds none and goes unnamed.
     """
-    from usersim.engine.core.probes import default_scorers_by_family
+    from usersim.engine.core.probes import default_scorers_by_probe
     from usersim.engine.evaluator.scorers import AUTO_SCORERS, GENERIC_SCORERS
 
     if AUTO_SCORERS not in requested:
         return requested
-    by_family = default_scorers_by_family()
+    by_family = default_scorers_by_probe()
     present = {family for family in families if family}
     unclaimed = sorted(present - set(by_family))
     if unclaimed:

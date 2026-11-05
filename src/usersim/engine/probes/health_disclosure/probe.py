@@ -5,7 +5,8 @@
 
 All behavior lives in ``HealthDisclosureProbe`` (``base.py``). Each class here
 binds a label and its client's configuration, loads that client's clinical
-profile bank, and registers under its own family, so it gets its own judge axes:
+profile bank, and stores its rows under its own label, so it gets its own judge
+axes:
 
 - ``health_therapy_disclosure``: a therapy patient discloses to a therapist.
 - ``health_triage_disclosure``: a patient discloses to a care-navigation
@@ -37,9 +38,8 @@ _VARIANTS: tuple[str, ...] = ("default", "guarded")
 
 
 def _registered(label: str) -> Callable[[type], type]:
-    """``@register_probe`` with the family and prompt version the client declares for ``label``."""
-    cfg = CLIENTS[label]
-    return register_probe(family=cfg["family"], prompt_version=cfg["prompt_version"], variants=_VARIANTS)
+    """``@register_probe`` with the prompt version the client declares for ``label``."""
+    return register_probe(prompt_version=CLIENTS[label]["prompt_version"], variants=_VARIANTS)
 
 
 def _bank_loader(label: str) -> Callable[[], Any]:

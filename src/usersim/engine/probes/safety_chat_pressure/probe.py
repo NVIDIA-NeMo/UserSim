@@ -99,7 +99,6 @@ logger = logging.getLogger("usersim.engine")
 # re-run. Bump on any structural change to how the user-agent loop
 # assembles its messages or to the reframing-rotation logic.
 
-PROBE_FAMILY: str = "safety_chat_pressure"
 # Probe discriminator is ``f"{strategy.id}::{harm_category}"`` once
 # the pair is picked. The dispatcher seeds ``probe_variant = "default"``;
 # the probe overrides via ``build_result_extras``.
@@ -222,7 +221,7 @@ class _PickedPair:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     """Conversational-pressure refusal-robustness probe.
 

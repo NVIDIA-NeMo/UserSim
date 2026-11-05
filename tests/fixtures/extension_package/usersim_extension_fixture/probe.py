@@ -13,7 +13,7 @@ def _check_locale_bank(locale_dir: Path) -> None:
         raise FileNotFoundError(f"no sample.yaml in {locale_dir}")
 
 
-@register_probe(family="fixture", prompt_version="v1.0", variants=("default",))
+@register_probe(prompt_version="v1.0", variants=("default",))
 class FixtureProbe(BaseProbe):
     label = "fixture_probe"
     assets_root = Path(__file__).parent / "assets"

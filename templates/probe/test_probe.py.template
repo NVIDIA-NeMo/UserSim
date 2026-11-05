@@ -24,8 +24,8 @@ import json
 from usersim.extension import ConversationSimulatorConfig
 from usersim.testing import ScriptedModel, assert_hosted_parity, assert_probe_conforms, run_episode
 
-# Replace with your probe's module.
-from usersim.engine.probes.YOUR_PROBE import probe
+# Replace with your probe's module. Importing it registers the probe.
+from usersim.engine.probes.YOUR_PROBE import probe  # noqa: F401
 
 PROBE_LABEL = "YOUR_PROBE"
 
@@ -57,7 +57,6 @@ class TestYourProbe:
     def test_registered_and_conforms(self) -> None:
         """Registered with what @register_probe sets, and conforming to the probe contract."""
         assert_probe_conforms(PROBE_LABEL)
-        assert probe.YourProbe.family == PROBE_LABEL  # rename to your class
 
     async def test_runs_end_to_end(self) -> None:
         run = await run_episode(PROBE_LABEL, config=CONFIG, persona=PERSONA, data=DATA, language="Portuguese")

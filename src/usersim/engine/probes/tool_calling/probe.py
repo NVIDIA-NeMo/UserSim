@@ -75,7 +75,6 @@ logger = logging.getLogger("usersim.engine")
 # See general_educational/probe.py for the contract. `probe_variant` is
 # carried on the trajectory; the evaluator reads it for stratification.
 
-PROBE_FAMILY: str = "tool_calling"
 PROBE_VARIANTS: list[str] = ["default"]  # tool-category via toolset_category column; single variant today
 PROMPT_VERSION: str = "v1.2"
 
@@ -253,7 +252,7 @@ async def _simulate_tool_response(
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """Tool-calling probe.
 

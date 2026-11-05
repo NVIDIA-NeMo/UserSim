@@ -46,7 +46,6 @@ from usersim.extension import BaseProbe, register_probe
 
 
 @register_probe(
-    family="demo_general",
     prompt_version="v1.0",
     variants=("default",),
 )

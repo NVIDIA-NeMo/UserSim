@@ -7,8 +7,8 @@ Scope:
 - ``get_code_sha`` returns a string (or None) and is callable repeatedly.
 - ``USERSIM_CODE_SHA`` env var overrides git probing.
 - ``get_nemotron_personas_version`` honours the env override.
-- Every shipped probe module declares ``PROBE_FAMILY`` /
-  ``PROBE_VARIANTS`` / ``PROMPT_VERSION``.
+- Every shipped probe module declares ``PROBE_VARIANTS`` /
+  ``PROMPT_VERSION``.
 """
 
 from __future__ import annotations
@@ -168,12 +168,7 @@ class TestNemotronPersonasVersion:
     ],
 )
 class TestProbeMetadata:
-    """Every shipped probe declares the three metadata constants."""
-
-    def test_has_probe_family(self, module_path: str) -> None:
-        mod = importlib.import_module(module_path)
-        fam = getattr(mod, "PROBE_FAMILY", None)
-        assert isinstance(fam, str) and fam
+    """Every shipped probe declares the two metadata constants."""
 
     def test_has_probe_variants(self, module_path: str) -> None:
         # Migrated probes declare ``PROBE_VARIANTS`` as a list at

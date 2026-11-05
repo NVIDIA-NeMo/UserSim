@@ -24,8 +24,8 @@ Checks performed:
    their typical argument sets without touching the network.
 7. **probe registry** — every probe in
    ``usersim.engine.core.probes.known_probes()`` resolves
-   to a class that carries ``family`` / ``prompt_version`` /
-   ``variants`` metadata.
+   to a class that carries ``prompt_version`` / ``variants``
+   metadata.
 8. **probe assets** — every registered probe's ``asset_problems()``
    comes back empty: each probe checks the assets it ships, such as a
    bank per locale, so a default path pointing at a missing directory
@@ -370,10 +370,10 @@ def _check_probe_registry(report: SmokeReport) -> None:
     """Confirm every registered probe resolves and exposes metadata.
 
     Catches the regression where a probe's metadata is dropped: each
-    probe class registered in ``_PROBE_REGISTRY`` must carry ``family``
-    (string), ``prompt_version`` (string), and ``variants`` (non-empty
-    sequence). These drive trajectory metadata and reporting joins;
-    missing them silently corrupts downstream aggregation.
+    probe class registered in ``_PROBE_REGISTRY`` must carry
+    ``prompt_version`` (string) and ``variants`` (non-empty sequence).
+    These drive trajectory metadata and reporting joins; missing them
+    silently corrupts downstream aggregation.
     """
     try:
         from usersim.engine.core.probes import known_probes, resolve_probe
@@ -399,8 +399,6 @@ def _check_probe_registry(report: SmokeReport) -> None:
             failures.append(f"{probe_name}: resolve raised {type(e).__name__}: {e}")
             continue
         # ``@register_probe`` sets these on the class.
-        if not isinstance(probe_cls.family, str) or not probe_cls.family:
-            failures.append(f"{probe_name}: family missing or non-string")
         if not isinstance(probe_cls.prompt_version, str) or not probe_cls.prompt_version:
             failures.append(f"{probe_name}: prompt_version missing or non-string")
         if not isinstance(probe_cls.variants, (list, tuple)) or not probe_cls.variants:

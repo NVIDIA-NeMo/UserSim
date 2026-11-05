@@ -156,11 +156,11 @@ declared = declared_model_aliases(ConversationSimulatorConfig(name="conversation
 check("model_aliases joins the run's models", "fixture_critic_model" in declared, str(declared))
 
 # `usersim eval --scorers auto` adds a contributed probe's default_scorers for
-# the rows stored under its family, which differs from its label.
+# the rows stored under its label.
 from usersim.cli.evaluate import _resolve_scorers  # noqa: E402
 from usersim.engine.evaluator.scorers import GENERIC_SCORERS  # noqa: E402
 
-auto = _resolve_scorers(["auto"], ["fixture"])
+auto = _resolve_scorers(["auto"], ["fixture_probe"])
 check("default_scorers join --scorers auto", auto == [*GENERIC_SCORERS, "fixture_scorer"], str(auto))
 
 # The per-row preview shows the fields a contributed probe declares.

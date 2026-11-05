@@ -52,7 +52,6 @@ from usersim.extension import (
 
 
 @register_probe(
-    family="demo_tool_calling",
     prompt_version="v1.0",
     variants=("default",),
 )

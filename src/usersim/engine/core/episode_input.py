@@ -164,7 +164,7 @@ def construct_episode_preamble(
         if probe_cls.variants
         else "default"
     )
-    probe_family = str(probe_cls.family or probe_type)
+    probe_family = probe_cls.label
     prompt_version = str(probe_cls.prompt_version or "v1.0")
     raw_provenance = resolved.get("usersim_provenance")
     if isinstance(raw_provenance, str):

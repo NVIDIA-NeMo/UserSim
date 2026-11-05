@@ -59,7 +59,7 @@ class TestProbeDiscovery:
 from usersim.engine.core.probes import BaseProbe, register_probe
 
 
-@register_probe(family="general", prompt_version="v1.0", variants=("default",))
+@register_probe(prompt_version="v1.0", variants=("default",))
 class PartnerProbe(BaseProbe):
     label = "partner_probe"
 """

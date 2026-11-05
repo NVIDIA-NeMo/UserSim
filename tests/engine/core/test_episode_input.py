@@ -235,7 +235,7 @@ def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
 def test_two_probes_in_one_module_record_their_own_metadata(
     monkeypatch: pytest.MonkeyPatch, register_test_probe
 ) -> None:
-    """A probe's family, variant and prompt version come from its own class, so
+    """A probe's label, variant and prompt version come from its own class, so
     two probes defined in one module each record their own."""
     data, config, models = _pinned_inputs("general_open_ended")
     module = ModuleType("_two_probes_module")

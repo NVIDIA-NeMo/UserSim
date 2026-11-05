@@ -61,7 +61,6 @@ def _demo_taxonomy_loader(locale: str = "en_US"):
 
 
 @register_probe(
-    family="demo_custom_turn1",
     prompt_version="v1.0",
     variants=("default",),
 )

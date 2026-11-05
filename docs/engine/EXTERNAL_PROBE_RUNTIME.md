@@ -30,7 +30,7 @@ runtime = ProbeEpisodeRuntime.from_resolved_row(rows[0], models=runtime_models)
 This uses the same Data Designer persona, probe, theme and toolset sampler
 graph as `usersim simulate`; the host does not select panel indices or author
 themes and toolsets. Rows carry the persona, probe inputs, locale-aware
-behavioral settings, probe family and variant, trajectory ID, provenance, and
+behavioral settings, probe label and variant, trajectory ID, provenance, and
 the `usersim_config` snapshot `from_resolved_row()` restores. `models_path` and
 `assets_dir` are optional overrides. Model configuration supplies trajectory
 identities; no configured model is called. Before sampling, it checks each

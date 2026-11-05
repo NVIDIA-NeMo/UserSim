@@ -62,8 +62,8 @@ authoring tutorial.
 ## The contract a probe class must satisfy
 
 A probe class is a `BaseProbe` subclass (plus an optional mixin)
-decorated with `@register_probe(...)`. The decorator sets three
-class attributes (`family` / `prompt_version` / `variants`); the
+decorated with `@register_probe(...)`. The decorator sets two
+class attributes (`prompt_version` / `variants`); the
 smoke check verifies they're present. A probe ported from this template
 keeps its banks beside its code, under
 `src/usersim/engine/probes/<your_probe>/assets/<your_probe>/`, and sets
@@ -128,8 +128,6 @@ When porting one of the templates into a new module:
 - [ ] List in `preview_fields` the columns or metadata keys the per-row
       preview's Probe Inputs panel shows, such as the id of the bank
       entry each row drew.
-- [ ] Pick a `family` (the class attribute the decorator sets).
-      The reporting layer stratifies on this.
 - [ ] Bump `prompt_version` on **any** semantic change to the
       user-agent prompt or the per-turn judge rubric. The
       evaluator's partial-re-run dedup key includes it.

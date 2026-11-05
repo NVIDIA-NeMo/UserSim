@@ -61,7 +61,6 @@ class TestClientConfig:
         cfg = C.CLIENTS[label]
         for key in (
             "label",
-            "family",
             "prompt_version",
             "profiles_env",
             "risk_noun",
@@ -73,12 +72,6 @@ class TestClientConfig:
         ):
             assert key in cfg, f"{label} missing config key {key!r}"
         assert cfg["label"] == label
-
-    @pytest.mark.parametrize("label", ALL_LABELS)
-    def test_families_are_distinct(self, label):
-        # Distinct family per client so each gets its own judge axes.
-        fams = [C.CLIENTS[x]["family"] for x in ALL_LABELS]
-        assert len(set(fams)) == len(fams)
 
     @pytest.mark.parametrize("label", ALL_LABELS)
     def test_user_prompt_has_all_placeholders(self, label):
@@ -124,11 +117,10 @@ class TestClientConfig:
     @pytest.mark.parametrize("label", ALL_LABELS)
     def test_five_provisional_axes(self, label):
         # Axes are declared inline in the evaluator (like every other probe),
-        # keyed by the client's family — not imported from this package.
+        # keyed by the probe's label — not imported from this package.
         from usersim.engine.evaluator.axes import PROBE_SCORES
 
-        family = C.CLIENTS[label]["family"]
-        axes = PROBE_SCORES[family]
+        axes = PROBE_SCORES[label]
         assert len(axes) == 5
         for ax in axes:
             assert ax.name and ax.description
@@ -621,10 +613,8 @@ class TestRegisteredMetadata:
         from usersim.engine.core.probes import resolve_probe
 
         cls = resolve_probe(label)
-        family = label
         assert cls.__module__ == "usersim.engine.probes.health_disclosure.probe"
-        assert cls.CLIENT["family"] == family
-        assert cls.family == family
+        assert cls.CLIENT["label"] == label
         assert isinstance(cls.prompt_version, str) and cls.prompt_version
         # Both variants are declared; "default" is first so it's the fallback
         # (move-space OFF) and "guarded" is the opt-in move-space.
