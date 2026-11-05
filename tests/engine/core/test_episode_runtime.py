@@ -677,27 +677,14 @@ async def test_activation_lifecycle_matches_native_safety_dispatch() -> None:
 
 
 def test_native_lifecycle_surface_covers_all_registered_probes() -> None:
-    registered = (
-        "financial_services",
-        "general_educational",
-        "general_open_ended",
-        "health_decision_support_disclosure",
-        "health_general_disclosure",
-        "health_therapy_disclosure",
-        "health_triage_disclosure",
-        "identity_disclosure",
-        "safety_agentic",
-        "safety_chat_pressure",
-        "sov_ai_dynamic",
-        "sov_ai_facts",
-        "sov_ai_multilingual_parity",
-        "tool_calling",
-    )
-    assert known_probes() == registered
-    for label in registered:
-        parameters = signature(resolve_probe(label).run_dispatch).parameters
-        assert "state" in parameters, label
-        assert "seed_state" in parameters, label
+    """A host resumes an episode through ``state`` and ``seed_state``, so every
+    registered probe's ``run_dispatch`` takes both, its own override included."""
+    classes = [resolve_probe(label) for label in known_probes()]
+    assert any(cls.run_dispatch is not BaseProbe.run_dispatch for cls in classes), "no probe overrides run_dispatch"
+    for cls in classes:
+        parameters = signature(cls.run_dispatch).parameters
+        assert "state" in parameters, cls.label
+        assert "seed_state" in parameters, cls.label
 
 
 async def test_native_lifecycle_routes_all_participant_roles() -> None:
