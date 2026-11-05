@@ -68,6 +68,16 @@ if TYPE_CHECKING:
         dispatch_episode,
         register_probe,
     )
+    from usersim.engine.core.probing_taxonomy import (
+        Category,
+        ProbingTaxonomy,
+        ProbingTaxonomyError,
+        load_probing_taxonomy,
+        load_probing_taxonomy_for,
+        reset_probing_taxonomy_cache,
+        select_category,
+        taxonomy_path_for,
+    )
     from usersim.engine.core.prompt_loader import get_prompt, load_prompt_file, render_prompt
     from usersim.engine.core.row_metadata import recorded_value
     from usersim.engine.core.seeds import load_seeds
@@ -140,6 +150,15 @@ __all__ = [
     "persona_to_tags",
     "probe_asset_roots",
     "probe_assets_dir",
+    # Probing taxonomies
+    "Category",
+    "ProbingTaxonomy",
+    "ProbingTaxonomyError",
+    "load_probing_taxonomy",
+    "load_probing_taxonomy_for",
+    "reset_probing_taxonomy_cache",
+    "select_category",
+    "taxonomy_path_for",
     # Locales and languages
     "SHIPPED_LOCALES",
     "asset_locale",
@@ -218,6 +237,16 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "ToolExecutionMixin",
         "dispatch_episode",
         "register_probe",
+    ),
+    "usersim.engine.core.probing_taxonomy": (
+        "Category",
+        "ProbingTaxonomy",
+        "ProbingTaxonomyError",
+        "load_probing_taxonomy",
+        "load_probing_taxonomy_for",
+        "reset_probing_taxonomy_cache",
+        "select_category",
+        "taxonomy_path_for",
     ),
     "usersim.engine.core.prompt_loader": ("get_prompt", "load_prompt_file", "render_prompt"),
     "usersim.engine.core.row_metadata": ("recorded_value",),

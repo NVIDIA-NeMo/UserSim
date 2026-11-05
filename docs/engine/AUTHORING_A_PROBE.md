@@ -101,7 +101,8 @@ the assistant stops or a per-turn cap, e.g. `financial_services`). The
 scoped retrieval + discoverable-tool gate + in-memory state, tier-branched) is
 `financial_services`: it rides the shared `ConversationLoop` (no custom
 `run_dispatch`) plus `ToolExecutionMixin`; the `dynamic` tier generates turn-1
-from the shared `core/probing_taxonomy` substrate (`select_category`).
+from a probing taxonomy (`load_probing_taxonomy_for` and `select_category`, in
+`usersim.extension`).
 
 ---
 

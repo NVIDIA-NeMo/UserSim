@@ -54,7 +54,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.probing_taxonomy import Category, load_probing_taxonomy, reset_probing_taxonomy_cache
 from usersim.engine.probes.sov_ai_dynamic.prompts import (
     PromptsUnavailableError,
     get_followup_instruction,
@@ -70,13 +69,16 @@ from usersim.engine.probes.sov_ai_dynamic.taxonomy import (
 from usersim.extension import (
     SHIPPED_LOCALES,
     BankBackedProbe,
+    Category,
     ConversationState,
     PreviewField,
     WarningKind,
     format_persona_for_prompt,
     get_conversation_language,
     language_instruction,
+    load_probing_taxonomy,
     register_probe,
+    reset_probing_taxonomy_cache,
 )
 
 logger = logging.getLogger("usersim.engine")

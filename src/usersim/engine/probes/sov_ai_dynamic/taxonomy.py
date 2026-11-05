@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from usersim.engine.core.probing_taxonomy import ProbingTaxonomy, load_probing_taxonomy_for, taxonomy_path_for
+from usersim.extension import ProbingTaxonomy, load_probing_taxonomy_for, taxonomy_path_for
 
 _FAMILY = "sov_ai_dynamic"
 _FILENAME = "categories.yaml"

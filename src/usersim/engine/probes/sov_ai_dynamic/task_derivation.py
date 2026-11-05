@@ -34,12 +34,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable
 
-from usersim.engine.core.probing_taxonomy import (
-    Category,
-    ProbingTaxonomy,
-    select_category,
-)
-from usersim.extension import persona_to_tags
+from usersim.extension import Category, ProbingTaxonomy, persona_to_tags, select_category
 
 # ---------------------------------------------------------------------------
 # Public API

@@ -68,9 +68,8 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.probing_taxonomy import Category
 from usersim.engine.probes.sov_ai_dynamic.taxonomy import load_probing_taxonomy_for_locale
-from usersim.extension import acall_llm, format_conversation_history_for_prompt, register_scorer
+from usersim.extension import Category, acall_llm, format_conversation_history_for_prompt, register_scorer
 
 logger = logging.getLogger("usersim.engine")
 

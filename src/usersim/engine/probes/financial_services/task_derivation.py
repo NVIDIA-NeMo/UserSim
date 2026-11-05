@@ -14,7 +14,6 @@ from __future__ import annotations
 import random
 from typing import Any, Sequence
 
-from usersim.engine.core.probing_taxonomy import select_category
 from usersim.engine.probes.financial_services.bank import FinanceBank
 from usersim.engine.probes.financial_services.tasks import (
     FinanceInstance,
@@ -24,6 +23,7 @@ from usersim.engine.probes.financial_services.tasks import (
     select_institution,
     select_institution_and_template,
 )
+from usersim.extension import select_category
 
 
 def _age_bin(age: Any) -> str | None:

@@ -101,6 +101,23 @@ does not load the conversation loop.
 | `LocalizedTextError` | Raised when a bank value cannot be read as `LocalizedText` |
 | `persona_to_tags` | The tags a persona matches bank entries on, such as its region, age and occupation, for a locale |
 
+### Probing taxonomies
+
+A probing taxonomy is a bank of topic categories, one file per locale, that a
+probe draws a persona's opening from. The file format is in the
+[`sov_ai_dynamic` schema](../src/usersim/engine/probes/sov_ai_dynamic/assets/sov_ai_dynamic/SCHEMA.md).
+
+| Name | What it is |
+|---|---|
+| `ProbingTaxonomy` | A loaded taxonomy: its categories, id and version, which it also gives as `bank_id` and `bank_version` |
+| `Category` | One category of a taxonomy: its invitation, its sub-topic hints, and the entity types and persona tags it suits |
+| `ProbingTaxonomyError` | Raised when a taxonomy file is missing or breaks the schema |
+| `load_probing_taxonomy` | Reads and validates one taxonomy file |
+| `load_probing_taxonomy_for` | A probe's taxonomy for a locale, read once and cached, so a probe and its scorer read the same version |
+| `taxonomy_path_for` | The file `load_probing_taxonomy_for` reads: the one an environment variable names, else the one in the probe's asset folder |
+| `select_category` | A category and sub-topic hint for a persona, the same for the same persona, taxonomy version and seed |
+| `reset_probing_taxonomy_cache` | Empties the cache `load_probing_taxonomy_for` reads |
+
 ### Locales and languages
 
 | Name | What it is |
