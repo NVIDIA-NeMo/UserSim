@@ -371,31 +371,7 @@ PAIR = (PARTNER,)
 
 
 class TestLayering:
-    """The taxonomy package exists to break a cycle; assert it stays broken."""
-
-    def test_taxonomy_does_not_import_its_consumers(self) -> None:
-        import ast
-        import pathlib
-
-        offenders = []
-        from usersim import taxonomy
-
-        taxonomy_dir = pathlib.Path(taxonomy.__file__).resolve().parent
-        for path in taxonomy_dir.glob("*.py"):
-            for node in ast.walk(ast.parse(path.read_text())):
-                names = []
-                if isinstance(node, ast.ImportFrom) and node.module:
-                    names = [node.module]
-                elif isinstance(node, ast.Import):
-                    names = [a.name for a in node.names]
-                for n in names:
-                    # Everything now shares the ``usersim`` root, so the
-                    # subpackage is the second component.
-                    parts = n.split(".")
-                    layer = parts[1] if parts[:1] == ["usersim"] else parts[0]
-                    if layer in {"reporting", "selection", "cli"}:
-                        offenders.append(f"{path}: {n}")
-        assert not offenders, "taxonomy must not import the layers that depend on it: " + str(offenders)
+    """Config-time construction stays clear of the reporting layer; ``test_layering.py`` states the layers."""
 
     def test_config_time_construction_avoids_reporting(self) -> None:
         """Config-time construction must not import the reporting layer."""
