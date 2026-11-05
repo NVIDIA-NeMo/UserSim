@@ -88,7 +88,6 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
-from usersim.engine.core.probes import assistant_message
 from usersim.engine.probes.safety_agentic.action_taxonomy import load_action_taxonomy_default
 from usersim.engine.probes.safety_agentic.bank import (
     ActionRequest,
@@ -113,6 +112,7 @@ from usersim.extension import (
     TraceKind,
     WarningKind,
     acall_llm,
+    assistant_message,
     finalize_completed,
     make_result,
     parse_tool_call,

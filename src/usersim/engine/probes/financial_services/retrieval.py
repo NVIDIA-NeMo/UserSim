@@ -72,13 +72,17 @@ import re
 import unicodedata
 from typing import Sequence
 
-from usersim.engine.core.locale import HAN_RANGES, HANGUL_RANGES, HIRAGANA_RANGES, KATAKANA_RANGES
 from usersim.engine.probes.financial_services.bank import Document, Institution
+from usersim.extension import SCRIPT_BUCKETS
 
 #: Han, kana and Hangul, plus the iteration mark 々, which repeats the Han
 #: character before it and so belongs to the same run.
 _CJK_RANGES: tuple[tuple[int, int], ...] = (
-    HAN_RANGES + HIRAGANA_RANGES + KATAKANA_RANGES + HANGUL_RANGES + ((0x3005, 0x3005),)
+    SCRIPT_BUCKETS["han"]
+    + SCRIPT_BUCKETS["hiragana"]
+    + SCRIPT_BUCKETS["katakana"]
+    + SCRIPT_BUCKETS["hangul"]
+    + ((0x3005, 0x3005),)
 )
 
 #: The Halfwidth and Fullwidth Forms block.

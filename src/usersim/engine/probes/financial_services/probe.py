@@ -37,7 +37,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
-from usersim.engine.core.locale import persona_dataset_locale
 from usersim.engine.probes.financial_services import retrieval as _retrieval
 from usersim.engine.probes.financial_services import tools as _tools
 from usersim.engine.probes.financial_services.bank import (
@@ -77,9 +76,11 @@ from usersim.extension import (
     format_persona_for_prompt,
     load_probing_taxonomy,
     load_probing_taxonomy_for,
+    persona_dataset_locale,
     persona_full_name,
     register_probe,
     taxonomy_path_for,
+    translate_search_query,
 )
 from usersim.extension import language_instruction as _language_instruction
 from usersim.extension import persona_uuid as compute_persona_uuid
@@ -739,8 +740,6 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         corpus_language = self._corpus_language()
         if not corpus_language or not query.strip():
             return query
-        from usersim.engine.core.translation import translate_search_query
-
         translated = await translate_search_query(
             models,
             query,

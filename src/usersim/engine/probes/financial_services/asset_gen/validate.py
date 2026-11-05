@@ -586,7 +586,7 @@ _SNAKE_CASE_RE = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-
 def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstData], rep: ValidationReport) -> None:
     locale = str(region_meta.get("locale", ""))
     try:
-        from usersim.engine.core.locale import expected_script_ranges
+        from usersim.extension import expected_script_ranges
 
         ranges = expected_script_ranges(locale)
     except Exception as e:  # pragma: no cover

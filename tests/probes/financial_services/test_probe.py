@@ -1925,7 +1925,7 @@ class TestSearchQueryTranslation:
         probe, ob = _probe_on("en_US", _northwind_dispute_instance())
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        with patch("usersim.engine.core.translation.translate_search_query") as translate:
+        with patch("usersim.engine.probes.financial_services.probe.translate_search_query") as translate:
             await probe.execute_tool_call(
                 "kb_search",
                 {"query": "dispute a card charge"},
@@ -1945,7 +1945,7 @@ class TestSearchQueryTranslation:
         probe.seed_state_metadata(state)
         assert probe._corpus_language() == "Indian English"
         with patch(
-            "usersim.engine.core.translation.translate_search_query",
+            "usersim.engine.probes.financial_services.probe.translate_search_query",
             return_value="dispute a card charge",
         ) as translate:
             await probe.execute_tool_call(
@@ -1972,7 +1972,7 @@ class TestSearchQueryTranslation:
         probe.seed_state_metadata(state)
         with (
             patch(
-                "usersim.engine.core.translation.translate_search_query",
+                "usersim.engine.probes.financial_services.probe.translate_search_query",
                 return_value="dispute a card charge",
             ),
             patch.object(
@@ -2007,7 +2007,7 @@ class TestSearchQueryTranslation:
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         with patch(
-            "usersim.engine.core.translation.translate_search_query",
+            "usersim.engine.probes.financial_services.probe.translate_search_query",
             return_value="dispute a card charge",
         ):
             await probe.execute_tool_call(
@@ -2028,7 +2028,7 @@ class TestSearchQueryTranslation:
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         with patch(
-            "usersim.engine.core.translation.translate_search_query",
+            "usersim.engine.probes.financial_services.probe.translate_search_query",
             return_value="dispute a card charge",
         ):
             await probe.execute_tool_call(
@@ -2056,7 +2056,7 @@ class TestSearchQueryTranslation:
         probe.seed_state_metadata(state)
         assert WarningKind.USED_MACHINE_TRANSLATION not in _warning_kinds(ob)
         with patch(
-            "usersim.engine.core.translation.translate_search_query",
+            "usersim.engine.probes.financial_services.probe.translate_search_query",
             return_value="fees on this account",
         ):
             for i in range(3):
@@ -2081,7 +2081,7 @@ class TestSearchQueryTranslation:
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         with patch(
-            "usersim.engine.core.translation.translate_search_query",
+            "usersim.engine.probes.financial_services.probe.translate_search_query",
             side_effect=lambda models, q, **kw: q,
         ):
             await probe.execute_tool_call(
@@ -2100,7 +2100,7 @@ class TestSearchQueryTranslation:
         probe, _ = self._variant_probe()
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        with patch("usersim.engine.core.translation.translate_search_query") as translate:
+        with patch("usersim.engine.probes.financial_services.probe.translate_search_query") as translate:
             await probe.execute_tool_call("kb_search", {}, {}, state, {}, turn_idx=0, call_idx=0)
         translate.assert_not_called()
         assert state.metadata["kb_search_queries"] == [""]

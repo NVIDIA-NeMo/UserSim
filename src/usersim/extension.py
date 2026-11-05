@@ -29,14 +29,23 @@ if TYPE_CHECKING:
     from usersim.engine.core.backends import ExecutionBackend, JobHandle, JobSpec, JobStatus
     from usersim.engine.core.behavioral import (
         ChatRealism,
+        education_ordinal,
         format_behavioral_profile_for_prompt,
         format_disclosure_instructions,
         format_interaction_style_instructions,
         get_conversation_language,
     )
-    from usersim.engine.core.identity import persona_uuid
+    from usersim.engine.core.identity import persona_uuid, resolve_model_name
     from usersim.engine.core.llm import acall_llm
-    from usersim.engine.core.locale import SHIPPED_LOCALES, asset_locale, expected_language_display, india_variant
+    from usersim.engine.core.locale import (
+        SCRIPT_BUCKETS,
+        SHIPPED_LOCALES,
+        asset_locale,
+        expected_language_display,
+        expected_script_ranges,
+        india_variant,
+        persona_dataset_locale,
+    )
     from usersim.engine.core.localized import LocalizedText, LocalizedTextError
     from usersim.engine.core.messages import format_conversation_history_for_prompt, format_tools_for_prompt
     from usersim.engine.core.missing import is_missing, none_for_missing
@@ -65,6 +74,7 @@ if TYPE_CHECKING:
         ProbeRegistrationError,
         ToolCallingMixin,
         ToolExecutionMixin,
+        assistant_message,
         dispatch_episode,
         register_probe,
     )
@@ -89,6 +99,7 @@ if TYPE_CHECKING:
         make_result,
     )
     from usersim.engine.core.tool_calls import parse_tool_call, recover_tool_call
+    from usersim.engine.core.translation import translate_search_query
     from usersim.engine.core.user_turn_policy import UserTurnPolicy
     from usersim.engine.evaluator.scorers import ScorerFn, ScorerRegistrationError, register_scorer
     from usersim.taxonomy.capabilities import ALL_PROBES, CapabilityDefinition, EvidenceSource
@@ -111,6 +122,7 @@ __all__ = [
     "register_probe",
     # Conversations and outcomes
     "ConversationState",
+    "assistant_message",
     "dispatch_episode",
     "FailureAttribution",
     "FailureClass",
@@ -129,6 +141,7 @@ __all__ = [
     "MODEL_USER",
     "ConversationSimulatorConfig",
     "acall_llm",
+    "resolve_model_name",
     # Prompts
     "ChatRealism",
     "format_behavioral_profile_for_prompt",
@@ -147,6 +160,7 @@ __all__ = [
     "LocalizedTextError",
     "load_seeds",
     "asset_roots_in_use",
+    "education_ordinal",
     "persona_to_tags",
     "probe_asset_roots",
     "probe_assets_dir",
@@ -160,12 +174,16 @@ __all__ = [
     "select_category",
     "taxonomy_path_for",
     # Locales and languages
+    "SCRIPT_BUCKETS",
     "SHIPPED_LOCALES",
     "asset_locale",
     "expected_language_display",
+    "expected_script_ranges",
     "get_conversation_language",
     "india_variant",
     "language_instruction",
+    "persona_dataset_locale",
+    "translate_search_query",
     # Tool calls
     "parse_tool_call",
     "recover_tool_call",
@@ -199,14 +217,23 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "usersim.engine.core.backends": ("ExecutionBackend", "JobHandle", "JobSpec", "JobStatus"),
     "usersim.engine.core.behavioral": (
         "ChatRealism",
+        "education_ordinal",
         "format_behavioral_profile_for_prompt",
         "format_disclosure_instructions",
         "format_interaction_style_instructions",
         "get_conversation_language",
     ),
-    "usersim.engine.core.identity": ("persona_uuid",),
+    "usersim.engine.core.identity": ("persona_uuid", "resolve_model_name"),
     "usersim.engine.core.llm": ("acall_llm",),
-    "usersim.engine.core.locale": ("SHIPPED_LOCALES", "asset_locale", "expected_language_display", "india_variant"),
+    "usersim.engine.core.locale": (
+        "SCRIPT_BUCKETS",
+        "SHIPPED_LOCALES",
+        "asset_locale",
+        "expected_language_display",
+        "expected_script_ranges",
+        "india_variant",
+        "persona_dataset_locale",
+    ),
     "usersim.engine.core.localized": ("LocalizedText", "LocalizedTextError"),
     "usersim.engine.core.messages": ("format_conversation_history_for_prompt", "format_tools_for_prompt"),
     "usersim.engine.core.missing": ("is_missing", "none_for_missing"),
@@ -235,6 +262,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "ProbeRegistrationError",
         "ToolCallingMixin",
         "ToolExecutionMixin",
+        "assistant_message",
         "dispatch_episode",
         "register_probe",
     ),
@@ -259,6 +287,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "make_result",
     ),
     "usersim.engine.core.tool_calls": ("parse_tool_call", "recover_tool_call"),
+    "usersim.engine.core.translation": ("translate_search_query",),
     "usersim.engine.core.user_turn_policy": ("UserTurnPolicy",),
     "usersim.engine.evaluator.scorers": ("ScorerFn", "ScorerRegistrationError", "register_scorer"),
     "usersim.taxonomy.capabilities": ("ALL_PROBES", "CapabilityDefinition", "EvidenceSource"),

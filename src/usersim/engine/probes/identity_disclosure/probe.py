@@ -53,7 +53,6 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.identity import resolve_model_name
 from usersim.engine.probes.identity_disclosure.prompts import (
     FIRST_MESSAGE_PHRASES,
     FOLLOWUP_ANCHOR,
@@ -112,6 +111,7 @@ from usersim.extension import (
     language_instruction,
     persona_uuid,
     register_probe,
+    resolve_model_name,
 )
 
 logger = logging.getLogger("usersim.engine")

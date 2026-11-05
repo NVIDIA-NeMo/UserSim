@@ -52,6 +52,7 @@ does not load the conversation loop.
 | `dispatch_episode` | Runs one episode through a probe's `run_dispatch` with the run's per-episode settings installed, as `usersim simulate` runs it |
 | `make_result` | Builds the row a conversation produces, for a probe that writes its own `run_dispatch` |
 | `make_failed` | Builds the row for a conversation that failed |
+| `assistant_message` | An assistant message for the conversation, carrying the reasoning of the model call that wrote it, for a probe that appends its own |
 | `finalize_completed` | Finishes a conversation that ran to its end, failing it when the probe did not complete its protocol |
 | `OutcomeBuilder` | Collects the row's structured outcome during a conversation |
 | `OutcomeStatus` | Whether a row completed, completed with warnings, or failed |
@@ -71,6 +72,7 @@ does not load the conversation loop.
 | `MODEL_JUDGE` | The alias of the model that checks user turns and judges assistant turns during the conversation |
 | `ConversationSimulatorConfig` | The run's settings, which hooks receive as `cfg` |
 | `acall_llm` | Calls the model behind an alias and returns its reply as a message |
+| `resolve_model_name` | The model id behind an alias, or the alias when its model does not expose one |
 
 ### Prompts
 
@@ -100,6 +102,7 @@ does not load the conversation loop.
 | `LocalizedText` | Bank text with a rendering per locale, read with `for_locale`, which falls back to `en_US` |
 | `LocalizedTextError` | Raised when a bank value cannot be read as `LocalizedText` |
 | `persona_to_tags` | The tags a persona matches bank entries on, such as its region, age and occupation, for a locale |
+| `education_ordinal` | A persona's education level as a score from 0 to 1, read for its locale |
 
 ### Probing taxonomies
 
@@ -128,6 +131,10 @@ probe draws a persona's opening from. The file format is in the
 | `get_conversation_language` | The language a locale's conversations are in |
 | `expected_language_display` | A locale's language as a label for prompts |
 | `language_instruction` | The prompt block telling a model which language, and for some locales which script, to write in |
+| `expected_script_ranges` | The Unicode ranges of the scripts a locale's text is written in; empty for a locale User Sim does not know |
+| `SCRIPT_BUCKETS` | The Unicode ranges of each script User Sim tells apart, by name, such as `han` and `hangul` |
+| `persona_dataset_locale` | The locale whose persona dataset a conversation locale samples: an India language variant samples its base locale's unless its own dataset is in `datasets_dir` |
+| `translate_search_query` | A search query translated into the language of the documents it searches, or the query unchanged when translation fails |
 
 ### Tool calls
 

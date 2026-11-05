@@ -550,9 +550,9 @@ def _whole_word_pattern(forms: list[str]) -> re.Pattern[str]:
     words. The forms that need that check before them share one, which keeps the
     regex as fast as a plain word-boundary pattern.
     """
-    from usersim.engine.core.locale import HAN_RANGES, HANGUL_RANGES, HIRAGANA_RANGES, KATAKANA_RANGES
+    from usersim.extension import SCRIPT_BUCKETS
 
-    ranges = HAN_RANGES + HIRAGANA_RANGES + KATAKANA_RANGES + HANGUL_RANGES
+    ranges = SCRIPT_BUCKETS["han"] + SCRIPT_BUCKETS["hiragana"] + SCRIPT_BUCKETS["katakana"] + SCRIPT_BUCKETS["hangul"]
     unspaced = "".join(f"{chr(lo)}-{chr(hi)}" for lo, hi in ranges)
     spaced = rf"[^\W{unspaced}]"
     checked: list[str] = []
