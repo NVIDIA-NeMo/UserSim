@@ -178,6 +178,8 @@ class SimulationConfigSnapshot:
     random_seed: int | None = None
     store_reasoning: bool = True
     replay_assistant_reasoning: bool = False
+    #: Each probe's settings for the run, by label, as ``probe_options`` set them.
+    probe_options: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -338,6 +340,11 @@ def _code_from_dict(d: Mapping[str, Any]) -> CodeInfo:
     )
 
 
+def _plain_probe_options(probe_options: Mapping[str, Mapping[str, Any]] | None) -> dict[str, dict[str, Any]]:
+    """A run's ``probe_options`` as plain dicts, so the snapshot shares no mapping with its source."""
+    return {str(label): dict(values) for label, values in (probe_options or {}).items()}
+
+
 def _sim_config_from_dict(d: Mapping[str, Any]) -> SimulationConfigSnapshot:
     return SimulationConfigSnapshot(
         max_turns=int(d.get("max_turns", 5)),
@@ -350,6 +357,7 @@ def _sim_config_from_dict(d: Mapping[str, Any]) -> SimulationConfigSnapshot:
         incremental_disclosure_ratio=float(d.get("incremental_disclosure_ratio", 0.6)),
         persona_grounding_ratio=float(d.get("persona_grounding_ratio", 1.0)),
         context_compression=bool(d.get("context_compression", True)),
+        probe_options=_plain_probe_options(d.get("probe_options")),
         compression_window=int(d.get("compression_window", 1)),
         random_seed=d.get("random_seed"),
     )
@@ -771,6 +779,7 @@ def build_run_manifest(
         context_compression=bool(getattr(sim_config, "context_compression", True)),
         compression_window=int(getattr(sim_config, "compression_window", 1)),
         random_seed=getattr(sim_config, "random_seed", None),
+        probe_options=_plain_probe_options(getattr(sim_config, "probe_options", None)),
     )
 
     # ``probes`` from aggregates is what actually ran; ``probe_mix`` is

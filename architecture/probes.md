@@ -122,6 +122,7 @@ its label.
 | `label` | none: required | the registry, every stage that names the probe, and the row's `trajectory_id` and `probe_family` column |
 | `prompt_version` | `"v1.0"` | the row's `trajectory_id` and provenance |
 | `variants` | `("default",)` | the row's `probe_variant` when the row names none, and so its `trajectory_id` |
+| `Options` | no settings | the run's pre-flight, which checks `probe_options[<label>]` against it, and the probe, as `self.options` |
 | `description` | `""` | the per-row preview and the capability report, beside the probe's rows |
 | `preview_fields` | `()` | the per-row preview's Probe Inputs panel |
 | `default_scorers` | `()` | `usersim eval --scorers auto`, for a run that holds the probe's rows |

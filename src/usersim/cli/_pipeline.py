@@ -44,7 +44,13 @@ from usersim.engine.core._assets import probe_assets_dir, reset_runtime_assets_d
 from usersim.engine.core.builtin_packages import builtin_modules
 from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES, persona_dataset_locale
 from usersim.engine.core.persona import persona_name_template
-from usersim.engine.core.probes import NO_THEME, SEED_DATASET_SUFFIXES, checks_each_locale, resolve_probe
+from usersim.engine.core.probes import (
+    NO_THEME,
+    SEED_DATASET_SUFFIXES,
+    checks_each_locale,
+    probe_options_problems,
+    resolve_probe,
+)
 from usersim.engine.core.probes import known_probes as _known_probes
 from usersim.engine.errors import ConfigError
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
@@ -421,6 +427,7 @@ def build_simulator_config_builder(
     finance_tier_mix: float = 0.0,
     finance_retrieval_mode: str = "hybrid",
     finance_embedding_model_alias: str = "embedding_model",
+    probe_options: Mapping[str, Mapping[str, Any]] | None = None,
 ):
     """Build a Data Designer ConfigBuilder for the conversation simulator.
 
@@ -471,10 +478,18 @@ def build_simulator_config_builder(
             finance_tier_mix=finance_tier_mix,
             finance_retrieval_mode=finance_retrieval_mode,
             finance_embedding_model_alias=finance_embedding_model_alias,
+            probe_options=probe_options or {},
         )
     )
 
     return data_designer, config_builder
+
+
+def verify_probe_options(probe_options: Mapping[str, Mapping[str, Any]] | None) -> None:
+    """Fail before any model call if a run's ``probe_options`` name a probe or a setting that does not take them."""
+    problems = probe_options_problems(dict(probe_options or {}))
+    if problems:
+        raise ConfigError("probe options this run cannot use:\n  - " + "\n  - ".join(problems))
 
 
 def _add_episode_input_columns(
@@ -542,6 +557,7 @@ def materialize_episode_inputs(
     store_reasoning: bool = True,
     finance_tier_mix: float = 0.0,
     finance_retrieval_mode: str = "hybrid",
+    probe_options: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Materialize fully resolved simulator rows without model calls."""
     import data_designer.config as dd
@@ -574,6 +590,7 @@ def materialize_episode_inputs(
         replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
         finance_tier_mix=finance_tier_mix,
         finance_retrieval_mode=finance_retrieval_mode,
+        probe_options=probe_options or {},
     )
     model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}
     sampled = designer.preview(builder, num_records=num_rows).dataset
@@ -586,6 +603,9 @@ def materialize_episode_inputs(
     # host restore the episode with ProbeEpisodeRuntime.from_resolved_row; the
     # simulator's own trajectory rows do not repeat it.
     config_snapshot = config.model_dump(mode="json")
+    # Parquet cannot hold an empty mapping, and the config's default restores it.
+    if not config_snapshot["probe_options"]:
+        del config_snapshot["probe_options"]
     rows: list[dict[str, Any]] = []
     for row in sampled.to_dict(orient="records"):
         resolved = construct_probe_episode(row, config=config, models=model_identities).preamble.to_row()

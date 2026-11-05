@@ -5,10 +5,10 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from data_designer.config.base import SingleColumnConfig
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from usersim.engine.core.columns import CORE_RESULT_COLUMNS
 from usersim.engine.core.probes import declared_output_columns
@@ -167,6 +167,12 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     finance_retrieval_mode: str = "hybrid"
     finance_embedding_model_alias: str = "embedding_model"
 
+    # Each probe's settings for the run, by label: ``{"<label>": {"<name>":
+    # value}}``. A probe declares the settings it takes in its ``Options``;
+    # the run checks them before any model call, and the probe reads them as
+    # ``self.options``. A probe left out runs on its defaults.
+    probe_options: dict[str, dict[str, Any]] = Field(default_factory=dict)
+
     # Reproducibility
     random_seed: int | None = None
 
@@ -184,6 +190,13 @@ class ConversationSimulatorConfig(SingleColumnConfig):
         and the health check treats every alias it is given as required.
         """
         return list(REQUIRED_MODEL_ALIASES)
+
+    @field_validator("probe_options")
+    @classmethod
+    def _leave_out_probes_given_no_setting(cls, probe_options: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        # Such a probe runs on its defaults either way, and stored rows, which
+        # carry this config, cannot hold an empty mapping in parquet.
+        return {label: values for label, values in probe_options.items() if values}
 
     @model_validator(mode="after")
     def _replay_needs_stored_reasoning(self) -> "ConversationSimulatorConfig":

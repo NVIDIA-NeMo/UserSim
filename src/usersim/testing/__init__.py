@@ -50,7 +50,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, Iterator, Mapping, Sequence
 
-# Engine imports stay inside the functions that use them: loading
+# Engine and pydantic imports stay inside the functions that use them: loading
 # ``usersim.testing.pytest_plugin`` imports this package first, and a suite
 # that opts in to the plugin does not load the probe registry or the
 # conversation loop just to start.
@@ -212,6 +212,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"installed package; got {guide!r}"
         )
 
+    problems.extend(_options_problems(cls))
     problems.extend(seed_dataset_problems(cls))
 
     for klass, key in _reserved_metadata_writes(cls):
@@ -244,6 +245,23 @@ def _default_scorers_problems(cls: type) -> list[str]:
             f"{cls.__qualname__}.default_scorers names {unknown}, which no registered scorer holds, so "
             f"`usersim eval --scorers auto` would record an error in its place on every row. "
             f"Registered: {', '.join(registered)}"
+        ]
+    return []
+
+
+def _options_problems(cls: type) -> list[str]:
+    """Whether ``cls.Options`` is a pydantic model a run that sets nothing can build."""
+    from pydantic import BaseModel, ValidationError
+
+    options = getattr(cls, "Options", None)
+    if not (isinstance(options, type) and issubclass(options, BaseModel)):
+        return [f"{cls.__qualname__}.Options must be a pydantic model class; got {options!r}"]
+    try:
+        options()
+    except ValidationError as error:
+        return [
+            f"{cls.__qualname__}.Options needs a default for every setting, so a run that sets none still runs: "
+            + "; ".join(f"{'.'.join(map(str, detail['loc']))}: {detail['msg']}" for detail in error.errors())
         ]
     return []
 

@@ -49,6 +49,7 @@ from usersim.engine import generator as generator_module
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.manifest import load_run_manifest
 from usersim.engine.core.missing import none_for_missing
+from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.storage import list_runs, read_partitioned_dataset
 from usersim.engine.errors import ConfigError
 from usersim.engine.models_file import ModelsConfig, ProviderSpec, default_models_path, load_models_config
@@ -893,12 +894,58 @@ def _write(rows, path: Path) -> Path:
         ("--probe-mix", "general_open_ended=1"),
         ("--random-seed", "4"),
         ("--no-store-reasoning", None),
+        ("--probe-option", "general_open_ended.tone=warm"),
     ],
 )
 def test_a_flag_the_stored_rows_settle_is_refused(rows, tmp_path, flag, value):
     argv = ["simulate", "--inputs", str(_write(rows, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]
     with pytest.raises(SystemExit, match=flag):
         cli.main([*argv, flag, *([value] if value else []), "--dry-run"])
+
+
+def test_a_run_s_probe_settings_reach_its_stored_rows_and_their_replay(register_test_probe, tmp_path):
+    class _Options(BaseProbe.Options):
+        party_size: int = 2
+
+    register_test_probe("ext_options", Options=_Options)
+    stored = tmp_path / "rows.parquet"
+    argv = [
+        "simulate",
+        "--locale",
+        "en_US",
+        "--num-rows",
+        "1",
+        "--max-turns",
+        "1",
+        "--probe-mix",
+        "general_open_ended=1",
+    ]
+    assert (
+        cli.main([*argv, "--probe-option", "ext_options.party_size=4", "--materialize-inputs", "--out", str(stored)])
+        == 0
+    )
+    rows = load_episode_inputs(stored)
+    assert [row["usersim_config"]["probe_options"] for row in rows] == [{"ext_options": {"party_size": 4}}]
+
+    configs = []
+    construct = generator_module.construct_probe_episode
+
+    def spy(data, **kwargs):
+        configs.append(kwargs["config"])
+        return construct(data, **kwargs)
+
+    with patch.object(generator_module, "construct_probe_episode", spy):
+        _run(rows, tmp_path / "out")
+    assert configs
+    assert all(config.probe_options == {"ext_options": {"party_size": 4}} for config in configs)
+
+
+def test_stored_rows_whose_settings_a_probe_rejects_stop_before_any_model_call(rows, tmp_path, caplog):
+    rejected = _edited(rows, lambda r: [row["usersim_config"].update(probe_options={"no_such_probe": {}}) for row in r])
+    argv = ["simulate", "--inputs", str(_write(rejected, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]
+    with caplog.at_level(logging.ERROR):
+        assert cli.main([*argv, "--dry-run"]) == 2
+    assert "'no_such_probe' is not a registered probe" in caplog.text
 
 
 def test_stored_rows_get_the_asset_pre_flight_against_the_root_they_run_on(rows, tmp_path, caplog):

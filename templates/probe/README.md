@@ -145,6 +145,9 @@ When porting one of the templates into a new module:
 - [ ] If the probe's conversations vary by topic, list the topics in a
       `themes` classmethod and read the row's with `self.theme()` (step 3
       of `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If a run can tune the probe, declare its settings in an `Options`
+      class, every field with a default, and read them as
+      `self.options` (step 2 of `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] If the probe calls a model beyond the conversation's own, name its
       alias in a `model_aliases` classmethod (step 2 of
       `docs/engine/AUTHORING_A_PROBE.md`), and give the tests a model for

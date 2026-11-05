@@ -58,6 +58,8 @@ from typing import (
     runtime_checkable,
 )
 
+from pydantic import BaseModel, ConfigDict, ValidationError
+
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core._probe_registry import PROBE_REGISTRY as _PROBE_REGISTRY
 from usersim.engine.core.builtin_packages import builtin_modules
@@ -318,6 +320,17 @@ class BaseProbe:
     # The probe's variants; a row records the first unless it names one.
     variants: tuple[str, ...] = ("default",)
 
+    class Options(BaseModel):
+        """The settings a run can give this probe, as ``probe_options[<label>]``; none by default.
+
+        A probe with settings of its own declares ``Options`` as a subclass of
+        this model, every field with a default, so a run that sets nothing
+        still runs. A run's settings are checked against it before any model
+        call, and the probe reads them, validated, as ``self.options``.
+        """
+
+        model_config = ConfigDict(extra="forbid")
+
     # A paragraph on what the probe tests, shown with each of its rows in the
     # per-row preview and in the capability report's evidence. Empty shows none.
     description: str = ""
@@ -484,6 +497,10 @@ class BaseProbe:
         self._language = language
         self._models = models
         self._cfg = cfg
+        # The run's settings for this probe, validated against its ``Options``.
+        self.options = type(self).Options.model_validate(
+            (getattr(cfg, "probe_options", None) or {}).get(self.label, {})
+        )
         self._provenance = provenance or Provenance()
         self._profile = profile or {}
         self._data = data or {}
@@ -1503,6 +1520,32 @@ def _declaration_problem(cls: type[BaseProbe]) -> str | None:
 def checks_each_locale(cls: type[BaseProbe]) -> bool:
     """Whether ``cls`` defines ``check_locale``, and so keeps one bank per locale."""
     return getattr(cls.check_locale, "__func__", None) is not BaseProbe.check_locale.__func__
+
+
+def probe_options_problems(probe_options: Mapping[str, Any]) -> list[str]:
+    """What is wrong with a run's ``probe_options``: a probe that is not registered, or a setting it lacks or rejects."""
+    problems = []
+    for label, values in probe_options.items():
+        if label not in known_probes():
+            problems.append(f"{label!r} is not a registered probe")
+            continue
+        options = resolve_probe(label).Options
+        if not isinstance(values, Mapping):
+            problems.append(f"{label}: settings must map each name to a value; got {values!r}")
+            continue
+        known = list(options.model_fields)
+        unknown = sorted(set(values) - set(known))
+        if unknown:
+            problems.append(
+                f"{label} has no setting {', '.join(map(repr, unknown))}; its settings: {', '.join(known) or 'none'}"
+            )
+        try:
+            options.model_validate({key: value for key, value in values.items() if key not in unknown})
+        except ValidationError as error:
+            problems.extend(
+                f"{label}.{'.'.join(map(str, detail['loc']))}: {detail['msg']}" for detail in error.errors()
+            )
+    return problems
 
 
 def theme_problems(cls: type[BaseProbe], locales: Iterable[str]) -> list[str]:

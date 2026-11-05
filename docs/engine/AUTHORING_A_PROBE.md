@@ -304,6 +304,32 @@ which embeds its search queries, and searches lexically without it. In a test,
 pass the model to `run_episode` by alias, as
 `models={"my_probe_critic_model": critic}`.
 
+### Settings a run can give the probe
+
+A probe whose behaviour a run can tune declares its settings in an `Options`
+class, a pydantic model with a default for every field, so a run that sets
+nothing still runs:
+
+```python
+class MyProbe(BaseProbe):
+    class Options(BaseProbe.Options):
+        party_size: int = 2
+        tone: Literal["plain", "warm"] = "plain"
+
+    def get_user_system_prompt(self) -> str:
+        ...  # reads self.options.party_size and self.options.tone
+```
+
+A run gives each probe its settings by label: `--probe-option
+my_probe.party_size=4` on `usersim simulate`, repeated for more, or
+`probe_options={"my_probe": {"party_size": 4}}` in Python. The run checks them
+against each probe's `Options` before any model call, so a probe that is not
+registered, a setting the probe lacks or a value it rejects stops the run. The
+probe reads its settings, validated, as `self.options`. Stored rows keep the
+settings they were made with, in `usersim_config.probe_options`, and run with
+them again. `assert_probe_conforms` reports an `Options` field without a
+default.
+
 ---
 
 ## Step 3: wire the asset bank

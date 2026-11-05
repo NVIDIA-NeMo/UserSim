@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -67,6 +67,7 @@ def materialize_episode_inputs(
     store_reasoning: bool = True,
     finance_tier_mix: float = 0.0,
     finance_retrieval_mode: str = "hybrid",
+    probe_options: Mapping[str, Mapping[str, object]] | None = None,
 ) -> list[dict[str, object]]:
     """Materialize canonical, fully resolved episode rows without model calls.
 
@@ -74,12 +75,14 @@ def materialize_episode_inputs(
     Designer configuration; this function never invokes a configured model.
     Before sampling, it checks each probe's bank as ``usersim simulate`` does,
     and raises ``ValueError`` when a probe in ``probe_mix`` has no usable bank
-    for ``locale`` under ``assets_dir``.
+    for ``locale`` under ``assets_dir``, or when ``probe_options``, each probe's
+    settings by label, name a probe or a setting that does not take them.
     """
     from usersim.cli._pipeline import materialize_episode_inputs as _materialize
-    from usersim.cli._pipeline import verify_probe_assets
+    from usersim.cli._pipeline import verify_probe_assets, verify_probe_options
     from usersim.engine.models_file import default_models_path, load_models_config
 
+    verify_probe_options(probe_options)
     resolved_assets_dir = assets_dir.resolve() if assets_dir is not None else None
     verify_probe_assets(probe_mix, [locale], resolved_assets_dir)
     return _materialize(
@@ -96,6 +99,7 @@ def materialize_episode_inputs(
         store_reasoning=store_reasoning,
         finance_tier_mix=finance_tier_mix,
         finance_retrieval_mode=finance_retrieval_mode,
+        probe_options=probe_options,
     )
 
 
@@ -133,7 +137,7 @@ def simulate_episode_inputs(
     written and skipped.
     """
     from usersim.cli._inputs import prepare_episode_inputs, simulate_inputs_to_dataset
-    from usersim.cli._pipeline import verify_probe_locales
+    from usersim.cli._pipeline import verify_probe_locales, verify_probe_options
     from usersim.engine.models_file import (
         REQUIRED_SIMULATOR_ALIASES,
         default_models_path,
@@ -146,6 +150,7 @@ def simulate_episode_inputs(
     require_aliases(models, required=REQUIRED_SIMULATOR_ALIASES, context="simulate_episode_inputs")
     inputs = prepare_episode_inputs(rows, assets_dir=assets_dir)
     verify_probe_locales(inputs.probe_locales, inputs.assets_dir)
+    verify_probe_options(inputs.config.get("probe_options"))
     return simulate_inputs_to_dataset(
         inputs=inputs,
         models=models,

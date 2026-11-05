@@ -34,12 +34,14 @@ stored instead of sampling, one run per setup; see ``cli/_inputs.py``.
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import tempfile
 import time
 from collections import Counter
 from fractions import Fraction
 from pathlib import Path
+from typing import Any
 
 from usersim.cli._persona_language import persona_dataset_report
 from usersim.cli._pipeline import (
@@ -48,6 +50,7 @@ from usersim.cli._pipeline import (
     resolve_seed_dataset_for_mix,
     verify_probe_assets,
     verify_probe_locales,
+    verify_probe_options,
 )
 from usersim.engine.errors import ConfigError
 
@@ -225,6 +228,18 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     p.add_argument(
+        "--probe-option",
+        action="append",
+        default=None,
+        metavar="PROBE.SETTING=VALUE",
+        help=(
+            "A setting for one probe in the mix; repeat it for more. "
+            "The value is read as JSON when it parses, else as text. "
+            "Each probe lists the settings it takes in its Options; an unknown probe or "
+            "setting, or a bad value, stops the run before any model call."
+        ),
+    )
+    p.add_argument(
         "--finance-tier-mix",
         type=float,
         default=0.0,
@@ -306,6 +321,7 @@ _STORED_ROW_FLAGS = {
     "max_assistant_attempts": "--max-assistant-attempts",
     "probe_mix": "--probe-mix",
     "random_seed": "--random-seed",
+    "probe_option": "--probe-option",
     "finance_tier_mix": "--finance-tier-mix",
     "finance_retrieval_mode": "--finance-retrieval-mode",
     "no_store_reasoning": "--no-store-reasoning",
@@ -313,6 +329,26 @@ _STORED_ROW_FLAGS = {
     "match_persona_language": "--match-persona-language",
     "materialize_inputs": "--materialize-inputs",
 }
+
+
+def _parse_probe_options(specs: list[str] | None) -> dict[str, dict[str, Any]]:
+    """``--probe-option PROBE.SETTING=VALUE`` flags as ``{probe: {setting: value}}``.
+
+    A value that parses as JSON is read as JSON, so ``0.3`` is a number and
+    ``true`` a boolean; any other value is text.
+    """
+    options: dict[str, dict[str, Any]] = {}
+    for spec in specs or ():
+        name, sep, raw = spec.partition("=")
+        probe, dot, setting = name.strip().partition(".")
+        if not sep or not dot or not probe or not setting:
+            raise SystemExit(f"--probe-option expects PROBE.SETTING=VALUE; got {spec!r}")
+        try:
+            value = json.loads(raw)
+        except json.JSONDecodeError:
+            value = raw
+        options.setdefault(probe, {})[setting] = value
+    return options
 
 
 def _parse_probe_mix(spec: str) -> dict:
@@ -376,6 +412,8 @@ def run(args: argparse.Namespace) -> int:
         return _run_inputs(args, models, models_path)
 
     probe_mix = _parse_probe_mix(args.probe_mix)
+    probe_options = _parse_probe_options(args.probe_option)
+    verify_probe_options(probe_options)
 
     # ``args.assets_dir`` is the folder the user pinned, or None. A pinned run
     # reads every bank there, and a missing one is an error rather than a
@@ -386,7 +424,7 @@ def run(args: argparse.Namespace) -> int:
         raise SystemExit("--locale requires --num-rows")
 
     if args.materialize_inputs:
-        return _materialize_inputs(args, models, probe_mix)
+        return _materialize_inputs(args, models, probe_mix, probe_options)
 
     if args.dry_run:
         run_locales = (
@@ -453,6 +491,7 @@ def run(args: argparse.Namespace) -> int:
         random_seed=args.random_seed,
         finance_tier_mix=args.finance_tier_mix,
         finance_retrieval_mode=args.finance_retrieval_mode,
+        probe_options=probe_options,
         skip_existing=not args.no_skip_existing,
         store_reasoning=not args.no_store_reasoning,
     )
@@ -485,10 +524,8 @@ def run(args: argparse.Namespace) -> int:
     return status.exit_code or 0
 
 
-def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
+def _materialize_inputs(args, models, probe_mix: dict[str, float], probe_options: dict[str, dict[str, Any]]) -> int:
     """CLI adapter for the public no-model-call materialization seam."""
-    import json
-
     import pandas as pd
 
     from usersim.cli._pipeline import materialize_episode_inputs
@@ -515,6 +552,7 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
                 store_reasoning=not args.no_store_reasoning,
                 finance_tier_mix=args.finance_tier_mix,
                 finance_retrieval_mode=args.finance_retrieval_mode,
+                probe_options=probe_options,
             )
         )
     out = Path(args.out)
@@ -554,6 +592,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
     except (OSError, ValueError) as error:
         raise SystemExit(f"--inputs {args.inputs}: {error}") from None
     verify_probe_locales(inputs.probe_locales, inputs.assets_dir)
+    verify_probe_options(inputs.config.get("probe_options"))
 
     config = inputs.config
     print("usersim simulate --inputs" + (" — dry run" if args.dry_run else ""))
@@ -641,6 +680,7 @@ def _simulate_to_parquet(
     random_seed,
     finance_tier_mix=0.0,
     finance_retrieval_mode="hybrid",
+    probe_options=None,
     skip_existing,
     max_assistant_attempts=1,
     store_reasoning=True,
@@ -744,6 +784,7 @@ def _simulate_to_parquet(
             random_seed=random_seed,
             finance_tier_mix=finance_tier_mix,
             finance_retrieval_mode=finance_retrieval_mode,
+            probe_options=probe_options,
         )
         if seed_source is not None:
             n = _count_rows_for_locale(panel, locale)
@@ -799,6 +840,7 @@ def _simulate_to_parquet(
     sim_cfg_for_manifest = _build_sim_config_for_manifest(
         max_turns=max_turns,
         random_seed=random_seed,
+        probe_options=probe_options,
         store_reasoning=store_reasoning,
         replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
     )
@@ -830,6 +872,7 @@ def _build_sim_config_for_manifest(
     random_seed,
     store_reasoning: bool = True,
     replay_assistant_reasoning: bool = False,
+    probe_options=None,
 ):
     """Snapshot the sim-config knobs the manifest captures.
 
@@ -849,6 +892,7 @@ def _build_sim_config_for_manifest(
         random_seed=random_seed,
         store_reasoning=store_reasoning,
         replay_assistant_reasoning=replay_assistant_reasoning,
+        probe_options=probe_options or {},
     )
 
 

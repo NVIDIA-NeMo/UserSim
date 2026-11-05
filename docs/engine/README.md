@@ -477,6 +477,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `replay_assistant_reasoning` | bool | `False` | Send the assistant model the reasoning of its own earlier messages (`replay_reasoning = true` on `assistant_model` in the models TOML). Needs `store_reasoning`; the assistant's history is then not compressed. No other model receives the assistant's reasoning during a simulation |
 | `verbosity` | int | `1` | Logging detail: 0=quiet, 1=normal, 2=detailed |
 | `finance_tier_mix` / `finance_tier` / `finance_retrieval_mode` / `finance_embedding_model_alias` | float / str? / str / str | `0.0` / `None` / `"hybrid"` / `"embedding_model"` | `financial_services` only; see the probe's [README](../../src/usersim/engine/probes/financial_services/README.md#running-it) |
+| `probe_options` | dict | `{}` | Each probe's settings, by label, checked against its `Options` before any model call (`--probe-option PROBE.SETTING=VALUE`) |
 | `random_seed` | int? | `None` | Seed for reproducible tool sampling |
 
 ## Side-Effect Columns
