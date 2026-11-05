@@ -273,8 +273,8 @@ strategies or models, can subclass this one under a label of its own:
 ```python
 from pathlib import Path
 
-from usersim.engine.core.probes import register_probe
 from usersim.engine.probes.identity_disclosure.probe import IdentityDisclosureProbe
+from usersim.extension import register_probe
 
 
 @register_probe(family="my_identity", prompt_version="v1.0", variants=("default",))

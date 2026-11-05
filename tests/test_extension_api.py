@@ -10,9 +10,9 @@ resolves to the object its home module defines and that the imports a type
 checker reads name the same objects.
 
 The code an extension author copies (the probe templates, the extension
-fixture, and the Python examples in the extension docs) imports ``usersim``
-only through these two modules, apart from the imports listed in
-``_KEPT_INTERNAL_IMPORTS``.
+fixture, and the Python examples in the extension docs, the templates' pages
+and every README of a built-in probe) imports ``usersim`` only through these
+two modules, apart from the imports listed in ``_KEPT_INTERNAL_IMPORTS``.
 """
 
 from __future__ import annotations
@@ -42,13 +42,19 @@ _EXAMPLE_FILES = (
     *sorted((_REPO / "templates" / "extension_package").rglob("*.py")),
 )
 
-#: Pages whose Python examples an extension author copies.
+#: Pages whose Python examples an extension author copies: the extension guides,
+#: every page of the templates, and every README of a built-in probe.
 _EXAMPLE_DOCS = (
     "CONTRIBUTING.md",
     "architecture/plugins.md",
     "docs/engine/AUTHORING_A_PROBE.md",
     "docs/extension_api.md",
     "docs/extensions.md",
+    *sorted(path.relative_to(_REPO).as_posix() for path in (_REPO / "templates").rglob("*.md")),
+    *sorted(
+        path.relative_to(_REPO).as_posix()
+        for path in (_REPO / "src" / "usersim" / "engine" / "probes").rglob("README.md")
+    ),
 )
 
 #: Imports from other ``usersim`` modules that the examples keep, as (module, name).
