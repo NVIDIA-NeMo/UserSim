@@ -1,14 +1,13 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Built-in probes take no more from internal ``usersim`` modules than ``_ALLOWED`` says.
+"""Built-in probes import ``usersim`` only through its extension API.
 
-An extension imports only ``usersim.extension`` and ``usersim.testing``. Each name a
-built-in package imports from any other ``usersim`` module, outside its own package,
-is an import to change if the probe leaves this repository. It is counted once per
-package, however many of the package's files import it. A package over its allowance
-fails, and so does an allowance above the count, so a name taken out cannot come
-back unnoticed. A new built-in package adds its count in the same change.
+An extension imports only ``usersim.extension`` and ``usersim.testing``, and so
+does every package under ``usersim/engine/probes/``, apart from its own
+modules, so moving a built-in out of this repository changes none of its
+imports. A name a probe needs from elsewhere in ``usersim`` is exported from
+``usersim.extension``, or kept in the package that uses it.
 """
 
 from __future__ import annotations
@@ -16,24 +15,10 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from usersim.engine.core.probes import BUILTIN_PROBE_MODULES
+
 _PROBE_PACKAGES = Path(__file__).resolve().parents[1] / "src" / "usersim" / "engine" / "probes"
 _PUBLIC = frozenset({"usersim.extension", "usersim.testing"})
-
-#: How many distinct ``(module, name)`` imports from internal ``usersim`` modules
-#: each built-in package holds.
-_ALLOWED: dict[str, int] = {
-    "financial_services": 0,
-    "general_educational": 0,
-    "general_open_ended": 0,
-    "health_disclosure": 0,
-    "identity_disclosure": 0,
-    "safety_agentic": 0,
-    "safety_chat_pressure": 0,
-    "sov_ai_dynamic": 0,
-    "sov_ai_facts": 0,
-    "sov_ai_multilingual_parity": 0,
-    "tool_calling": 0,
-}
 
 
 def _packages() -> list[Path]:
@@ -59,28 +44,15 @@ def _internal_imports(package: Path) -> set[str]:
     return found
 
 
-def test_every_built_in_package_has_an_allowance():
-    missing = {package.name: len(_internal_imports(package)) for package in _packages() if package.name not in _ALLOWED}
-    assert not missing, (
-        f"add each to _ALLOWED with its count, after importing what you can from usersim.extension: {missing}"
-    )
+def test_the_scan_covers_every_built_in_probe():
+    scanned = {package.name for package in _packages()}
+    unscanned = sorted(module for module in BUILTIN_PROBE_MODULES if module.split(".")[3] not in scanned)
+    assert not unscanned, f"built-in probe modules outside the scanned packages: {unscanned}"
 
 
-def test_no_built_in_package_imports_more_internal_names_than_allowed():
-    over = {
-        package.name: sorted(found)
-        for package in _packages()
-        if len(found := _internal_imports(package)) > _ALLOWED.get(package.name, len(found))
-    }
-    assert not over, (
-        "A built-in package imports more names from internal usersim modules than its allowance. "
-        f"Import them from usersim.extension, or keep them in the probe's own package: {over}"
-    )
-
-
-def test_every_allowance_is_still_needed():
-    counts = {package.name: len(_internal_imports(package)) for package in _packages()}
-    stale = {name: (allowed, counts.get(name)) for name, allowed in _ALLOWED.items() if counts.get(name, 0) < allowed}
-    assert not stale, (
-        f"lower each allowance to its package's count, or drop a removed package, (allowed, counted): {stale}"
+def test_built_in_probes_import_usersim_only_through_the_extension_api():
+    found = {package.name: sorted(names) for package in _packages() if (names := _internal_imports(package))}
+    assert not found, (
+        "A built-in probe package imports from an internal usersim module. Import the name from "
+        f"usersim.extension, export it there, or keep it in the probe's own package: {found}"
     )
