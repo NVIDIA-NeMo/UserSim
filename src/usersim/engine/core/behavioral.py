@@ -502,8 +502,8 @@ ROLE_ANCHOR_PROMPT_WRAPUP = (
 
 def format_behavioral_profile_for_prompt(
     profile: dict[str, Any],
-    language: str = "English",
     *,
+    language: str = "English",
     chat_realism: ChatRealism = ChatRealism.ASKING,
     pressing: bool = False,
 ) -> str:

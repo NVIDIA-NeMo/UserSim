@@ -3,6 +3,8 @@
 
 """Tests for core/behavioral.py -- OCEAN->behavioral parameter computation."""
 
+import pytest
+
 from usersim.engine.core.behavioral import (
     ChatRealism,
     _extract_ocean,
@@ -238,6 +240,14 @@ class TestFormatBehavioralProfile:
         assert "You do NOT have the answers" in asking and "Never provide information" in asking
         assert "You do NOT have the answers" not in pressing and "Never provide information" not in pressing
         assert "pressing the point" in pressing and "Use plain text ONLY" in pressing
+
+    def test_the_language_is_passed_by_name(self, full_persona):
+        """The language sets the chat style, and only a named argument can set it."""
+        profile = compute_behavioral_profile(full_persona)
+        english = format_behavioral_profile_for_prompt(profile)
+        assert format_behavioral_profile_for_prompt(profile, language="Japanese") != english
+        with pytest.raises(TypeError):
+            format_behavioral_profile_for_prompt(profile, "Japanese")  # type: ignore[misc]
 
 
 class TestGetConversationLanguage:
