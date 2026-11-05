@@ -120,15 +120,25 @@ def test_the_type_checking_imports_match_the_exports():
 
 
 def test_an_asset_domain_or_backend_import_leaves_the_conversation_loop_unloaded():
+    """The loop and Data Designer stay unloaded until a name that needs them is imported.
+
+    The last import is that name, so the two module names checked are the ones
+    the loop loads: a rename of either fails here rather than passing unseen.
+    """
     code = (
         "import sys\n"
+        "loaded = lambda: sorted(m for m in ('usersim.engine.core.simulation', 'data_designer') if m in sys.modules)\n"
         "from usersim.extension import AssetDomain, CapabilityDefinition, ExecutionBackend, JobSpec\n"
         "from usersim.extension import require_aliases, to_data_designer_kwargs, to_model_configs\n"
-        "print(sorted(m for m in ('usersim.engine.core.simulation', 'data_designer') if m in sys.modules))\n"
+        "print(loaded())\n"
+        "from usersim.extension import ConversationState\n"
+        "print(loaded())\n"
     )
     result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == "[]", f"loaded by the import: {result.stdout.strip()}"
+    before, after = result.stdout.splitlines()
+    assert before == "[]", f"loaded by the import: {before}"
+    assert after == "['data_designer', 'usersim.engine.core.simulation']", f"the loop loaded: {after}"
 
 
 def _examples() -> list[tuple[str, str]]:
