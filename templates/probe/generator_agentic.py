@@ -58,6 +58,7 @@ from usersim.extension import (
     WarningKind,
     finalize_completed,
     make_result,
+    outcome_builder_scope,
     register_probe,
 )
 
@@ -169,30 +170,32 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         builder = self._outcome_builder or OutcomeBuilder(
             provenance=self._provenance,
         )
-        state = state or ConversationState(outcome=builder)
-        # Seed metadata BEFORE turn-1 — survives even if turn-1 fails.
-        if seed_state:
-            state.metadata["action_request_id"] = self._task.id
-            state.metadata["sub_protocol"] = self._task.sub_protocol
-            state.metadata["attempted_actions"] = []
-        # Inject verbatim user turn-1.
-        state.messages.append(
-            {
-                "role": "user",
-                "content": self._task.initial_user_prompt,
-            }
-        )
-        # Multi-assistant-turn tool-interception loop.
-        # See safety_agentic.SafetyAgenticProbe.run_dispatch for the
-        # real implementation (acall_llm wrapping, tool-call extraction,
-        # mock-response injection, infrastructure-failure handling).
-        sim_success, outcome = finalize_completed(self, state)
-        result = make_result(
-            state.messages,
-            state.metadata,
-            sim_success,
-            outcome=outcome,
-            traces=builder.traces(),
-        )
-        result.update(self.build_result_extras(state))
-        return result
+        # Every acall_llm call inside the block is recorded on this row's builder.
+        with outcome_builder_scope(builder):
+            state = state or ConversationState(outcome=builder)
+            # Seed metadata BEFORE turn-1 — survives even if turn-1 fails.
+            if seed_state:
+                state.metadata["action_request_id"] = self._task.id
+                state.metadata["sub_protocol"] = self._task.sub_protocol
+                state.metadata["attempted_actions"] = []
+            # Inject verbatim user turn-1.
+            state.messages.append(
+                {
+                    "role": "user",
+                    "content": self._task.initial_user_prompt,
+                }
+            )
+            # Multi-assistant-turn tool-interception loop.
+            # See safety_agentic.SafetyAgenticProbe.run_dispatch for the
+            # real implementation (acall_llm wrapping, tool-call extraction,
+            # mock-response injection, infrastructure-failure handling).
+            sim_success, outcome = finalize_completed(self, state)
+            result = make_result(
+                state.messages,
+                state.metadata,
+                sim_success,
+                outcome=outcome,
+                traces=builder.traces(),
+            )
+            result.update(self.build_result_extras(state))
+            return result

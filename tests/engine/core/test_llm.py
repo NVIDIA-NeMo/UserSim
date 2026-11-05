@@ -34,6 +34,7 @@ from usersim.engine.core.llm import (
     ContextWindowError,
     _dicts_to_chat_messages,
     acall_llm,
+    outcome_builder_scope,
     replay_reasoning_scope,
     set_current_outcome_builder,
 )
@@ -408,6 +409,29 @@ async def test_call_llm_records_data_designer_usage_tokens() -> None:
     assert outcome.per_model_calls == {"judge_model": 1}
     assert outcome.per_model_input_tokens == {"judge_model": 12}
     assert outcome.per_model_output_tokens == {"judge_model": 7}
+
+
+async def test_a_call_is_recorded_on_the_innermost_scope_and_the_outer_builder_returns() -> None:
+    outer, inner = OutcomeBuilder(), OutcomeBuilder()
+    models, messages = {"judge_model": _Facade()}, [{"role": "user", "content": "hello"}]
+    with outcome_builder_scope(outer):
+        with outcome_builder_scope(inner):
+            await acall_llm(models, "judge_model", messages)
+        await acall_llm(models, "judge_model", messages)
+    await acall_llm(models, "judge_model", messages)
+
+    assert inner.finalize(status=OutcomeStatus.OK).per_model_calls == {"judge_model": 1}
+    assert outer.finalize(status=OutcomeStatus.OK).per_model_calls == {"judge_model": 1}
+
+
+async def test_the_outer_builder_returns_when_a_scope_raises() -> None:
+    outer = OutcomeBuilder()
+    with outcome_builder_scope(outer):
+        with pytest.raises(RuntimeError), outcome_builder_scope(OutcomeBuilder()):
+            raise RuntimeError("the probe's own loop failed")
+        await acall_llm({"judge_model": _Facade()}, "judge_model", [{"role": "user", "content": "hello"}])
+
+    assert outer.finalize(status=OutcomeStatus.OK).per_model_calls == {"judge_model": 1}
 
 
 class _OpenAIShapedFacade:

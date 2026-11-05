@@ -16,9 +16,12 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from usersim.engine.config import MODEL_ASSISTANT
+
+if TYPE_CHECKING:
+    from usersim.engine.core.outcomes import OutcomeBuilder
 
 _MAX_RETRIES = 3
 _BASE_DELAY = 1.0
@@ -194,6 +197,22 @@ def get_current_outcome_builder():  # type: ignore[no-untyped-def]
     leave the calls after it unattributed.
     """
     return _OUTCOME_BUILDER.get()
+
+
+@contextmanager
+def outcome_builder_scope(builder: OutcomeBuilder | None) -> Iterator[None]:
+    """Record the model calls made inside the block on ``builder``.
+
+    Each ``acall_llm`` call in the block adds its alias, tokens and latency to
+    ``builder``; ``None`` records them nowhere. The builder in place before the
+    block receives calls again after it, also when the block raises, so a probe
+    that runs its own loop cannot leave the row's calls unrecorded.
+    """
+    token = _OUTCOME_BUILDER.set(builder)
+    try:
+        yield
+    finally:
+        _OUTCOME_BUILDER.reset(token)
 
 
 def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, elapsed_s: float) -> None:

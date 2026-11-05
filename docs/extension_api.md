@@ -55,6 +55,7 @@ does not load the conversation loop.
 | `assistant_message` | An assistant message for the conversation, carrying the reasoning of the model call that wrote it, for a probe that appends its own |
 | `finalize_completed` | Finishes a conversation that ran to its end, failing it when the probe did not complete its protocol |
 | `OutcomeBuilder` | Collects the row's structured outcome during a conversation |
+| `outcome_builder_scope` | Records the model calls made inside a `with` block on an `OutcomeBuilder`, for a probe whose `run_dispatch` runs its own loop |
 | `OutcomeStatus` | Whether a row completed, completed with warnings, or failed |
 | `FailureClass` | How a row failed |
 | `FailureAttribution` | What caused a failure: one of the models, the probe's own logic, or infrastructure |

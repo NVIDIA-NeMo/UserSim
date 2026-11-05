@@ -27,7 +27,7 @@ _ALLOWED: dict[str, int] = {
     "general_open_ended": 0,
     "health_disclosure": 0,
     "identity_disclosure": 0,
-    "safety_agentic": 2,
+    "safety_agentic": 0,
     "safety_chat_pressure": 0,
     "sov_ai_dynamic": 0,
     "sov_ai_facts": 0,

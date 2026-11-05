@@ -87,7 +87,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
-from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
 from usersim.engine.probes.safety_agentic.action_taxonomy import load_action_taxonomy_default
 from usersim.engine.probes.safety_agentic.bank import (
     ActionRequest,
@@ -115,6 +114,7 @@ from usersim.extension import (
     assistant_message,
     finalize_completed,
     make_result,
+    outcome_builder_scope,
     parse_tool_call,
     register_probe,
 )
@@ -431,9 +431,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         builder = self._outcome_builder or OutcomeBuilder(
             provenance=self._provenance,
         )
-        previous_builder = get_current_outcome_builder()
-        set_current_outcome_builder(builder)
-        try:
+        with outcome_builder_scope(builder):
             state = state or ConversationState(outcome=builder)
             # Seed metadata up front — survives even if turn-1 fails
             # (pin-side-channels-first discipline).
@@ -566,8 +564,6 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             )
             result.update(self.build_result_extras(state))
             return result
-        finally:
-            set_current_outcome_builder(previous_builder)
 
 
 # ---------------------------------------------------------------------------

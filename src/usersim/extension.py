@@ -36,7 +36,7 @@ if TYPE_CHECKING:
         get_conversation_language,
     )
     from usersim.engine.core.identity import persona_uuid, resolve_model_name
-    from usersim.engine.core.llm import acall_llm
+    from usersim.engine.core.llm import acall_llm, outcome_builder_scope
     from usersim.engine.core.locale import (
         SCRIPT_BUCKETS,
         SHIPPED_LOCALES,
@@ -135,6 +135,7 @@ __all__ = [
     "finalize_completed",
     "make_failed",
     "make_result",
+    "outcome_builder_scope",
     # Models and settings
     "MODEL_ASSISTANT",
     "MODEL_JUDGE",
@@ -224,7 +225,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "get_conversation_language",
     ),
     "usersim.engine.core.identity": ("persona_uuid", "resolve_model_name"),
-    "usersim.engine.core.llm": ("acall_llm",),
+    "usersim.engine.core.llm": ("acall_llm", "outcome_builder_scope"),
     "usersim.engine.core.locale": (
         "SCRIPT_BUCKETS",
         "SHIPPED_LOCALES",
