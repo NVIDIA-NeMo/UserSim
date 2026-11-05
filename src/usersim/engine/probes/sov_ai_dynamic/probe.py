@@ -212,8 +212,7 @@ class SovAiDynamicProbe(BankBackedProbe):
         super().__init__(**kwargs)
         # Fail-fast contract: ``derive_probe`` returns None when every
         # category is excluded; effectively impossible with the shipped
-        # 5-category taxonomies but reported as SCENARIO_ABORTED if it
-        # ever happens.
+        # taxonomies but reported as SCENARIO_ABORTED if it ever happens.
         if self._task is None:
             raise SovAiDynamicProbeError(
                 f"no usable category in {self._bank.taxonomy_id} "

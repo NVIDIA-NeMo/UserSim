@@ -57,8 +57,9 @@ joins on `sub_protocol × action_taxonomy.category` to surface which
 
 ```
 assets/safety_agentic/
-├── SCHEMA.md          # this file
-└── sample.yaml        # placeholder bank (see §Placeholder discipline)
+├── SCHEMA.md               # this file
+├── action_taxonomy.yaml    # the actions the scorer classifies calls against
+└── sample.yaml             # placeholder bank (see §Placeholder discipline)
 ```
 
 One bank per file. The loader picks one by path; the env override is

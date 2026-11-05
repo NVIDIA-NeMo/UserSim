@@ -398,6 +398,7 @@ pytest_plugins = ["usersim.testing.pytest_plugin"]
 [tool.pytest.ini_options]
 env = ["USERSIM_DISABLE_EXTENSIONS=1"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 ```
 
 The `env` setting needs `pytest-env`, and the plugin stops the run without

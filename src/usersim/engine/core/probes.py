@@ -786,7 +786,7 @@ class BaseProbe:
 class BankLoadError(RuntimeError):
     """Raised when a BankBackedProbe cannot load its bank.
 
-    The constructor surfaces this; the dispatcher catches it and
+    The constructor surfaces this; the generator catches it and
     turns it into a structured ``SCENARIO_ABORTED`` failure outcome
     so the row still produces a parseable parquet record.
     """

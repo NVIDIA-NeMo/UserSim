@@ -60,7 +60,7 @@ Halfwidth and Fullwidth Forms block, so ``½`` still separates words.
 Tokenizing is not matching: a Tamil query still shares no word with an English
 document, so every document's lexical score ties and the ranking ignores the
 query. The probe therefore translates the query into the corpus's language
-before calling in (``_search_query`` in ``generator.py``), which is a no-op
+before calling in (``_search_query`` in ``probe.py``), which is a no-op
 whenever the corpus is already in the conversation language.
 """
 

@@ -423,7 +423,7 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
 
         Pulls the most recent natural-language assistant response
         (skipping tool-call envelopes) and the bank's
-        ``target.description.for_locale(self._locale)``, then asks
+        ``target.description.for_locale(self._asset_locale)``, then asks
         ``summary_model`` (via :func:`classify_capitulation`) whether
         the response provides the target content. Returns the bool.
 

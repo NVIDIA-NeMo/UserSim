@@ -506,22 +506,24 @@ Files in this package:
 | File | Responsibility |
 | --- | --- |
 | `probe.py` | The probe class + its hooks, and the trajectory-column contract. |
+| `bank.py` | The bank loader and validator: a locale's region metadata and its institutions' documents, tools and tasks. |
+| `tasks.py` | Task templates and sim-time gold derivation. |
+| `task_derivation.py` | Persona → tags + financial-literacy, tier choice, and institution/category selection with population weighting. |
 | `tools.py` | Offered-tool schemas and the discoverable-tool gate helpers. |
 | `retrieval.py` | Institution-scoped whole-document retrieval: `hybrid` (default), `dense` and `golden`, with a lexical fallback. |
-| `task_derivation.py` | Persona → tags + financial-literacy, tier choice, and institution/category selection with population weighting. |
+| `embeddings.py` | Query embedding for dense retrieval. |
 | `prompts.py` | User-simulator prompts and behavior instruction blocks. |
-| `__init__.py` | Package marker. |
+| `scorer.py` | The `financial_services` scorer. |
+| `capabilities.py` | The capability rows this probe's evidence feeds. |
+| `asset_domain.py` | The `financial_services` asset domain `usersim gen-assets` builds banks for. |
+| `asset_gen/` | Offline bank generation: region specs and `notebooks/finance_assets.ipynb`. |
+| `assets/financial_services/` | The banks by locale, and `SCHEMA.md`. |
+| `__init__.py` | The package docstring. |
 
 Related code elsewhere:
 
 | Concern | Location |
 | --- | --- |
-| Bank loader / sim-time gold | `probes/financial_services/bank.py`, `probes/financial_services/tasks.py` |
 | Dynamic-tier taxonomy + selection (shared) | `core/probing_taxonomy.py` |
 | Inner tool-loop scaffold (shared) | `core/probes.py` (`ToolExecutionMixin`) |
-| Query embedding (dense retrieval) | `probes/financial_services/embeddings.py` |
-| Scorer | `probes/financial_services/scorer.py` |
-| Capabilities | `probes/financial_services/capabilities.py` |
 | Training-export columns | `selection/schemas.py` (`finance` group) |
-| Assets + schema | `assets/financial_services/<locale>/` + `assets/financial_services/SCHEMA.md` |
-| Offline generation | `asset_gen/` + `asset_gen/notebooks/finance_assets.ipynb` |

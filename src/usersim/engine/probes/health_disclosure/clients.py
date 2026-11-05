@@ -3,8 +3,8 @@
 
 """Per-client configuration for the health_disclosure family.
 
-Everything that differs between the three client-shaped probes lives here so the
-base probe + move/Guard runtime stay generic. Adding a fourth client is a new
+Everything that differs between the client-shaped probes lives here so the
+base probe + move/Guard runtime stay generic. Adding a client is a new
 entry in ``CLIENTS`` plus a thin module that registers it (see therapy.py).
 
     ┌── what varies per client ──────────────────────────────────────────────┐

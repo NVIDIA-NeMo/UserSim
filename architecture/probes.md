@@ -16,7 +16,7 @@ prompt versions. The decorator also sets the same values on the module as
 module those hold whichever was registered last.
 
 ```python
-@register_probe(family="general", prompt_version="v1.0", variants=("default",))
+@register_probe(family="general_open_ended", prompt_version="v1.0", variants=("default",))
 class OpenEndedProbe(BaseProbe):
     label = "general_open_ended"
 ```

@@ -7,13 +7,13 @@ Sibling of :mod:`usersim.engine.probes.sov_ai_facts`,
 not a replacement. The two probes cover complementary halves of the
 sovereign-AI readiness question:
 
-- ``sov_ai_facts`` — *curated depth*: a reviewer-
-  vetted fact bank with ground truth, false premises, and graceful-
+- ``sov_ai_facts`` — *curated depth*: a curated
+  fact bank with ground truth, false premises, and graceful-
   unknown reference answers. Tests precisely whether the assistant
   recovers the right facts on a fixed slate.
 - ``sov_ai_dynamic`` — *dynamic breadth*: a per-locale
-  probing taxonomy of broad topic categories (geography, history,
-  culture, poetry-and-music, public-services). The user-agent generates
+  probing taxonomy of broad topic categories (such as geography,
+  history, culture and public services). The user-agent generates
   the opening turn in the persona's voice, anchored to one category
   invitation and a rotated sub-topic hint. There is **no ground truth**;
   out-of-sim heuristic scorers (suspected fabrication, self-consistency,
