@@ -47,7 +47,11 @@ from usersim.cli._persona_language import (
     DEFAULT_PERSONA_DATASETS_DIR,
     persona_sampler_params,
 )
-from usersim.engine.core.probes import NO_THEME
+from usersim.engine.core._assets import probe_assets_dir, reset_runtime_assets_dir, set_runtime_assets_dir
+from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES, persona_dataset_locale
+from usersim.engine.core.persona import persona_name_template
+from usersim.engine.core.probes import BUILTIN_PROBE_MODULES, NO_THEME, SEED_DATASET_SUFFIXES, resolve_probe
+from usersim.engine.core.probes import known_probes as _known_probes
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
 
 if TYPE_CHECKING:
@@ -70,9 +74,6 @@ def _probe_themes(probe: str, locale: str, assets_dir: Path | None) -> list[str]
     each probe's own assets. ``ensure_ascii``
     is off so non-Latin descriptions stay readable in the stored column.
     """
-    from usersim.engine.core._assets import reset_runtime_assets_dir, set_runtime_assets_dir
-    from usersim.engine.core.probes import resolve_probe
-
     token = set_runtime_assets_dir(assets_dir)
     try:
         themes = resolve_probe(probe).themes(locale)
@@ -108,9 +109,6 @@ def resolve_seed_dataset_path(
     than a precedence question, since silently preferring one would make an
     edit to the other look like it had no effect.
     """
-    from usersim.engine.core._assets import probe_assets_dir
-    from usersim.engine.core.probes import SEED_DATASET_SUFFIXES, resolve_probe
-
     if toolset_seed_path is not None:
         resolved = Path(toolset_seed_path).resolve()
         if not resolved.is_file():
@@ -165,9 +163,6 @@ def verify_probe_locales(
     Stored rows pair each probe with the locales it runs in; checking every probe
     against every locale would refuse pairs the rows never ask for.
     """
-    from usersim.engine.core._assets import probe_assets_dir
-    from usersim.engine.core.probes import resolve_probe
-
     root = Path(assets_dir) if assets_dir is not None else None
     problems: list[str] = []
     probes_missing_a_locale: list[type[BaseProbe]] = []
@@ -199,8 +194,6 @@ def verify_probe_locales(
 
 def _remedies(probes_missing_a_locale: Sequence[type[BaseProbe]]) -> list[str]:
     """What to do about a refusal, with links when a probe can't run one of the run's locales."""
-    from usersim.engine.core.probes import BUILTIN_PROBE_MODULES
-
     remedies = [
         "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them."
     ]
@@ -253,8 +246,6 @@ def _locale_bank_problems(cls: type[BaseProbe], probe_dir: Path, locales: Sequen
 
 def _runnable_locales(runnable: Sequence[str], bank_locale: Callable[[str], str]) -> str:
     """``runnable``, plus the shipped locales and India variants that run on one of their banks."""
-    from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES
-
     if not runnable:
         return "none"
     described = ", ".join(runnable)
@@ -274,8 +265,6 @@ def seed_dataset_probe(probe_mix: Mapping[str, float]) -> str | None:
     A run attaches one seed table, so a mix with two such probes is a
     ``ConfigError``: run them separately.
     """
-    from usersim.engine.core.probes import resolve_probe
-
     readers = [probe for probe in probe_mix if resolve_probe(probe).seed_dataset is not None]
     if len(readers) > 1:
         raise ConfigError(
@@ -307,8 +296,6 @@ def resolve_seed_dataset_for_mix(
         return None
     resolved = resolve_seed_dataset_path(probe, assets_dir, toolset_seed_path)
     if resolved is None:
-        from usersim.engine.core.probes import resolve_probe
-
         stem = resolve_probe(probe).seed_dataset
         raise ConfigError(
             f"probe_mix includes {probe}, which reads the seed table {stem}.parquet or {stem}.jsonl, and none is "
@@ -410,9 +397,7 @@ def known_probes() -> tuple[str, ...]:
     Used by ``cli.simulate`` to validate ``--probe-mix`` keys before
     running.
     """
-    from usersim.engine.core.probes import known_probes as _known
-
-    return _known()
+    return _known_probes()
 
 
 def _recorded_assets_dir(assets_dir: Path | str | None) -> str | None:
@@ -504,8 +489,6 @@ def _add_episode_input_columns(
     drop_persona: bool,
 ) -> None:
     """Install the one canonical persona, probe, theme and seed-table sampler graph."""
-    from usersim.engine.core.locale import persona_dataset_locale
-
     persona_locale = persona_dataset_locale(locale, datasets_dir=DEFAULT_PERSONA_DATASETS_DIR)
     unknown = [key for key in probe_mix if key not in set(known_probes())]
     if unknown:
@@ -883,8 +866,6 @@ def _add_persona_expressions(config_builder, dd, persona_locale: str) -> None:
 
     ``persona_locale`` is the persona dataset's locale; it sets the name order.
     """
-    from usersim.engine.core.persona import persona_name_template
-
     config_builder.add_column(
         dd.ExpressionColumnConfig(name="persona_name", expr=persona_name_template(persona_locale))
     )
