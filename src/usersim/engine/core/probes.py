@@ -1667,17 +1667,26 @@ def known_probes() -> tuple[str, ...]:
     return tuple(sorted(_PROBE_REGISTRY))
 
 
-def declared_output_columns() -> tuple[str, ...]:
-    """The union of every registered probe's ``output_columns``, each name once.
+def run_probes(cfg: Any) -> tuple[str, ...]:
+    """The labels of the probes in the run ``cfg`` describes, sorted: its ``probes``, or every registered probe.
 
-    In label order, then each probe's own order. A run declares all of them,
-    not just those of the probes in its mix: Data Designer reads the
-    declaration once, before any row says which probe produced it, and rows
-    from other probes leave the columns empty.
+    A config that names no probes was built outside a run (a test, a host
+    building one episode), so every registered probe counts.
+    """
+    return tuple(sorted(getattr(cfg, "probes", None) or ())) or known_probes()
+
+
+def declared_output_columns(labels: Iterable[str] | None = None) -> tuple[str, ...]:
+    """The union of the ``output_columns`` of the probes ``labels`` names, every registered one by default, each name once.
+
+    In label order, then each probe's own order. A run declares the columns
+    of the probes in its mix: Data Designer reads the declaration once,
+    before any row says which probe produced it, and rows from the mix's
+    other probes leave the columns empty.
     """
     columns: dict[str, None] = {}
-    for label in known_probes():
-        columns.update(dict.fromkeys(_PROBE_REGISTRY[label].output_columns))
+    for label in sorted(labels) if labels is not None else known_probes():
+        columns.update(dict.fromkeys(resolve_probe(label).output_columns))
     return tuple(columns)
 
 
@@ -1709,10 +1718,10 @@ def default_scorers_by_probe() -> dict[str, tuple[str, ...]]:
 
 
 def declared_model_aliases(cfg: Any) -> tuple[str, ...]:
-    """The aliases every registered probe names in ``model_aliases``, each once, in label order."""
+    """The aliases the probes of the run ``cfg`` describes name in ``model_aliases``, each once, in label order."""
     aliases: dict[str, None] = {}
-    for label in known_probes():
-        aliases.update(dict.fromkeys(alias for alias in _PROBE_REGISTRY[label].model_aliases(cfg) if alias))
+    for label in run_probes(cfg):
+        aliases.update(dict.fromkeys(alias for alias in resolve_probe(label).model_aliases(cfg) if alias))
     return tuple(aliases)
 
 

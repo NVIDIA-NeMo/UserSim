@@ -164,8 +164,8 @@ When porting one of the templates into a new module:
       `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] Declare every key `build_result_extras` adds beyond the core
       columns in the class's `output_columns`, as each template does. The
-      engine keeps the core columns plus every registered probe's
-      `output_columns` and discards the rest (logging a warning), so an
+      engine keeps the core columns plus the `output_columns` of the
+      probes in the run's mix and discards the rest (logging a warning), so an
       undeclared join key is computed, dropped, and then read back as
       absent by your scorer, which reports the trajectory as having
       nothing to score while the run looks fine. See step 6 of

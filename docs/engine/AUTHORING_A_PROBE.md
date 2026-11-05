@@ -293,7 +293,8 @@ class MyProbe(BaseProbe):
         return ("my_probe_critic_model",)
 ```
 
-Each row's `models` holds every declared alias the models file defines, so the
+Each row's `models` holds every alias the run's probes declare that the models
+file defines, so the
 probe reads its model as `self._models.get("my_probe_critic_model")`. An alias
 the file lacks is left out, and the probe handles its absence: `get` returns
 `None`, and the probe can fall back or raise an error that names the alias. A
@@ -667,8 +668,8 @@ class MyProbe(BankBackedProbe):
     output_columns = ("my_probe_task_id",)  # the join key build_result_extras writes
 ```
 
-A run keeps the core columns plus the union of every registered probe's
-`output_columns`, and discards everything else. An undeclared key is computed
+A run keeps the core columns plus the union of the `output_columns` of the
+probes in its mix, and discards everything else. An undeclared key is computed
 on every row, dropped on the way to storage, and then read back as absent by
 your scorer, which reports the trajectory as having nothing to score rather
 than failing. The generator logs a warning naming the probe and the column the

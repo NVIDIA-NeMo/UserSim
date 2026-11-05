@@ -79,13 +79,14 @@ lists each declaration.
 
 A probe's own columns are the one part of this that is declared twice. Whatever
 `build_result_extras` returns is written only if the name is a core column or
-appears in some registered probe's `output_columns`; anything else is
+appears in the `output_columns` of a probe in the run's mix; anything else is
 discarded, and the scorer that reads it back finds nothing to score. The
 generator logs a warning naming the probe and the column the first time it
-happens. A run declares the core columns plus the union of every registered
-probe's `output_columns` as `ConversationSimulatorConfig.side_effect_columns`,
-because Data Designer reads the declaration once, before any row says which
-probe produced it.
+happens. A run declares the core columns plus the union of the `output_columns`
+of the probes in its mix (the config's `probes`) as
+`ConversationSimulatorConfig.side_effect_columns`, because Data Designer reads
+the declaration once, before any row says which probe produced it. A config
+that names no probes, built outside a run, declares every registered probe's.
 
 Per-row data that is not a column of its own goes in `state.metadata`, which is
 stored with the row as `conversation_metadata` and read from there by the
@@ -134,7 +135,7 @@ its label.
 | `asset_problems` | `check_locale` on each locale folder the probe ships, when it defines one; else no problems | `usersim smoke` and `assert_probe_conforms` |
 | `themes` | `None`: no theme | run setup, which draws one per row into the `theme` column |
 | `seed_dataset` | `None`: no seed table | run setup, which attaches `<seed_dataset>.parquet` or `.jsonl` from the probe's asset folder and gives each of the probe's rows the columns of one of its rows, and the mix's other probes' rows those columns empty (the run's config lists them in `seed_dataset_columns`); a mix with two such probes is refused; smoke and `assert_probe_conforms` check the table is there |
-| `model_aliases` | `()` | run setup, which adds each alias the models file defines to every row's models |
+| `model_aliases` | `()` | run setup, which adds each alias the models file defines to every row's models, for the probes in the run's mix |
 | `output_columns` | `()` | the run's `side_effect_columns`; a column left out is dropped |
 | `supports_assistant_resampling` | `True`; `False` with the tool mixins | judge-gated assistant resampling (`max_assistant_attempts > 1`) |
 | `bank_loader` | none: required on a `BankBackedProbe` | constructing a `BankBackedProbe`, for the row's locale |

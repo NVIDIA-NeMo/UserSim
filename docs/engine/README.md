@@ -474,6 +474,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `replay_assistant_reasoning` | bool | `False` | Send the assistant model the reasoning of its own earlier messages (`replay_reasoning = true` on `assistant_model` in the models TOML). Needs `store_reasoning`; the assistant's history is then not compressed. No other model receives the assistant's reasoning during a simulation |
 | `verbosity` | int | `1` | Logging detail: 0=quiet, 1=normal, 2=detailed |
 | `probe_options` | dict | `{}` | Each probe's settings, by label, checked against its `Options` before any model call (`--probe-option PROBE.SETTING=VALUE`); `financial_services` and `tool_calling` list theirs in their READMEs |
+| `probes` | list[str] | `[]` | The labels of the probes in the run's mix, set by the run builder; the run declares their output columns and resolves their extra models only. Empty counts every registered probe |
 | `seed_dataset_columns` | list[str] | `[]` | The columns of the seed table the run attaches, set by the run builder; a row of a probe that reads no seed table sees them empty |
 | `random_seed` | int? | `None` | Seed for reproducible tool sampling |
 
@@ -594,7 +595,7 @@ The tables describe the main files.
 | `test_language_detection.py` | Lazy `lingua` detector loading, `script_compliance_fraction`, `script_dominance` helpers |
 | `test_default_asset_paths.py` | Every shipped probe's default asset path resolves to a real file across every supported locale |
 | `test_assets_discovery.py` | Runtime assets-dir resolution (`set_runtime_assets_dir`, `probe_assets_dir`), env-override precedence, a probe's declared `assets_root`, and every registered probe owning a folder in the package |
-| `test_config.py` | `ConversationSimulatorConfig` defaults, optional fields, side-effect-columns contract (the core columns plus every registered probe's `output_columns`) |
+| `test_config.py` | `ConversationSimulatorConfig` defaults, optional fields, side-effect-columns contract (the core columns plus the `output_columns` of the run's probes) |
 | `test_pipeline.py` | Pipeline-level config validation |
 | `test_generator.py` | Dispatcher failed-result structure, probe-variant resolution, structured `SCENARIO_ABORTED` outcomes |
 | `test_messages.py` | Message / tool / theme formatting helpers |

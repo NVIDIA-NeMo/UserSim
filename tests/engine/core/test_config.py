@@ -56,6 +56,16 @@ class TestConversationSimulatorConfig:
         for column in ("query_id", "sovereign_facts_probed", "probing_categories_explored", "finance_task_id"):
             assert column in declared, f"{column} would be dropped before any scorer could read it"
 
+    def test_a_run_declares_the_output_columns_of_the_probes_in_its_mix(self, register_test_probe):
+        """A probe installed but not in the mix adds no empty columns to the run's rows."""
+        register_test_probe("ext_a", output_columns=("ext_a_score",))
+        with_it = ConversationSimulatorConfig(name="test", probes=["general_open_ended", "ext_a"]).side_effect_columns
+        without = ConversationSimulatorConfig(name="test", probes=["general_open_ended"]).side_effect_columns
+
+        assert "ext_a_score" in with_it
+        assert "ext_a_score" not in without and "finance_task_id" not in without
+        assert without[: len(CORE_RESULT_COLUMNS)] == list(CORE_RESULT_COLUMNS)
+
     def test_registered_probes_output_columns_follow_the_core_columns(self, register_test_probe):
         """A run keeps every registered probe's columns; a name two probes declare appears once."""
         register_test_probe("ext_a", output_columns=("ext_a_score", "shared_id"))

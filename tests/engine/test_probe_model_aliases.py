@@ -23,6 +23,14 @@ def test_the_built_in_probes_declare_the_embedding_model() -> None:
     assert declared_model_aliases(ConversationSimulatorConfig(name="conversation_messages")) == ("embedding_model",)
 
 
+def test_a_run_resolves_the_models_of_the_probes_in_its_mix_only() -> None:
+    def run_of(*probes: str) -> ConversationSimulatorConfig:
+        return ConversationSimulatorConfig(name="conversation_messages", probes=list(probes))
+
+    assert declared_model_aliases(run_of("general_open_ended")) == ()
+    assert declared_model_aliases(run_of("financial_services", "general_open_ended")) == ("embedding_model",)
+
+
 def test_a_declared_alias_follows_the_setting_that_names_it() -> None:
     config = ConversationSimulatorConfig(
         name="conversation_messages", probe_options={"financial_services": {"embedding_model_alias": "my_embedder"}}

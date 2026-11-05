@@ -174,10 +174,16 @@ def prepare_episode_inputs(
             raise ValueError(f"{where}: usersim_config does not load: {error}") from None
         if not row.get(config.persona_column):
             raise ValueError(f"{where} has no {config.persona_column}")
+        probe_type = str(row.get(config.probe_type_column))
         try:
-            resolve_probe(str(row.get(config.probe_type_column)))
+            resolve_probe(probe_type)
         except KeyError as error:
             raise ValueError(f"{where}: {error.args[0]}") from None
+        if config.probes and probe_type not in config.probes:
+            raise ValueError(
+                f"{where}: its probe {probe_type!r} is not among its run's probes {config.probes}, "
+                "so the run would not declare its columns"
+            )
         if "locale" in row and row["locale"] != config.locale:
             raise ValueError(f"{where}: locale {row['locale']!r} differs from its config's {config.locale!r}")
         try:

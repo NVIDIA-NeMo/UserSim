@@ -931,6 +931,7 @@ class TestDryRuns:
         assert row["theme"]
         assert row["tools"]
         assert row["usersim_config"]["random_seed"] == 42
+        assert row["usersim_config"]["probes"] == ["tool_calling"]
         assert "probe_options" not in row["usersim_config"]
         assert row["usersim_config"]["store_reasoning"] is True
 

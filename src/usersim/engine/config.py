@@ -11,7 +11,7 @@ from data_designer.config.base import SingleColumnConfig
 from pydantic import Field, field_validator, model_validator
 
 from usersim.engine.core.columns import CORE_RESULT_COLUMNS
-from usersim.engine.core.probes import declared_output_columns
+from usersim.engine.core.probes import declared_output_columns, run_probes
 
 MODEL_USER = "user_model"
 MODEL_ASSISTANT = "assistant_model"
@@ -147,6 +147,11 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # ``self.options``. A probe left out runs on its defaults.
     probe_options: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
+    # The labels of the probes in the run's mix. A run declares the output
+    # columns and resolves the extra models of these probes only; a config
+    # that names none counts every registered probe.
+    probes: list[str] = Field(default_factory=list)
+
     # The columns of the seed table the run attaches. Data Designer gives every
     # row one row of that table; a row of a probe that reads no seed table
     # gets these columns empty, so it neither sees nor records a seed row its
@@ -199,10 +204,11 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     def side_effect_columns(self) -> list[str]:
         """The columns a run keeps besides the configured one.
 
-        The core columns the engine writes for every probe, then each
-        registered probe's ``output_columns``. A run writes back only these
+        The core columns the engine writes for every probe, then the
+        ``output_columns`` of each probe in the run (``probes``, or every
+        registered probe when it names none). A run writes back only these
         and drops any other key a probe returns (the generator logs a
         warning), so an undeclared column never reaches the scorer that
         reads it.
         """
-        return [*CORE_RESULT_COLUMNS, *declared_output_columns()]
+        return [*CORE_RESULT_COLUMNS, *declared_output_columns(run_probes(self))]

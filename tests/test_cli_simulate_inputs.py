@@ -246,8 +246,8 @@ def test_a_model_setting_that_can_change_a_conversation_is_a_new_setup(rows, mod
     assert _fingerprint(rows, models()) != _fingerprint(rows)
 
 
-def test_a_model_a_probe_declares_is_part_of_the_setup(rows, register_test_probe):
-    """A model a probe calls changes what its conversations say, like the conversation's own models."""
+def test_a_model_a_probe_in_the_run_declares_is_part_of_the_setup(rows, register_test_probe):
+    """A model a probe in the run calls changes what its conversations say; a probe outside the mix changes nothing."""
     register_test_probe("ext_critic", model_aliases=classmethod(lambda cls, cfg: ("ext_critic_model",)))
 
     def with_critic(model: str) -> ModelsConfig:
@@ -255,7 +255,9 @@ def test_a_model_a_probe_declares_is_part_of_the_setup(rows, register_test_probe
         critic = replace(base.models[0], alias="ext_critic_model", model=model)
         return ModelsConfig(providers=base.providers, models=(*base.models, critic))
 
-    assert _fingerprint(rows, with_critic("acme/critic-a")) != _fingerprint(rows, with_critic("acme/critic-b"))
+    in_run = _edited(rows, lambda r: [row["usersim_config"]["probes"].append("ext_critic") for row in r])
+    assert _fingerprint(in_run, with_critic("acme/critic-a")) != _fingerprint(in_run, with_critic("acme/critic-b"))
+    assert _fingerprint(rows, with_critic("acme/critic-a")) == _fingerprint(rows, with_critic("acme/critic-b"))
 
 
 def test_the_runs_models_file_decides_replay_whatever_the_rows_were_stored_with(rows, tmp_path):
@@ -833,6 +835,10 @@ def _edited(rows, edit):
         (lambda r: r[0].update(persona=None), "persona"),
         (lambda r: r[0].update(extension_blob=b"bytes"), "JSON"),
         (lambda r: r[0].update(trajectory_id=""), "trajectory_id"),
+        (
+            lambda r: [row["usersim_config"].update(probes=["general_educational"]) for row in r],
+            "not among its run's probes",
+        ),
     ],
 )
 def test_rows_that_cannot_run_are_refused(rows, edit, message):

@@ -431,6 +431,7 @@ def simulator_config(
     verbosity: int = 1,
     random_seed: int | None = None,
     probe_options: Mapping[str, Mapping[str, Any]] | None = None,
+    probes: Sequence[str] = (),
     seed_dataset_columns: Sequence[str] = (),
 ) -> ConversationSimulatorConfig:
     """The simulator column's config for one locale of a run.
@@ -452,6 +453,7 @@ def simulator_config(
         verbosity=verbosity,
         random_seed=random_seed,
         probe_options=probe_options or {},
+        probes=list(probes),
         seed_dataset_columns=list(seed_dataset_columns),
     )
 
@@ -509,6 +511,7 @@ def build_simulator_config_builder(
             verbosity=verbosity,
             random_seed=random_seed,
             probe_options=probe_options,
+            probes=list(probe_mix),
             seed_dataset_columns=seed_dataset_columns(seed_path) if seed_path is not None else (),
         )
     )
@@ -620,6 +623,7 @@ def materialize_episode_inputs(
         store_reasoning=store_reasoning,
         random_seed=random_seed,
         probe_options=probe_options,
+        probes=list(probe_mix),
         seed_dataset_columns=seed_dataset_columns(seed_path) if seed_path is not None else (),
     )
     model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}
