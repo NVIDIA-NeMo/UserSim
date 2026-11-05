@@ -355,22 +355,23 @@ and from `should_succeed` / `build_result_extras`.
 ### Check each locale's bank before a run
 
 Before any model call, a run checks that each selected probe's asset folder
-exists and holds bank files. A probe whose banks are split by locale also sets
-`locale_bank_check`, and the run then loads the bank each run locale runs on
+exists and holds bank files. A probe whose banks are split by locale also
+defines `check_locale`, and the run then loads the bank each run locale runs on
 and refuses a locale whose bank is missing or does not load:
 
 ```python
-def _check_locale_bank(locale_dir: Path) -> None:
-    MyBank.from_yaml((locale_dir / "sample.yaml").read_text(encoding="utf-8"))
-
-
 class MyProbe(BankBackedProbe):
-    locale_bank_check = staticmethod(_check_locale_bank)
     authoring_guide = "https://example.com/my-probe/README.md#adding-a-locale"
+
+    @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        MyBank.from_yaml((locale_dir / "sample.yaml").read_text(encoding="utf-8"))
 ```
 
-- **`locale_bank_check`** takes one locale's folder, `<asset folder>/<locale>/`,
-  and raises whatever would stop the bank loader. The refusal quotes the error.
+- **`check_locale(locale_dir)`**, a classmethod, takes one locale's folder,
+  `<asset folder>/<locale>/`, and raises whatever would stop the bank loader.
+  The refusal quotes the error. A probe that does not define it keeps no bank
+  per locale, and the run checks only its asset folder.
 - **`bank_locale(locale, probe_dir)`**, a classmethod, names the locale whose
   bank a row in `locale` runs on, as the bank loader picks it. By default, an
   India language variant runs on its own bank when it has one and on `en_IN`'s
@@ -385,23 +386,25 @@ class MyProbe(BankBackedProbe):
 `usersim smoke` runs each registered probe's `asset_problems` classmethod, and
 `assert_probe_conforms` reports what it finds, so an install that is missing a
 bank fails a check rather than a run. Return one string per problem, or an
-empty list, and read what your loaders read without calling a model:
+empty list, and read what your loaders read without calling a model.
+
+The default runs `check_locale` on each locale folder the probe ships, and
+checks nothing for a probe that does not define it. An override adds checks
+for files that are not per locale, keeping the default's:
 
 ```python
 class MyProbe(BankBackedProbe):
     @classmethod
     def asset_problems(cls) -> list[str]:
-        problems = []
-        for locale in ("en_US", "fr_FR"):
-            try:
-                _check_locale_bank(cls.assets_dir() / locale)
-            except Exception as error:
-                problems.append(f"{locale}: {type(error).__name__}: {error}")
+        problems = super().asset_problems()
+        if not (cls.assets_dir() / "tools.yaml").is_file():
+            problems.append("tools.yaml is missing")
         return problems
 ```
 
-The default checks nothing. An exception the check raises is reported like a
-problem it returns.
+A probe that reads themes rather than a bank per locale can check them with
+`theme_problems(cls, locales)` from `usersim.extension`. An exception the check
+raises is reported like a problem it returns.
 
 ### Give each row a theme
 
@@ -825,7 +828,7 @@ import random
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.probes.bookings.bank import LOCALES, Booking, draw_booking, read_booking_bank
+from usersim.engine.probes.bookings.bank import Booking, draw_booking, read_booking_bank
 from usersim.engine.probes.bookings.prompts import BOOKINGS_USER_PROMPTS
 from usersim.extension import (
     BankBackedProbe,
@@ -866,19 +869,12 @@ class BookingsProbe(ToolExecutionMixin, BankBackedProbe):
         "written the way people write them in the user's language."
     )
     bank_loader = staticmethod(_bank_loader)
-    locale_bank_check = staticmethod(read_booking_bank)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_BOOKING
     output_columns = ("booking_id", "booking")
 
     @classmethod
-    def asset_problems(cls) -> list[str]:
-        problems = []
-        for locale in LOCALES:
-            try:
-                read_booking_bank(cls.assets_dir() / locale)
-            except Exception as error:
-                problems.append(f"{locale}: {type(error).__name__}: {error}")
-        return problems
+    def check_locale(cls, locale_dir: Path) -> None:
+        read_booking_bank(locale_dir)
 
     def derive_task(self, persona: dict, bank: Any, *, cfg: Any) -> Booking:
         rng = random.Random(f"{persona_uuid(persona)}:{bank.bank_version}:{cfg.random_seed}")

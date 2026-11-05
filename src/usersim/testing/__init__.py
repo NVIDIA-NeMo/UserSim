@@ -198,13 +198,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     problems.extend(_default_scorers_problems(cls))
 
     # A run reads these on the class, before any row runs.
-    check = getattr(cls, "locale_bank_check", None)
-    if check is not None and not callable(check):
-        problems.append(
-            f"{cls.__qualname__}.locale_bank_check must be None or a function that loads one "
-            f"locale's bank folder; got {check!r}"
-        )
-    for hook in ("bank_locale", "themes", "model_aliases", "asset_problems"):
+    for hook in ("check_locale", "bank_locale", "themes", "model_aliases", "asset_problems"):
         if not isinstance(inspect.getattr_static(cls, hook, None), classmethod):
             problems.append(f"{cls.__qualname__}.{hook} must be a classmethod; a run calls it on the class.")
     if isinstance(inspect.getattr_static(cls, "model_aliases", None), classmethod):

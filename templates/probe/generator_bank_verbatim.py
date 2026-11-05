@@ -81,15 +81,6 @@ def _demo_bank_loader(locale: str = "en_US"):
     raise NotImplementedError("replace with your real bank loader")
 
 
-def _demo_locale_bank_check(locale_dir: Path) -> None:
-    """Stub check: load the bank in ``locale_dir``, one locale's folder.
-
-    A run's pre-flight calls it for each run locale before any model
-    call; whatever it raises refuses that locale.
-    """
-    raise NotImplementedError("replace with a load of one locale's bank")
-
-
 @register_probe
 class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     """Verbatim-turn-1 probe driven by a curated asset bank.
@@ -104,7 +95,15 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     bank_loader = staticmethod(_demo_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
     bank_version_key: str | None = None  # locale-keyed (inclusion convention)
-    locale_bank_check = staticmethod(_demo_locale_bank_check)
+
+    @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        """Stub check: load the bank in ``locale_dir``, one locale's folder.
+
+        A run's pre-flight calls it for each run locale before any model
+        call; whatever it raises refuses that locale.
+        """
+        raise NotImplementedError("replace with a load of one locale's bank")
 
     def derive_task(
         self,

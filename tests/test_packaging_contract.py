@@ -412,7 +412,7 @@ class TestProbeAssetPreflight:
         register_test_probe(
             "ext_banks",
             assets_root=tmp_path,
-            locale_bank_check=staticmethod(self._bank_check),
+            check_locale=classmethod(lambda cls, locale_dir: self._bank_check(locale_dir)),
             authoring_guide="https://example.com/ext-banks/locales",
         )
 
@@ -430,6 +430,18 @@ class TestProbeAssetPreflight:
             "To build a ext_banks bank yourself, see https://example.com/ext-banks/locales",
         ]
 
+    def test_a_probe_without_check_locale_runs_in_a_locale_it_has_no_folder_for(
+        self, tmp_path: Path, register_test_probe
+    ) -> None:
+        """A probe that keeps no bank per locale, such as one whose themes fall back to en_US, is not refused."""
+        from usersim.cli._pipeline import verify_probe_assets
+
+        (tmp_path / "ext_themes" / "en_US").mkdir(parents=True)
+        (tmp_path / "ext_themes" / "en_US" / "themes.json").write_text("[]", encoding="utf-8")
+        register_test_probe("ext_themes", assets_root=tmp_path)
+
+        verify_probe_assets({"ext_themes": 1.0}, ["fr_FR"], None)
+
     def test_a_probe_names_the_bank_a_locale_runs_on(self, tmp_path: Path, register_test_probe) -> None:
         """The pre-flight checks the bank the class's bank_locale picks, not the locale's own folder."""
         from usersim.cli._pipeline import verify_probe_assets
@@ -441,7 +453,7 @@ class TestProbeAssetPreflight:
         register_test_probe(
             "ext_banks",
             assets_root=tmp_path,
-            locale_bank_check=staticmethod(self._bank_check),
+            check_locale=classmethod(lambda cls, locale_dir: self._bank_check(locale_dir)),
             bank_locale=classmethod(lambda cls, locale, probe_dir: "shared"),
         )
 

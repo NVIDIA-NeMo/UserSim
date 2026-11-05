@@ -76,6 +76,7 @@ if TYPE_CHECKING:
         assistant_message,
         dispatch_episode,
         register_probe,
+        theme_problems,
     )
     from usersim.engine.core.probing_taxonomy import (
         Category,
@@ -167,6 +168,7 @@ __all__ = [
     "persona_to_tags",
     "probe_asset_roots",
     "probe_assets_dir",
+    "theme_problems",
     # Probing taxonomies
     "Category",
     "ProbingTaxonomy",
@@ -268,6 +270,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "assistant_message",
         "dispatch_episode",
         "register_probe",
+        "theme_problems",
     ),
     "usersim.engine.core.probing_taxonomy": (
         "Category",

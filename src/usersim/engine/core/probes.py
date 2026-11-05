@@ -51,6 +51,7 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
+    Iterable,
     Mapping,
     Protocol,
     Sequence,
@@ -352,13 +353,6 @@ class BaseProbe:
         """
         return probe_assets_dir(cls.label)
 
-    # Loads one locale's bank from its folder, ``<asset folder>/<locale>/``,
-    # and raises when no row could run on it. A probe whose banks are split by
-    # locale sets it, and a run's pre-flight then loads the bank each run
-    # locale resolves to (``bank_locale``) before any model call. ``None``
-    # checks only that the probe's asset folder holds bank files.
-    locale_bank_check: Callable[[Path], object] | None = None
-
     # Where to read how to build this probe's bank for another locale. The
     # pre-flight links it when a run asks for a locale the probe has no bank for.
     authoring_guide: str | None = None
@@ -382,6 +376,18 @@ class BaseProbe:
         return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
 
     @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        """Raise when no row could run on the bank in ``locale_dir``, ``<asset folder>/<locale>/``.
+
+        A probe that keeps one bank per locale defines it to load that bank.
+        A run's pre-flight then calls it on the bank each run locale resolves
+        to (``bank_locale``) before any model call, and refuses a locale with
+        no folder of its own to resolve to. A probe that does not define it
+        keeps no bank per locale: the pre-flight checks only that its asset
+        folder holds bank files.
+        """
+
+    @classmethod
     def asset_problems(cls) -> list[str]:
         """Each problem with the assets this probe ships, such as a locale's missing bank. Empty when none.
 
@@ -389,9 +395,22 @@ class BaseProbe:
         ``assert_probe_conforms`` reports what it finds, so a missing or broken
         bank surfaces at install time rather than partway through a run. Check
         what the probe's loaders read, without calling a model or the network.
-        The default checks nothing.
+        The default runs ``check_locale`` on each locale folder the probe
+        ships, when it defines one; an override adds checks for files that are
+        not per locale by extending ``super().asset_problems()``.
         """
-        return []
+        if not checks_each_locale(cls):
+            return []
+        folder = cls.assets_dir()
+        if not folder.is_dir():
+            return [f"no asset folder at {folder}"]
+        problems = []
+        for locale_dir in sorted(path for path in folder.iterdir() if path.is_dir()):
+            try:
+                cls.check_locale(locale_dir)
+            except Exception as error:  # whatever stops the loader stops every row in that locale
+                problems.append(f"{locale_dir.name}: {type(error).__name__}: {error}")
+        return problems
 
     @classmethod
     def themes(cls, locale: str) -> Sequence[Mapping[str, Any]] | None:
@@ -1482,6 +1501,22 @@ def _declaration_problem(cls: type[BaseProbe]) -> str | None:
     return None
 
 
+def checks_each_locale(cls: type[BaseProbe]) -> bool:
+    """Whether ``cls`` defines ``check_locale``, and so keeps one bank per locale."""
+    return getattr(cls.check_locale, "__func__", None) is not BaseProbe.check_locale.__func__
+
+
+def theme_problems(cls: type[BaseProbe], locales: Iterable[str]) -> list[str]:
+    """One line for each of ``locales`` whose themes ``cls.themes`` cannot read."""
+    problems = []
+    for locale in locales:
+        try:
+            cls.themes(locale)
+        except Exception as error:  # whatever stops the read stops every row in that locale
+            problems.append(f"no themes for {locale}: {type(error).__name__}: {error}")
+    return problems
+
+
 def register_probe(cls: type[BaseProbe]) -> type[BaseProbe]:
     """Register a ``BaseProbe`` subclass under its ``label``, in ``_PROBE_REGISTRY``.
 
@@ -1499,7 +1534,9 @@ def register_probe(cls: type[BaseProbe]) -> type[BaseProbe]:
     and one whose ``placeholder_warning_kind`` does not mark placeholder
     content, since the report would not count its rows as placeholder. A
     ``prompt_version`` that is not a non-empty string, or ``variants`` that
-    is not a non-empty tuple of non-empty strings, is refused too.
+    is not a non-empty tuple of non-empty strings, is refused too, and so is
+    a class that declares ``locale_bank_check``, which ``check_locale``
+    replaces.
 
     The class itself IS the registration: there is no central registry
     entry or ``simulate_*`` function to add alongside it.
@@ -1528,6 +1565,11 @@ def register_probe(cls: type[BaseProbe]) -> type[BaseProbe]:
     problem = _declaration_problem(cls)
     if problem:
         raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.{problem}")
+    if hasattr(cls, "locale_bank_check"):
+        raise ProbeRegistrationError(
+            f"@register_probe: {_definition(cls)} declares locale_bank_check, which no run reads. "
+            "Define a check_locale(cls, locale_dir) classmethod that loads the locale's bank instead."
+        )
     if cls.assets_root is not None and not Path(cls.assets_root).is_absolute():
         raise ProbeRegistrationError(
             f"@register_probe: {_definition(cls)} declares the relative assets_root "

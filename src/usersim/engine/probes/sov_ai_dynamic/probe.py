@@ -96,10 +96,6 @@ def _bank_loader(locale: str):
     return _load_taxonomy_for_locale(locale)
 
 
-def _check_locale_bank(locale_dir: Path) -> None:
-    load_probing_taxonomy(locale_dir / "categories.yaml")
-
-
 def should_succeed(state: ConversationState) -> bool:
     """Sim-side guardrail: did we actually probe a category?
 
@@ -186,7 +182,11 @@ class SovAiDynamicProbe(BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
     bank_version_key = None  # locale-keyed (the inclusion convention)
-    locale_bank_check = staticmethod(_check_locale_bank)
+
+    @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        """Load the locale's probing taxonomy, ``<locale_dir>/categories.yaml``."""
+        load_probing_taxonomy(locale_dir / "categories.yaml")
 
     @classmethod
     def asset_problems(cls) -> list[str]:

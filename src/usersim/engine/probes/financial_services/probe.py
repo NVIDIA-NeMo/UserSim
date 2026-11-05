@@ -333,8 +333,6 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FINANCE
     bank_version_key = None  # per-locale
-    # A bank without tasks aborts every row, so the pre-flight loads it.
-    locale_bank_check = staticmethod(load_finance_bank)
     authoring_guide = (
         "https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
         "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale"
@@ -343,6 +341,11 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     # -> act -> confirm), capped per turn by ToolExecutionMixin.
     tool_loop_mode = "multi"
     tool_max_calls_per_turn = 8
+
+    @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        """Load the locale's bank whole: a bank without tasks aborts every row."""
+        load_finance_bank(locale_dir)
 
     @classmethod
     def asset_problems(cls) -> list[str]:

@@ -36,8 +36,8 @@ write areas and their bounds, not messages to send.
    scorer's name. Every name the package adds starts with your prefix, as
    `my_tool_calls` and `my_tool_used` start with `my_`; see
    [Names](../../docs/extensions.md#names).
-2. Write your areas in `themes.yaml`, one file per locale in its language, and
-   list each locale in `LOCALES` in `probe.py`.
+2. Write your areas in `themes.yaml`, one file per locale in its language, in
+   a folder named for the locale.
 3. Write the user's instructions in `prompts.yaml`. `render_prompt` fills
    `{persona}`, `{area}` and any column of the row.
 4. Replace `DO_TASK` with the tool your probe offers the assistant, or drop it,

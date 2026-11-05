@@ -182,7 +182,7 @@ class TestTheChecksCanFail:
     @pytest.mark.parametrize(
         ("attributes", "expected"),
         [
-            ({"locale_bank_check": "sample.yaml"}, "PreflightProbe.locale_bank_check must be None or a function"),
+            ({"check_locale": lambda self, locale_dir: None}, "PreflightProbe.check_locale must be a classmethod"),
             (
                 {"bank_locale": lambda self, locale, probe_dir: locale},
                 "PreflightProbe.bank_locale must be a classmethod",
@@ -266,13 +266,16 @@ class TestTheChecksCanFail:
     async def test_usable_preflight_declarations_are_accepted(self) -> None:
         class Declared(BaseProbe):
             label = "declared_probe"
-            locale_bank_check = staticmethod(lambda locale_dir: None)
             authoring_guide = "https://example.com/declared-probe/locales"
             default_scorers = ("tool_use", "language_compliance")
             preview_fields = (
                 PreviewField("theme", "Topic"),
                 PreviewField("taxonomy_id", "Taxonomy", from_metadata=True),
             )
+
+            @classmethod
+            def check_locale(cls, locale_dir):
+                return None
 
             @classmethod
             def bank_locale(cls, locale, probe_dir):
@@ -291,7 +294,7 @@ class TestTheChecksCanFail:
                 return []
 
         declarations = (
-            "locale_bank_check",
+            "check_locale",
             "bank_locale",
             "authoring_guide",
             "themes",

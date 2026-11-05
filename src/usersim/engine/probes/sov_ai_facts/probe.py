@@ -102,10 +102,6 @@ def _bank_loader(locale: str):
     return _load_bank_for_locale(locale)
 
 
-def _check_locale_bank(locale_dir: Path) -> None:
-    load_fact_bank(locale_dir / "sample.yaml")
-
-
 def should_succeed(state: ConversationState) -> bool:
     """Sim-side guardrail: did we actually probe a fact?
 
@@ -167,7 +163,11 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
     bank_version_key = None  # locale-keyed (the inclusion convention)
-    locale_bank_check = staticmethod(_check_locale_bank)
+
+    @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        """Load the locale's fact bank, ``<locale_dir>/sample.yaml``."""
+        load_fact_bank(locale_dir / "sample.yaml")
 
     @classmethod
     def asset_problems(cls) -> list[str]:

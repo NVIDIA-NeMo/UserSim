@@ -48,10 +48,12 @@ from usersim.engine.core.probes import (
     ToolCallingMixin,
     ToolExecutionMixin,
     assistant_message,
+    checks_each_locale,
     clear_registry,
     known_probes,
     register_probe,
     resolve_probe,
+    theme_problems,
 )
 from usersim.engine.core.user_turn_policy import UserTurnPolicy
 
@@ -724,6 +726,52 @@ class TestLocalePromptPack:
 # ---------------------------------------------------------------------------
 
 
+class TestLocaleChecks:
+    """A probe that keeps one bank per locale defines ``check_locale``; ``asset_problems`` runs it on each it ships."""
+
+    @staticmethod
+    def _check(cls, locale_dir: Path) -> None:
+        if not (locale_dir / "bank.yaml").read_text(encoding="utf-8").strip():
+            raise ValueError("the bank is empty")
+
+    def test_asset_problems_checks_each_locale_folder_the_probe_ships(self, tmp_path, register_test_probe) -> None:
+        for locale, bank in (("en_US", "recipes: [curry]\n"), ("pt_BR", "")):
+            (tmp_path / "ext_banks" / locale).mkdir(parents=True)
+            (tmp_path / "ext_banks" / locale / "bank.yaml").write_text(bank, encoding="utf-8")
+        probe = register_test_probe("ext_banks", assets_root=tmp_path, check_locale=classmethod(self._check))
+
+        assert checks_each_locale(probe)
+        assert probe.asset_problems() == ["pt_BR: ValueError: the bank is empty"]
+
+    def test_a_probe_without_check_locale_checks_no_locale(self, tmp_path, register_test_probe) -> None:
+        (tmp_path / "ext_plain" / "en_US").mkdir(parents=True)
+        probe = register_test_probe("ext_plain", assets_root=tmp_path)
+
+        assert not checks_each_locale(probe)
+        assert probe.asset_problems() == []
+
+    def test_a_check_locale_a_mixin_defines_counts(self) -> None:
+        class _ChecksLocales:
+            @classmethod
+            def check_locale(cls, locale_dir: Path) -> None:
+                return None
+
+        class _Probe(_ChecksLocales, BaseProbe):
+            label = "_mixin_checked_probe"
+
+        assert checks_each_locale(_Probe)
+
+    def test_theme_problems_names_each_locale_whose_themes_do_not_read(self) -> None:
+        class _Themed(BaseProbe):
+            @classmethod
+            def themes(cls, locale: str) -> list[dict]:
+                if locale == "de_DE":
+                    raise FileNotFoundError("no topics.json")
+                return [{"type": "cooking"}]
+
+        assert theme_problems(_Themed, ["en_US", "de_DE"]) == ["no themes for de_DE: FileNotFoundError: no topics.json"]
+
+
 class TestRegisterProbe:
     @pytest.fixture(autouse=True)
     def _empty_registry(self, restored_registries):
@@ -865,6 +913,16 @@ class TestRegisterProbe:
         with pytest.raises(ProbeRegistrationError, match="placeholder_warning_kind must mark placeholder content"):
             register_probe(bank_probe)
         assert "_mislabelled_bank_probe" not in known_probes()
+
+    def test_rejects_a_class_that_declares_locale_bank_check(self) -> None:
+        """No run reads it, so a probe still declaring it would lose its locale check without a word."""
+        mod = self._make_module()
+        legacy = self._probe_class("_Legacy", "_legacy_check_probe", mod.__name__)
+        legacy.locale_bank_check = staticmethod(lambda locale_dir: None)
+
+        with pytest.raises(ProbeRegistrationError, match="declares locale_bank_check, which no run reads"):
+            register_probe(legacy)
+        assert "_legacy_check_probe" not in known_probes()
 
     def test_rejects_output_columns_given_as_one_string(self) -> None:
         """A bare string would be read as one column per character."""

@@ -17,9 +17,8 @@ from usersim.extension import (
     render_prompt,
 )
 
-#: The locales the package ships themes for. A new locale is a folder under
-#: assets/my_probe/ holding a themes.yaml in its language, plus an entry here.
-LOCALES = ("en_US", "pt_BR")
+#: A new locale is a folder under assets/my_probe/ holding a themes.yaml in
+#: its language.
 
 #: The tool the assistant under test is offered. Replace it with yours, or drop
 #: it, ToolExecutionMixin and execute_tool_call if the probe offers none.
@@ -53,9 +52,12 @@ class MyProbe(ToolExecutionMixin, BaseProbe):
     label = "my_probe"
     description = "Replace with what the probe tests, as the per-row preview and the capability report show it."
     assets_root = Path(__file__).parent / "assets"
-    locale_bank_check = staticmethod(read_themes)
     default_scorers = ("my_probe",)
     output_columns = ("my_tool_calls",)
+
+    @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        read_themes(locale_dir)
 
     @classmethod
     def themes(cls, locale: str) -> list[dict]:
@@ -63,12 +65,8 @@ class MyProbe(ToolExecutionMixin, BaseProbe):
 
     @classmethod
     def asset_problems(cls) -> list[str]:
-        problems = []
-        for locale in LOCALES:
-            try:
-                read_themes(cls.assets_dir() / locale)
-            except Exception as error:
-                problems.append(f"{locale}: {type(error).__name__}: {error}")
+        # The default runs check_locale on each locale folder the package ships.
+        problems = super().asset_problems()
         if "user_system_prompt" not in load_prompt_file(cls.label):
             problems.append("prompts.yaml has no user_system_prompt")
         return problems

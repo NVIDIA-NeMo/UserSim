@@ -44,7 +44,7 @@ from usersim.engine.core._assets import probe_assets_dir, reset_runtime_assets_d
 from usersim.engine.core.builtin_packages import builtin_modules
 from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES, persona_dataset_locale
 from usersim.engine.core.persona import persona_name_template
-from usersim.engine.core.probes import NO_THEME, SEED_DATASET_SUFFIXES, resolve_probe
+from usersim.engine.core.probes import NO_THEME, SEED_DATASET_SUFFIXES, checks_each_locale, resolve_probe
 from usersim.engine.core.probes import known_probes as _known_probes
 from usersim.engine.errors import ConfigError
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
@@ -177,7 +177,7 @@ def verify_probe_locales(
             problems.append(f"{probe}: {probe_dir} contains no bank files")
             continue
         cls = resolve_probe(probe)
-        if cls.locale_bank_check is None:
+        if not checks_each_locale(cls):
             continue
         locale_problems = _locale_bank_problems(cls, probe_dir, probe_locales[probe])
         problems.extend(locale_problems)
@@ -211,7 +211,6 @@ def _remedies(probes_missing_a_locale: Sequence[type[BaseProbe]]) -> list[str]:
 def _locale_bank_problems(cls: type[BaseProbe], probe_dir: Path, locales: Sequence[str]) -> list[str]:
     """The locales ``cls`` can't run in, as one line naming those that can."""
     probe = cls.label
-    check = cls.locale_bank_check
     errors: dict[Path, str | None] = {}
 
     def resolve(loc: str) -> str:
@@ -220,7 +219,7 @@ def _locale_bank_problems(cls: type[BaseProbe], probe_dir: Path, locales: Sequen
     def load_error(locale_dir: Path) -> str | None:
         if locale_dir not in errors:
             try:
-                check(locale_dir)
+                cls.check_locale(locale_dir)
                 errors[locale_dir] = None
             except Exception as exc:  # whatever stops the loader stops every row
                 errors[locale_dir] = f"{type(exc).__name__}: {exc}"

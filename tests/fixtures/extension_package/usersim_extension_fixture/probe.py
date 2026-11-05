@@ -8,11 +8,6 @@ import yaml
 from usersim.extension import BaseProbe, PreviewField, register_probe
 
 
-def _check_locale_bank(locale_dir: Path) -> None:
-    if not (locale_dir / "sample.yaml").is_file():
-        raise FileNotFoundError(f"no sample.yaml in {locale_dir}")
-
-
 @register_probe
 class FixtureProbe(BaseProbe):
     label = "fixture_probe"
@@ -20,7 +15,6 @@ class FixtureProbe(BaseProbe):
     output_columns = ("fixture_probe_marker",)
     preview_fields = (PreviewField("fixture_probe_marker", "Marker"),)
     default_scorers = ("fixture_scorer",)
-    locale_bank_check = staticmethod(_check_locale_bank)
     authoring_guide = "https://example.com/fixture-probe/locales"
     seed_dataset = "fixture_seed"
 
@@ -29,12 +23,9 @@ class FixtureProbe(BaseProbe):
         return ("fixture_critic_model",)
 
     @classmethod
-    def asset_problems(cls) -> list[str]:
-        try:
-            _check_locale_bank(cls.assets_dir() / "en_US")
-        except FileNotFoundError as error:
-            return [str(error)]
-        return []
+    def check_locale(cls, locale_dir: Path) -> None:
+        if not (locale_dir / "sample.yaml").is_file():
+            raise FileNotFoundError(f"no sample.yaml in {locale_dir}")
 
     @classmethod
     def themes(cls, locale: str) -> list[dict]:

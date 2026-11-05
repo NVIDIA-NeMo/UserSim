@@ -135,7 +135,7 @@ When porting one of the templates into a new module:
       `placeholder_warning_kind` (a `WarningKind.USED_PLACEHOLDER_*`
       member), `bank_version_key`. See
       `core/probes.py::BankBackedProbe` for the contract. A bank split
-      by locale also sets `locale_bank_check`, so a run refuses a locale
+      by locale also defines `check_locale`, so a run refuses a locale
       whose bank is missing before any model call (step 3 of
       `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] If the probe ships banks, check them in an `asset_problems`

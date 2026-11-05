@@ -124,10 +124,10 @@ than into a branch on its label.
 | `preview_fields` | `()` | the per-row preview's Probe Inputs panel |
 | `default_scorers` | `()` | `usersim eval --scorers auto`, for a run that holds the probe's rows |
 | `assets_root` | `None`: the override roots only | `assets_dir()`, and through it the probe's loaders, the pre-flight and smoke |
-| `locale_bank_check` | `None`: the asset folder holds bank files | the pre-flight, for each run locale |
+| `check_locale` | checks nothing: the probe keeps no bank per locale, and the pre-flight checks only that its asset folder holds bank files | the pre-flight, for each run locale, and the default `asset_problems`, for each locale folder the probe ships |
 | `bank_locale` | an India variant's own bank when it has one, else its base locale's | the pre-flight |
 | `authoring_guide` | `None` | the pre-flight, when a run asks for a locale the probe has no bank for |
-| `asset_problems` | no problems | `usersim smoke` and `assert_probe_conforms` |
+| `asset_problems` | `check_locale` on each locale folder the probe ships, when it defines one; else no problems | `usersim smoke` and `assert_probe_conforms` |
 | `themes` | `None`: no theme | run setup, which draws one per row into the `theme` column |
 | `seed_dataset` | `None`: no seed table | run setup, which attaches `<seed_dataset>.parquet` or `.jsonl` from the probe's asset folder and gives each of the probe's rows the columns of one of its rows, and the mix's other probes' rows those columns empty; a mix with two such probes is refused; smoke and `assert_probe_conforms` check the table is there |
 | `model_aliases` | `()` | run setup, which adds each alias the models file defines to every row's models |
@@ -168,9 +168,8 @@ probe or, as `health_disclosure` is, shared by several. It
 is resolved through `probe_assets_dir()`. A run fails pre-flight, before any
 model call, if a selected probe's bank is missing or, for the probes whose banks
 are split by locale, doesn't load for a run locale (a finance bank without
-tasks, for instance). Those probes declare a `locale_bank_check` on the class,
-which the
-pre-flight calls on the bank the class's `bank_locale` names. The refusal names
+tasks, for instance). Those probes define a `check_locale` classmethod, which
+the pre-flight calls on the bank the class's `bank_locale` names. The refusal names
 the probe, the locale and the locales that can run, rather than failing from
 inside a loader mid-run. `simulate` and its `--dry-run`, `--materialize-inputs`,
 `--inputs` and notebook 01 all run the check. A probe's `asset_problems`

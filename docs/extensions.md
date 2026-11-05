@@ -129,9 +129,6 @@ from usersim.extension import (
     register_probe,
 )
 
-#: The locales the package ships a bank for.
-LOCALES = ("en_US", "pt_BR")
-
 BOOK_APPOINTMENT = {
     "type": "function",
     "function": {
@@ -213,19 +210,12 @@ class BookingProbe(ToolExecutionMixin, BankBackedProbe):
     default_scorers = ("my_bookings",)
     assets_root = Path(__file__).parent / "assets"
     bank_loader = staticmethod(load_booking_bank)
-    locale_bank_check = staticmethod(read_booking_bank)
     placeholder_warning_kind = "my_used_placeholder_booking"
     output_columns = ("my_booking_id", "my_booking")
 
     @classmethod
-    def asset_problems(cls) -> list[str]:
-        problems = []
-        for locale in LOCALES:
-            try:
-                read_booking_bank(cls.assets_dir() / locale)
-            except Exception as error:
-                problems.append(f"{locale}: {type(error).__name__}: {error}")
-        return problems
+    def check_locale(cls, locale_dir: Path) -> None:
+        read_booking_bank(locale_dir)
 
     def derive_task(self, persona, bank, *, cfg):
         rng = random.Random(f"{persona_uuid(persona)}:{bank.bank_version}:{cfg.random_seed}")
@@ -301,10 +291,11 @@ class BookingProbe(ToolExecutionMixin, BankBackedProbe):
 - **`load_booking_bank`** reads under `BookingProbe.assets_dir()`, the probe's
   folder on the asset search path, so a folder `--assets-dir` or
   `USERSIM_ASSET_PATH` names reaches it too.
-- **`locale_bank_check`** reads one locale's bank, so a run in a locale with no
+- **`check_locale`** reads one locale's bank, so a run in a locale with no
   bank that loads stops before any model call rather than failing every row.
-- **`asset_problems`** reads each bank the package ships, so `usersim smoke` and
-  `assert_probe_conforms` report an install that is missing one.
+  `asset_problems`, which `usersim smoke` and `assert_probe_conforms` run,
+  calls it on each locale folder the package ships, so they report a bank
+  that does not load.
 - **`placeholder_warning_kind`** is the warning a row records when its
   appointment is marked `placeholder: true`. Its
   `<prefix>_used_placeholder_<thing>` form is what the capability report counts
@@ -534,8 +525,8 @@ usersim simulate --locale pt_BR --num-rows 5 \
 
 The package has banks for `en_US` and `pt_BR` only, so a run with
 `--locale fr_FR` stops before any model call and says the probe has no bank for
-it. A new locale is a folder holding a `bookings.yaml` written in its language,
-plus an entry in `LOCALES`. `--assets-dir` pins every probe in a run to the
+it. A new locale is a folder holding a `bookings.yaml` written in its language.
+`--assets-dir` pins every probe in a run to the
 folder it names, this one included, so a run that passes it needs
 `my_bookings/` there too.
 

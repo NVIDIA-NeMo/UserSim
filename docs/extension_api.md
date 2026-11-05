@@ -101,6 +101,7 @@ does not load the conversation loop.
 | `probe_asset_roots` | The roots searched for a probe's assets, highest priority first, for assets layered across them |
 | `asset_roots_in_use` | Every root an asset lookup can read, for keying a cache by the roots a run uses |
 | `load_seeds` | A probe's seeds of one kind for a locale, such as its topics, from `<probe>/<locale>/<kind>.json`, or the `en_US` file when the locale has none |
+| `theme_problems` | One line for each of the given locales whose themes a probe's `themes` cannot read, for its `asset_problems` |
 | `LocalizedText` | Bank text with a rendering per locale, read with `for_locale`, which falls back to `en_US` |
 | `LocalizedTextError` | Raised when a bank value cannot be read as `LocalizedText` |
 | `persona_to_tags` | The tags a persona matches bank entries on, such as its region, age and occupation, for a locale |

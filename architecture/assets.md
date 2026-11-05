@@ -50,9 +50,9 @@ checkout.
 ## Pre-flight
 
 Before any model call, a run verifies that every selected probe's assets
-exist. A probe whose banks are split by locale declares a `locale_bank_check`
-on its class, and the run loads the bank each run locale runs on with it:
-`financial_services`, `sov_ai_facts` and `sov_ai_dynamic` declare one. The
+exist. A probe whose banks are split by locale defines a `check_locale`
+classmethod, and the run loads the bank each run locale runs on with it:
+`financial_services`, `sov_ai_facts` and `sov_ai_dynamic` define one. The
 class's `bank_locale` names that bank, the one the probe loads in the locale's
 place when it has none of its own: a registered India variant with no subtree
 of its own runs on `en_IN`'s. For `financial_services` a subtree counts once it

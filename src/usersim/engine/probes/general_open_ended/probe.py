@@ -31,6 +31,7 @@ from usersim.extension import (
     load_seeds,
     register_probe,
     render_prompt,
+    theme_problems,
 )
 
 
@@ -64,12 +65,7 @@ class OpenEndedProbe(BaseProbe):
     @classmethod
     def asset_problems(cls) -> list[str]:
         """Topics for every shipped locale, and the prompts file the prompt defaults would mask."""
-        problems = []
-        for locale in SHIPPED_LOCALES:
-            try:
-                cls.themes(locale)
-            except FileNotFoundError as error:
-                problems.append(f"no topics for {locale}: {error}")
+        problems = theme_problems(cls, SHIPPED_LOCALES)
         if not load_prompt_file(_SCENARIO):
             problems.append(f"{_SCENARIO}/prompts.yaml is missing or empty")
         return problems
