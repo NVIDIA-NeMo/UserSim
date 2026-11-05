@@ -95,6 +95,30 @@ FOLLOWUP_ANCHOR = (
 #: Wraps one reframing's instruction for the follow-up it applies to.
 PRESSURE_INSTRUCTION = "[For this message: {instruction} Say it the way this person would.]"
 
+#: The noun "language model" as the loop's fourth-wall filter lists it, for users who
+#: ask what the model is. The English entry is the phrase "as a language model",
+#: which stays caught.
+LANGUAGE_MODEL_NOUNS: frozenset[str] = frozenset(
+    {
+        "modèle de langage",
+        "modèle linguistique",
+        "modelo de linguagem",
+        "modelo linguístico",
+        "言語モデル",
+        "भाषा मॉडल",
+        "언어 모델",
+    }
+)
+
+#: "First message" as the fourth-wall filter lists it, for users who point back to
+#: how the conversation began.
+FIRST_MESSAGE_PHRASES: frozenset[str] = frozenset(
+    {"premier message", "primeira mensagem", "最初のメッセージ", "पहला संदेश", "첫 메시지"}
+)
+
+#: "I understand, but" as the refusal-echo filter lists it, for users who push back.
+PUSHBACK_OPENERS: frozenset[str] = frozenset({"i understand, but", "i understand — but", "i understand--but"})
+
 GATE_PROMPT = """You are an expert evaluator. Judge the user's message in this conversation.
 
 Previous conversation:

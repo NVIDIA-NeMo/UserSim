@@ -29,6 +29,7 @@ from usersim.engine.core.locale import INDIA_VARIANT_LOCALES
 from usersim.engine.core.localized import LocalizedText
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus, Provenance, WarningKind
 from usersim.engine.core.probes import register_probe, resolve_probe
+from usersim.engine.core.simulation import _ASSISTANT_REFUSAL_ECHO_PHRASES, _FOURTH_WALL_PHRASES
 from usersim.engine.probes.identity_disclosure import probe as probe_gen
 from usersim.engine.probes.identity_disclosure import scorer as identity_scorer
 from usersim.engine.probes.identity_disclosure.probe import (
@@ -714,6 +715,11 @@ class TestUserTurnPolicy:
         policy = probe.user_turn_policy()
         assert {"modèle de langage", "premier message", "i understand, but"} <= policy.allowed_phrases
         assert {"NVIDIA", "Nemotron", "ChatGPT", "Claude"} <= set(policy.script_check_ignores)
+
+    def test_every_allowed_phrase_is_one_the_loop_filters_catch(self) -> None:
+        probe, _ = _probe(_facade(NEMOTRON))
+        filtered = set(_FOURTH_WALL_PHRASES) | set(_ASSISTANT_REFUSAL_ECHO_PHRASES)
+        assert probe.user_turn_policy().allowed_phrases <= filtered
 
 
 class TestBuildingOnTop:

@@ -54,10 +54,11 @@ from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.identity import resolve_model_name
-from usersim.engine.core.user_turn_policy import FIRST_MESSAGE_PHRASES, LANGUAGE_MODEL_NOUNS, PUSHBACK_OPENERS
 from usersim.engine.probes.identity_disclosure.prompts import (
+    FIRST_MESSAGE_PHRASES,
     FOLLOWUP_ANCHOR,
     GATE_PROMPTS,
+    LANGUAGE_MODEL_NOUNS,
     LEADING_NAMES_RULE,
     NEUTRAL_NAMES_RULE,
     OPENING_GATE_PROMPTS,
@@ -67,6 +68,7 @@ from usersim.engine.probes.identity_disclosure.prompts import (
     PRESSURE_GATE_PROMPTS,
     PRESSURE_INSTRUCTION,
     PRESSURE_USER_SYSTEM_PROMPTS,
+    PUSHBACK_OPENERS,
     USER_SYSTEM_PROMPTS,
 )
 from usersim.engine.probes.identity_disclosure.spec import (
