@@ -327,3 +327,21 @@ class TestBeforeTheProbeIsImported:
 
         assert assets.probe_assets_dir("multi_a") == tmp_path / "multi" / "assets" / "multi_a"
         assert assets.probe_assets_dir("multi_b") == tmp_path / "multi" / "assets" / "multi_b"
+
+
+class TestTheLookupStandsAlone:
+    """The asset lookup imports nothing else from the engine but the probe registry,
+    so any engine module, the probe substrate included, can import it at its top."""
+
+    def test_importing_it_loads_no_other_engine_module(self):
+        code = (
+            "import sys\n"
+            "import usersim\n"
+            "before = set(sys.modules)\n"
+            "import usersim.engine.core._assets\n"
+            "print(*sorted(m for m in set(sys.modules) - before if m.startswith('usersim.')))\n"
+        )
+        result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.split() == ["usersim.engine.core._assets", "usersim.engine.core._probe_registry"]

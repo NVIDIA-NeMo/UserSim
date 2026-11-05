@@ -39,7 +39,7 @@ from contextvars import ContextVar, Token
 from importlib import resources
 from pathlib import Path
 
-from usersim.engine.core import probes
+from usersim.engine.core._probe_registry import PROBE_REGISTRY
 
 _RUNTIME_ASSETS_DIR: ContextVar[Path | None] = ContextVar(
     "conversation_plugin_runtime_assets_dir",
@@ -99,7 +99,7 @@ def declared_assets_roots() -> dict[str, Path]:
     """
     return {
         label: Path(cls.assets_root)
-        for label, cls in sorted(probes._PROBE_REGISTRY.items())
+        for label, cls in sorted(PROBE_REGISTRY.items())
         if getattr(cls, "assets_root", None) is not None
     }
 
@@ -137,7 +137,7 @@ def _declared_root(probe: str) -> Path | None:
     that never imports the probe, reaches the probe's assets.
     """
     declared = declared_assets_roots().get(probe)
-    if declared is None and probe not in probes._PROBE_REGISTRY:
+    if declared is None and probe not in PROBE_REGISTRY:
         return _builtin_probe_root(probe)
     return declared
 

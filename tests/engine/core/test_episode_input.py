@@ -248,16 +248,16 @@ def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
     assert episode.preamble.trajectory_id == _PINNED_TRAJECTORY_IDS[probe_type]
 
 
-def test_two_probes_in_one_module_record_their_own_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_two_probes_in_one_module_record_their_own_metadata(
+    monkeypatch: pytest.MonkeyPatch, register_test_probe
+) -> None:
     """A probe's family, variant and prompt version come from its own class, so
     two probes defined in one module each record their own."""
     data, config, models = _pinned_inputs("general_open_ended")
     module = ModuleType("_two_probes_module")
     monkeypatch.setitem(sys.modules, module.__name__, module)
-    monkeypatch.setattr(probes, "_PROBE_REGISTRY", dict(probes._PROBE_REGISTRY))
     for label, version, variant in (("_first_probe", "v1.0", "alpha"), ("_second_probe", "v2.0", "beta")):
-        cls = type(label, (probes.BaseProbe,), {"label": label, "__module__": module.__name__})
-        probes.register_probe(family=label, prompt_version=version, variants=(variant,))(cls)
+        register_test_probe(label, prompt_version=version, variants=(variant,), __module__=module.__name__)
 
     first = construct_episode_preamble({**data, "probe_type": "_first_probe"}, config=config, models=models)
     second = construct_episode_preamble({**data, "probe_type": "_second_probe"}, config=config, models=models)

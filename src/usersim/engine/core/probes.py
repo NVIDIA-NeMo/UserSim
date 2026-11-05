@@ -58,6 +58,8 @@ from typing import (
     runtime_checkable,
 )
 
+from usersim.engine.core._assets import probe_assets_dir
+from usersim.engine.core._probe_registry import PROBE_REGISTRY as _PROBE_REGISTRY
 from usersim.engine.core.columns import output_columns_problem
 from usersim.engine.core.locale import asset_locale, india_variant
 from usersim.engine.core.messages import _parse_theme
@@ -270,9 +272,6 @@ def seed_dataset_problems(cls: type) -> list[str]:
             f"{cls.__qualname__}.seed_dataset must be None or a file name without its suffix, such as "
             f"'toolsets_seed'; got {seed!r}"
         ]
-    # _assets imports this module at its top, so importing it here at the top would be circular.
-    from usersim.engine.core._assets import probe_assets_dir
-
     folder = probe_assets_dir(cls.label)
     names = [f"{seed}{suffix}" for suffix in SEED_DATASET_SUFFIXES]
     present = [name for name in names if (folder / name).is_file()]
@@ -348,10 +347,6 @@ class BaseProbe:
         shipped in its own package calls this from its loader, so an override
         reaches its banks too.
         """
-        # _assets imports this module at its top, so importing it here at the
-        # top would be circular.
-        from usersim.engine.core._assets import probe_assets_dir
-
         return probe_assets_dir(cls.label)
 
     # Loads one locale's bank from its folder, ``<asset folder>/<locale>/``,
@@ -1463,9 +1458,6 @@ class LocalePromptPack:
 # ---------------------------------------------------------------------------
 # Registry + decorator
 # ---------------------------------------------------------------------------
-
-
-_PROBE_REGISTRY: dict[str, type[BaseProbe]] = {}
 
 
 class ProbeRegistrationError(ValueError):

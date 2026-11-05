@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -406,23 +406,33 @@ def evaluator_df(trajectory_df):
 
 
 @pytest.fixture
-def register_test_probe(monkeypatch) -> Callable[..., type]:
-    """Register throwaway ``BaseProbe`` subclasses in a copy of the probe registry.
+def register_test_probe() -> Iterator[Callable[..., type]]:
+    """Register throwaway ``BaseProbe`` subclasses for one test.
 
     ``register_test_probe("ext_probe", assets_root=root)`` registers a class
     labelled ``ext_probe`` with the given class attributes, in the family
-    ``family`` or, by default, its label's. The registry is restored after
-    the test, so nothing registered here reaches another test.
+    ``family`` or, by default, its label's, so the asset lookup sees it as it
+    sees any registered probe. The registry's entries are restored after the
+    test, so nothing registered here reaches another test.
     """
     from usersim.engine.core import probes
 
-    monkeypatch.setattr(probes, "_PROBE_REGISTRY", dict(probes._PROBE_REGISTRY))
+    snapshot = dict(probes._PROBE_REGISTRY)
 
-    def register(label: str, *, family: str | None = None, **attributes: Any) -> type:
+    def register(
+        label: str,
+        *,
+        family: str | None = None,
+        prompt_version: str = "v1.0",
+        variants: tuple[str, ...] = ("default",),
+        **attributes: Any,
+    ) -> type:
         cls = type(label, (probes.BaseProbe,), {"label": label, **attributes})
-        return probes.register_probe(family=family or label, prompt_version="v1.0", variants=("default",))(cls)
+        return probes.register_probe(family=family or label, prompt_version=prompt_version, variants=variants)(cls)
 
-    return register
+    yield register
+    probes._PROBE_REGISTRY.clear()
+    probes._PROBE_REGISTRY.update(snapshot)
 
 
 @pytest.fixture
