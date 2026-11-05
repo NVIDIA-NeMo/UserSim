@@ -347,30 +347,6 @@ def _prompt_versions() -> dict[str, str]:
     return {label: str(resolve_probe(label).prompt_version or "v1.0") for label in known_probes()}
 
 
-def _extension_identities() -> list[dict[str, Any]]:
-    """Every entry point User Sim discovers, with the package release behind it."""
-    from importlib.metadata import entry_points
-
-    from usersim.engine.core._extensions import ENTRY_POINT_GROUPS, extensions_disabled
-
-    if extensions_disabled():
-        return []
-    identities: list[dict[str, Any]] = []
-    for group in ENTRY_POINT_GROUPS:
-        for entry in sorted(entry_points(group=group), key=lambda e: (e.name, e.value)):
-            dist = getattr(entry, "dist", None)
-            identities.append(
-                {
-                    "group": group,
-                    "name": entry.name,
-                    "value": entry.value,
-                    "distribution": dist.name if dist else None,
-                    "version": dist.version if dist else None,
-                }
-            )
-    return identities
-
-
 def _data_designer_version() -> str | None:
     """The installed Data Designer release, which shapes every model request."""
     from usersim.engine.core.manifest import _pkg_version
@@ -397,6 +373,7 @@ def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str
     A code change that bumps none of these versions is not seen.
     """
     from usersim.engine.config import MODEL_ALIASES, ConversationSimulatorConfig
+    from usersim.engine.core._extensions import extension_identities
     from usersim.engine.core.manifest import _own_version
     from usersim.engine.core.probes import declared_model_aliases
     from usersim.engine.core.storage import RUN_KIND_STORED
@@ -413,7 +390,7 @@ def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str
             "assets": _asset_roots_digest(inputs.assets_dir),
             "environment": _environment_settings(),
             "prompts": _prompt_versions(),
-            "extensions": _extension_identities(),
+            "extensions": extension_identities(),
             "usersim": _own_version(),
             "data_designer": _data_designer_version(),
         }

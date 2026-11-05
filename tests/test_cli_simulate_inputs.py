@@ -412,7 +412,7 @@ def test_an_extension_release_is_part_of_the_setup(rows, monkeypatch):
             dist=SimpleNamespace(name="partner", version=version),
         )
         monkeypatch.setattr(
-            "importlib.metadata.entry_points", lambda group: [entry] if group == "usersim.probes" else []
+            "usersim.engine.core._extensions.entry_points", lambda group: [entry] if group == "usersim.probes" else []
         )
 
     installed("1.0")

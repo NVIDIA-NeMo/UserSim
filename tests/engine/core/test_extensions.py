@@ -16,8 +16,10 @@ from usersim.engine.core._extensions import (
     DISABLE_ENV_VAR,
     ENTRY_POINT_GROUPS,
     PROBES,
+    SCORERS,
     clear_extension_cache,
     extension_distributions,
+    extension_identities,
     extension_records,
     extensions_disabled,
     load_extensions,
@@ -212,3 +214,38 @@ class TestExtensionDistributions:
         object.__setattr__(ep, "dist", _Dist())
         monkeypatch.setattr(_extensions, "entry_points", lambda group: [ep] if group == PROBES else [])
         assert extension_distributions() == {"my-bookings": "0.1.0"}
+
+
+class TestExtensionIdentities:
+    """Every advertised entry point, as a stored run's setup fingerprint records it."""
+
+    def test_none_while_discovery_is_off(self, monkeypatch) -> None:
+        _fake_entry_points(monkeypatch, ("p", "json:dumps"))
+        assert extension_identities() == []
+
+    def test_each_entry_point_with_its_package_release(self, monkeypatch, discovery_enabled) -> None:
+        class _Dist:
+            name, version = "my-bookings", "0.1.0"
+
+        packaged = EntryPoint(name="my_bookings", value="json:dumps", group=PROBES)
+        object.__setattr__(packaged, "dist", _Dist())
+        bare = EntryPoint(name="my_scorer", value="json:loads", group=SCORERS)
+        advertised = {PROBES: [packaged], SCORERS: [bare]}
+        monkeypatch.setattr(_extensions, "entry_points", lambda group: advertised.get(group, []))
+
+        assert extension_identities() == [
+            {
+                "group": PROBES,
+                "name": "my_bookings",
+                "value": "json:dumps",
+                "distribution": "my-bookings",
+                "version": "0.1.0",
+            },
+            {"group": SCORERS, "name": "my_scorer", "value": "json:loads", "distribution": None, "version": None},
+        ]
+        # The manifest's distributions are the same walk, without the entry point that names none.
+        assert extension_distributions() == {"my-bookings": "0.1.0"}
+
+    def test_one_name_is_ordered_by_target(self, monkeypatch, discovery_enabled) -> None:
+        _fake_entry_points(monkeypatch, ("same", "json:loads"), ("same", "json:dumps"))
+        assert [i["value"] for i in extension_identities()] == ["json:dumps", "json:loads"]
