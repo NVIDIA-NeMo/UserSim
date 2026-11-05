@@ -61,11 +61,9 @@ _EXAMPLE_DOCS = (
 _KEPT_INTERNAL_IMPORTS = {
     # A new in-tree probe's own modules, under the names the examples give them.
     ("usersim.engine.probes.YOUR_PROBE", "probe"),
-    ("usersim.engine.probes.bookings.bank", "LOCALES"),
     ("usersim.engine.probes.bookings.bank", "Booking"),
     ("usersim.engine.probes.bookings.bank", "draw_booking"),
     ("usersim.engine.probes.bookings.bank", "read_booking_bank"),
-    ("usersim.engine.probes.bookings.prompts", "BOOKINGS_USER_PROMPTS"),
     ("usersim.engine.templates.probe.prompts", "DEMO_GATE_PROMPT_TEMPLATE"),
     ("usersim.engine.templates.probe.prompts", "DEMO_USER_AGENT_PROMPTS"),
     # The fixture's probe that layers a spec over a shipped probe's.

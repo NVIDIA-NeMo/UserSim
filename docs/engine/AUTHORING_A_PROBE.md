@@ -20,7 +20,7 @@ piece to pick and *how* to wire it.
 2. [Step 1: subclass `BaseProbe` + the right mixin](#step-1-subclass-baseprobe--the-right-mixin)
 3. [Step 2: configure the class attributes](#step-2-configure-the-class-attributes)
 4. [Step 3: wire the asset bank (skip if the probe is asset-free)](#step-3-wire-the-asset-bank)
-5. [Step 4: write your `LocalePromptPack`](#step-4-write-your-localepromptpack)
+5. [Step 4: write the user model's instructions](#step-4-write-the-user-models-instructions)
 6. [Step 5: write the user-judge gate prompt](#step-5-write-the-user-judge-gate-prompt)
 7. [Step 6: `@register_probe`](#step-6-register_probe)
 8. [Step 7: run the smoke test](#step-7-run-the-smoke-test)
@@ -439,13 +439,71 @@ class MyProbe(BaseProbe):
 
 ---
 
-## Step 4: write your `LocalePromptPack`
+## Step 4: write the user model's instructions
 
-For ANY prompt that ships across multiple locales, use
-`LocalePromptPack`. It validates at construction time that every locale
-in `shipped_locales` has a prompt entry, half-shipped locales are
-caught at import time, not at simulate-time when the locale's first
-row trips a KeyError.
+The user model writes every user turn, the first included, in the persona's own
+words, and that is where a probe's reach comes from. The probe sets the area,
+such as a theme, a bank entry or a task, and the bounds a scorer checks; each
+persona asks about it the way that person would, in their language and
+register, with their own detours and follow-ups. Give the user model what to
+talk about and what to hold to, not lines to say: a turn written in advance
+tests one phrasing, and turns the personas write test how people actually ask.
+Keep exact wording for a probe whose wording is itself under test, such as a
+false premise or a matched pair.
+
+**The default: one instruction in `prompts.yaml`.** Put the instructions in
+the probe's asset folder, `assets/<label>/prompts.yaml`, read them with
+`get_prompt`, fill them with `render_prompt`, and add `language_instruction`:
+
+```yaml
+user_system_prompt: |
+  {persona}
+
+  You want an assistant's help with {topic}. Ask in your own words, the way you
+  would yourself, and follow up on what it says until you have what you need.
+```
+
+```python
+from usersim.extension import format_persona_for_prompt, get_prompt, language_instruction, render_prompt
+
+
+class MyProbe(BaseProbe):
+    def get_user_system_prompt(self) -> str:
+        prompt = render_prompt(
+            get_prompt(self.label, "user_system_prompt"),
+            self._data,
+            persona=format_persona_for_prompt(self._persona),
+            topic=self.theme()["description"],
+        )
+        return f"{prompt}\n\n{language_instruction(self._language, self._locale)}"
+```
+
+The instruction is written once and serves every locale. `render_prompt` fills
+each placeholder from the values you pass, then from the row's columns, and
+names a placeholder it cannot fill. Check in `asset_problems` that the file
+holds the instruction, so an install without it fails `usersim smoke` rather
+than a run.
+
+**How language guidance works.** Each row carries the conversation language
+of its locale, which the probe reads as `self._language` (and its locale as
+`self._locale`); `get_conversation_language(locale)` gives it for any locale.
+`language_instruction(language, locale)` is the block the user model reads:
+write every message in that language and, for a locale with a script of its
+own or a romanized one, in which script, without transliterating. It is empty
+for English. The loop then checks the script of each user turn itself, with no
+model call, and has the user model write the turn again when too little of it
+is in the locale's script (`enforce_user_language`,
+`user_language_min_script_compliance`); each retry counts in the outcome's
+`n_user_language_violations`. Whether the assistant answered in the user's
+language is scored after the run, by the `language_compliance` scorer and the
+judges' `language_appropriateness` axis. So instructions written in English
+produce conversations in Japanese or Hindi.
+
+**When the wording is under test: `LocalePromptPack`.** A probe that tests the
+exact words a user sends writes its instructions in each language it ships.
+`LocalePromptPack` holds one per locale and refuses, when the module is
+imported, a locale in `shipped_locales` without one, rather than failing when
+that locale's first row runs:
 
 ```python
 from usersim.extension import SHIPPED_LOCALES, LocalePromptPack
@@ -465,10 +523,6 @@ MY_USER_PROMPTS = LocalePromptPack(
 # At simulate time:
 prompt = MY_USER_PROMPTS.get(self._locale, persona="Sarah", topic="train tickets")
 ```
-
-If you only ship one locale, plain string templates are fine:
-`LocalePromptPack` adds value specifically for the half-shipped-locale
-failure mode.
 
 ---
 
@@ -726,9 +780,6 @@ from pathlib import Path
 
 import yaml
 
-#: The locales the probe ships a bank for.
-LOCALES = ("en_US", "pt_BR")
-
 
 @dataclass(frozen=True)
 class Appointment:
@@ -783,40 +834,23 @@ def draw_booking(appointment: Appointment, rng: random.Random) -> Booking:
 """bookings probe: booking arguments from dates and times as users write them."""
 ```
 
-### File 4: `src/usersim/engine/probes/bookings/prompts.py`
+### File 4: `src/usersim/engine/probes/bookings/assets/bookings/prompts.yaml`
 
-```python
-"""The simulated user's instructions, in each language the probe ships."""
+```yaml
+user_system_prompt: |
+  {persona}
 
-from usersim.engine.probes.bookings.bank import LOCALES
-from usersim.extension import LocalePromptPack
-
-BOOKINGS_USER_PROMPTS = LocalePromptPack(
-    label="bookings.user_system",
-    prompts={
-        "en_US": (
-            "{persona}\n\n"
-            "You want an assistant to book {what} on {date} at {time}. Ask for it in your own words, "
-            "and write the date and time the way you would write them yourself, not in the form they are "
-            "given here. Say how many people are coming only if it asks; the answer is {people}. "
-            "Once it confirms the booking, thank it."
-        ),
-        "pt_BR": (
-            "{persona}\n\n"
-            "Você quer que um assistente reserve {what} para {date} às {time}. Peça do seu jeito, e "
-            "escreva a data e a hora como você mesmo escreveria, não na forma em que aparecem aqui. "
-            "Diga quantas pessoas vão só se ele perguntar; a resposta é {people}. "
-            "Quando ele confirmar a reserva, agradeça."
-        ),
-    },
-    shipped_locales=LOCALES,
-)
+  You want an assistant to book {what} on {date} at {time}. Ask for it in your
+  own words, and write the date and time the way you would write them yourself,
+  not in the form they are given here. Say how many people are coming only if it
+  asks; the answer is {people}. Once it confirms the booking, thank it.
 ```
 
-The user's instructions are written in each language the probe ships, and
-`LocalePromptPack` refuses, when the module is imported, a locale without them.
-They give the user model what to book, with the date and time in the tool's
-form, and ask it to write the date and time the way it would itself.
+The instruction is written once, and `language_instruction` (File 5) has the
+user write in the row's language, so a Brazilian persona asks in Portuguese and
+writes the date the way people in Brazil write dates. It gives the user model
+what to book, with the date and time in the tool's form, and asks it to write
+them the way it would itself.
 
 ### File 5: `src/usersim/engine/probes/bookings/probe.py`
 
@@ -831,13 +865,16 @@ from pathlib import Path
 from typing import Any
 
 from usersim.engine.probes.bookings.bank import Booking, draw_booking, read_booking_bank
-from usersim.engine.probes.bookings.prompts import BOOKINGS_USER_PROMPTS
 from usersim.extension import (
     BankBackedProbe,
     ToolExecutionMixin,
     format_persona_for_prompt,
+    get_prompt,
+    language_instruction,
+    load_prompt_file,
     persona_uuid,
     register_probe,
+    render_prompt,
 )
 
 BOOK_APPOINTMENT = {
@@ -877,19 +914,29 @@ class BookingsProbe(ToolExecutionMixin, BankBackedProbe):
     def check_locale(cls, locale_dir: Path) -> None:
         read_booking_bank(locale_dir)
 
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        problems = super().asset_problems()
+        if "user_system_prompt" not in load_prompt_file(cls.label):
+            problems.append("prompts.yaml has no user_system_prompt")
+        return problems
+
     def derive_task(self, persona: dict, bank: Any, *, cfg: Any) -> Booking:
         rng = random.Random(f"{persona_uuid(persona)}:{bank.bank_version}:{cfg.random_seed}")
         return draw_booking(rng.choice(bank.appointments), rng)
 
     def get_user_system_prompt(self) -> str:
-        return BOOKINGS_USER_PROMPTS.get(
-            self._locale,
+        task = self._task
+        prompt = render_prompt(
+            get_prompt(self.label, "user_system_prompt"),
+            self._data,
             persona=format_persona_for_prompt(self._persona),
-            what=self._task.what,
-            date=self._task.date,
-            time=self._task.time,
-            people=self._task.people,
+            what=task.what,
+            date=task.date,
+            time=task.time,
+            people=task.people,
         )
+        return f"{prompt}\n\n{language_instruction(self._language, self._locale)}"
 
     def get_assistant_system_prompt(self) -> str:
         return ""  # Pure-capability-test policy.

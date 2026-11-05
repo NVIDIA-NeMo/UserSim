@@ -20,8 +20,10 @@ What the unified ``ConversationLoop`` provides for you:
 What you provide:
 - ``themes(locale)``: the topics a run draws from, one per row, each a
   mapping with at least a ``description``.
-- The user-agent system prompt (how the simulated user behaves, and the
-  row's topic).
+- The user-agent system prompt: one instruction in ``prompts.yaml``
+  (copy ``prompts.yaml`` to ``assets/<your_probe>/``), filled with the
+  persona and the row's topic, plus ``language_instruction`` so the user
+  writes in the row's language.
 - The assistant system prompt (empty per pure-capability-test policy;
   see docs/engine/README.md "Assistant under test").
 
@@ -40,9 +42,15 @@ import yaml
 # ``usersim.engine.probes.<your_probe>.prompts``.
 from usersim.engine.templates.probe.prompts import (  # type: ignore[import-not-found]
     DEMO_GATE_PROMPT_TEMPLATE,
-    DEMO_USER_AGENT_PROMPTS,
 )
-from usersim.extension import BaseProbe, register_probe
+from usersim.extension import (
+    BaseProbe,
+    format_persona_for_prompt,
+    get_prompt,
+    language_instruction,
+    register_probe,
+    render_prompt,
+)
 
 
 @register_probe
@@ -59,12 +67,14 @@ class DemoGeneralProbe(BaseProbe):
         return yaml.safe_load((cls.assets_dir() / locale / "themes.yaml").read_text(encoding="utf-8"))
 
     def get_user_system_prompt(self) -> str:
-        prompt = DEMO_USER_AGENT_PROMPTS.get(
-            self._locale,
-            persona=self._persona.get("first_name", "the user"),
-        )
         # The topic bounds the conversation; the persona picks the question.
-        return f"{prompt}\n\nTopic: {self.theme()['description']}"
+        prompt = render_prompt(
+            get_prompt(self.label, "user_system_prompt"),
+            self._data,
+            persona=format_persona_for_prompt(self._persona),
+            topic=self.theme()["description"],
+        )
+        return f"{prompt}\n\n{language_instruction(self._language, self._locale)}"
 
     def get_assistant_system_prompt(self) -> str:
         # Pure-capability-test policy. Empty system prompt;

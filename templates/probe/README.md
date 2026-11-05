@@ -45,15 +45,16 @@ templates/probe/
 ├── generator_bank_reframing.py     # BankReframingMixin: multi-turn pressure with reframings
 ├── generator_agentic.py            # AgenticMixin: single user turn + tool-interception
 ├── generator_tool_calling.py       # ToolCallingMixin: early-stop deferred until tool used
-├── prompts.py                      # LocalePromptPack demo
+├── prompts.yaml                    # the user model's instructions: one, in English
+├── prompts.py                      # LocalePromptPack demo (wording under test), gate prompt
 └── test_probe.py.template          # copy-and-edit per-probe test scaffold
 ```
 
 When you port the template, copy the `generator_<shape>.py` whose
 shape matches your probe into
 `src/usersim/engine/probes/<your_probe>/probe.py`,
-copy `prompts.py` into the same directory, put its banks in that
-directory's `assets/<your_probe>/`, and copy
+copy `prompts.py` into the same directory, put its banks and
+`prompts.yaml` in that directory's `assets/<your_probe>/`, and copy
 `test_probe.py.template` to
 `tests/probes/<your_probe>/test_probe.py`, beside an `__init__.py`. Then
 follow the
@@ -152,9 +153,12 @@ When porting one of the templates into a new module:
       The loop writes the keys in `RESERVED_METADATA_KEYS` (in
       `usersim.extension`); a probe reads them, and
       `assert_probe_conforms` reports a probe class that writes one.
-- [ ] Author the user-agent system prompt + the per-turn judge
-      rubric in `prompts.py`. Use `LocalePromptPack` for any prompt
-      that ships across multiple locales.
+- [ ] Write the user model's instructions once, in `prompts.yaml`, and
+      add `language_instruction` so the user writes in the row's language.
+      Give the area and its bounds, not lines to say: the persona writes
+      every turn. Use `LocalePromptPack` in `prompts.py` only when the
+      exact wording in each locale is under test (step 4 of
+      `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] Declare every key `build_result_extras` adds beyond the core
       columns in the class's `output_columns`, as each template does. The
       engine keeps the core columns plus every registered probe's

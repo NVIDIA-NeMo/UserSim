@@ -38,8 +38,10 @@ write areas and their bounds, not messages to send.
    [Names](../../docs/extensions.md#names).
 2. Write your areas in `themes.yaml`, one file per locale in its language, in
    a folder named for the locale.
-3. Write the user's instructions in `prompts.yaml`. `render_prompt` fills
-   `{persona}`, `{area}` and any column of the row.
+3. Write the user's instructions in `prompts.yaml`, once, in English.
+   `render_prompt` fills `{persona}`, `{area}` and any column of the row, and
+   `language_instruction` has the user write in the row's language. Give the
+   area and its bounds, not lines to say: the persona writes every turn.
 4. Replace `DO_TASK` with the tool your probe offers the assistant, or drop it,
    `ToolExecutionMixin` and `execute_tool_call` if it offers none.
 5. Replace the scorer with what your probe measures.

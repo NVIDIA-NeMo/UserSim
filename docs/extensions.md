@@ -27,6 +27,7 @@ my-bookings/
 │   ├── probe.py
 │   ├── scorer.py
 │   └── assets/my_bookings/
+│       ├── prompts.yaml
 │       ├── en_US/bookings.yaml
 │       └── pt_BR/bookings.yaml
 └── tests/
@@ -124,9 +125,12 @@ from usersim.extension import (
     PreviewField,
     ToolExecutionMixin,
     format_persona_for_prompt,
+    get_prompt,
     language_instruction,
+    load_prompt_file,
     persona_uuid,
     register_probe,
+    render_prompt,
 )
 
 BOOK_APPOINTMENT = {
@@ -217,23 +221,29 @@ class BookingProbe(ToolExecutionMixin, BankBackedProbe):
     def check_locale(cls, locale_dir: Path) -> None:
         read_booking_bank(locale_dir)
 
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        problems = super().asset_problems()
+        if "user_system_prompt" not in load_prompt_file(cls.label):
+            problems.append("prompts.yaml has no user_system_prompt")
+        return problems
+
     def derive_task(self, persona, bank, *, cfg):
         rng = random.Random(f"{persona_uuid(persona)}:{bank.bank_version}:{cfg.random_seed}")
         return draw_booking(rng.choice(bank.appointments), rng)
 
     def get_user_system_prompt(self) -> str:
         task = self._task
-        return "\n\n".join(
-            [
-                format_persona_for_prompt(self._persona),
-                f"You want an assistant to book {task.what} on {task.date} at {task.time}. "
-                "Ask for it in your own words, and write the date and time the way you would write them "
-                "yourself, not in the form they are given here. "
-                f"Say how many people are coming only if it asks; the answer is {task.people}. "
-                "Once it confirms the booking, thank it.",
-                language_instruction(self._language, self._locale),
-            ]
+        prompt = render_prompt(
+            get_prompt(self.label, "user_system_prompt"),
+            self._data,
+            persona=format_persona_for_prompt(self._persona),
+            what=task.what,
+            date=task.date,
+            time=task.time,
+            people=task.people,
         )
+        return f"{prompt}\n\n{language_instruction(self._language, self._locale)}"
 
     def get_assistant_system_prompt(self) -> str:
         return ""
@@ -267,12 +277,17 @@ class BookingProbe(ToolExecutionMixin, BankBackedProbe):
   `book_appointment` in `get_tools_for_assistant`, and `execute_tool_call`
   answers each call. It records the first booking in `state.metadata`, with
   how many user turns came before it.
-- **`get_user_system_prompt`** gives the user model the persona, what to book,
-  the date and time in the tool's form, and the number of people, to give only
-  if the assistant asks. It asks for the date and time written the way the user
-  would write them, and `language_instruction` keeps the user writing in the
-  run's language. The user model writes every user turn, the first included,
-  and the gate checks each one.
+- **`get_user_system_prompt`** fills the instruction in `prompts.yaml` with the
+  persona, what to book, the date and time in the tool's form, and the number
+  of people, to give only if the assistant asks. The instruction is written
+  once, in English, and `language_instruction` has the user write in the row's
+  language and, for a locale with a script of its own, in that script; the loop
+  checks each user turn's script and has a turn written again when it is wrong.
+  The user model writes every user turn, the first included, in the persona's
+  own words, which is what lets rows that draw the same appointment open
+  differently; the gate checks each one.
+  [Step 4 of the authoring guide](engine/AUTHORING_A_PROBE.md#step-4-write-the-user-models-instructions)
+  says when to write the instructions in each language instead.
 - **`allow_early_stop_at_turn`** keeps the conversation going until the
   assistant books, so a user who adds a thank-you to the number of people does
   not end it before the booking is made.
@@ -295,7 +310,8 @@ class BookingProbe(ToolExecutionMixin, BankBackedProbe):
   bank that loads stops before any model call rather than failing every row.
   `asset_problems`, which `usersim smoke` and `assert_probe_conforms` run,
   calls it on each locale folder the package ships, so they report a bank
-  that does not load.
+  that does not load, and the override adds a check that `prompts.yaml` holds
+  the instruction.
 - **`placeholder_warning_kind`** is the warning a row records when its
   appointment is marked `placeholder: true`. Its
   `<prefix>_used_placeholder_<thing>` form is what the capability report counts
@@ -307,6 +323,18 @@ class BookingProbe(ToolExecutionMixin, BankBackedProbe):
   time and number of people, with a generator seeded from the persona, the
   bank's version and the run's seed, never the global `random`, so a row draws
   the same booking every time it runs.
+
+The instruction, `assets/my_bookings/prompts.yaml`:
+
+```yaml
+user_system_prompt: |
+  {persona}
+
+  You want an assistant to book {what} on {date} at {time}. Ask for it in your
+  own words, and write the date and time the way you would write them yourself,
+  not in the form they are given here. Say how many people are coming only if it
+  asks; the answer is {people}. Once it confirms the booking, thank it.
+```
 
 The banks, `assets/my_bookings/en_US/bookings.yaml`:
 

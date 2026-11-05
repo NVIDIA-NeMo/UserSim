@@ -397,7 +397,8 @@ Copy-pasteable starter files for each shape live at
 - `generator_bank_reframing.py`: multi-turn bank-driven reframings
 - `generator_agentic.py`: single-user-turn + tool-interception (custom `run_dispatch`)
 - `generator_tool_calling.py`: tool-calling capability test
-- `prompts.py`: `LocalePromptPack` demo
+- `prompts.yaml`: the user model's instructions, one in English for every locale
+- `prompts.py`: `LocalePromptPack` demo, for wording under test, and the gate prompt
 - `test_probe.py.template`: per-probe test scaffold
 
 Quick orientation:

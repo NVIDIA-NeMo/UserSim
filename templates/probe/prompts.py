@@ -1,23 +1,25 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Prompts module for the demo probes — uses LocalePromptPack.
+"""Prompts module for the demo probes: instructions written in each language, and the gate prompt.
 
-For ANY prompt that ships across multiple locales, use
-``LocalePromptPack``. It validates at construction time that every
-locale in ``shipped_locales`` has a prompt entry — half-shipped
-locales are caught at import time, not at simulate-time when the
-locale's first row trips a KeyError.
+The default is one instruction in ``prompts.yaml`` (beside this file), read
+with ``get_prompt`` and followed by ``language_instruction``, as
+``generator_baseprobe_only.py`` does: the persona writes every turn in the
+row's language. Write the instructions in each language, as
+``DEMO_USER_AGENT_PROMPTS`` does, only for a probe whose exact wording is
+under test. ``LocalePromptPack`` refuses, when the module is imported, a
+locale in ``shipped_locales`` without its prompt.
 
-The single-locale demo at the bottom (``DEMO_GATE_PROMPT_TEMPLATE``)
-shows the form factor when localization isn't a concern.
+The plain template at the bottom (``DEMO_GATE_PROMPT_TEMPLATE``) is the
+gate prompt, which does not vary by locale.
 """
 
 from __future__ import annotations
 
 from usersim.extension import SHIPPED_LOCALES, LocalePromptPack
 
-# ── Multi-locale: use LocalePromptPack ──────────────────────────────
+# ── Wording under test: one prompt per locale ───────────────────────
 
 DEMO_USER_AGENT_PROMPTS = LocalePromptPack(
     label="demo_general.user_system",

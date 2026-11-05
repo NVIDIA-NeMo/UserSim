@@ -1,0 +1,12 @@
+# The demo probes' instructions for the simulated user. Copy this file to
+# src/usersim/engine/probes/<your_probe>/assets/<your_probe>/prompts.yaml.
+#
+# One instruction, written once, serves every locale: the probe appends
+# language_instruction, so the user writes in the row's language and script.
+# Give the user model the area and its bounds, not lines to say; the persona
+# writes every turn, the first included, in its own words.
+user_system_prompt: |
+  {persona}
+
+  You want an assistant's help with {topic}. Ask in your own words, the way you
+  would yourself, and follow up on what it says until you have what you need.
