@@ -1294,7 +1294,6 @@ class TestRunMetadataResolution:
             simulation_config=SimulationConfigSnapshot(
                 max_turns=5,
                 max_steps=10,
-                max_tools=5,
                 max_query_attempts=3,
                 max_assistant_attempts=1,
                 incremental_disclosure_ratio=0.6,

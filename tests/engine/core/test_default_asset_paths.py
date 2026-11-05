@@ -269,27 +269,16 @@ def test_prompt_loader_returns_nonempty_for_each_probe(probe: str) -> None:
 
 
 def test_tool_calling_toolsets_seed_exists_and_loads() -> None:
-    """``cli/simulate.py`` and ``notebooks/01_simulate.ipynb`` compose the
-    toolset-seed path manually as ``assets_dir / "tool_calling" /
-    "toolsets_seed.parquet"`` rather than going through a loader. When
-    the file is absent both branches silently set ``use_tools=False``
-    in ``cli/_pipeline.py``, which sets ``ConversationSimulatorConfig.tools_column=None``,
-    which makes every ``tool_calling`` probe fail at construction with
-    ``cfg.tools_column not configured``. We pin the existence + structural
-    health here so a future move (e.g. somebody renaming the
-    ``tool_calling/`` directory without updating the path-composition sites)
-    fails the test suite instead of silently producing 100% failed
-    ``tool_calling`` trajectories.
+    """The toolset table every ``tool_calling`` row is drawn from ships, loads and holds the columns rows read.
+
+    The probe takes a row's tools from its ``tools`` column (the probe's
+    ``tools_column`` setting) and refuses a row without it, so a missing or
+    malformed table fails every ``tool_calling`` conversation.
     """
     from usersim.engine.core._assets import probe_assets_dir
 
     p = probe_assets_dir("tool_calling") / "toolsets_seed.parquet"
-    assert p.exists(), (
-        f"tool_calling toolset seed missing: {p}\n"
-        "Without it cli/simulate.py's `use_tools` branch resolves to "
-        "False and every tool_calling probe fails at construction with "
-        "'cfg.tools_column not configured'."
-    )
+    assert p.exists(), f"tool_calling toolset seed missing: {p}"
 
     # Structural health: parquet readable, non-empty, has the columns the
     # data-designer SamplerColumnConfig consumes.

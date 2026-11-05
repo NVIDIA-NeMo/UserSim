@@ -22,6 +22,10 @@ the other probes.
   conversation does not end early before the assistant has called a tool.
 - Each row records `tool_subset`, the tools it offered, and `num_tool_calls`.
 
+Two settings, each set with `--probe-option tool_calling.<name>=<value>`:
+`max_tools`, the most tools a conversation offers (default `5`), and
+`tools_column`, the row column holding the toolset's tools (default `tools`).
+
 ## Locales
 
 One catalog and one `prompts.yaml` serve every locale, the India language

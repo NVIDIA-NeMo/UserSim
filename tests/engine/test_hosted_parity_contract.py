@@ -53,10 +53,7 @@ def _config(probe_type: str) -> ConversationSimulatorConfig:
         locale="en_US",
         max_turns=2,
         random_seed=4242,
-        tools_column="tools" if probe_type == "tool_calling" else None,
-        finance_tier_mix=0.0,
-        finance_tier="verifiable",
-        finance_retrieval_mode="hybrid",
+        probe_options={"financial_services": {"tier": "verifiable"}},
     )
 
 

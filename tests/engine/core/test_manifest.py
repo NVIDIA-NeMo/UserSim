@@ -92,7 +92,6 @@ class _StubSimConfig:
 
     max_turns: int = 5
     max_steps: int = 10
-    max_tools: int = 5
     max_query_attempts: int = 3
     incremental_disclosure_ratio: float = 0.6
     persona_grounding_ratio: float = 1.0
@@ -144,7 +143,6 @@ class TestRoundTrip:
             simulation_config=SimulationConfigSnapshot(
                 max_turns=5,
                 max_steps=10,
-                max_tools=5,
                 max_query_attempts=3,
                 max_assistant_attempts=1,
                 incremental_disclosure_ratio=0.6,
@@ -224,7 +222,6 @@ def _minimal_manifest(run_id: str = "1700000000") -> RunManifest:
         simulation_config=SimulationConfigSnapshot(
             max_turns=5,
             max_steps=10,
-            max_tools=5,
             max_query_attempts=3,
             max_assistant_attempts=1,
             incremental_disclosure_ratio=0.6,

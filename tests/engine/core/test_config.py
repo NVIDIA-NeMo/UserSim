@@ -14,12 +14,10 @@ class TestConversationSimulatorConfig:
     def test_default_values(self):
         cfg = ConversationSimulatorConfig(name="test")
         assert cfg.locale == "en_US"
-        assert cfg.tools_column is None
-        assert cfg.toolset_name_column is None
         assert cfg.max_turns == 5
-        assert cfg.max_tools == 5
         assert cfg.max_steps == 10
         assert cfg.random_seed is None
+        assert cfg.probe_options == {}
 
     def test_custom_locale(self):
         cfg = ConversationSimulatorConfig(name="test", locale="pt_BR")
@@ -47,7 +45,7 @@ class TestConversationSimulatorConfig:
         cfg = ConversationSimulatorConfig(name="test")
         declared = cfg.get_model_aliases()
         assert "summary_model" not in declared
-        assert cfg.finance_embedding_model_alias not in declared
+        assert "embedding_model" not in declared
 
     def test_every_probe_specific_column_is_declared(self):
         """A column the config does not declare is written by the probe and
@@ -109,7 +107,3 @@ class TestConversationSimulatorConfig:
         assert "persona" in required
         assert "probe_type" in required
         assert "theme" in required
-
-    def test_tools_column_optional(self):
-        cfg = ConversationSimulatorConfig(name="test", tools_column="tools")
-        assert cfg.tools_column == "tools"

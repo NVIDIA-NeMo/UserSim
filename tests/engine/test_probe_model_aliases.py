@@ -24,7 +24,9 @@ def test_the_built_in_probes_declare_the_embedding_model() -> None:
 
 
 def test_a_declared_alias_follows_the_setting_that_names_it() -> None:
-    config = ConversationSimulatorConfig(name="conversation_messages", finance_embedding_model_alias="my_embedder")
+    config = ConversationSimulatorConfig(
+        name="conversation_messages", probe_options={"financial_services": {"embedding_model_alias": "my_embedder"}}
+    )
 
     assert declared_model_aliases(config) == ("my_embedder",)
 

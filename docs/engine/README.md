@@ -457,11 +457,8 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `persona_column` | str | `"persona"` | Column containing persona dict |
 | `probe_type_column` | str | `"probe_type"` | Column carrying the probe label that the dispatcher resolves through `_PROBE_REGISTRY` |
 | `theme_column` | str | `"theme"` | Column with theme/topic |
-| `tools_column` | str? | `None` | The column `tool_calling` reads its tools from; `None` reads `tools`, the column of its seed table |
-| `toolset_name_column` | str? | `None` | Read by no probe; a stored config may set it |
 | `locale` | str | `"en_US"` | Locale for conversation language |
 | `assets_dir` | str? | `None` | The asset root every probe is pinned to (`--assets-dir`); `None` reads each probe's own assets, after any `USERSIM_ASSET_PATH` override |
-| `max_tools` | int | `5` | Max tools sampled per row (tool_calling) |
 | `max_turns` | int | `5` | Max conversation turns |
 | `max_steps` | int | `10` | Max tool steps per turn |
 | `max_query_attempts` | int | `3` | Max retries for the user-LLM query / follow-up + judge gate before declaring `USER_QUERY_GATE_EXHAUSTED` |
@@ -476,8 +473,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `store_reasoning` | bool | `True` | Keep the assistant's thinking trace on the assistant message when the model emits one (`--no-store-reasoning` to turn off). Gated at capture, so a suppressed trace is never attached. Independent of whether the model *produces* a trace: that is a model-side setting (`chat_template_kwargs` in the models TOML, plus a server-side reasoning parser). A trace reaches a model again only through `replay_assistant_reasoning` |
 | `replay_assistant_reasoning` | bool | `False` | Send the assistant model the reasoning of its own earlier messages (`replay_reasoning = true` on `assistant_model` in the models TOML). Needs `store_reasoning`; the assistant's history is then not compressed. No other model receives the assistant's reasoning during a simulation |
 | `verbosity` | int | `1` | Logging detail: 0=quiet, 1=normal, 2=detailed |
-| `finance_tier_mix` / `finance_tier` / `finance_retrieval_mode` / `finance_embedding_model_alias` | float / str? / str / str | `0.0` / `None` / `"hybrid"` / `"embedding_model"` | `financial_services` only; see the probe's [README](../../src/usersim/engine/probes/financial_services/README.md#running-it) |
-| `probe_options` | dict | `{}` | Each probe's settings, by label, checked against its `Options` before any model call (`--probe-option PROBE.SETTING=VALUE`) |
+| `probe_options` | dict | `{}` | Each probe's settings, by label, checked against its `Options` before any model call (`--probe-option PROBE.SETTING=VALUE`); `financial_services` and `tool_calling` list theirs in their READMEs |
 | `random_seed` | int? | `None` | Seed for reproducible tool sampling |
 
 ## Side-Effect Columns

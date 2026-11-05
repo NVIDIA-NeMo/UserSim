@@ -29,6 +29,8 @@ import random
 from pathlib import Path
 from typing import Any
 
+from pydantic import Field
+
 from usersim.engine.probes.tool_calling.credentials import (
     declared_credentials,
     draw_credentials,
@@ -108,11 +110,6 @@ def _build_tool_context(tool_subset: list) -> str:
         desc = spec.get("description", "No description available.")
         lines.append(f"- {name}: {desc}")
     return "\n".join(lines) if lines else "No tools available."
-
-
-def _tools_column(cfg: Any) -> str:
-    """The row column holding the toolset's tools: the run's ``tools_column``, else the catalog's ``tools``."""
-    return getattr(cfg, "tools_column", None) or "tools"
 
 
 def _row_identity(data: dict) -> str:
@@ -287,6 +284,14 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         PreviewField("num_tools", "Tools available"),
     )
 
+    class Options(BaseProbe.Options):
+        """The run's settings for this probe, set as ``--probe-option tool_calling.<name>=<value>``."""
+
+        #: The most tools a conversation offers, drawn from its toolset.
+        max_tools: int = Field(default=5, ge=1)
+        #: The row column holding the toolset's tools.
+        tools_column: str = "tools"
+
     @classmethod
     def asset_problems(cls) -> list[str]:
         """The prompts file the prompt defaults would mask."""
@@ -296,8 +301,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        cfg = self._cfg
-        tools_column = _tools_column(cfg)
+        tools_column = self.options.tools_column
         if tools_column not in self._data:
             raise ValueError(f"tool_calling: column {tools_column!r} missing in data")
 
@@ -309,7 +313,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         # row is always handed the same tools.
         self.tool_subset = random.Random(_tool_subset_seed(self._data)).sample(
             all_tools,
-            min(cfg.max_tools, len(all_tools)),
+            min(self.options.max_tools, len(all_tools)),
         )
 
         theme = _derive_tool_theme(self._data)

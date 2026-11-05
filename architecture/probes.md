@@ -65,12 +65,13 @@ mixin that adds them.
 | `on_tool_call_executed` | after each tool call runs: `ToolExecutionMixin` calls it, and a probe that runs tool calls itself must |
 | `set_tool_call_observer` | an external host, to watch the tool calls the probe runs |
 
-Two helpers are for the probe to call:
+Three helpers are for the probe to call:
 
 | Helper | Gives |
 |---|---|
 | `theme` | the row's theme, one of those `themes` lists; `{}` for a probe that lists none |
 | `assets_dir` | the probe's asset folder, `<root>/<label>/`, where its bank loaders read |
+| `options_for` | the probe's settings in a run's config, validated against its `Options`, for a classmethod such as `model_aliases`; its defaults when the config gives none |
 
 Anything a probe does not override inherits a default, so a new probe declares
 only what is specific to it; [What a probe declares](#what-a-probe-declares)

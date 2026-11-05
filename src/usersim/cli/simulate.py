@@ -233,38 +233,11 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default=None,
         metavar="PROBE.SETTING=VALUE",
         help=(
-            "A setting for one probe in the mix; repeat it for more. "
+            "A setting for one probe in the mix, such as financial_services.tier_mix=0.3; "
+            "repeat it for more. "
             "The value is read as JSON when it parses, else as text. "
             "Each probe lists the settings it takes in its Options; an unknown probe or "
             "setting, or a bad value, stops the run before any model call."
-        ),
-    )
-    p.add_argument(
-        "--finance-tier-mix",
-        type=float,
-        default=0.0,
-        help=(
-            "financial_services only: probability [0,1] a trajectory uses the "
-            "DYNAMIC tier (generated open-ended, judge-scored) vs the default "
-            "VERIFIABLE tier (param-locked, deterministically verified). "
-            "0.0 (default) = verifiable-only."
-        ),
-    )
-    p.add_argument(
-        "--finance-retrieval-mode",
-        choices=("hybrid", "dense", "golden"),
-        default="hybrid",
-        help=(
-            "financial_services only: kb_search backend. 'hybrid' (default) "
-            "blends word overlap with cosine similarity over the institution's "
-            "document vectors (embeddings.parquet, written by gen-assets; the "
-            "query is embedded with the 'embedding_model' alias), and ranks on "
-            "word overlap alone when the bank has no vectors. 'dense' uses "
-            "cosine alone, as an ablation. 'golden' is a reasoning-isolation "
-            "ablation that injects the verifiable task's gold documents; the "
-            "dynamic tier has no gold documents, so it ranks on word overlap "
-            "there. Retrieval quality is measured separately by the "
-            "financial_retrieval_recall capability."
         ),
     )
     p.add_argument(
@@ -322,8 +295,6 @@ _STORED_ROW_FLAGS = {
     "probe_mix": "--probe-mix",
     "random_seed": "--random-seed",
     "probe_option": "--probe-option",
-    "finance_tier_mix": "--finance-tier-mix",
-    "finance_retrieval_mode": "--finance-retrieval-mode",
     "no_store_reasoning": "--no-store-reasoning",
     "toolset_seed_path": "--toolset-seed-path",
     "match_persona_language": "--match-persona-language",
@@ -489,8 +460,6 @@ def run(args: argparse.Namespace) -> int:
         max_assistant_attempts=args.max_assistant_attempts,
         probe_mix=probe_mix,
         random_seed=args.random_seed,
-        finance_tier_mix=args.finance_tier_mix,
-        finance_retrieval_mode=args.finance_retrieval_mode,
         probe_options=probe_options,
         skip_existing=not args.no_skip_existing,
         store_reasoning=not args.no_store_reasoning,
@@ -550,8 +519,6 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float], probe_options
                 max_turns=args.max_turns,
                 max_assistant_attempts=args.max_assistant_attempts,
                 store_reasoning=not args.no_store_reasoning,
-                finance_tier_mix=args.finance_tier_mix,
-                finance_retrieval_mode=args.finance_retrieval_mode,
                 probe_options=probe_options,
             )
         )
@@ -678,8 +645,6 @@ def _simulate_to_parquet(
     toolset_seed_path=None,
     probe_mix,
     random_seed,
-    finance_tier_mix=0.0,
-    finance_retrieval_mode="hybrid",
     probe_options=None,
     skip_existing,
     max_assistant_attempts=1,
@@ -782,8 +747,6 @@ def _simulate_to_parquet(
             match_persona_language=match_persona_language,
             toolset_seed_path=toolset_seed_path,
             random_seed=random_seed,
-            finance_tier_mix=finance_tier_mix,
-            finance_retrieval_mode=finance_retrieval_mode,
             probe_options=probe_options,
         )
         if seed_source is not None:

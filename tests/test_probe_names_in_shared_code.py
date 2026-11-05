@@ -46,7 +46,7 @@ _ALLOWED: dict[tuple[str, str], str] = {
     ("cli/simulate.py", "general_educational"): "the --probe-mix default",
     ("cli/simulate.py", "general_open_ended"): "the --probe-mix default",
     ("cli/simulate.py", "tool_calling"): "the --probe-mix default and the --toolsets help",
-    ("cli/simulate.py", "financial_services"): "the help of its two run settings",
+    ("cli/simulate.py", "financial_services"): "the --probe-option help example",
     ("cli/smoke.py", "general_open_ended"): "the synthetic rows the report smoke check renders",
     ("engine/core/preview.py", "safety_agentic"): "the attempted-actions table",
     ("engine/core/preview.py", "tool_calling"): "the tool-call panels",

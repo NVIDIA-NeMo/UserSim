@@ -193,10 +193,7 @@ def _runtime(
         locale="en_US",
         max_turns=case.max_turns,
         random_seed=case.seed,
-        tools_column="tools" if case.probe_type == "tool_calling" else None,
-        finance_tier_mix=0.0,
-        finance_tier="verifiable",
-        finance_retrieval_mode="hybrid",
+        probe_options={"financial_services": {"tier": "verifiable"}},
     )
     invocations: list[str] = []
     models = {

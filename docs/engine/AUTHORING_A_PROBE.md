@@ -298,9 +298,10 @@ probe reads its model as `self._models.get("my_probe_critic_model")`. An alias
 the file lacks is left out, and the probe handles its absence: `get` returns
 `None`, and the probe can fall back or raise an error that names the alias. A
 run's setup fingerprint counts the settings of each declared model. `cfg` is
-the run's `ConversationSimulatorConfig`, for an alias that is itself a setting:
-`financial_services` declares the model named by `finance_embedding_model_alias`,
-which embeds its search queries, and searches lexically without it. In a test,
+the run's `ConversationSimulatorConfig`, for an alias that is itself one of the
+probe's settings, read with `cls.options_for(cfg)`: `financial_services`
+declares the model named by its `embedding_model_alias` setting, which embeds
+its search queries, and searches lexically without it. In a test,
 pass the model to `run_episode` by alias, as
 `models={"my_probe_critic_model": critic}`.
 
@@ -328,7 +329,9 @@ registered, a setting the probe lacks or a value it rejects stops the run. The
 probe reads its settings, validated, as `self.options`. Stored rows keep the
 settings they were made with, in `usersim_config.probe_options`, and run with
 them again. `assert_probe_conforms` reports an `Options` field without a
-default.
+default. A classmethod given the run's config, such as `model_aliases`, reads
+the settings with `cls.options_for(cfg)`. `financial_services` and
+`tool_calling` declare their settings this way.
 
 ---
 

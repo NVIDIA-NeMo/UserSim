@@ -25,6 +25,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from pydantic import ValidationError
 
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.outcomes import (
@@ -91,8 +92,13 @@ def _fresh_taxonomy():
     reset_probing_taxonomy_cache()
 
 
-def _cfg(**kw):
-    base = dict(max_turns=6, random_seed=None, finance_retrieval_mode="golden", verbosity=0)
+def _cfg(retrieval_mode="golden", **kw):
+    base = dict(
+        max_turns=6,
+        random_seed=None,
+        verbosity=0,
+        probe_options={"financial_services": {"retrieval_mode": retrieval_mode}},
+    )
     base.update(kw)
     return types.SimpleNamespace(**base)
 
@@ -503,10 +509,7 @@ class TestHybridRetrieval:
             assert all(d.institution_id == inst.institution_id for d in docs)
 
     def test_hybrid_is_the_shipped_default(self):
-        from usersim.engine.config import ConversationSimulatorConfig
-
-        field = ConversationSimulatorConfig.model_fields["finance_retrieval_mode"]
-        assert field.default == "hybrid"
+        assert G.FinancialServicesProbe.Options().retrieval_mode == "hybrid"
 
     def test_hybrid_survives_a_dense_signal_that_points_at_tool_docs(self):
         """End-to-end guard on the actual defect, against the real en_IN corpus.
@@ -1770,6 +1773,41 @@ def _probe_on(locale: str, instance, **cfg_kw):
     return probe, ob
 
 
+class TestRunSettings:
+    """The run's ``financial_services`` settings reach the task draw, and a value out of range is refused."""
+
+    def test_the_tier_settings_reach_the_task_draw(self):
+        settings = {"tier_mix": 0.3, "tier": "verifiable"}
+        cfg = types.SimpleNamespace(max_turns=6, random_seed=None, probe_options={"financial_services": settings})
+        with patch.object(G, "derive_instance", return_value=_northwind_dispute_instance()) as derive:
+            G.FinancialServicesProbe(
+                persona=_PERSONA,
+                locale="en_US",
+                language="English",
+                models=_MODELS,
+                cfg=cfg,
+                provenance=Provenance(),
+                profile={},
+                data={"persona_uuid": "u1"},
+                outcome_builder=OutcomeBuilder(provenance=Provenance()),
+            )
+        assert derive.call_args.kwargs["tier_mix"] == 0.3
+        assert derive.call_args.kwargs["forced_tier"] == "verifiable"
+
+    @pytest.mark.parametrize(
+        ("settings", "field"),
+        [
+            ({"tier_mix": 1.5}, "tier_mix"),
+            ({"tier_mix": -0.1}, "tier_mix"),
+            ({"tier": "both"}, "tier"),
+            ({"retrieval_mode": "lexical"}, "retrieval_mode"),
+        ],
+    )
+    def test_a_value_out_of_range_is_refused(self, settings, field):
+        with pytest.raises(ValidationError, match=field):
+            G.FinancialServicesProbe.Options(**settings)
+
+
 class TestPersonaLocaleResolution:
     """Persona-ATTRIBUTE vocabulary is keyed on the persona dataset locale."""
 
@@ -1879,13 +1917,13 @@ class TestQueryEmbedding:
 
     @pytest.mark.parametrize("mode", ["hybrid", "dense"])
     async def test_a_bank_without_vectors_is_searched_without_embedding_the_query(self, mode):
-        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), finance_retrieval_mode=mode)
+        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), retrieval_mode=mode)
         probe._institution = dataclasses.replace(probe._institution, embeddings={})
         (await self._search(probe)).assert_not_called()
 
     @pytest.mark.parametrize("mode", ["hybrid", "dense"])
     async def test_a_bank_with_vectors_embeds_the_query(self, mode):
-        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), finance_retrieval_mode=mode)
+        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), retrieval_mode=mode)
         probe._institution = _with_vectors(probe._institution)
         (await self._search(probe)).assert_called_once()
 
@@ -1953,7 +1991,7 @@ class TestSearchQueryTranslation:
         ``retrieve`` would leave the lexical collapse exactly as it was while
         looking, from the trace, as though the query had been translated."""
         # hybrid, with document vectors, so the embedding half is exercised too.
-        probe, _ = self._variant_probe(finance_retrieval_mode="hybrid")
+        probe, _ = self._variant_probe(retrieval_mode="hybrid")
         probe._institution = _with_vectors(probe._institution)
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)

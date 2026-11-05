@@ -424,9 +424,6 @@ def build_simulator_config_builder(
     match_persona_language: bool = False,
     verbosity: int = 1,
     random_seed: int | None = None,
-    finance_tier_mix: float = 0.0,
-    finance_retrieval_mode: str = "hybrid",
-    finance_embedding_model_alias: str = "embedding_model",
     probe_options: Mapping[str, Mapping[str, Any]] | None = None,
 ):
     """Build a Data Designer ConfigBuilder for the conversation simulator.
@@ -475,9 +472,6 @@ def build_simulator_config_builder(
             compression_window=1,
             verbosity=verbosity,
             random_seed=random_seed,
-            finance_tier_mix=finance_tier_mix,
-            finance_retrieval_mode=finance_retrieval_mode,
-            finance_embedding_model_alias=finance_embedding_model_alias,
             probe_options=probe_options or {},
         )
     )
@@ -555,8 +549,6 @@ def materialize_episode_inputs(
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
-    finance_tier_mix: float = 0.0,
-    finance_retrieval_mode: str = "hybrid",
     probe_options: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Materialize fully resolved simulator rows without model calls."""
@@ -588,8 +580,6 @@ def materialize_episode_inputs(
         max_assistant_attempts=max_assistant_attempts,
         store_reasoning=store_reasoning,
         replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
-        finance_tier_mix=finance_tier_mix,
-        finance_retrieval_mode=finance_retrieval_mode,
         probe_options=probe_options or {},
     )
     model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}

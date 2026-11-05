@@ -168,7 +168,6 @@ class SimulationConfigSnapshot:
 
     max_turns: int
     max_steps: int
-    max_tools: int
     max_query_attempts: int
     max_assistant_attempts: int
     incremental_disclosure_ratio: float
@@ -349,7 +348,6 @@ def _sim_config_from_dict(d: Mapping[str, Any]) -> SimulationConfigSnapshot:
     return SimulationConfigSnapshot(
         max_turns=int(d.get("max_turns", 5)),
         max_steps=int(d.get("max_steps", 10)),
-        max_tools=int(d.get("max_tools", 5)),
         max_query_attempts=int(d.get("max_query_attempts", 3)),
         max_assistant_attempts=int(d.get("max_assistant_attempts", 1)),
         store_reasoning=bool(d.get("store_reasoning", True)),
@@ -769,7 +767,6 @@ def build_run_manifest(
     sim_snapshot = SimulationConfigSnapshot(
         max_turns=int(getattr(sim_config, "max_turns", 5)),
         max_steps=int(getattr(sim_config, "max_steps", 10)),
-        max_tools=int(getattr(sim_config, "max_tools", 5)),
         max_query_attempts=int(getattr(sim_config, "max_query_attempts", 3)),
         max_assistant_attempts=int(getattr(sim_config, "max_assistant_attempts", 1)),
         store_reasoning=bool(getattr(sim_config, "store_reasoning", True)),

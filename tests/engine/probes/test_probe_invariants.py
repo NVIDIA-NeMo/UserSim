@@ -121,7 +121,7 @@ def _resolve_should_succeed(probe_label: str) -> Callable[[ConversationState], b
 
     For the other probes, which inherit BaseProbe's default, we
     cannot cheaply construct an instance: the constructors validate
-    ``cfg.tools_column`` / ``profile["tech_literacy"]`` etc. and would
+    a row's tools / ``profile["tech_literacy"]`` etc. and would
     require a richer fixture than this invariant test should carry.
     Instead we invoke the unbound class method with ``self=None``:
     the BaseProbe default returns True without reading ``self``. This

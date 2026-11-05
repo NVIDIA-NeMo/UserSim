@@ -156,8 +156,9 @@ runtime_models["api_response_model"] = my_tool_response_model
 
 A probe names any other model it calls in `model_aliases` on its class.
 `financial_services` optionally embeds its `kb_search` queries with the model
-named by `finance_embedding_model_alias` (`embedding_model` by default, anything
-exposing `agenerate_text_embeddings()`); without one, dense retrieval falls back
+named by its `embedding_model_alias` setting (`embedding_model` unless the
+config's `probe_options` names another; any model exposing
+`agenerate_text_embeddings()`); without one, dense retrieval falls back
 to lexical search with a warning, so results can differ from a standalone run
 that has one configured.
 

@@ -201,9 +201,9 @@ practical consequence was that the assistant answered product questions without
 ever seeing the product documents. Blending in the lexical signal restores
 topical discrimination while cosine still supplies paraphrase matching.
 
-The mode is selected at run time with `--finance-retrieval-mode` (`usersim
-simulate`, default `hybrid`) or `FINANCE_RETRIEVAL_MODE`
-(`notebooks/01_simulate.ipynb`).
+The mode is the probe's `retrieval_mode` setting (default `hybrid`), set with
+`--probe-option financial_services.retrieval_mode=<mode>` on `usersim simulate`
+or in `PROBE_OPTIONS` in `notebooks/01_simulate.ipynb`.
 
 **Disentangling retrieval from reasoning.** Success is scored on the verifiable
 state/action outcome, *not* on retrieval. Retrieval is reported separately, on two
@@ -312,16 +312,19 @@ The probe is opt-in: it is not part of the default probe mix. Run it with:
 
 ```bash
 usersim simulate --locale en_US --num-rows 20 --probe-mix 'financial_services=1.0' \
-  --finance-tier-mix 0.5 --out output/trajectories   # 0.0 = verifiable-only (default); 1.0 = dynamic-only
+  --probe-option financial_services.tier_mix=0.5 --out output/trajectories   # 0.0 = verifiable-only (default); 1.0 = dynamic-only
 ```
 
-Configuration (all optional):
+Settings (all optional), each set with `--probe-option
+financial_services.<name>=<value>`, or in Python as
+`probe_options={"financial_services": {...}}`:
 
-- `finance_tier_mix` (`--finance-tier-mix`): probability a conversation uses the
-  `dynamic` tier; `0.0` (default) means verifiable-only.
-- `finance_tier`: force a single tier (`verifiable` or `dynamic`).
-- `finance_retrieval_mode`: `hybrid` (default), `dense` or `golden`.
-- `finance_embedding_model_alias`: the embedding model used for dense retrieval.
+- `tier_mix`: probability a conversation uses the `dynamic` tier, from 0 to 1;
+  `0.0` (default) means verifiable-only.
+- `tier`: force a single tier (`verifiable` or `dynamic`).
+- `retrieval_mode`: `hybrid` (default), `dense` or `golden`.
+- `embedding_model_alias`: the models-file alias that embeds `kb_search`
+  queries (default `embedding_model`).
 
 ## Generating the assets
 

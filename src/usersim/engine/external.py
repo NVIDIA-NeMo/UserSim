@@ -65,8 +65,6 @@ def materialize_episode_inputs(
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
-    finance_tier_mix: float = 0.0,
-    finance_retrieval_mode: str = "hybrid",
     probe_options: Mapping[str, Mapping[str, object]] | None = None,
 ) -> list[dict[str, object]]:
     """Materialize canonical, fully resolved episode rows without model calls.
@@ -97,8 +95,6 @@ def materialize_episode_inputs(
         max_turns=max_turns,
         max_assistant_attempts=max_assistant_attempts,
         store_reasoning=store_reasoning,
-        finance_tier_mix=finance_tier_mix,
-        finance_retrieval_mode=finance_retrieval_mode,
         probe_options=probe_options,
     )
 

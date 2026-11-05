@@ -35,7 +35,9 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Literal, Sequence
+
+from pydantic import Field
 
 from usersim.engine.probes.financial_services import retrieval as _retrieval
 from usersim.engine.probes.financial_services import tools as _tools
@@ -310,6 +312,27 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         "and self-consistency). Retrieval is scoped to a single institution."
     )
     default_scorers = ("financial_services",)
+
+    class Options(BankBackedProbe.Options):
+        """The run's settings for this probe, set as ``--probe-option financial_services.<name>=<value>``."""
+
+        #: The probability that a row asks a dynamic-tier question (open-ended,
+        #: from the locale's taxonomy, judge-scored) rather than a verifiable task.
+        tier_mix: float = Field(default=0.0, ge=0.0, le=1.0)
+        #: Puts every row in this tier, whatever ``tier_mix`` says. A locale
+        #: without a dynamic taxonomy gives verifiable tasks either way.
+        tier: Literal["verifiable", "dynamic"] | None = None
+        #: How ``kb_search`` searches the institution's corpus: ``hybrid`` blends
+        #: dense cosine with lexical overlap; ``dense`` is cosine alone, an
+        #: ablation; ``golden`` hands a verifiable task its gold documents, an
+        #: ablation that takes retrieval out of the score (the dynamic tier,
+        #: which has none, searches lexically). Every mode searches lexically
+        #: when no embedding model answers. The financial_retrieval_recall
+        #: capability measures retrieval itself.
+        retrieval_mode: Literal["hybrid", "dense", "golden"] = "hybrid"
+        #: The models-file alias that embeds ``kb_search`` queries.
+        embedding_model_alias: str = "embedding_model"
+
     output_columns = (
         "finance_task_id",
         "task_type",
@@ -394,8 +417,8 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         self._read_only_tools: frozenset[str] = frozenset(
             t.name for t in self._institution.tools if t.side_effect_class == "read_only"
         )
-        self._retrieval_mode = getattr(self._cfg, "finance_retrieval_mode", "hybrid")
-        (self._embedding_alias,) = self.model_aliases(self._cfg)
+        self._retrieval_mode = self.options.retrieval_mode
+        self._embedding_alias = self.options.embedding_model_alias
         # Tripped the first time dense mode has to fall back to lexical (no query
         # vector) so a misconfigured run -- dense requested but no embedding model
         # -- is loud instead of silently degrading to word overlap.
@@ -410,7 +433,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     @classmethod
     def model_aliases(cls, cfg: Any) -> tuple[str, ...]:
         """The model that embeds ``kb_search`` queries; without it, dense retrieval falls back to lexical."""
-        return (getattr(cfg, "finance_embedding_model_alias", "embedding_model"),)
+        return (cls.options_for(cfg).embedding_model_alias,)
 
     @classmethod
     def bank_locale(cls, locale: str, probe_dir: Path) -> str:
@@ -467,8 +490,8 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         cfg: Any,
     ) -> _PickedTask | None:
         puuid = self._data.get("persona_uuid") or compute_persona_uuid(persona)
-        tier_mix = float(getattr(cfg, "finance_tier_mix", 0.0) or 0.0)
-        forced_tier = getattr(cfg, "finance_tier", None)
+        tier_mix = self.options.tier_mix
+        forced_tier = self.options.tier
         taxonomy = None
         if tier_mix > 0.0 or forced_tier == "dynamic":
             taxonomy = self._load_dynamic_taxonomy()

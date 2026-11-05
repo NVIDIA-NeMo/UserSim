@@ -186,8 +186,6 @@ class _Cfg:
     max_query_attempts = 2
     context_compression = False
     compression_window = 1
-    tools_column = None
-    max_tools = 5
     max_steps = 10
     incremental_disclosure_ratio = 0.6
     persona_grounding_ratio = 1.0

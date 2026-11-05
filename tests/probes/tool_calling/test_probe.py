@@ -16,6 +16,7 @@ from contextlib import ExitStack
 from unittest.mock import patch
 
 import pytest
+from pydantic import ValidationError
 
 from usersim.engine.core.llm import ContextWindowError
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
@@ -176,9 +177,8 @@ async def _run_concrete_tool_probe(
         "user_interaction_style": "neutral",
     }
     cfg = types.SimpleNamespace(
-        tools_column="tools",
         theme_column="theme",
-        max_tools=2,
+        probe_options={"tool_calling": {"max_tools": 2}},
         max_turns=2,
         max_query_attempts=1,
         context_compression=False,
@@ -323,7 +323,7 @@ class TestToolSubsetIsRowDerived:
     """
 
     @staticmethod
-    def _subset(**data_overrides: object) -> list[str]:
+    def _subset(*, max_tools: int = 3, **data_overrides: object) -> list[str]:
         from usersim.engine.core.behavioral import compute_behavioral_profile
 
         persona = {"first_name": "A", "last_name": "User", "age": 35}
@@ -337,9 +337,8 @@ class TestToolSubsetIsRowDerived:
         }
         data.update(data_overrides)
         cfg = types.SimpleNamespace(
-            tools_column="tools",
             theme_column="theme",
-            max_tools=3,
+            probe_options={"tool_calling": {"max_tools": max_tools}},
             max_turns=2,
             max_query_attempts=1,
             context_compression=False,
@@ -358,6 +357,13 @@ class TestToolSubsetIsRowDerived:
             outcome_builder=OutcomeBuilder(provenance=Provenance()),
         )
         return [tool["tool"]["function"]["name"] for tool in probe.tool_subset]
+
+    def test_a_conversation_offers_as_many_tools_as_the_run_s_max_tools(self) -> None:
+        assert [len(self._subset(max_tools=n)) for n in (1, 3, 5)] == [1, 3, 5]
+
+    def test_a_run_offers_at_least_one_tool(self) -> None:
+        with pytest.raises(ValidationError, match="max_tools"):
+            ToolCallingProbe.Options(max_tools=0)
 
     def test_one_row_always_draws_the_same_tools(self) -> None:
         first = self._subset()
@@ -388,9 +394,8 @@ class TestThemeFollowsTheToolset:
         }
         data.update(data_overrides)
         cfg = types.SimpleNamespace(
-            tools_column="tools",
             theme_column="theme",
-            max_tools=3,
+            probe_options={"tool_calling": {"max_tools": 3}},
             max_turns=2,
             max_query_attempts=1,
             context_compression=False,

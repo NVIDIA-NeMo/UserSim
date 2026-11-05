@@ -931,19 +931,8 @@ class TestDryRuns:
         assert row["theme"]
         assert row["tools"]
         assert row["usersim_config"]["random_seed"] == 42
-        assert row["usersim_config"]["finance_retrieval_mode"] == "hybrid"
+        assert "probe_options" not in row["usersim_config"]
         assert row["usersim_config"]["store_reasoning"] is True
-
-    def test_finance_retrieval_defaults_to_the_engine_default(self):
-        """The CLI must not override the engine's retrieval mode with an ablation."""
-        from usersim.engine.config import ConversationSimulatorConfig
-
-        base = ["simulate", "--locale", "en_US", "--num-rows", "1", "--out", "out"]
-        engine_default = ConversationSimulatorConfig.model_fields["finance_retrieval_mode"].default
-        assert cli._build_parser().parse_args(base).finance_retrieval_mode == engine_default == "hybrid"
-        for mode in ("hybrid", "dense", "golden"):
-            args = cli._build_parser().parse_args([*base, "--finance-retrieval-mode", mode])
-            assert args.finance_retrieval_mode == mode
 
     def test_simulate_panel_or_locale_required(self, tmp_path):
         with pytest.raises(SystemExit):

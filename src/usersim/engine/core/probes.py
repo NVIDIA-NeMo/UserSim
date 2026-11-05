@@ -331,6 +331,15 @@ class BaseProbe:
 
         model_config = ConfigDict(extra="forbid")
 
+    @classmethod
+    def options_for(cls, cfg: Any) -> BaseProbe.Options:
+        """This probe's settings in the run ``cfg``, validated against its ``Options``; its defaults when ``cfg`` gives none.
+
+        A probe instance reads ``self.options``; a classmethod given the run's
+        config, such as ``model_aliases``, reads ``cls.options_for(cfg)``.
+        """
+        return cls.Options.model_validate((getattr(cfg, "probe_options", None) or {}).get(cls.label, {}))
+
     # A paragraph on what the probe tests, shown with each of its rows in the
     # per-row preview and in the capability report's evidence. Empty shows none.
     description: str = ""
@@ -444,7 +453,7 @@ class BaseProbe:
         the file lacks is left out, and the probe handles its absence. A run's
         setup fingerprint counts each one's settings.
         ``cfg`` is the run's ``ConversationSimulatorConfig``, for a probe whose
-        alias is one of its settings.
+        alias is one of its settings, read with ``cls.options_for(cfg)``.
         """
         return ()
 
@@ -497,10 +506,7 @@ class BaseProbe:
         self._language = language
         self._models = models
         self._cfg = cfg
-        # The run's settings for this probe, validated against its ``Options``.
-        self.options = type(self).Options.model_validate(
-            (getattr(cfg, "probe_options", None) or {}).get(self.label, {})
-        )
+        self.options = type(self).options_for(cfg)
         self._provenance = provenance or Provenance()
         self._profile = profile or {}
         self._data = data or {}

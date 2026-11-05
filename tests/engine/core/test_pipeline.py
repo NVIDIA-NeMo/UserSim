@@ -28,8 +28,6 @@ class TestPipelineConfig:
             persona_column="persona",
             probe_type_column="probe_type",
             theme_column="theme",
-            tools_column="tools",
-            toolset_name_column="toolset_name",
             locale="en_US",
         )
         assert "conversation_messages" in cfg.side_effect_columns
@@ -42,7 +40,6 @@ class TestPipelineConfig:
             name="conversation_messages",
             locale="pt_BR",
         )
-        assert cfg.tools_column is None
         assert cfg.locale == "pt_BR"
 
     def test_locale_language_mapping(self):

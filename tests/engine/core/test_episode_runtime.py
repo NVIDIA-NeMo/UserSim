@@ -79,8 +79,7 @@ def _tool_calling_runtime() -> ProbeEpisodeRuntime:
         models={"api_response_model": _JSONModel()},
         config=ConversationSimulatorConfig(
             name="episode_runtime_test",
-            tools_column="tools",
-            max_tools=1,
+            probe_options={"tool_calling": {"max_tools": 1}},
             theme_column="theme",
             random_seed=7,
         ),
@@ -123,10 +122,7 @@ def _financial_runtime() -> ProbeEpisodeRuntime:
             random_seed=1,
             max_turns=1,
             context_compression=False,
-            finance_tier_mix=0.0,
-            finance_tier="verifiable",
-            finance_retrieval_mode="golden",
-            finance_embedding_model_alias="embedding_model",
+            probe_options={"financial_services": {"tier": "verifiable", "retrieval_mode": "golden"}},
         ),
         data={},
     )
