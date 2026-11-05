@@ -45,6 +45,7 @@ from usersim.cli._errors import ConfigError
 from usersim.cli._persona_language import persona_dataset_report
 from usersim.cli._pipeline import (
     clear_seed_columns_of_other_probes,
+    known_probes,
     resolve_seed_dataset_for_mix,
     verify_probe_assets,
     verify_probe_locales,
@@ -56,9 +57,30 @@ logger = logging.getLogger("usersim.cli.simulate")
 _OWN_ASSETS = "each probe's own assets"
 
 
+class _HelpWithProbes(argparse.Action):
+    """``-h``/``--help``: prints the help with the registered probes ending ``--probe-mix``'s.
+
+    The registry is read only when the help is asked for, since loading it
+    imports every probe module. argparse can expand a help string as soon as
+    its option is added (Python 3.14 does), so the list joins the help here.
+    """
+
+    def __init__(self, option_strings: list[str], dest: str, help: str | None = None) -> None:
+        super().__init__(option_strings, dest=argparse.SUPPRESS, default=argparse.SUPPRESS, nargs=0, help=help)
+        #: The ``--probe-mix`` option, set once it is added.
+        self.probe_mix: argparse.Action | None = None
+
+    def __call__(self, parser: argparse.ArgumentParser, namespace: object, values: object, option_string=None) -> None:
+        if self.probe_mix is not None:
+            self.probe_mix.help = f"{self.probe_mix.help} Registered probes: {', '.join(known_probes())}."
+        parser.print_help()
+        parser.exit()
+
+
 def register(subparsers: argparse._SubParsersAction) -> None:
     p = subparsers.add_parser(
         "simulate",
+        add_help=False,
         help="🗣  Run the conversation simulator and write a trajectory parquet.",
         description=(
             "Run the simulator pipeline against a panel parquet (or an "
@@ -67,6 +89,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "rows that run already holds; --no-skip-existing starts a new run."
         ),
     )
+    show_help = p.add_argument("-h", "--help", action=_HelpWithProbes, help="show this help message and exit")
 
     src = p.add_mutually_exclusive_group(required=True)
     src.add_argument(
@@ -179,7 +202,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "side-effectful after_assistant_turn are capped to 1."
         ),
     )
-    p.add_argument(
+    show_help.probe_mix = p.add_argument(
         "--probe-mix",
         type=str,
         default="tool_calling=0.34,general_open_ended=0.33,general_educational=0.33",
@@ -187,15 +210,8 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "Comma-separated probe=weight pairs. A weight can be an integer, "
             "a decimal or a fraction (1/3); weights are normalized to sum to "
             "1. The default runs tool_calling and the two general probes. "
-            "Built-in probes: general_open_ended, general_educational, "
-            "tool_calling, financial_services, sov_ai_facts, sov_ai_dynamic, "
-            "sov_ai_multilingual_parity, safety_chat_pressure, safety_agentic, "
-            "identity_disclosure, health_general_disclosure, "
-            "health_triage_disclosure, health_therapy_disclosure, "
-            "health_decision_support_disclosure. An unknown name is refused "
-            "with the full registered list, including installed extensions, "
-            "and a probe that cannot run in a requested locale stops the run "
-            "before any model call."
+            "An unknown name is refused, and a probe that cannot run in a "
+            "requested locale stops the run before any model call."
         ),
     )
     p.add_argument(
@@ -306,8 +322,6 @@ def _parse_probe_mix(spec: str) -> dict:
     unknown probe fails at argument-parse time with a friendly
     error rather than as an opaque sampler error mid-run.
     """
-    from usersim.cli._pipeline import known_probes
-
     out: dict[str, float] = {}
     for pair in spec.split(","):
         pair = pair.strip()

@@ -1,37 +1,56 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""`usersim simulate --probe-mix` help names every built-in probe.
+"""`usersim simulate --help` names every registered probe under `--probe-mix`.
 
-The help spells the probe list out by hand rather than reading the registry,
-which would import every probe module on each `usersim` invocation. So a new
-probe has to be added to the help as well, and this test says when it is not.
-Probes from installed extensions are left out: the help lists built-ins only.
+The list is read from the registry when the help is asked for, so it names a
+new probe without an edit. Building the parser, which every `usersim` command
+does, imports no probe module.
 """
 
 from __future__ import annotations
 
 import argparse
 import re
+import subprocess
+import sys
+
+import pytest
 
 
-def _probe_mix_help() -> str:
+def _usersim_parser() -> argparse.ArgumentParser:
     from usersim.cli import simulate
 
-    parser = argparse.ArgumentParser()
-    sub = parser.add_subparsers(dest="cmd")
-    simulate.register(sub)
-    (action,) = [a for a in sub.choices["simulate"]._actions if a.dest == "probe_mix"]
-    return action.help
+    parser = argparse.ArgumentParser(prog="usersim")
+    simulate.register(parser.add_subparsers(dest="cmd"))
+    return parser
 
 
-def test_probe_mix_help_names_every_built_in_probe() -> None:
-    from usersim.engine.core.probes import known_probes, resolve_probe
+def test_the_help_names_every_registered_probe(monkeypatch, capsys) -> None:
+    from usersim.engine.core.probes import known_probes
 
-    built_in = [
-        label for label in known_probes() if resolve_probe(label).__module__.startswith("usersim.engine.probes.")
-    ]
-    assert built_in, "no built-in probes registered"
-    named = set(re.findall(r"[a-z_]+", _probe_mix_help()))
-    missing = [label for label in built_in if label not in named]
+    monkeypatch.setenv("COLUMNS", "10000")  # one line per option, so no name is broken
+    with pytest.raises(SystemExit) as exit_:
+        _usersim_parser().parse_args(["simulate", "--help"])
+    assert exit_.value.code == 0
+    listed = capsys.readouterr().out.split("Registered probes:", 1)[1].splitlines()[0]
+    assert known_probes(), "no probes registered"
+    missing = [label for label in known_probes() if label not in set(re.findall(r"[a-z_]+", listed))]
     assert not missing, f"--probe-mix help does not name: {missing}"
+
+
+def test_only_asking_for_the_help_loads_the_probes() -> None:
+    code = (
+        "import argparse, contextlib, io, sys\n"
+        "from usersim.cli import simulate\n"
+        "parser = argparse.ArgumentParser(prog='usersim')\n"
+        "simulate.register(parser.add_subparsers())\n"
+        "loaded = lambda: any(m.startswith('usersim.engine.probes.') for m in sys.modules)\n"
+        "before = loaded()\n"
+        "with contextlib.redirect_stdout(io.StringIO()), contextlib.suppress(SystemExit):\n"
+        "    parser.parse_args(['simulate', '--help'])\n"
+        "print(before, loaded())\n"
+    )
+    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.split() == ["False", "True"]
