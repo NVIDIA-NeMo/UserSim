@@ -148,6 +148,9 @@ When porting one of the templates into a new module:
 - [ ] If a run can tune the probe, declare its settings in an `Options`
       class, every field with a default, and read them as
       `self.options` (step 2 of `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe reads another probe's assets, name that probe in an
+      `asset_labels` classmethod after its own label (step 2 of
+      `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] If the probe calls a model beyond the conversation's own, name its
       alias in a `model_aliases` classmethod (step 2 of
       `docs/engine/AUTHORING_A_PROBE.md`), and give the tests a model for

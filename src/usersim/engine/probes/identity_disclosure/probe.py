@@ -76,6 +76,7 @@ from usersim.engine.probes.identity_disclosure.spec import (
     IdentitySpec,
     TacticMode,
     Vocabulary,
+    extends_chain,
     load_identity_spec_default,
     spec_env_var,
     validate_spec,
@@ -170,6 +171,11 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     def bank_loader(cls) -> IdentitySpec:  # type: ignore[override]
         """The spec named by the probe's label. One spec serves every locale, so it takes none."""
         return load_identity_spec_default(cls.label)
+
+    @classmethod
+    def asset_labels(cls) -> tuple[str, ...]:
+        """Its own label, then each probe whose spec its spec ``extends``, whose assets it reads too."""
+        return tuple(dict.fromkeys([cls.label, *extends_chain(cls.label)]))
 
     @classmethod
     def asset_problems(cls) -> list[str]:

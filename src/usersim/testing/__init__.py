@@ -213,6 +213,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         )
 
     problems.extend(_options_problems(cls))
+    problems.extend(_asset_labels_problems(cls))
     problems.extend(seed_dataset_problems(cls))
 
     for klass, key in _reserved_metadata_writes(cls):
@@ -263,6 +264,16 @@ def _options_problems(cls: type) -> list[str]:
             f"{cls.__qualname__}.Options needs a default for every setting, so a run that sets none still runs: "
             + "; ".join(f"{'.'.join(map(str, detail['loc']))}: {detail['msg']}" for detail in error.errors())
         ]
+    return []
+
+
+def _asset_labels_problems(cls: type) -> list[str]:
+    """Whether ``cls.asset_labels()`` is a tuple of labels that starts with the probe's own."""
+    labels = cls.asset_labels()
+    if not (isinstance(labels, tuple) and labels and all(isinstance(label, str) and label for label in labels)):
+        return [f"{cls.__qualname__}.asset_labels() must return a tuple of probe labels; got {labels!r}"]
+    if labels[0] != cls.label:
+        return [f"{cls.__qualname__}.asset_labels() must start with its own label {cls.label!r}; got {labels!r}"]
     return []
 
 

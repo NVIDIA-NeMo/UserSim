@@ -151,6 +151,34 @@ def identity_spec_path(label: str = PROBE_LABEL) -> Path:
     return default_identity_spec_path(label)
 
 
+def extends_chain(label: str = PROBE_LABEL) -> tuple[str, ...]:
+    """The labels whose specs ``label``'s spec ``extends``, nearest first; empty when it extends none.
+
+    Read from each layer's ``extends`` alone, so a layer that does not
+    validate still names its parent. The walk stops at a layer it cannot read
+    or a parent it cannot find; loading such a spec fails anyway.
+    """
+    labels: list[str] = []
+    path = identity_spec_path(label)
+    seen: set[Path] = set()
+    while True:
+        try:
+            path = path.resolve()
+            doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except (OSError, yaml.YAMLError):
+            break
+        parent = doc.get("extends") if isinstance(doc, dict) else None
+        if path in seen or not isinstance(parent, str) or not parent.strip():
+            break
+        seen.add(path)
+        labels.append(parent)
+        try:
+            path = _parent_path(parent, below=path)
+        except IdentitySpecError:
+            break
+    return tuple(labels)
+
+
 def load_identity_spec(path: str | Path) -> IdentitySpec:
     """Load the spec at ``path``, following ``extends`` down the asset roots."""
     merged, layers, sources = _load_layers(Path(path), visited=())

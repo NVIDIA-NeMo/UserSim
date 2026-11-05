@@ -25,6 +25,7 @@ from usersim.engine.probes.identity_disclosure.spec import (
     SpecProblem,
     TacticMode,
     default_identity_spec_path,
+    extends_chain,
     identity_spec_path,
     load_identity_spec,
     load_identity_spec_default,
@@ -573,3 +574,26 @@ class TestValidation:
         (problem,) = self._problems(roots, doc)
         assert problem.code is ProblemCode.INVALID_VALUE
         assert problem.where.endswith("::developers.google.ambiguous")
+
+
+class TestExtendsChain:
+    """A spec built on another probe's spec reads that probe's assets, so the probe counts them as its own."""
+
+    def test_a_spec_names_each_probe_it_extends(self, roots) -> None:
+        upper, lower = roots
+        _write(lower, LABEL, BASE)
+        _write(upper, "ext_identity", _layer("ext_identity", extends=LABEL))
+
+        assert extends_chain("ext_identity") == (LABEL,)
+        assert extends_chain(LABEL) == ()
+
+    def test_a_probe_built_on_the_identity_probe_reads_its_parent_s_assets(self, roots, restored_registries) -> None:
+        from usersim.engine.core.probes import register_probe
+        from usersim.engine.probes.identity_disclosure.probe import IdentityDisclosureProbe
+
+        upper, lower = roots
+        _write(lower, LABEL, BASE)
+        _write(upper, "ext_identity", _layer("ext_identity", extends=LABEL))
+        probe = register_probe(type("ExtIdentityProbe", (IdentityDisclosureProbe,), {"label": "ext_identity"}))
+
+        assert probe.asset_labels() == ("ext_identity", LABEL)

@@ -8,16 +8,18 @@ were stored, so two setups can be compared on the same simulated users.
 
 - **Identity.** Each run of a row gets its own ``trajectory_id``: a hash of the
   stored row and of everything about the setup that can change the
-  conversation (see :func:`setup_fingerprint`). The stored row's own id is
-  saved as ``input_id``, the column that pairs two runs of the same rows.
+  conversation: the core part every row shares and its own probe's part (see
+  :func:`setup_fingerprint`), so a change to one probe's setup gives only that
+  probe's rows new ids. The stored row's own id is saved as ``input_id``, the
+  column that pairs two runs of the same rows.
 - **The conversation.** It runs with the stored id as ``trajectory_id``, as
   the hosted runtime does, so whatever a probe derives from its id (the tools
   ``tool_calling`` offers, say) is the same for every setup. The new id is
   written only when the rows are saved.
 - **Runs.** A run holds one setup. A resume reopens the latest run of stored
-  rows whose setup fingerprint matches; otherwise the first saved rows claim
-  a new run. Every save happens under the root's write lock, after checking
-  the run's saved rows again.
+  rows whose core part, and the part of every probe in the rows' mix, match;
+  otherwise the first saved rows claim a new run. Every save happens under
+  the root's write lock, after checking the run's saved rows again.
 """
 
 from __future__ import annotations
@@ -30,7 +32,7 @@ import tempfile
 import time
 from collections import Counter
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -40,7 +42,7 @@ logger = logging.getLogger("usersim.cli.simulate")
 INPUT_ID_COLUMN = "input_id"
 
 #: Names the id formula, so a later formula never collides with this one.
-_ID_SCHEME = "usersim-inputs-v1"
+_ID_SCHEME = "usersim-inputs-v2"
 
 #: ``USERSIM_*`` variables that cannot change a conversation: debug logging,
 #: where the models file is (the models themselves are fingerprinted),
@@ -309,48 +311,63 @@ def _model_settings(models: Any, aliases: list[str]) -> tuple[dict[str, Any], di
     return readable, hashed
 
 
-def _asset_roots_digest(assets_dir: Path | None) -> list[str]:
-    """The contents of every asset root a run can read, in priority order.
+def _probe_assets_digest(label: str, assets_dir: Path | None) -> dict[str, list[str]]:
+    """The contents of the asset folders probe ``label`` reads, on each root it searches, highest priority first.
 
-    The search path, then the ``assets_root`` each registered probe declares.
-    Every root counts, not just the first copy of each file: an identity spec
-    that ``extends`` its own probe reads the copy below it on the path. Where a
-    root is does not count, so the same assets in another folder are the same
-    setup.
+    The folders of each label its ``asset_labels`` names. Every root holding
+    one counts, not just the first copy of each file: an identity spec that
+    ``extends`` its own probe reads the copy below it on the path. Where a
+    root is does not count, so the same assets in another folder are the
+    same setup.
     """
-    from usersim.engine.core._assets import asset_roots_in_use, reset_runtime_assets_dir, set_runtime_assets_dir
-    from usersim.engine.core.probes import known_probes
+    from usersim.engine.core._assets import probe_asset_roots, reset_runtime_assets_dir, set_runtime_assets_dir
+    from usersim.engine.core.probes import resolve_probe
 
-    known_probes()  # registers every probe, so each declared root is seen
     token = set_runtime_assets_dir(assets_dir)
     try:
-        roots = asset_roots_in_use()
+        return {
+            read: [_contents_digest(root / read) for root in probe_asset_roots(read) if (root / read).exists()]
+            for read in resolve_probe(label).asset_labels()
+        }
     finally:
         reset_runtime_assets_dir(token)
-    return [_contents_digest(root) if root.exists() else "missing" for root in roots]
 
 
 def _environment_settings() -> dict[str, list[str]]:
-    """Every ``USERSIM_*`` variable that can change a conversation.
+    """Every ``USERSIM_*`` variable that can change a conversation, apart from the asset search path.
 
-    A part of a value (split on ``os.pathsep``) that names an existing file or
-    folder counts by its contents, so the same bank in another place is the
-    same setup, and an edited bank is a different one.
+    The search path's roots count in each probe's part, by the folders the
+    probe reads. A part of a value (split on ``os.pathsep``) that names an
+    existing file or folder counts by its contents, so the same bank in
+    another place is the same setup, and an edited bank is a different one.
     """
+    from usersim.engine.core._assets import ASSET_PATH_ENV_VAR
+
     settings: dict[str, list[str]] = {}
     for name in sorted(os.environ):
-        if not name.startswith("USERSIM_") or name in _OPERATIONAL_ENV:
+        if not name.startswith("USERSIM_") or name in _OPERATIONAL_ENV or name == ASSET_PATH_ENV_VAR:
             continue
         parts = os.environ[name].split(os.pathsep)
         settings[name] = [_contents_digest(Path(part)) if part and Path(part).exists() else part for part in parts]
     return settings
 
 
-def _prompt_versions() -> dict[str, str]:
-    """The prompt version of every registered probe, read as the episode preamble reads it."""
-    from usersim.engine.core.probes import known_probes, resolve_probe
+def _backend_releases() -> list[dict[str, Any]]:
+    """Each model backend an installed package advertises, with its release: backends shape every model call."""
+    from usersim.engine.core._extensions import BACKENDS, extension_identities
 
-    return {label: resolve_probe(label).prompt_version for label in known_probes()}
+    return [entry for entry in extension_identities() if entry["group"] == BACKENDS]
+
+
+def _probe_release(cls: type) -> dict[str, Any] | None:
+    """The package release that registers the probe class ``cls``, or ``None`` for a probe User Sim ships."""
+    from usersim.engine.core._extensions import PROBES, extension_identities
+
+    package = cls.__module__.split(".")[0]
+    for entry in extension_identities():
+        if entry["group"] == PROBES and entry["value"].split(":")[0].split(".")[0] == package:
+            return {"distribution": entry["distribution"], "version": entry["version"]}
+    return None
 
 
 def _data_designer_version() -> str | None:
@@ -360,53 +377,108 @@ def _data_designer_version() -> str | None:
     return _pkg_version("data_designer")
 
 
-def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str, Any]]:
-    """The fingerprint of everything about a setup that can change a conversation.
+#: ``usersim_config`` fields that count in a probe's part or change no
+#: conversation: each probe's settings, the mix, and the seed table's columns
+#: (the table is the reading probe's asset).
+_NOT_IN_THE_CORE = ("probe_options", "probes", "seed_dataset_columns")
 
-    Returns the fingerprint and the run record that names it. Covered:
 
-    - every simulator model alias, and every alias a registered probe names in
-      ``model_aliases``, as Data Designer sends it, provider settings included
-      (``api_key``, a provider's name and ``max_parallel_requests`` are left
-      out: they don't change what a model says);
+@dataclass(frozen=True)
+class SetupFingerprint:
+    """The setup stored rows run with: a core part, and one part per probe in the rows' mix.
+
+    A row's id combines the core part with its own probe's part, so a change
+    to one probe's setup gives that probe's rows new ids and leaves the
+    others alone.
+    """
+
+    core: str
+    #: Each probe in the rows' mix, with its part. Equal fingerprints share a
+    #: core, so hashing the core alone keeps a fingerprint usable in a set.
+    probes: Mapping[str, str] = field(hash=False)
+
+    @property
+    def label(self) -> str:
+        """Twelve characters naming the whole setup, for messages."""
+        return _digest({"core": self.core, "probes": dict(self.probes)})[:12]
+
+
+def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[SetupFingerprint, dict[str, Any]]:
+    """The fingerprint of everything about a setup that can change a conversation, in parts.
+
+    Returns the fingerprint and the run record that names it. The core part
+    covers what every conversation shares:
+
+    - the user, assistant, tool-response, judge and summary models as Data
+      Designer sends them, provider settings included (``api_key``, a
+      provider's name and ``max_parallel_requests`` are left out: they don't
+      change what a model says);
     - the shared ``usersim_config`` as loaded, defaults applied, with whether
-      the assistant's reasoning is replayed as the run's models file sets it;
-    - the contents of every asset root, a probe's declared ``assets_root``
-      included, and every non-operational ``USERSIM_*`` variable;
-    - every probe's prompt version, every extension's package release, and
-      the User Sim and Data Designer releases.
+      the assistant's reasoning is replayed as the run's models file sets it,
+      apart from ``_NOT_IN_THE_CORE``;
+    - every non-operational ``USERSIM_*`` variable but the asset search path;
+    - each model backend's release, and the User Sim and Data Designer
+      releases.
+
+    Each probe in the rows' mix (their config's ``probes``, every registered
+    probe when it names none) has a part of its own, so every batch of one set
+    of stored rows has the same parts: the contents of the asset
+    folders it reads (``asset_labels``) on every root it searches, its prompt
+    version, each model it names in ``model_aliases``, its settings in
+    ``probe_options``, and the release of the package that registers it.
 
     A code change that bumps none of these versions is not seen.
     """
     from usersim.engine.config import MODEL_ALIASES, ConversationSimulatorConfig
-    from usersim.engine.core._extensions import extension_identities
     from usersim.engine.core.manifest import _own_version
-    from usersim.engine.core.probes import declared_model_aliases
+    from usersim.engine.core.probes import resolve_probe, run_probes
     from usersim.engine.core.storage import RUN_KIND_STORED
 
     config = ConversationSimulatorConfig.model_validate(_run_config(inputs, models))
     simulation = config.model_dump(mode="json")
     for key in _PER_ROW_SETTINGS:
         simulation.pop(key, None)
-    readable, hashed = _model_settings(models, [*MODEL_ALIASES, *declared_model_aliases(config)])
-    fingerprint = _digest(
+    present = list(run_probes(config))
+    probe_aliases = {
+        label: [alias for alias in resolve_probe(label).model_aliases(config) if alias] for label in present
+    }
+    readable, hashed = _model_settings(
+        models, [*MODEL_ALIASES, *(alias for aliases in probe_aliases.values() for alias in aliases)]
+    )
+    core = _digest(
         {
-            "models": hashed,
-            "simulation": simulation,
-            "assets": _asset_roots_digest(inputs.assets_dir),
+            "models": {alias: hashed[alias] for alias in MODEL_ALIASES},
+            "simulation": {key: value for key, value in simulation.items() if key not in _NOT_IN_THE_CORE},
             "environment": _environment_settings(),
-            "prompts": _prompt_versions(),
-            "extensions": extension_identities(),
+            "backends": _backend_releases(),
             "usersim": _own_version(),
             "data_designer": _data_designer_version(),
         }
     )
-    record = {"kind": RUN_KIND_STORED, "fingerprint": fingerprint, "models": readable, "simulation": simulation}
-    return fingerprint, record
+    parts = {
+        label: _digest(
+            {
+                "assets": _probe_assets_digest(label, inputs.assets_dir),
+                "prompt_version": resolve_probe(label).prompt_version,
+                "models": {alias: hashed[alias] for alias in probe_aliases[label]},
+                "options": config.probe_options.get(label, {}),
+                "release": _probe_release(resolve_probe(label)),
+            }
+        )
+        for label in present
+    }
+    record = {
+        "kind": RUN_KIND_STORED,
+        "fingerprint": core,
+        "probes": parts,
+        "models": readable,
+        "simulation": simulation,
+    }
+    return SetupFingerprint(core=core, probes=parts), record
 
 
-def replay_trajectory_id(row: Mapping[str, Any], fingerprint: str) -> str:
-    """The ``trajectory_id`` of ``row`` run under the setup ``fingerprint`` names.
+def replay_trajectory_id(row: Mapping[str, Any], fingerprint: SetupFingerprint) -> str:
+    """The ``trajectory_id`` of ``row`` run under ``fingerprint``: the core part and its own probe's part.
 
     The stored row is hashed whole, apart from its machine-specific asset
     path, so a row whose contents changed under the same stored id is a
@@ -414,19 +486,23 @@ def replay_trajectory_id(row: Mapping[str, Any], fingerprint: str) -> str:
     """
     stored = dict(row)
     stored["usersim_config"] = {key: value for key, value in row["usersim_config"].items() if key != "assets_dir"}
-    composite = f"{_ID_SCHEME}|{_digest(stored)}|{fingerprint}"
+    probe_part = fingerprint.probes[str(row["probe_type"])]
+    composite = f"{_ID_SCHEME}|{_digest(stored)}|{fingerprint.core}|{probe_part}"
     return hashlib.sha256(composite.encode("utf-8")).hexdigest()[:16]
 
 
 # ── running ─────────────────────────────────────────────────────────────
 
 
-def _matching_run(out: Path, fingerprint: str) -> str | None:
-    """The latest run of stored rows made with this setup."""
+def _matching_run(out: Path, fingerprint: SetupFingerprint) -> str | None:
+    """The latest run of stored rows whose core part and the part of every probe in the rows' mix match."""
     from usersim.engine.core.storage import RUN_KIND_STORED, latest_run_where
 
     def matches(run_id: str, record: dict[str, Any] | None) -> bool:
-        return bool(record) and record.get("kind") == RUN_KIND_STORED and record.get("fingerprint") == fingerprint
+        if not record or record.get("kind") != RUN_KIND_STORED or record.get("fingerprint") != fingerprint.core:
+            return False
+        recorded = record.get("probes") or {}
+        return all(recorded.get(label) == part for label, part in fingerprint.probes.items())
 
     return latest_run_where(out, matches)
 
@@ -469,7 +545,7 @@ def _unsaved(planned: list[tuple[str, str]], saved: dict[str, set[str]], run_id:
 class InputsPlan:
     """What a run of stored rows would do, worked out before any model call."""
 
-    fingerprint: str
+    fingerprint: SetupFingerprint
     #: The record a new run with this setup is published with.
     record: dict[str, Any]
     #: The run of stored rows with this setup that a resume reopens, if any.
@@ -628,7 +704,7 @@ def simulate_inputs_to_dataset(
     fingerprint, matching, pending, skipped = plan.fingerprint, plan.matching_run, plan.pending, plan.saved
     record = {**plan.record, "started_at": started_at}
     stored = {row["trajectory_id"]: (row, replay_trajectory_id(row, fingerprint)) for row in inputs.rows}
-    logger.info("setup %s: %d stored rows, %d already saved", fingerprint[:12], len(stored), skipped)
+    logger.info("setup %s: %d stored rows, %d already saved", fingerprint.label, len(stored), skipped)
 
     by_locale: dict[str, dict[str, tuple[dict[str, Any], str]]] = {}
     for input_id in sorted(pending):

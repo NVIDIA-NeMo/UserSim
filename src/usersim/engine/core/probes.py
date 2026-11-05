@@ -449,13 +449,25 @@ class BaseProbe:
         """Models this probe calls beyond the user, assistant, tool-response, judge and summary models.
 
         Each is an alias in the models file. Every row's ``models`` holds each
-        alias a registered probe names here that the models file defines; one
+        alias a probe in the run names here that the models file defines; one
         the file lacks is left out, and the probe handles its absence. A run's
         setup fingerprint counts each one's settings.
         ``cfg`` is the run's ``ConversationSimulatorConfig``, for a probe whose
         alias is one of its settings, read with ``cls.options_for(cfg)``.
         """
         return ()
+
+    @classmethod
+    def asset_labels(cls) -> tuple[str, ...]:
+        """The labels whose asset folders this probe reads, its own first.
+
+        A run of stored rows counts the contents of each, on every asset root,
+        as this probe's part of the setup, so an edit there gives its rows new
+        ids and leaves other probes' rows alone. A probe that reads another
+        probe's assets (a spec built on another probe's spec, say) names that
+        probe here.
+        """
+        return (cls.label,)
 
     # The top-level columns ``build_result_extras`` adds beyond the core ones
     # (``CORE_RESULT_COLUMNS``). A run keeps the core columns plus the union of

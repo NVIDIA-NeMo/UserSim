@@ -41,6 +41,7 @@ from usersim.cli._inputs import (
     INPUT_ID_COLUMN,
     load_episode_inputs,
     prepare_episode_inputs,
+    replay_trajectory_id,
     setup_fingerprint,
     simulate_inputs_to_dataset,
 )
@@ -164,7 +165,7 @@ def _saved(out: Path, run_id: str):
     return read_partitioned_dataset(out, run=run_id)
 
 
-def _fingerprint(rows, models=None, *, assets_dir=None) -> str:
+def _fingerprint(rows, models=None, *, assets_dir=None) -> _inputs.SetupFingerprint:
     return setup_fingerprint(models or _models(), prepare_episode_inputs(rows, assets_dir=assets_dir))[0]
 
 
@@ -192,6 +193,15 @@ def test_both_setups_offer_each_tool_calling_row_the_same_tools(rows, tmp_path):
     tools = pairs[pairs["probe_type_x"] == "tool_calling"]
     assert len(tools)
     assert tools["tool_subset_x"].astype(str).tolist() == tools["tool_subset_y"].astype(str).tolist()
+
+
+def test_a_later_batch_holding_another_probe_of_the_mix_resumes_the_run(rows, tmp_path):
+    """Every probe in the rows' mix counts, whichever rows a batch holds, so the rows can run in batches."""
+    general = [row for row in rows if row["probe_type"] == "general_open_ended"]
+    first = _run(general, tmp_path)
+    second = _run(rows, tmp_path)
+
+    assert (second.run_id, second.resumed, second.skipped) == (first.run_id, True, len(general))
 
 
 def test_a_resume_reopens_the_run_with_the_same_setup(rows, tmp_path):
@@ -246,8 +256,22 @@ def test_a_model_setting_that_can_change_a_conversation_is_a_new_setup(rows, mod
     assert _fingerprint(rows, models()) != _fingerprint(rows)
 
 
-def test_a_model_a_probe_in_the_run_declares_is_part_of_the_setup(rows, register_test_probe):
-    """A model a probe in the run calls changes what its conversations say; a probe outside the mix changes nothing."""
+def _with_a_row_of(rows, label: str) -> list[dict[str, Any]]:
+    """The stored rows plus a copy of the first with probe ``label``, which joins every row's mix."""
+    held = _edited(rows, lambda r: [row["usersim_config"]["probes"].append(label) for row in r])
+    extra = {**copy.deepcopy(held[0]), "probe_type": label, "trajectory_id": f"{label}-row"}
+    return [*held, extra]
+
+
+def _the_others(fingerprint, label: str) -> tuple[str, dict[str, str]]:
+    """The core part and every probe's part but ``label``'s, which must hold the rows' own probes."""
+    others = {probe: part for probe, part in fingerprint.probes.items() if probe != label}
+    assert {"general_open_ended", "tool_calling"} <= set(others)
+    return fingerprint.core, others
+
+
+def test_a_model_a_probe_in_the_rows_mix_declares_is_part_of_its_setup(rows, register_test_probe):
+    """A model a probe calls changes what its conversations say; a probe outside the rows' mix changes nothing."""
     register_test_probe("ext_critic", model_aliases=classmethod(lambda cls, cfg: ("ext_critic_model",)))
 
     def with_critic(model: str) -> ModelsConfig:
@@ -255,8 +279,10 @@ def test_a_model_a_probe_in_the_run_declares_is_part_of_the_setup(rows, register
         critic = replace(base.models[0], alias="ext_critic_model", model=model)
         return ModelsConfig(providers=base.providers, models=(*base.models, critic))
 
-    in_run = _edited(rows, lambda r: [row["usersim_config"]["probes"].append("ext_critic") for row in r])
-    assert _fingerprint(in_run, with_critic("acme/critic-a")) != _fingerprint(in_run, with_critic("acme/critic-b"))
+    held = _with_a_row_of(rows, "ext_critic")
+    first, second = _fingerprint(held, with_critic("acme/critic-a")), _fingerprint(held, with_critic("acme/critic-b"))
+    assert first.probes["ext_critic"] != second.probes["ext_critic"]
+    assert _the_others(first, "ext_critic") == _the_others(second, "ext_critic")
     assert _fingerprint(rows, with_critic("acme/critic-a")) == _fingerprint(rows, with_critic("acme/critic-b"))
 
 
@@ -328,17 +354,56 @@ def test_changed_assets_are_a_new_setup_and_moved_ones_are_not(rows, tmp_path):
     assert _fingerprint(rows, assets_dir=first) != moved
 
 
+def test_an_edit_to_one_probe_s_bank_gives_only_its_rows_new_ids(rows, tmp_path):
+    root = tmp_path / "assets"
+    shutil.copytree(probe_assets_dir("tool_calling").parent, root)
+    before = _fingerprint(rows, assets_dir=root)
+    readme = next((root / "tool_calling").rglob("README.md"))
+    readme.write_text(readme.read_text() + "\nedited\n")
+    after = _fingerprint(rows, assets_dir=root)
+
+    assert after.core == before.core
+    assert after.probes["general_open_ended"] == before.probes["general_open_ended"]
+    assert after.probes["tool_calling"] != before.probes["tool_calling"]
+    for row in rows:
+        kept = replay_trajectory_id(row, after) == replay_trajectory_id(row, before)
+        assert kept is (row["probe_type"] != "tool_calling")
+
+
+def test_a_run_resumes_only_when_each_probe_s_part_matches(rows, tmp_path):
+    root = tmp_path / "assets"
+    shutil.copytree(probe_assets_dir("tool_calling").parent, root)
+    first = _run(rows, tmp_path / "out", assets_dir=root)
+    fingerprint, record = setup_fingerprint(_models(), prepare_episode_inputs(rows, assets_dir=root))
+    readme = next((root / "tool_calling").rglob("README.md"))
+    readme.write_text(readme.read_text() + "\nedited\n")
+    again = _run(rows, tmp_path / "out", assets_dir=root)
+
+    assert (record["fingerprint"], record["probes"]) == (fingerprint.core, dict(fingerprint.probes))
+    assert again.run_id != first.run_id and not again.resumed
+
+
+def test_a_probe_outside_the_rows_mix_changes_no_setup(rows, register_test_probe, tmp_path):
+    before = _fingerprint(rows)
+    bank = tmp_path / "pkg" / "ext_other" / "sample.yaml"
+    bank.parent.mkdir(parents=True)
+    bank.write_text("items: []\n")
+    register_test_probe("ext_other", assets_root=tmp_path / "pkg", prompt_version="v9.9")
+
+    assert _fingerprint(rows) == before
+
+
 def test_a_change_in_a_lower_priority_asset_root_is_a_new_setup(monkeypatch, tmp_path):
     """A spec that ``extends`` its own probe reads the copy below it, so every root counts."""
     top, below = tmp_path / "top", tmp_path / "below"
     shutil.copytree(probe_assets_dir("identity_disclosure").parent, top)
     shutil.copytree(probe_assets_dir("identity_disclosure").parent, below)
     monkeypatch.setenv("USERSIM_ASSET_PATH", str(below))
-    before = _inputs._asset_roots_digest(top)
+    before = _inputs._probe_assets_digest("identity_disclosure", top)
     shadowed = next(below.rglob("spec.yaml"))
     shadowed.write_text(shadowed.read_text() + "\n# edited\n")
 
-    assert _inputs._asset_roots_digest(top) != before
+    assert _inputs._probe_assets_digest("identity_disclosure", top) != before
 
 
 def test_a_change_under_a_probe_declared_assets_root_is_a_new_setup(register_test_probe, tmp_path):
@@ -347,10 +412,27 @@ def test_a_change_under_a_probe_declared_assets_root_is_a_new_setup(register_tes
     bank.parent.mkdir(parents=True)
     bank.write_text("items: []\n")
     register_test_probe("ext_probe", assets_root=tmp_path / "pkg")
-    before = _inputs._asset_roots_digest(None)
+    before = _inputs._probe_assets_digest("ext_probe", None)
     bank.write_text("items: [edited]\n")
 
-    assert _inputs._asset_roots_digest(None) != before
+    assert _inputs._probe_assets_digest("ext_probe", None) != before
+
+
+def test_a_probe_counts_the_assets_of_each_probe_it_reads(register_test_probe, tmp_path):
+    """A probe that reads another probe's assets names it in ``asset_labels``, and an edit there is its own."""
+    for label in ("ext_reader", "ext_source"):
+        (tmp_path / "pkg" / label).mkdir(parents=True)
+        (tmp_path / "pkg" / label / "sample.yaml").write_text("items: []\n")
+    register_test_probe("ext_source", assets_root=tmp_path / "pkg")
+    register_test_probe(
+        "ext_reader",
+        assets_root=tmp_path / "pkg",
+        asset_labels=classmethod(lambda cls: (cls.label, "ext_source")),
+    )
+    before = _inputs._probe_assets_digest("ext_reader", None)
+    (tmp_path / "pkg" / "ext_source" / "sample.yaml").write_text("items: [edited]\n")
+
+    assert _inputs._probe_assets_digest("ext_reader", None) != before
 
 
 def test_a_data_designer_release_is_part_of_the_setup(rows, monkeypatch):
@@ -404,25 +486,48 @@ def test_a_bank_override_counts_by_its_contents(rows, monkeypatch, tmp_path):
     assert _fingerprint(rows) != original
 
 
-def test_an_extension_release_is_part_of_the_setup(rows, monkeypatch):
-    # The suite runs with discovery off; this test is about what it finds.
+def _installed(monkeypatch, wanted: str, value: str, version: str) -> None:
+    """One package advertising ``value`` in the group ``wanted`` at ``version``, as entry-point discovery finds it."""
+    entry = SimpleNamespace(name="partner", value=value, dist=SimpleNamespace(name="partner", version=version))
+    monkeypatch.setattr(
+        "usersim.engine.core._extensions.entry_points", lambda group=None: [entry] if group == wanted else []
+    )
+
+
+@pytest.fixture
+def discovery_on(monkeypatch):
+    # The suite runs with discovery off; these tests are about what it finds.
     monkeypatch.delenv("USERSIM_DISABLE_EXTENSIONS", raising=False)
 
-    def installed(version: str):
-        entry = SimpleNamespace(
-            name="partner_probe",
-            value="partner.probes:PartnerProbe",
-            dist=SimpleNamespace(name="partner", version=version),
-        )
-        monkeypatch.setattr(
-            "usersim.engine.core._extensions.entry_points", lambda group: [entry] if group == "usersim.probes" else []
-        )
 
-    installed("1.0")
+def test_the_release_of_a_package_registering_a_probe_in_the_rows_mix_is_part_of_its_setup(
+    rows, monkeypatch, register_test_probe, discovery_on
+):
+    register_test_probe("partner_probe", __module__="partner.probes")
+    held = _with_a_row_of(rows, "partner_probe")
+    _installed(monkeypatch, "usersim.probes", "partner.probes", "1.0")
+    first = _fingerprint(held)
+    _installed(monkeypatch, "usersim.probes", "partner.probes", "2.0")
+    second = _fingerprint(held)
+
+    assert first.probes["partner_probe"] != second.probes["partner_probe"]
+    assert _the_others(first, "partner_probe") == _the_others(second, "partner_probe")
+
+
+def test_a_package_registering_a_probe_outside_the_rows_mix_changes_no_setup(rows, monkeypatch, discovery_on):
+    _installed(monkeypatch, "usersim.probes", "partner.probes", "1.0")
     first = _fingerprint(rows)
-    installed("2.0")
+    _installed(monkeypatch, "usersim.probes", "partner.probes", "2.0")
 
-    assert _fingerprint(rows) != first
+    assert _fingerprint(rows) == first
+
+
+def test_a_model_backend_release_is_part_of_every_row_s_setup(rows, monkeypatch, discovery_on):
+    _installed(monkeypatch, "usersim.backends", "partner.backend:PartnerBackend", "1.0")
+    first = _fingerprint(rows)
+    _installed(monkeypatch, "usersim.backends", "partner.backend:PartnerBackend", "2.0")
+
+    assert _fingerprint(rows).core != first.core
 
 
 # ── changed rows, concurrent writers, failures ──────────────────────────

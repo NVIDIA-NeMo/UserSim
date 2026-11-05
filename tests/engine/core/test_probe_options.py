@@ -91,6 +91,20 @@ def test_a_probe_option_flag_names_a_probe_a_setting_and_a_value(spec) -> None:
         _parse_probe_options([spec])
 
 
+@pytest.mark.parametrize(
+    ("labels", "problem"),
+    [
+        (lambda cls: ["ext_labels"], "must return a tuple of probe labels"),
+        (lambda cls: (), "must return a tuple of probe labels"),
+        (lambda cls: ("other", "ext_labels"), "must start with its own label"),
+    ],
+)
+def test_asset_labels_that_do_not_start_with_the_probe_s_own_are_reported(register_test_probe, labels, problem) -> None:
+    probe = register_test_probe("ext_labels", asset_labels=classmethod(labels))
+
+    assert any(problem in found for found in probe_conformance_problems(probe))
+
+
 def test_options_without_a_default_are_reported(register_test_probe) -> None:
     class _Required(BaseProbe.Options):
         party_size: int

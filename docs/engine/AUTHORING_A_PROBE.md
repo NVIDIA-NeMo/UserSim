@@ -280,6 +280,13 @@ def load_my_bank(locale: str) -> MyBank:
 [`docs/extensions.md`](../extensions.md) builds a whole package around such a
 probe.
 
+A run of stored rows (`usersim simulate --inputs`) counts the contents of the
+probe's asset folder as the probe's part of its setup, so an edit there gives
+only that probe's rows new ids. A probe that also reads another probe's assets
+names it in an `asset_labels` classmethod, its own label first, so an edit
+there counts too; `identity_disclosure` names each probe whose spec its spec
+`extends`.
+
 ### Call a model of your own
 
 A probe that calls a model beyond the conversation's own (the user, assistant,

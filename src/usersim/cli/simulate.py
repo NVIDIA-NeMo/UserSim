@@ -573,7 +573,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
     )
     print(f"  assets_dir:    {inputs.assets_dir or _OWN_ASSETS}")
     print(f"  models config: {models_path}")
-    print(f"  setup:         {plan.fingerprint[:12]}")
+    print(f"  setup:         {plan.fingerprint.label}")
     if plan.matching_run is not None:
         print(f"  run_id:        {plan.matching_run} (resume; {plan.saved} of {len(inputs.rows)} rows already saved)")
     else:

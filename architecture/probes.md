@@ -136,6 +136,7 @@ its label.
 | `themes` | `None`: no theme | run setup, which draws one per row into the `theme` column |
 | `seed_dataset` | `None`: no seed table | run setup, which attaches `<seed_dataset>.parquet` or `.jsonl` from the probe's asset folder and gives each of the probe's rows the columns of one of its rows, and the mix's other probes' rows those columns empty (the run's config lists them in `seed_dataset_columns`); a mix with two such probes is refused; smoke and `assert_probe_conforms` check the table is there |
 | `model_aliases` | `()` | run setup, which adds each alias the models file defines to every row's models, for the probes in the run's mix |
+| `asset_labels` | its own label | the setup fingerprint of stored rows, which counts the asset folders of each label as the probe's part, so an edit there gives only its rows new ids |
 | `output_columns` | `()` | the run's `side_effect_columns`; a column left out is dropped |
 | `supports_assistant_resampling` | `True`; `False` with the tool mixins | judge-gated assistant resampling (`max_assistant_attempts > 1`) |
 | `bank_loader` | none: required on a `BankBackedProbe` | constructing a `BankBackedProbe`, for the row's locale |
