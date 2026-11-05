@@ -35,7 +35,6 @@ from usersim.engine.core.outcomes import (
     WarningKind,
 )
 from usersim.engine.core.probes import (
-    _PROBE_REGISTRY,
     BankBackedProbe,
     BankLoadError,
     BankReframingMixin,
@@ -51,7 +50,6 @@ from usersim.engine.core.probes import (
     assistant_message,
     clear_registry,
     known_probes,
-    load_builtin_probes,
     register_probe,
     resolve_probe,
 )
@@ -727,16 +725,14 @@ class TestLocalePromptPack:
 
 
 class TestRegisterProbe:
-    def setup_method(self) -> None:
-        # Loaded before the snapshot so it holds the built-ins, and so a
-        # lookup during the test cannot add them to the cleared registry.
-        load_builtin_probes()
-        self._snapshot = dict(_PROBE_REGISTRY)
-        clear_registry()
+    @pytest.fixture(autouse=True)
+    def _empty_registry(self, restored_registries):
+        """Each test starts from an empty registry, and the next test gets the built-ins back.
 
-    def teardown_method(self) -> None:
+        ``restored_registries`` loads the built-ins first, so a lookup during
+        the test cannot add them to the cleared registry.
+        """
         clear_registry()
-        _PROBE_REGISTRY.update(self._snapshot)
 
     def _make_module(self, name: str = "_probe_test_module") -> types.ModuleType:
         mod = types.ModuleType(name)

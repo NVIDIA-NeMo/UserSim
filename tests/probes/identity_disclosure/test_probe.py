@@ -20,7 +20,6 @@ import yaml
 import usersim.cli as cli_pkg
 import usersim.engine.generator  # noqa: F401  (populates the registry)
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core import probes as core_probes
 from usersim.engine.core import translation
 from usersim.engine.core.behavioral import compute_behavioral_profile
 from usersim.engine.core.locale import INDIA_VARIANT_LOCALES
@@ -72,15 +71,6 @@ def _fresh_state(monkeypatch):
     yield
     reset_identity_spec_cache()
     probe_gen._announced.clear()
-
-
-@pytest.fixture
-def probe_registry():
-    """Restore the registry exactly, so a probe defined here cannot leak."""
-    snapshot = dict(core_probes._PROBE_REGISTRY)
-    yield
-    core_probes._PROBE_REGISTRY.clear()
-    core_probes._PROBE_REGISTRY.update(snapshot)
 
 
 def _facade(model_id: str) -> SimpleNamespace:
@@ -723,7 +713,7 @@ class TestUserTurnPolicy:
 
 
 class TestBuildingOnTop:
-    def test_a_subclass_gets_its_own_spec_and_provenance_slot(self, probe_registry, tmp_path, monkeypatch) -> None:
+    def test_a_subclass_gets_its_own_spec_and_provenance_slot(self, restored_registries, tmp_path, monkeypatch) -> None:
         layer = tmp_path / "derived_identity_fixture" / "spec.yaml"
         layer.parent.mkdir()
         layer.write_text(

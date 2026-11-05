@@ -26,7 +26,9 @@ keep.
 
 ``run_episode`` runs one episode of a probe offline with ``ScriptedModel``
 answering for every model alias, and returns the generator's row and the
-prompts sent, so a probe's tests patch nothing.
+prompts sent, so a probe's tests patch nothing. ``registry_snapshot`` puts
+the probe and scorer registries back as they were, for a test that registers
+its own.
 
 ``usersim.testing.pytest_plugin`` is the hermetic harness the built-in tests
 run under, for a suite to load with
@@ -42,10 +44,11 @@ import copy
 import inspect
 import json
 import textwrap
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, Iterator, Mapping, Sequence
 
 # Engine imports stay inside the functions that use them: loading
 # ``usersim.testing.pytest_plugin`` imports this package first, and a suite
@@ -61,6 +64,7 @@ __all__ = [
     "assert_scorer_conforms",
     "hosted_parity_report",
     "probe_conformance_problems",
+    "registry_snapshot",
     "run_episode",
     "scorer_conformance_problems",
 ]
@@ -455,6 +459,36 @@ async def assert_scorer_conforms(
     problems = await scorer_conformance_problems(name, sample_row=sample_row)
     if problems:
         raise AssertionError(f"scorer {name!r} does not conform:\n  - " + "\n  - ".join(problems))
+
+
+@contextmanager
+def registry_snapshot() -> Iterator[None]:
+    """Put the probe and scorer registries back as they were on entry when the block exits.
+
+    A test that registers a probe or scorer of its own, or clears a registry,
+    runs inside it, so nothing it registers reaches the next test in the same
+    process::
+
+        async def test_my_scorer_conforms():
+            with registry_snapshot():
+                register_scorer("my_reply_length", reply_length)
+                await assert_scorer_conforms("my_reply_length")
+
+    The built-in probes are loaded on entry, so the snapshot holds them even
+    when nothing has looked a probe up yet. Each registry is restored in
+    place, so code holding a reference to one sees the restored entries.
+    """
+    from usersim.engine.core.probes import _PROBE_REGISTRY, load_builtin_probes
+    from usersim.engine.evaluator.scorers import _DETERMINISTIC, _REGISTRY
+
+    load_builtin_probes()
+    saved = [(registry, copy.copy(registry)) for registry in (_PROBE_REGISTRY, _REGISTRY, _DETERMINISTIC)]
+    try:
+        yield
+    finally:
+        for registry, entries in saved:
+            registry.clear()
+            registry.update(entries)
 
 
 # ---------------------------------------------------------------------------

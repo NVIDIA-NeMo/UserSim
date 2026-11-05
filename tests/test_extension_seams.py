@@ -52,24 +52,6 @@ def extension(monkeypatch, tmp_path):
     clear_extension_cache()
 
 
-@pytest.fixture
-def probe_registry():
-    """Restore the probe registry exactly, rather than clearing it.
-
-    ``clear_registry()`` drops the built-ins as well, which would leave an
-    empty registry for whatever test runs next in the same worker.
-    """
-    from usersim.engine.core import probes
-
-    # Loaded first so the snapshot holds the built-ins even when no earlier
-    # test has looked a probe up.
-    probes.load_builtin_probes()
-    snapshot = dict(probes._PROBE_REGISTRY)
-    yield
-    probes._PROBE_REGISTRY.clear()
-    probes._PROBE_REGISTRY.update(snapshot)
-
-
 class TestProbeDiscovery:
     """A probe package must register through the same decorator a built-in uses."""
 
@@ -82,7 +64,7 @@ class PartnerProbe(BaseProbe):
     label = "partner_probe"
 """
 
-    def test_contributed_probe_appears(self, extension, probe_registry) -> None:
+    def test_contributed_probe_appears(self, extension, restored_registries) -> None:
         from usersim.engine.core.probes import known_probes
 
         extension(
@@ -92,7 +74,7 @@ class PartnerProbe(BaseProbe):
         )
         assert "partner_probe" in known_probes()
 
-    def test_contributed_probe_resolves(self, extension, probe_registry) -> None:
+    def test_contributed_probe_resolves(self, extension, restored_registries) -> None:
         from usersim.engine.core.probes import resolve_probe
 
         extension(
@@ -102,7 +84,7 @@ class PartnerProbe(BaseProbe):
         )
         assert resolve_probe("partner_probe").label == "partner_probe"
 
-    def test_absent_when_discovery_is_off(self, extension, probe_registry, monkeypatch) -> None:
+    def test_absent_when_discovery_is_off(self, extension, restored_registries, monkeypatch) -> None:
         from usersim.engine.core.probes import known_probes
 
         extension(
@@ -113,7 +95,7 @@ class PartnerProbe(BaseProbe):
         monkeypatch.setenv(DISABLE_ENV_VAR, "1")
         assert "partner_probe" not in known_probes()
 
-    def test_a_contributed_probe_cannot_take_a_builtin_label(self, extension, probe_registry, caplog) -> None:
+    def test_a_contributed_probe_cannot_take_a_builtin_label(self, extension, restored_registries, caplog) -> None:
         from usersim.engine.core.probes import known_probes, resolve_probe
 
         builtin = resolve_probe("tool_calling")
@@ -128,17 +110,6 @@ class PartnerProbe(BaseProbe):
         assert "'tool_calling' is already registered by usersim.engine.probes.tool_calling.probe" in caplog.text
 
 
-@pytest.fixture
-def scorer_registry():
-    """Restore the scorer registry so a fixture scorer does not leak."""
-    from usersim.engine.evaluator import scorers
-
-    snapshot = dict(scorers._REGISTRY)
-    yield
-    scorers._REGISTRY.clear()
-    scorers._REGISTRY.update(snapshot)
-
-
 class TestScorerDiscovery:
     SOURCE = """
 from usersim.engine.evaluator.scorers import register_scorer
@@ -151,7 +122,7 @@ def _score(row, models):
 register_scorer("partner_scorer", _score)
 """
 
-    def test_contributed_scorer_resolves(self, extension, scorer_registry) -> None:
+    def test_contributed_scorer_resolves(self, extension, restored_registries) -> None:
         from usersim.engine.evaluator.scorers import get_scorer
 
         extension(
@@ -161,7 +132,7 @@ register_scorer("partner_scorer", _score)
         )
         assert get_scorer("partner_scorer")({}, {}) == {"score": 1.0}
 
-    def test_contributed_scorer_is_listed(self, extension, scorer_registry) -> None:
+    def test_contributed_scorer_is_listed(self, extension, restored_registries) -> None:
         from usersim.engine.evaluator.scorers import list_scorers
 
         extension(
@@ -171,7 +142,7 @@ register_scorer("partner_scorer", _score)
         )
         assert "partner_scorer" in list_scorers()
 
-    def test_a_contributed_scorer_cannot_take_a_builtin_name(self, extension, scorer_registry, caplog) -> None:
+    def test_a_contributed_scorer_cannot_take_a_builtin_name(self, extension, restored_registries, caplog) -> None:
         from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 
         builtin = get_scorer("tool_use")

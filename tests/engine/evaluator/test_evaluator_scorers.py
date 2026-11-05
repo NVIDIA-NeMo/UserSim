@@ -12,17 +12,8 @@ import pytest
 from usersim.engine.evaluator import scorers as scorers_module
 
 
+@pytest.mark.usefixtures("empty_scorer_registry")
 class TestScorerRegistry:
-    # The registry is process-global, so teardown restores what was there
-    # instead of leaving it empty for whatever runs next in this worker.
-    def setup_method(self) -> None:
-        self._snapshot = dict(scorers_module._REGISTRY)
-        scorers_module.clear_registry()
-
-    def teardown_method(self) -> None:
-        scorers_module.clear_registry()
-        scorers_module._REGISTRY.update(self._snapshot)
-
     def test_register_and_get(self) -> None:
         def fake_scorer(traj: dict, models: dict) -> dict:
             return {"score": 0.5}

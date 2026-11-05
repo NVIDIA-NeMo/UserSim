@@ -358,17 +358,14 @@ class TestTheChecksCanFail:
 
     @pytest.mark.parametrize(("deterministic", "reported"), [(True, True), (False, False)])
     async def test_a_deterministic_scorer_that_looks_up_a_model_is_reported(
-        self, monkeypatch, deterministic, reported
+        self, restored_registries, deterministic, reported
     ) -> None:
         """usersim rescore reruns a deterministic scorer with no models, trusting it calls none."""
 
         async def judged_when_wired(row, models):
             return {"judged": models.get("judge_model") is not None}
 
-        monkeypatch.setattr(scorers, "_REGISTRY", dict(scorers._REGISTRY))
-        monkeypatch.setattr(scorers, "_DETERMINISTIC", set(scorers._DETERMINISTIC))
         scorers.register_scorer("judged_when_wired", judged_when_wired, deterministic=deterministic)
-
         problems = await scorer_conformance_problems("judged_when_wired")
         expected = "'judged_when_wired' is registered as deterministic but looked up judge_model"
         assert any(expected in p for p in problems) is reported, problems

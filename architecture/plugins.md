@@ -218,6 +218,11 @@ It returns the row the generator produces and every prompt the models
 received, so a probe's tests need neither a provider nor a patch of the
 engine's internals.
 
+A test that registers a probe or scorer of its own runs it inside
+`with registry_snapshot():`. When the block exits, both registries are back
+as they were, so nothing the test registered reaches the next test in the
+same process.
+
 Installing `usersim` does not load the plugin. It has no `pytest11` entry
 point, because it blocks outbound connections, and a project that installs
 `usersim` for another reason keeps its tests as they are.

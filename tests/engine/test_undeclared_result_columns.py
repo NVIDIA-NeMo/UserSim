@@ -25,7 +25,7 @@ import pytest
 from usersim.engine import generator as generator_module
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.episode_input import ConstructedEpisode
-from usersim.engine.core.probes import _PROBE_REGISTRY, clear_registry, load_builtin_probes, register_probe
+from usersim.engine.core.probes import register_probe
 from usersim.engine.generator import ConversationSimulatorGenerator
 from usersim.engine.probes.general_open_ended.probe import OpenEndedProbe
 
@@ -116,9 +116,7 @@ class _EchoingProbe(OpenEndedProbe):
 
 
 @pytest.fixture
-def extra_column_probe():
-    load_builtin_probes()
-    snapshot = dict(_PROBE_REGISTRY)
+def extra_column_probe(restored_registries):
     for probe in (
         _ExtraColumnProbe,
         _DeclaredColumnProbe,
@@ -128,9 +126,7 @@ def extra_column_probe():
         _EchoingProbe,
     ):
         register_probe(family="general", prompt_version="v1.0", variants=("default",))(probe)
-    yield _PROBE
-    clear_registry()
-    _PROBE_REGISTRY.update(snapshot)
+    return _PROBE
 
 
 def _config() -> ConversationSimulatorConfig:

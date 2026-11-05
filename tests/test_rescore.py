@@ -111,13 +111,6 @@ def run_on_disk(tmp_path):
     )
 
 
-def _register_for_this_test(monkeypatch, name, fn, *, deterministic=False):
-    """Register ``fn`` in copies of the scorer registry, restored after the test."""
-    monkeypatch.setattr(scorers_module, "_REGISTRY", dict(scorers_module._REGISTRY))
-    monkeypatch.setattr(scorers_module, "_DETERMINISTIC", set(scorers_module._DETERMINISTIC))
-    scorers_module.register_scorer(name, fn, deterministic=deterministic)
-
-
 def _read_cell(evaluations, run_id="1700000000"):
     pytest.importorskip("pandas")
     from usersim.engine.core.storage import read_partitioned_dataset
@@ -187,7 +180,7 @@ class TestRoundTrip:
 
 
 class TestScorerInput:
-    def test_empty_cells_reach_the_scorer_as_none(self, run_on_disk, monkeypatch):
+    def test_empty_cells_reach_the_scorer_as_none(self, run_on_disk, restored_registries):
         """The store reads an empty cell back as pandas NA, which a scorer's
         falsy fallback cannot test, so it has to arrive as None, as it does
         from the evaluator."""
@@ -197,7 +190,7 @@ class TestScorerInput:
             seen["traj_row"] = traj
             return {"scores": {}}
 
-        _register_for_this_test(monkeypatch, "__spy__", spy, deterministic=True)
+        scorers_module.register_scorer("__spy__", spy, deterministic=True)
         run_on_disk.scorers = ["__spy__"]
 
         assert run(run_on_disk) == 0
@@ -220,13 +213,13 @@ class TestRefusesToSpendMoney:
         assert f"{scorer!r} is not registered as deterministic" in str(excinfo.value)
         assert "LLM-free" in str(excinfo.value)
 
-    def test_a_scorer_registered_without_the_flag_is_refused(self, run_on_disk, monkeypatch):
+    def test_a_scorer_registered_without_the_flag_is_refused(self, run_on_disk, restored_registries):
         """Rescore reruns only what a scorer's registration promises calls no model."""
 
         async def my_judged(traj, models):
             return {"scores": {}}
 
-        _register_for_this_test(monkeypatch, "my_judged", my_judged)
+        scorers_module.register_scorer("my_judged", my_judged)
         run_on_disk.scorers = ["my_judged"]
         with pytest.raises(SystemExit) as excinfo:
             run(run_on_disk)

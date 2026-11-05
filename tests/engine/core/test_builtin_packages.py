@@ -103,10 +103,8 @@ _THROWAWAY = {
 
 
 @pytest.fixture
-def throwaway_package(tmp_path, monkeypatch):
+def throwaway_package(tmp_path, monkeypatch, restored_registries):
     """A package named ``throwaway_pkg`` under ``usersim.engine.probes``, on the roster."""
-    from usersim.engine.core import probes
-    from usersim.engine.evaluator import scorers
     from usersim.taxonomy import capabilities
 
     folder = tmp_path / "throwaway_pkg"
@@ -115,17 +113,11 @@ def throwaway_package(tmp_path, monkeypatch):
         (folder / name).write_text(textwrap.dedent(source), encoding="utf-8")
     monkeypatch.setattr(usersim.engine.probes, "__path__", [*usersim.engine.probes.__path__, str(tmp_path)])
     monkeypatch.setattr(builtin_packages, "BUILTIN_PACKAGES", (*BUILTIN_PACKAGES, "throwaway_pkg"))
-    probe_registry = dict(probes._PROBE_REGISTRY)
-    scorer_registry = dict(scorers._REGISTRY)
     capabilities._builtin_capabilities.cache_clear()
     capabilities._axis_descriptions.cache_clear()
     yield
     for module in [name for name in sys.modules if name.startswith(f"{BUILTIN_ROOT}.throwaway_pkg")]:
         del sys.modules[module]
-    probes._PROBE_REGISTRY.clear()
-    probes._PROBE_REGISTRY.update(probe_registry)
-    scorers._REGISTRY.clear()
-    scorers._REGISTRY.update(scorer_registry)
     capabilities._builtin_capabilities.cache_clear()
     capabilities._axis_descriptions.cache_clear()
 

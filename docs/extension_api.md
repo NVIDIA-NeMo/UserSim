@@ -191,3 +191,4 @@ suite can load.
 | `assert_hosted_parity` | Fails when a probe run through a host differs from the same probe run alone |
 | `hosted_parity_report` | Runs one episode alone and through a host, and compares the two |
 | `HostedParityReport` | What `hosted_parity_report` returns |
+| `registry_snapshot` | A context manager that puts the probe and scorer registries back as they were, for a test that registers its own |

@@ -406,7 +406,24 @@ def evaluator_df(trajectory_df):
 
 
 @pytest.fixture
-def register_test_probe() -> Iterator[Callable[..., type]]:
+def restored_registries() -> Iterator[None]:
+    """Put the probe and scorer registries back after the test, so nothing it registers reaches another test."""
+    from usersim.testing import registry_snapshot
+
+    with registry_snapshot():
+        yield
+
+
+@pytest.fixture
+def empty_scorer_registry(restored_registries) -> None:
+    """Start the test from an empty scorer registry; the registered scorers are back after it."""
+    from usersim.engine.evaluator import scorers
+
+    scorers.clear_registry()
+
+
+@pytest.fixture
+def register_test_probe(restored_registries) -> Callable[..., type]:
     """Register throwaway ``BaseProbe`` subclasses for one test.
 
     ``register_test_probe("ext_probe", assets_root=root)`` registers a class
@@ -416,8 +433,6 @@ def register_test_probe() -> Iterator[Callable[..., type]]:
     test, so nothing registered here reaches another test.
     """
     from usersim.engine.core import probes
-
-    snapshot = dict(probes._PROBE_REGISTRY)
 
     def register(
         label: str,
@@ -430,9 +445,7 @@ def register_test_probe() -> Iterator[Callable[..., type]]:
         cls = type(label, (probes.BaseProbe,), {"label": label, **attributes})
         return probes.register_probe(family=family or label, prompt_version=prompt_version, variants=variants)(cls)
 
-    yield register
-    probes._PROBE_REGISTRY.clear()
-    probes._PROBE_REGISTRY.update(snapshot)
+    return register
 
 
 @pytest.fixture
