@@ -22,7 +22,7 @@ What ``ToolCallingMixin`` does:
 What you provide:
 - ``seed_dataset`` — the name of the tool table in your asset folder
   (``<name>.parquet`` or ``<name>.jsonl``); a run gives each row the
-  columns of one of its rows, and ``--toolset-seed-path`` swaps in another.
+  columns of one of its rows, and ``--seed-dataset-path`` swaps in another.
 - ``__init__(...)`` — sample tools from the row's ``tools`` column,
   validate, store on ``self``.
 - ``get_user_system_prompt`` — typical persona-grounded user prompt.

@@ -173,18 +173,16 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     p.add_argument(
-        "--toolset-seed-path",
+        "--seed-dataset-path",
         type=Path,
         default=None,
         help=(
             "Seed table (.parquet or .jsonl) for the probe in --probe-mix that "
-            "reads one, in place of the table it declares in its assets. For "
-            "tool_calling, its toolset catalog: one row per toolset with columns "
-            "toolset_source, toolset_category, toolset_name, num_tools and tools "
-            "(JSON list of OpenAI-style function specs) -- see the Schema section of "
-            "engine/probes/tool_calling/assets/tool_calling/README.md in the package. "
-            "Requires a probe in --probe-mix that reads a seed table; a missing or "
-            "unsupported explicit file is an error."
+            "reads one, in place of the table it declares in its assets, with the "
+            "columns that probe reads: for tool_calling, its toolset catalog (see the "
+            "Schema section of engine/probes/tool_calling/assets/tool_calling/README.md "
+            "in the package). Requires a probe in --probe-mix that reads a seed table; "
+            "a missing or unsupported explicit file is an error."
         ),
     )
     p.add_argument(
@@ -296,7 +294,7 @@ _STORED_ROW_FLAGS = {
     "random_seed": "--random-seed",
     "probe_option": "--probe-option",
     "no_store_reasoning": "--no-store-reasoning",
-    "toolset_seed_path": "--toolset-seed-path",
+    "seed_dataset_path": "--seed-dataset-path",
     "match_persona_language": "--match-persona-language",
     "materialize_inputs": "--materialize-inputs",
 }
@@ -407,7 +405,7 @@ def run(args: argparse.Namespace) -> int:
         seed = resolve_seed_dataset_for_mix(
             probe_mix,
             args.assets_dir,
-            args.toolset_seed_path,
+            args.seed_dataset_path,
         )
         # Reported, not refused: the offline check a new install runs comes
         # before the persona download.
@@ -434,7 +432,7 @@ def run(args: argparse.Namespace) -> int:
 
             print(f"  asset path:    {', '.join([*map(str, asset_search_path()), _OWN_ASSETS])}")
         print(f"  match_persona_language: {args.match_persona_language}")
-        print(f"  toolset_seed_path: {seed or '(not used)'}")
+        print(f"  seed_dataset_path: {seed or '(not used)'}")
         print(f"  output:        {args.out}")
         print(f"  resumable:     {not args.no_skip_existing}")
         print(f"  store_reasoning: {not args.no_store_reasoning}")
@@ -455,7 +453,7 @@ def run(args: argparse.Namespace) -> int:
         out=args.out,
         assets_dir=args.assets_dir,
         match_persona_language=args.match_persona_language,
-        toolset_seed_path=args.toolset_seed_path,
+        seed_dataset_path=args.seed_dataset_path,
         max_turns=args.max_turns,
         max_assistant_attempts=args.max_assistant_attempts,
         probe_mix=probe_mix,
@@ -514,7 +512,7 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float], probe_options
                 assets_dir=args.assets_dir,
                 probe_mix=probe_mix,
                 random_seed=args.random_seed,
-                toolset_seed_path=args.toolset_seed_path,
+                seed_dataset_path=args.seed_dataset_path,
                 match_persona_language=args.match_persona_language,
                 max_turns=args.max_turns,
                 max_assistant_attempts=args.max_assistant_attempts,
@@ -642,7 +640,7 @@ def _simulate_to_parquet(
     assets_dir,
     max_turns,
     match_persona_language=False,
-    toolset_seed_path=None,
+    seed_dataset_path=None,
     probe_mix,
     random_seed,
     probe_options=None,
@@ -692,10 +690,10 @@ def _simulate_to_parquet(
     # Resolve only for a run whose mix reads a seed table. The builder also
     # enforces this for library callers, while doing it here gives the manifest
     # the exact file used and keeps other runs independent of seed tables.
-    toolset_seed_path = resolve_seed_dataset_for_mix(
+    seed_dataset_path = resolve_seed_dataset_for_mix(
         probe_mix,
         assets_dir,
-        toolset_seed_path,
+        seed_dataset_path,
     )
 
     if panel:
@@ -750,7 +748,7 @@ def _simulate_to_parquet(
             locale=locale,
             probe_mix=probe_mix,
             match_persona_language=match_persona_language,
-            toolset_seed_path=toolset_seed_path,
+            seed_dataset_path=seed_dataset_path,
             **run_settings,
         )
         if seed_source is not None:
@@ -763,7 +761,7 @@ def _simulate_to_parquet(
         with tempfile.TemporaryDirectory(prefix="usersim_simulate_") as artifacts:
             df = data_designer.create(builder, num_records=n, artifact_path=artifacts).load_dataset()
         df = clear_seed_columns_of_other_probes(
-            df, probe_mix=probe_mix, assets_dir=assets_dir, toolset_seed_path=toolset_seed_path
+            df, probe_mix=probe_mix, assets_dir=assets_dir, seed_dataset_path=seed_dataset_path
         )
         # Per-locale atomic write: this locale's partition lands on
         # disk before the next locale starts. A crash mid-run leaves
@@ -814,7 +812,7 @@ def _simulate_to_parquet(
             sim_config=simulator_config(locale=run_locales[0], **run_settings),
             locales_requested=run_locales,
             probe_mix=probe_mix,
-            toolset_seed_path=toolset_seed_path,
+            seed_dataset_path=seed_dataset_path,
             panel_path=Path(panel) if panel else None,
             assets_dir=Path(assets_dir).resolve() if assets_dir is not None else None,
             trajectories_requested=requested_per_locale,

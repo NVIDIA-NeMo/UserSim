@@ -201,6 +201,17 @@ class TestRoundTrip:
         assert m.simulation_config.max_turns == 5  # default
         assert m.simulation_config.store_reasoning is True
 
+    def test_a_manifest_naming_its_seed_table_after_toolsets_still_loads(self) -> None:
+        written = {
+            "manifest_schema_version": "v1",
+            "run_id": "1700000000",
+            "started_at_epoch": 1700000000,
+            "models": {},
+            "scope": {"toolset_seed_path": "/catalog.parquet", "toolset_content_hash": "abc123"},
+        }
+        scope = RunManifest.from_dict(written).scope
+        assert (scope.seed_dataset_path, scope.seed_dataset_content_hash) == ("/catalog.parquet", "abc123")
+
     def test_schema_version_is_v1(self) -> None:
         assert MANIFEST_SCHEMA_VERSION == "v1"
 

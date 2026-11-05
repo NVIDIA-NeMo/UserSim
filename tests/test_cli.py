@@ -1192,7 +1192,7 @@ class TestConfigErrorPresentation:
         from usersim.engine.errors import ConfigError
 
         def _raises(args):
-            raise ConfigError("toolset seed not found: /nope.parquet")
+            raise ConfigError("seed table not found: /nope.parquet")
 
         with patch("usersim.cli._build_parser") as build:
             build.return_value.parse_args.return_value = SimpleNamespace(
@@ -1203,10 +1203,10 @@ class TestConfigErrorPresentation:
                 code = cli.main([])
 
         assert code == 2
-        assert "toolset seed not found: /nope.parquet" in caplog.text
+        assert "seed table not found: /nope.parquet" in caplog.text
 
-    def test_missing_toolset_seed_raises_config_error(self, tmp_path):
-        """The real path: an explicit ``--toolset-seed-path`` that is not
+    def test_missing_seed_table_raises_config_error(self, tmp_path):
+        """The real path: an explicit ``--seed-dataset-path`` that is not
         there is a user error, not a crash."""
         from usersim.cli._pipeline import resolve_seed_dataset_path
         from usersim.engine.errors import ConfigError
@@ -1214,7 +1214,7 @@ class TestConfigErrorPresentation:
         with pytest.raises(ConfigError, match="seed table not found"):
             resolve_seed_dataset_path(
                 "tool_calling",
-                toolset_seed_path=tmp_path / "absent.parquet",
+                seed_dataset_path=tmp_path / "absent.parquet",
             )
 
 

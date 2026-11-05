@@ -275,7 +275,7 @@ class TestNewRunIdWiring:
                 store_reasoning=False,
             )
         assert rc == 0
-        assert captured_builder_kwargs["toolset_seed_path"] is None
+        assert captured_builder_kwargs["seed_dataset_path"] is None
         assert captured_builder_kwargs["store_reasoning"] is False
 
         # Two distinct runs on disk now: the seeded "1700000000"
@@ -306,8 +306,8 @@ class TestNewRunIdWiring:
         assert fresh_manifest.manifest_schema_version == "v1"
         assert fresh_manifest.run_id == new_id
         assert "assistant_model" in fresh_manifest.models
-        assert fresh_manifest.scope.toolset_seed_path is None
-        assert fresh_manifest.scope.toolset_content_hash is None
+        assert fresh_manifest.scope.seed_dataset_path is None
+        assert fresh_manifest.scope.seed_dataset_content_hash is None
         assert fresh_manifest.simulation_config.store_reasoning is False
         assert fresh_manifest.source.kind == "cli"
         assert fresh_manifest.source.invocation == "usersim simulate --locale en_US --num-rows 1"

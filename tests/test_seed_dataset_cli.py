@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for `--toolset-seed-path` and the resolver of a probe's seed table.
+"""Tests for `--seed-dataset-path` and the resolver of a probe's seed table.
 
 Scope: `cli/_pipeline.py`'s resolver, the CLI flag that overrides it, and
 Data Designer's JSONL contract, through `tool_calling`, which reads its
@@ -105,7 +105,7 @@ class TestResolveSeedDatasetPath:
         seed = tmp_path / "toolsets.csv"
         seed.touch()
         with pytest.raises(ConfigError, match="unsupported seed table suffix"):
-            resolve_seed_dataset_path("tool_calling", toolset_seed_path=seed)
+            resolve_seed_dataset_path("tool_calling", seed_dataset_path=seed)
 
     def test_default_candidate_must_be_a_file(self, tmp_path):
         root = _assets_root(tmp_path)
@@ -209,7 +209,7 @@ class TestSeedColumnsStayWithTheirReader:
         rows = _mixed_rows().assign(region="EU")
 
         assert seed_dataset_columns(seed) == ["tools", "toolset_category", "region"]
-        _, general = clear_seed_columns_of_other_probes(rows, probe_mix=_MIX, toolset_seed_path=seed).to_dict(
+        _, general = clear_seed_columns_of_other_probes(rows, probe_mix=_MIX, seed_dataset_path=seed).to_dict(
             orient="records"
         )
         assert (general["region"], general["toolset_category"], general["tools"]) == (None, None, None)
@@ -322,17 +322,17 @@ class TestToolsetSeedFlag:
 
     def test_defaults_to_none(self):
         """None means 'resolve from --assets-dir', not 'no toolset'."""
-        assert self._parse().toolset_seed_path is None
+        assert self._parse().seed_dataset_path is None
 
     def test_flag_is_parsed_as_a_path(self, tmp_path):
         seed = tmp_path / "custom.jsonl"
-        args = self._parse("--toolset-seed-path", str(seed))
-        assert args.toolset_seed_path == Path(str(seed))
+        args = self._parse("--seed-dataset-path", str(seed))
+        assert args.seed_dataset_path == Path(str(seed))
 
     def test_help_renders(self, capsys):
         with pytest.raises(SystemExit):
             cli._build_parser().parse_args(["simulate", "--help"])
-        assert "--toolset-seed-path" in capsys.readouterr().out
+        assert "--seed-dataset-path" in capsys.readouterr().out
 
 
 class TestDryRunResolvesTheSeed:
@@ -401,7 +401,7 @@ class TestDryRunResolvesTheSeed:
                 root,
                 "--probe-mix",
                 "sov_ai_facts=1.0",
-                "--toolset-seed-path",
+                "--seed-dataset-path",
                 str(custom),
             )
 
@@ -418,14 +418,14 @@ class TestDryRunResolvesTheSeed:
     def test_raises_when_explicit_seed_is_missing(self, tmp_path):
         root = _assets_root(tmp_path, "toolsets_seed.parquet")
         with pytest.raises(ConfigError) as e:
-            self._run(root, "--toolset-seed-path", str(tmp_path / "nope.jsonl"))
+            self._run(root, "--seed-dataset-path", str(tmp_path / "nope.jsonl"))
         assert "seed table not found" in str(e.value)
 
     def test_explicit_seed_overrides_the_default(self, tmp_path, capsys):
         root = _assets_root(tmp_path, "toolsets_seed.parquet")
         custom = tmp_path / "custom.jsonl"
         custom.touch()
-        assert self._run(root, "--toolset-seed-path", str(custom)) == 0
+        assert self._run(root, "--seed-dataset-path", str(custom)) == 0
         assert "custom.jsonl" in capsys.readouterr().out
 
 
@@ -446,7 +446,7 @@ class TestPipelineRejectsToolCallingWithoutASeed:
             models=load_models_config(default_models_path()),
             assets_dir=Path(assets_dir).resolve() if assets_dir else None,
             probe_mix=mix,
-            toolset_seed_path=seed,
+            seed_dataset_path=seed,
         )
 
     def test_raises_when_tool_calling_has_no_seed(self, tmp_path):
@@ -468,7 +468,7 @@ class TestPipelineRejectsToolCallingWithoutASeed:
             self._build({"tool_calling": 1.0}, tmp_path / "nope.parquet")
 
     def test_other_probes_are_unaffected(self):
-        """A mix that needs no tools must build without a toolset seed."""
+        """A mix whose probes read no seed table builds without one."""
         self._build({"sov_ai_facts": 1.0}, None)
 
     def test_other_probes_do_not_inspect_ambiguous_seeds(self, tmp_path):

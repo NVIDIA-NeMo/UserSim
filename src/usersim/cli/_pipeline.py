@@ -98,13 +98,13 @@ def _probe_themes(probe: str, locale: str, assets_dir: Path | None) -> list[str]
 def resolve_seed_dataset_path(
     probe: str,
     assets_dir: Path | str | None = None,
-    toolset_seed_path: Path | str | None = None,
+    seed_dataset_path: Path | str | None = None,
 ) -> Path | None:
     """The seed table ``probe`` reads, or ``None`` if its asset folder holds none.
 
     ``probe`` must declare a ``seed_dataset``. Two sources:
 
-    - ``toolset_seed_path`` — an explicit file, which wins when given. It
+    - ``seed_dataset_path`` — an explicit file, which wins when given. It
       must exist: you named a path, and a run that silently ignores it is
       worse than one that stops.
     - the probe's asset folder, under ``assets_dir`` when it is given and
@@ -118,8 +118,8 @@ def resolve_seed_dataset_path(
     than a precedence question, since silently preferring one would make an
     edit to the other look like it had no effect.
     """
-    if toolset_seed_path is not None:
-        resolved = Path(toolset_seed_path).resolve()
+    if seed_dataset_path is not None:
+        resolved = Path(seed_dataset_path).resolve()
         if not resolved.is_file():
             raise ConfigError(f"seed table not found: {resolved}")
         if resolved.suffix not in SEED_DATASET_SUFFIXES:
@@ -284,30 +284,30 @@ def seed_dataset_probe(probe_mix: Mapping[str, float]) -> str | None:
 def resolve_seed_dataset_for_mix(
     probe_mix: Mapping[str, float],
     assets_dir: Path | str | None = None,
-    toolset_seed_path: Path | str | None = None,
+    seed_dataset_path: Path | str | None = None,
 ) -> Path | None:
     """The seed table a run of ``probe_mix`` attaches, or ``None`` when no probe in it reads one.
 
     A run without such a probe is not blocked by an ambiguous or missing
     table in an otherwise valid asset tree, and its manifest does not claim
     it used a file that never entered the pipeline; an explicit
-    ``toolset_seed_path`` for it is refused rather than silently ignored. A
+    ``seed_dataset_path`` for it is refused rather than silently ignored. A
     run with one must resolve a real table.
     """
     probe = seed_dataset_probe(probe_mix)
     if probe is None:
-        if toolset_seed_path is not None:
+        if seed_dataset_path is not None:
             raise ConfigError(
-                "toolset_seed_path was provided, but no probe in probe_mix reads a seed table. "
+                "seed_dataset_path was provided, but no probe in probe_mix reads a seed table. "
                 "Add the probe it is for, or remove the override."
             )
         return None
-    resolved = resolve_seed_dataset_path(probe, assets_dir, toolset_seed_path)
+    resolved = resolve_seed_dataset_path(probe, assets_dir, seed_dataset_path)
     if resolved is None:
         stem = resolve_probe(probe).seed_dataset
         raise ConfigError(
             f"probe_mix includes {probe}, which reads the seed table {stem}.parquet or {stem}.jsonl, and none is "
-            f"available. Pass toolset_seed_path=<path>, point assets_dir at a tree with {probe}/{stem}.parquet or "
+            f"available. Pass seed_dataset_path=<path>, point assets_dir at a tree with {probe}/{stem}.parquet or "
             f"{probe}/{stem}.jsonl, or drop {probe} from the mix."
         )
     return resolved
@@ -332,7 +332,7 @@ def clear_seed_columns_of_other_probes(
     *,
     probe_mix: Mapping[str, float],
     assets_dir: Path | str | None = None,
-    toolset_seed_path: Path | str | None = None,
+    seed_dataset_path: Path | str | None = None,
 ) -> Any:
     """``df`` with the seed table's columns emptied on every row of a probe that does not read the table.
 
@@ -343,7 +343,7 @@ def clear_seed_columns_of_other_probes(
     same arguments, and ``df`` comes back unchanged when no probe in the mix
     reads one.
     """
-    seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, toolset_seed_path)
+    seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, seed_dataset_path)
     reader = seed_dataset_probe(probe_mix)
     if seed_path is None or reader is None or "probe_type" not in df.columns:
         return df
@@ -460,7 +460,7 @@ def build_simulator_config_builder(
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
     probe_mix: dict[str, float] | None = None,
-    toolset_seed_path: Path | None = None,
+    seed_dataset_path: Path | None = None,
     match_persona_language: bool = False,
     verbosity: int = 1,
     random_seed: int | None = None,
@@ -488,7 +488,7 @@ def build_simulator_config_builder(
         locale=locale,
         assets_dir=assets_dir,
         probe_mix=probe_mix,
-        toolset_seed_path=toolset_seed_path,
+        seed_dataset_path=seed_dataset_path,
         match_persona_language=match_persona_language,
         drop_persona=True,
     )
@@ -524,7 +524,7 @@ def _add_episode_input_columns(
     locale: str,
     assets_dir: Path | None,
     probe_mix: dict[str, float],
-    toolset_seed_path: Path | None,
+    seed_dataset_path: Path | None,
     match_persona_language: bool,
     drop_persona: bool,
 ) -> None:
@@ -533,7 +533,7 @@ def _add_episode_input_columns(
     unknown = [key for key in probe_mix if key not in set(known_probes())]
     if unknown:
         raise ConfigError(f"Unknown probe_type(s) in probe_mix: {unknown}. Registered: {sorted(known_probes())}.")
-    seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, toolset_seed_path)
+    seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, seed_dataset_path)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="persona",
@@ -575,7 +575,7 @@ def materialize_episode_inputs(
     probe_mix: dict[str, float],
     assets_dir: Path | None = None,
     random_seed: int | None = None,
-    toolset_seed_path: Path | None = None,
+    seed_dataset_path: Path | None = None,
     match_persona_language: bool = False,
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
@@ -597,7 +597,7 @@ def materialize_episode_inputs(
         locale=locale,
         assets_dir=assets_dir,
         probe_mix=probe_mix,
-        toolset_seed_path=toolset_seed_path,
+        seed_dataset_path=seed_dataset_path,
         match_persona_language=match_persona_language,
         drop_persona=False,
     )
@@ -616,7 +616,7 @@ def materialize_episode_inputs(
     if sampled is None:
         return []
     sampled = clear_seed_columns_of_other_probes(
-        sampled, probe_mix=probe_mix, assets_dir=assets_dir, toolset_seed_path=toolset_seed_path
+        sampled, probe_mix=probe_mix, assets_dir=assets_dir, seed_dataset_path=seed_dataset_path
     )
     # ``usersim_config`` rides on the materialized row only. It is what lets a
     # host restore the episode with ProbeEpisodeRuntime.from_resolved_row; the

@@ -188,8 +188,8 @@ class ScopeInfo:
     locales: list[str]
     probes: list[str]
     probe_mix: dict[str, float]
-    toolset_seed_path: str | None = None
-    toolset_content_hash: str | None = None
+    seed_dataset_path: str | None = None
+    seed_dataset_content_hash: str | None = None
     panel_path: str | None = None
     panel_content_hash: str | None = None
     trajectories_requested: dict[str, int] = field(default_factory=dict)
@@ -366,8 +366,10 @@ def _scope_from_dict(d: Mapping[str, Any]) -> ScopeInfo:
         locales=list(d.get("locales") or []),
         probes=list(d.get("probes") or []),
         probe_mix=dict(d.get("probe_mix") or {}),
-        toolset_seed_path=d.get("toolset_seed_path"),
-        toolset_content_hash=d.get("toolset_content_hash"),
+        # A manifest written by an earlier release names these after
+        # tool_calling's toolsets, the one probe that read a seed table.
+        seed_dataset_path=d.get("seed_dataset_path", d.get("toolset_seed_path")),
+        seed_dataset_content_hash=d.get("seed_dataset_content_hash", d.get("toolset_content_hash")),
         panel_path=d.get("panel_path"),
         panel_content_hash=d.get("panel_content_hash"),
         trajectories_requested=dict(d.get("trajectories_requested") or {}),
@@ -725,7 +727,7 @@ def build_run_manifest(
     sim_config: Any,
     locales_requested: Sequence[str],
     probe_mix: Mapping[str, float],
-    toolset_seed_path: Path | None = None,
+    seed_dataset_path: Path | None = None,
     panel_path: Path | None = None,
     assets_dir: Path | None = None,
     trajectories_requested: Mapping[str, int] | None = None,
@@ -789,8 +791,8 @@ def build_run_manifest(
         locales=sorted(set(list(locales_run) + list(locales_requested))),
         probes=list(aggregates["probes"]) or sorted(probe_mix.keys()),
         probe_mix=dict(probe_mix),
-        toolset_seed_path=str(toolset_seed_path) if toolset_seed_path else None,
-        toolset_content_hash=_file_content_hash(toolset_seed_path) if toolset_seed_path else None,
+        seed_dataset_path=str(seed_dataset_path) if seed_dataset_path else None,
+        seed_dataset_content_hash=_file_content_hash(seed_dataset_path) if seed_dataset_path else None,
         panel_path=str(panel_path) if panel_path else None,
         panel_content_hash=_file_content_hash(panel_path) if panel_path else None,
         trajectories_requested=requested_per_locale,
@@ -926,7 +928,7 @@ def write_simulator_manifest(
     sim_config: Any,
     locales_requested: Sequence[str],
     probe_mix: Mapping[str, float],
-    toolset_seed_path: Path | None = None,
+    seed_dataset_path: Path | None = None,
     panel_path: Path | None = None,
     assets_dir: Path | None = None,
     trajectories_requested: Mapping[str, int] | None = None,
@@ -963,7 +965,7 @@ def write_simulator_manifest(
         sim_config=sim_config,
         locales_requested=locales_requested,
         probe_mix=probe_mix,
-        toolset_seed_path=toolset_seed_path,
+        seed_dataset_path=seed_dataset_path,
         panel_path=panel_path,
         assets_dir=assets_dir,
         trajectories_requested=trajectories_requested,

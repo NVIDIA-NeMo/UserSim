@@ -188,7 +188,7 @@ To point a run at a file somewhere else, without touching this tree:
 ```bash
 usersim simulate --locale en_US --num-rows 10 \
     --probe-mix 'tool_calling=1.0' \
-    --toolset-seed-path /path/to/my_toolsets.jsonl \
+    --seed-dataset-path /path/to/my_toolsets.jsonl \
     --out output/trajectories
 ```
 

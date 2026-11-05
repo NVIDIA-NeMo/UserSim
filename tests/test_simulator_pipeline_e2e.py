@@ -215,7 +215,7 @@ def _cli_built_simulator_config(probe_type: str, locale: str) -> ConversationSim
         models=models,
         max_turns=1,
         probe_mix=probe_mix,
-        toolset_seed_path=toolset_seed,
+        seed_dataset_path=toolset_seed,
         random_seed=42,
     )
     cfg = builder.get_column_config("conversation_messages")
