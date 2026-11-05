@@ -12,6 +12,7 @@ from types import SimpleNamespace
 from typing import Any, Mapping, Sequence
 
 import pytest
+from _probe_contract import built_in_labels, find_contract, probe_contract
 
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.episode_runtime import (
@@ -21,7 +22,7 @@ from usersim.engine.core.episode_runtime import (
     EpisodeLifecycleComplete,
     ProbeEpisodeRuntime,
 )
-from usersim.engine.core.probes import known_probes, resolve_probe
+from usersim.engine.core.probes import resolve_probe
 from usersim.engine.generator import ConversationSimulatorGenerator
 
 _PERSONA = {
@@ -59,29 +60,11 @@ class _Case:
     max_turns: int = 1
 
 
-_CASES = (
-    _Case("general_open_ended", 1001),
-    _Case("general_educational", 1002),
-    _Case("tool_calling", 1003, {"tools": [_TOOL]}),
-    _Case("sov_ai_facts", 1004),
-    _Case("sov_ai_dynamic", 1005),
-    _Case("sov_ai_multilingual_parity", 1006),
-    _Case("safety_chat_pressure", 1007),
-    _Case("safety_agentic", 42, {"user_interaction_style": "direct"}, 3),
-    _Case("financial_services", 1009),
-    _Case("health_general_disclosure", 1010, {"probe_variant": "default"}),
-    _Case("health_therapy_disclosure", 1011, {"probe_variant": "default"}),
-    _Case("health_triage_disclosure", 1012, {"probe_variant": "default"}),
-    _Case("health_decision_support_disclosure", 1013, {"probe_variant": "default"}),
-    # The guarded variant's simulated user commits a move with a tool call. With
-    # two turns the only follow-up is the last one, where this persona's risk
-    # pacing picks the move without asking the user, so three is the smallest
-    # budget that covers a user activation offering tools.
-    _Case("health_general_disclosure", 1015, {"probe_variant": "guarded"}, 3),
-    _Case("health_therapy_disclosure", 1016, {"probe_variant": "guarded"}, 3),
-    _Case("health_triage_disclosure", 1017, {"probe_variant": "guarded"}, 3),
-    _Case("health_decision_support_disclosure", 1018, {"probe_variant": "guarded"}, 3),
-    _Case("identity_disclosure", 1014),
+_CASES = tuple(
+    _Case(label, case.seed, case.probe_data, case.max_turns)
+    for label in built_in_labels()
+    if (contract := find_contract(label)) is not None
+    for case in contract.parity
 )
 
 
@@ -372,8 +355,9 @@ async def test_direct_and_resumable_execution_have_deterministic_parity(case: _C
         assert tool_messages, f"{case.probe_type} did not exercise its registered tool evidence"
 
 
-def test_parity_cases_cover_the_complete_registry() -> None:
-    assert {case.probe_type for case in _CASES} == set(known_probes())
+@pytest.mark.parametrize("label", built_in_labels())
+def test_every_built_in_probe_has_a_parity_case(label: str) -> None:
+    assert probe_contract(label).parity, f"{label}'s contract lists no parity case"
 
 
 class _AlwaysToolModel(_ReplayableModel):

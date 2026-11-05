@@ -12,6 +12,7 @@ from types import ModuleType, SimpleNamespace
 
 import pandas as pd
 import pytest
+from _probe_contract import built_in_labels, probe_contract
 
 from usersim.cli._pipeline import known_probes
 from usersim.engine.config import ConversationSimulatorConfig
@@ -114,22 +115,6 @@ _PERSONA_DERIVED_COLUMNS = (
     "usersim_config",
 )
 _PINNED_ASSISTANT_MODEL = "nvidia/llama-3.1-nemotron-70b-instruct"
-_PINNED_TRAJECTORY_IDS = {
-    "financial_services": "f29c0dac38c0ba2a",
-    "general_educational": "fef0f90231a81da0",
-    "general_open_ended": "0fb84850f75a3f00",
-    "health_decision_support_disclosure": "fd69ae7b7cfc94a9",
-    "health_general_disclosure": "53a2c75f6cd26bce",
-    "health_therapy_disclosure": "e34d48f7eac319a6",
-    "health_triage_disclosure": "8c2c67f3cbd0f7b0",
-    "identity_disclosure": "ab9a7b113d58f3d3",
-    "safety_agentic": "0dd753b33d0edb8c",
-    "safety_chat_pressure": "34650e5f725ae448",
-    "sov_ai_dynamic": "f2fb3d9172800ca5",
-    "sov_ai_facts": "dfc5df24a426aad0",
-    "sov_ai_multilingual_parity": "6d1ca33ea06f0977",
-    "tool_calling": "5630556a85d11e4d",
-}
 
 
 @pytest.mark.parametrize(
@@ -215,11 +200,6 @@ def test_a_probe_with_no_themes_for_the_locale_is_refused(register_test_probe, t
         materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_no_themes": 1.0}, random_seed=5)
 
 
-def test_every_registered_probe_has_a_pinned_trajectory_id() -> None:
-    """Guard against a probe landing without a trajectory-identity decision."""
-    assert set(_PINNED_TRAJECTORY_IDS) == set(known_probes())
-
-
 def _pinned_inputs(probe_type: str) -> tuple[dict, ConversationSimulatorConfig, dict]:
     """A sampled row for ``probe_type`` with the pinned persona, seed and model names."""
     sampled = materialize_episode_inputs(
@@ -240,15 +220,16 @@ def _pinned_inputs(probe_type: str) -> tuple[dict, ConversationSimulatorConfig, 
     return data, config, models
 
 
-@pytest.mark.parametrize("probe_type", sorted(_PINNED_TRAJECTORY_IDS))
+@pytest.mark.parametrize("probe_type", built_in_labels())
 def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
+    """Each built-in's contract pins the id of one episode, so a change to its identity scheme fails."""
     data, config, models = _pinned_inputs(probe_type)
 
     # construct_probe_episode, not construct_episode_preamble: the probe is built
     # here, which is where a probe-discovered variant could leak into the id.
     episode = construct_probe_episode(data, config=config, models=models)
 
-    assert episode.preamble.trajectory_id == _PINNED_TRAJECTORY_IDS[probe_type]
+    assert episode.preamble.trajectory_id == probe_contract(probe_type).trajectory_id
 
 
 def test_two_probes_in_one_module_record_their_own_metadata(

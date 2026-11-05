@@ -572,6 +572,8 @@ The engine's tests live under `tests/engine/`, which mirrors
 suites at the top level (conformance, scripted episode runs and hosted parity,
 plugin entry points, undeclared result columns). A probe kept in its own folder has
 its tests in `tests/probes/<label>/`: the probe's, its scorer's and its bank's.
+Each package's `contract.py` there holds what the shared tests check for each
+of its probes (`tests/_probe_contract.py` describes the fields).
 The tables describe the main files.
 
 **`tests/engine/core/`: substrate, asset loaders, behavioral, identity, storage**

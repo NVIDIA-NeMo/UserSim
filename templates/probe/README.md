@@ -185,6 +185,11 @@ When porting one of the templates into a new module:
       which runs every built-in this way. The tests run under
       `usersim.testing.pytest_plugin`, so a model call nothing scripted
       fails with `BlockedNetworkCall`.
+- [ ] Add your probe's entry to `CONTRACTS` in
+      `tests/probes/<your_probe>/contract.py`: the `trajectory_id` of one
+      pinned episode, the metadata that makes `should_succeed` true, and
+      its parity episodes (`tests/_probe_contract.py` describes them).
+      The shared tests fail, naming the file, until it is there.
 - [ ] Update `docs/engine/README.md`'s probe table, add a row to the
       catalog in `docs/probes.md`, and raise the probe counts in the
       README headline and in `docs/probes.md` (for a `BankBackedProbe`,

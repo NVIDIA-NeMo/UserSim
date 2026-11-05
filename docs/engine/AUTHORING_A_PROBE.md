@@ -566,6 +566,15 @@ in the README headline and `docs/outputs.md` the same way.
 `tests/test_probe_catalog.py` checks the row, and
 `tests/test_security_defaults.py` each count, against the registries.
 
+Then state what the shared tests hold your probe to, in
+`tests/probes/<package>/contract.py`: `CONTRACTS` maps your label to a
+`ProbeContract` (fields in `tests/_probe_contract.py`) with the
+`trajectory_id` of one pinned episode, the metadata key and value that make
+`should_succeed` true (None when you keep the default), and the episodes run
+directly and through a host for parity. Until it is there, the shared tests
+fail and name the file. A wrong `trajectory_id` fails with the id the probe
+produces; pin it once you have checked which fields go into it.
+
 A built-in imports `usersim` only through `usersim.extension` and
 `usersim.testing`, as an extension does, apart from its own package's modules,
 so moving it out of this repository changes none of its imports.

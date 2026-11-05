@@ -11,7 +11,7 @@ probe-specific behavior.
 
 What is asserted here (vs in per-probe test files):
 
-- **Registry completeness** — the canonical 12 probes are registered
+- **Registry completeness** — the canonical probes are registered
   with the canonical labels. Catches the regression where a rename
   drops one or where the bootstrap silently fails to import a
   module.
@@ -25,7 +25,8 @@ What is asserted here (vs in per-probe test files):
   but a probe forgot to update.
 - **should_succeed invariant** — every probe's sim-side guardrail
   returns False on a minimally-empty state and True when the probe-
-  specific side-channel key is present. Catches the regression
+  specific side-channel key, which its contract in
+  ``tests/probes/<package>/contract.py`` names, is present. Catches the regression
   where a probe stops emitting its primary join key but still
   produces "successful" trajectories.
 - **BaseProbe.after_assistant_turn default contract** — the default
@@ -57,6 +58,7 @@ import sys
 from typing import Any, Callable
 
 import pytest
+from _probe_contract import probe_contract
 
 import usersim.engine.generator  # noqa: F401 — bootstraps the registry
 from usersim.engine.core.outcomes import OutcomeBuilder
@@ -88,32 +90,6 @@ EXPECTED_PROBES: tuple[str, ...] = (
     "health_general_disclosure",
     "identity_disclosure",
 )
-
-
-# Per-probe should_succeed contract. Each entry maps the probe label
-# to the (metadata_key, value) pair that makes the sim-side guardrail
-# pass. Probes whose ``should_succeed`` defers to ``BaseProbe`` (the
-# always-True default) carry None for both, and the test asserts True
-# regardless of metadata. tool_calling is one of them: a conversation
-# with no tool calls completed its protocol, and the evaluator scores it.
-SHOULD_SUCCEED_CONTRACT: dict[str, tuple[str | None, Any]] = {
-    "general_open_ended": (None, None),
-    "general_educational": (None, None),
-    "tool_calling": (None, None),
-    "sov_ai_facts": ("facts_probed", ["F-001"]),
-    "sov_ai_dynamic": ("probing_categories_explored", ["category-1"]),
-    "sov_ai_multilingual_parity": ("query_id", "Q-001"),
-    "safety_chat_pressure": ("target_request_id", "T-001"),
-    "safety_agentic": ("action_request_id", "AR-001"),
-    "financial_services": ("finance_task_id", "TPL-DISPUTE-001"),
-    # health_disclosure family — BaseProbe-only probes that inherit the
-    # always-True should_succeed (like the general probes).
-    "health_therapy_disclosure": (None, None),
-    "health_triage_disclosure": (None, None),
-    "health_decision_support_disclosure": (None, None),
-    "health_general_disclosure": (None, None),
-    "identity_disclosure": ("identity_tactic_id", "canonical_who_are_you"),
-}
 
 
 def _resolve_target_class(probe_label: str) -> type:
@@ -291,10 +267,10 @@ class TestShouldSucceedInvariant:
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_minimal_empty_state_returns_expected(self, label: str) -> None:
-        key, value = SHOULD_SUCCEED_CONTRACT[label]
+        succeeds_on = probe_contract(label).succeeds_on
         fn = _resolve_should_succeed(label)
         result = fn(_make_state())
-        if key is None:
+        if succeeds_on is None:
             # Default-True probes (general probes inheriting BaseProbe).
             assert result is True, (
                 f"{label}: should_succeed on empty state returned False; BaseProbe default should return True"
@@ -302,15 +278,16 @@ class TestShouldSucceedInvariant:
         else:
             assert result is False, (
                 f"{label}: should_succeed on empty state returned True; "
-                f"expected False until metadata[{key!r}] is populated"
+                f"expected False until metadata[{succeeds_on[0]!r}] is populated"
             )
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_populated_side_channel_returns_true(self, label: str) -> None:
-        key, value = SHOULD_SUCCEED_CONTRACT[label]
-        if key is None:
+        succeeds_on = probe_contract(label).succeeds_on
+        if succeeds_on is None:
             # Default-True probes — already covered above.
             return
+        key, value = succeeds_on
         fn = _resolve_should_succeed(label)
         result = fn(_make_state(metadata={key: value}))
         assert result is True, f"{label}: should_succeed with metadata[{key!r}]={value!r} returned False; expected True"
