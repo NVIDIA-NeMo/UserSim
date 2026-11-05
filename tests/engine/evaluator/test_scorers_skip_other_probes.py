@@ -7,7 +7,8 @@
 every row, so a run that mixes probes hands each probe's scorer the rows of
 the others. Each skips such a row with the "no ... scorer skipped" sentinel,
 before any model call, and the capability report counts it as not applicable
-rather than as evidence.
+rather than as evidence. Every registered scorer but the generic ones, which
+apply to every row, is checked, whichever probe asks for it.
 """
 
 from __future__ import annotations
@@ -15,10 +16,10 @@ from __future__ import annotations
 import pytest
 
 from usersim.engine.core.probes import default_scorers_by_family
-from usersim.engine.evaluator.scorers import get_scorer
+from usersim.engine.evaluator.scorers import GENERIC_SCORERS, get_scorer, list_scorers
 from usersim.taxonomy.eval_cell import scorer_state
 
-_PROBE_SCORERS = sorted({(family, name) for family, names in default_scorers_by_family().items() for name in names})
+_PROBE_SCORERS = sorted(set(list_scorers()) - set(GENERIC_SCORERS))
 
 
 def _general_open_ended_row() -> dict:
@@ -42,16 +43,17 @@ def _general_open_ended_row() -> dict:
     }
 
 
-def test_every_probe_scorer_is_checked() -> None:
-    assert ("tool_calling", "tool_use") in _PROBE_SCORERS
-    assert (
-        "general_open_ended" not in default_scorers_by_family() or not default_scorers_by_family()["general_open_ended"]
-    )
+def test_every_scorer_a_probe_asks_for_is_checked() -> None:
+    asked_for = {name for names in default_scorers_by_family().values() for name in names}
+    assert asked_for, "no probe asks for a scorer"
+    assert asked_for - set(GENERIC_SCORERS) <= set(_PROBE_SCORERS)
+    # The row the scorers are given belongs to general_open_ended, which asks for none of them.
+    assert not default_scorers_by_family().get("general_open_ended")
 
 
-@pytest.mark.parametrize(("family", "scorer"), _PROBE_SCORERS)
-async def test_a_probes_scorer_skips_another_probes_row(family: str, scorer: str) -> None:
+@pytest.mark.parametrize("scorer", _PROBE_SCORERS)
+async def test_a_probes_scorer_skips_another_probes_row(scorer: str) -> None:
     # No models: a scorer that tried to judge the row would fail, not skip.
     result = await get_scorer(scorer)(_general_open_ended_row(), {})
 
-    assert scorer_state(result) == "not_applicable", f"{scorer} ({family}) judged a general_open_ended row: {result}"
+    assert scorer_state(result) == "not_applicable", f"{scorer} judged a general_open_ended row: {result}"
