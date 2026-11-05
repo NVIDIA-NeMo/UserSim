@@ -632,6 +632,8 @@ The tables describe the main files.
 
 | Test File | Coverage |
 |-----------|----------|
+| `general_open_ended/test_probe.py` | `general_open_ended` probe through `run_episode` with a scripted Japanese conversation: the row's topic and language reach the simulated user, the assistant gets no system prompt, a user who keeps asking gets every turn and a satisfied one ends the conversation |
+| `general_educational/test_probe.py` | `general_educational` probe through `run_episode` with a scripted Brazilian Portuguese learner: the row's subject and language reach the simulated user, each learner turn is judged before the tutor sees it, the tutor gets no system prompt, every turn is recorded |
 | `sov_ai_facts/test_probe.py` | `sov_ai_facts` probe: each region's facts, deterministic `derive_task` (bank-version salted), prompts, e2e with mocked LLM |
 | `sov_ai_facts/test_scorer.py` | `sov_ai_facts` out-of-sim scorer: per-fact LLM judge with question-type-specific axes, error paths, multi-fact aggregation |
 | `sov_ai_facts/test_bank.py` | Fact-bank YAML schema validator, loader, persona-tag matching, locale-keyed shared cache |

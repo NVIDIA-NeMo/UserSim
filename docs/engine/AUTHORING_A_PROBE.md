@@ -1080,6 +1080,10 @@ the class as `model_factory`. `models` gives a model by alias: one your probe
 names in `model_aliases`, or one that replaces the scripted model of a
 conversation alias. A `ScriptedModel` given there records its requests in
 `run.prompts` with the others.
+[`tests/probes/general_open_ended/test_probe.py`](../../tests/probes/general_open_ended/test_probe.py)
+and [`tests/probes/general_educational/test_probe.py`](../../tests/probes/general_educational/test_probe.py)
+test two built-ins this way, with conversations scripted in Japanese and in
+Brazilian Portuguese.
 
 Some built-in probes' tests patch `acall_llm` in `core.simulation` and
 `core.judges`, the two modules that call it, to control each reply turn by
