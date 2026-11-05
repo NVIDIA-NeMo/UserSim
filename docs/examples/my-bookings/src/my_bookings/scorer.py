@@ -13,15 +13,16 @@ async def score(row, models):
     booking = json.loads(row["my_booking"])
     expected, made = booking["expected"], booking["made"]
     if made is None:
-        return {"my_booked": 0.0}
+        return {"scores": {"my_bookings.booked_rate": {"score": 0.0}}}
     arguments = made["arguments"]
-    return {
-        "my_booked": 1.0,
-        "my_date_correct": float(arguments.get("date") == expected["date"]),
-        "my_time_correct": float(arguments.get("time") == expected["time"]),
-        "my_people_correct": float(arguments.get("people") == expected["people"]),
-        "my_asked_before_booking": float(made["after_user_turns"] > 1),
+    rates = {
+        "my_bookings.booked_rate": 1.0,
+        "my_bookings.date_match_rate": float(arguments.get("date") == expected["date"]),
+        "my_bookings.time_match_rate": float(arguments.get("time") == expected["time"]),
+        "my_bookings.people_match_rate": float(arguments.get("people") == expected["people"]),
+        "my_bookings.asked_first_rate": float(made["after_user_turns"] > 1),
     }
+    return {"scores": {axis: {"score": value} for axis, value in rates.items()}}
 
 
 register_scorer("my_bookings", score, deterministic=True)

@@ -16,6 +16,9 @@ my_bookings = "my_bookings.probe:BookingProbe"
 [project.entry-points."usersim.scorers"]
 my_bookings = "my_bookings.scorer"
 
+[project.entry-points."usersim.capabilities"]
+my_bookings = "my_bookings.capabilities"
+
 [tool.setuptools.package-data]
 my_bookings = ["assets/**/*.yaml"]
 

@@ -16,6 +16,9 @@ my_probe = "my_probe.probe:MyProbe"
 [project.entry-points."usersim.scorers"]
 my_probe = "my_probe.scorer"
 
+[project.entry-points."usersim.capabilities"]
+my_probe = "my_probe.capabilities"
+
 [tool.setuptools.package-data]
 my_probe = ["assets/**/*.yaml"]
 

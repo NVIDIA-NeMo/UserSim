@@ -26,6 +26,7 @@ my-bookings/
 │   ├── __init__.py
 │   ├── probe.py
 │   ├── scorer.py
+│   ├── capabilities.py
 │   └── assets/my_bookings/
 │       ├── prompts.yaml
 │       ├── en_US/bookings.yaml
@@ -86,6 +87,9 @@ my_bookings = "my_bookings.probe:BookingProbe"
 [project.entry-points."usersim.scorers"]
 my_bookings = "my_bookings.scorer"
 
+[project.entry-points."usersim.capabilities"]
+my_bookings = "my_bookings.capabilities"
+
 [tool.setuptools.package-data]
 my_bookings = ["assets/**/*.yaml"]
 
@@ -103,7 +107,8 @@ asyncio_default_fixture_loop_scope = "function"
   to the next minor release. A lock file pins the exact build an environment
   runs. The copy of this package in the repository names no range, so its
   checks install it beside the User Sim they build.
-- **The entry points** name the probe class and the scorer's module.
+- **The entry points** name the probe class, the scorer's module and the
+  capabilities module.
 - **`package-data`** ships the banks in the wheel; without it, an installed
   package has no assets.
 - **The pytest settings** turn extension discovery off under test, run
@@ -415,30 +420,93 @@ async def score(row, models):
     booking = json.loads(row["my_booking"])
     expected, made = booking["expected"], booking["made"]
     if made is None:
-        return {"my_booked": 0.0}
+        return {"scores": {"my_bookings.booked_rate": {"score": 0.0}}}
     arguments = made["arguments"]
-    return {
-        "my_booked": 1.0,
-        "my_date_correct": float(arguments.get("date") == expected["date"]),
-        "my_time_correct": float(arguments.get("time") == expected["time"]),
-        "my_people_correct": float(arguments.get("people") == expected["people"]),
-        "my_asked_before_booking": float(made["after_user_turns"] > 1),
+    rates = {
+        "my_bookings.booked_rate": 1.0,
+        "my_bookings.date_match_rate": float(arguments.get("date") == expected["date"]),
+        "my_bookings.time_match_rate": float(arguments.get("time") == expected["time"]),
+        "my_bookings.people_match_rate": float(arguments.get("people") == expected["people"]),
+        "my_bookings.asked_first_rate": float(made["after_user_turns"] > 1),
     }
+    return {"scores": {axis: {"score": value} for axis, value in rates.items()}}
 
 
 register_scorer("my_bookings", score, deterministic=True)
 ```
 
 The evaluator awaits a scorer once per trajectory, with the row and the
-models, and merges the mapping it returns into the row's evaluation. It calls
-the scorer on every row it evaluates, so the scorer returns nothing for a row
-without a `my_booking` column, such as one from another probe. A field the
-row holds empty arrives as `None`. Each argument must match what the user meant
-exactly, in the form the tool's description asks for, and
-`my_asked_before_booking` is 1.0 when the booking came after the user's
-second turn, the first that can say how many people are coming.
+models, and stores the mapping it returns in the row's evaluation. Its numbers
+go under `scores`, one `{"score": ...}` per axis, which is where the capability
+report reads them; an axis whose name ends in `_rate` is read as a share from 0
+to 1. The evaluator calls the scorer on every row it evaluates, so the scorer
+returns nothing for a row without a `my_booking` column, such as one from
+another probe. A field the row holds empty arrives as `None`. Each argument
+must match what the user meant exactly, in the form the tool's description asks
+for, and `my_bookings.asked_first_rate` is 1.0 when the booking came after the
+user's second turn, the first that can say how many people are coming.
 `deterministic=True` says the scorer never calls a model, so `usersim rescore`
 can recompute it on a stored evaluation.
+
+## The capabilities
+
+The capability report is built from capability definitions, not from
+trajectories, so a probe without one simulates and evaluates and is then absent
+from the report. `capabilities.py` names the rows the probe's evidence feeds:
+
+<!-- example: src/my_bookings/capabilities.py -->
+```python
+from usersim.extension import CapabilityDefinition, EvidenceSource
+
+CAPABILITIES = (
+    CapabilityDefinition(
+        id="my_booking_arguments",
+        label="Bookings as users write them",
+        description="Does the assistant book the date, time and party size the user meant, however they wrote them?",
+        sources=(
+            EvidenceSource(
+                probe="my_bookings",
+                scorer="my_bookings",
+                axes=(
+                    "my_bookings.date_match_rate",
+                    "my_bookings.time_match_rate",
+                    "my_bookings.people_match_rate",
+                ),
+            ),
+        ),
+        threshold=0.9,
+        scale="rate",
+        aggregation_policy="mean",
+        next_action="Read the failing rows and compare the date the user wrote with the one the assistant booked.",
+    ),
+    CapabilityDefinition(
+        id="my_booking_asks_first",
+        label="Asking before booking",
+        description="Does the assistant ask how many people are coming before it books?",
+        sources=(EvidenceSource(probe="my_bookings", scorer="my_bookings", axes=("my_bookings.asked_first_rate",)),),
+        threshold=0.8,
+        scale="rate",
+        aggregation_policy="mean",
+        next_action="Read the rows booked on the first reply: the assistant guessed the party size.",
+    ),
+)
+
+AXIS_DESCRIPTIONS = {
+    "my_bookings.date_match_rate": "Share of bookings made for the date the user meant, however they wrote it.",
+    "my_bookings.time_match_rate": "Share of bookings made for the time the user meant.",
+    "my_bookings.people_match_rate": "Share of bookings made for the number of people the user gave.",
+    "my_bookings.asked_first_rate": "Share of bookings the assistant made only after asking how many people.",
+}
+```
+
+- **`sources`** names the probe, the scorer and the axes of the scorer's
+  `scores` each row reads, and `threshold` the share a model needs to pass.
+- **`AXIS_DESCRIPTIONS`** says what each rate measures, in a reviewer's terms,
+  on the report's evidence cards.
+- **The `usersim.capabilities` entry point** names the module, the same shape a
+  probe in this repository keeps in its package's `capabilities.py`.
+  [`architecture/plugins.md`](../architecture/plugins.md#capabilities-the-seam-that-is-easy-to-miss)
+  describes how the report merges an extension's rows.
 
 ## Tests
 
@@ -459,6 +527,7 @@ import json
 import random
 
 import my_bookings.probe  # noqa: F401  registers the probe; discovery is off under test
+from my_bookings.capabilities import AXIS_DESCRIPTIONS, CAPABILITIES
 from my_bookings.probe import Appointment, BookingProbe, draw_booking
 from my_bookings.scorer import score
 
@@ -510,13 +579,23 @@ async def test_a_month_first_reading_of_a_day_first_date_is_wrong():
     expected = {"date": "2027-03-06", "time": "11:00", "people": 6}
     result = await score({"my_booking": json.dumps({"expected": expected, "made": made})}, models={})
 
-    assert result == {
-        "my_booked": 1.0,
-        "my_date_correct": 0.0,
-        "my_time_correct": 1.0,
-        "my_people_correct": 1.0,
-        "my_asked_before_booking": 1.0,
+    assert {axis: cell["score"] for axis, cell in result["scores"].items()} == {
+        "my_bookings.booked_rate": 1.0,
+        "my_bookings.date_match_rate": 0.0,
+        "my_bookings.time_match_rate": 1.0,
+        "my_bookings.people_match_rate": 1.0,
+        "my_bookings.asked_first_rate": 1.0,
     }
+
+
+async def test_each_capability_reads_axes_the_scorer_writes_and_describes():
+    made = {"arguments": {"date": "2027-03-06", "time": "11:00", "people": 6}, "after_user_turns": 2}
+    expected = {"date": "2027-03-06", "time": "11:00", "people": 6}
+    written = (await score({"my_booking": json.dumps({"expected": expected, "made": made})}, models={}))["scores"]
+
+    read = {axis for capability in CAPABILITIES for source in capability.sources for axis in source.axes}
+    assert read <= set(written)
+    assert read <= set(AXIS_DESCRIPTIONS)
 
 
 async def test_a_host_reproduces_a_standalone_run():

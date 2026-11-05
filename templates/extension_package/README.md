@@ -1,7 +1,8 @@
 # Extension package template
 
 A package to copy when you start a probe of your own: the probe, its scorer, the
-assets they read and their tests, wired together. Every name in it is a
+capability report rows they feed, the assets they read and their tests, wired
+together. Every name in it is a
 placeholder to replace. [`docs/extensions.md`](../../docs/extensions.md) builds a
 complete package step by step and explains each piece.
 
@@ -12,6 +13,7 @@ extension_package/
 │   ├── __init__.py
 │   ├── probe.py
 │   ├── scorer.py
+│   ├── capabilities.py
 │   └── assets/my_probe/
 │       ├── prompts.yaml
 │       ├── en_US/themes.yaml
@@ -34,7 +36,7 @@ write areas and their bounds, not messages to send.
 1. Copy this folder out of the repository, and rename `my-probe`, the
    distribution, and `my_probe`, the package, the probe's label and the
    scorer's name. Every name the package adds starts with your prefix, as
-   `my_tool_calls` and `my_tool_used` start with `my_`; see
+   `my_tool_calls` and `my_probe.tool_used_rate` start with `my_`; see
    [Names](../../docs/extensions.md#names).
 2. Write your areas in `themes.yaml`, one file per locale in its language, in
    a folder named for the locale.
@@ -44,7 +46,9 @@ write areas and their bounds, not messages to send.
    area and its bounds, not lines to say: the persona writes every turn.
 4. Replace `DO_TASK` with the tool your probe offers the assistant, or drop it,
    `ToolExecutionMixin` and `execute_tool_call` if it offers none.
-5. Replace the scorer with what your probe measures.
+5. Replace the scorer with what your probe measures, and `capabilities.py`
+   with the report rows it feeds: without a capability the probe's rows are
+   absent from the capability report.
 6. Name the User Sim releases the package works with in `pyproject.toml`.
 
 ## Test it

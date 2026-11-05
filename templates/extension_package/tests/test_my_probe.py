@@ -4,6 +4,7 @@
 import json
 from importlib.metadata import entry_points
 
+from my_probe.capabilities import AXIS_DESCRIPTIONS, CAPABILITIES
 from my_probe.probe import MyProbe  # registers the probe; discovery is off under test
 from my_probe.scorer import score
 
@@ -21,9 +22,11 @@ CONFIG = ConversationSimulatorConfig(name="conversation_messages", max_turns=2, 
 AREA = MyProbe.themes("pt_BR")[0]
 
 
-def test_the_entry_points_name_the_probe_and_the_scorer():
+def test_the_entry_points_name_the_probe_the_scorer_and_the_capabilities():
     assert {ep.name: ep.value for ep in entry_points(group="usersim.probes")}["my_probe"] == "my_probe.probe:MyProbe"
     assert {ep.name: ep.value for ep in entry_points(group="usersim.scorers")}["my_probe"] == "my_probe.scorer"
+    capabilities = {ep.name: ep.value for ep in entry_points(group="usersim.capabilities")}
+    assert capabilities["my_probe"] == "my_probe.capabilities"
 
 
 def test_the_probe_conforms():
@@ -47,10 +50,15 @@ async def test_the_user_explores_the_row_area_in_their_own_words():
 
 
 async def test_the_scorer_reads_the_tool_calls():
-    assert await score({"my_tool_calls": json.dumps([{"name": "do_task", "arguments": {}}])}, models={}) == {
-        "my_tool_used": 1.0
-    }
-    assert await score({"my_tool_calls": "[]"}, models={}) == {"my_tool_used": 0.0}
+    used = await score({"my_tool_calls": json.dumps([{"name": "do_task", "arguments": {}}])}, models={})
+    assert used["scores"]["my_probe.tool_used_rate"]["score"] == 1.0
+    unused = await score({"my_tool_calls": "[]"}, models={})
+    assert unused["scores"]["my_probe.tool_used_rate"]["score"] == 0.0
+
+
+def test_each_capability_reads_a_rate_it_describes():
+    read = {axis for capability in CAPABILITIES for source in capability.sources for axis in source.axes}
+    assert read <= set(AXIS_DESCRIPTIONS)
 
 
 async def test_a_host_reproduces_a_standalone_run():

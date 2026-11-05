@@ -5,6 +5,7 @@ import json
 import random
 
 import my_bookings.probe  # noqa: F401  registers the probe; discovery is off under test
+from my_bookings.capabilities import AXIS_DESCRIPTIONS, CAPABILITIES
 from my_bookings.probe import Appointment, BookingProbe, draw_booking
 from my_bookings.scorer import score
 
@@ -56,13 +57,23 @@ async def test_a_month_first_reading_of_a_day_first_date_is_wrong():
     expected = {"date": "2027-03-06", "time": "11:00", "people": 6}
     result = await score({"my_booking": json.dumps({"expected": expected, "made": made})}, models={})
 
-    assert result == {
-        "my_booked": 1.0,
-        "my_date_correct": 0.0,
-        "my_time_correct": 1.0,
-        "my_people_correct": 1.0,
-        "my_asked_before_booking": 1.0,
+    assert {axis: cell["score"] for axis, cell in result["scores"].items()} == {
+        "my_bookings.booked_rate": 1.0,
+        "my_bookings.date_match_rate": 0.0,
+        "my_bookings.time_match_rate": 1.0,
+        "my_bookings.people_match_rate": 1.0,
+        "my_bookings.asked_first_rate": 1.0,
     }
+
+
+async def test_each_capability_reads_axes_the_scorer_writes_and_describes():
+    made = {"arguments": {"date": "2027-03-06", "time": "11:00", "people": 6}, "after_user_turns": 2}
+    expected = {"date": "2027-03-06", "time": "11:00", "people": 6}
+    written = (await score({"my_booking": json.dumps({"expected": expected, "made": made})}, models={}))["scores"]
+
+    read = {axis for capability in CAPABILITIES for source in capability.sources for axis in source.axes}
+    assert read <= set(written)
+    assert read <= set(AXIS_DESCRIPTIONS)
 
 
 async def test_a_host_reproduces_a_standalone_run():
