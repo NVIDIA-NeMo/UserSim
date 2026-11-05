@@ -720,7 +720,7 @@ def _check_extensions(report: SmokeReport) -> None:
         from usersim.engine.core.backends import known_backends
         from usersim.engine.core.probes import known_probes
         from usersim.engine.evaluator.scorers import list_scorers
-        from usersim.taxonomy.capabilities import capability_definitions
+        from usersim.taxonomy.capabilities import axis_descriptions, capability_definitions
 
         if extensions_disabled():
             report.add("extensions", True, f"discovery is off ({DISABLE_ENV_VAR} is set)")
@@ -732,6 +732,7 @@ def _check_extensions(report: SmokeReport) -> None:
         domain_names()
         known_backends()
         capability_definitions()
+        axis_descriptions()
         _build_parser()
 
         records = extension_records()

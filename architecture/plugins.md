@@ -24,7 +24,7 @@ which system they are looking at.
 | `usersim.scorers` | a module calling `register_scorer` | the scorer registry |
 | `usersim.asset_domains` | an `AssetDomain` or a zero-arg factory | `gen-assets` domains |
 | `usersim.backends` | an `ExecutionBackend` implementation | `--backend` choices |
-| `usersim.capabilities` | a `CapabilityDefinition` or an iterable | the capability matrix |
+| `usersim.capabilities` | a `CapabilityDefinition`, an iterable of them, or a module with `CAPABILITIES` and optional `AXIS_DESCRIPTIONS` | the capability matrix, and the evidence cards' axis descriptions |
 | `usersim.commands` | a `register(subparsers)` callable | `usersim --help` |
 | `usersim.toolset_sources` | *(reserved)* | n/a |
 
@@ -103,7 +103,16 @@ rather than from trajectories. The rows exist; nothing asks about them.
 capability it provides evidence for. A built-in probe declares its capabilities
 in its package's `capabilities.py`, which the report reads in the order of
 `BUILTIN_PACKAGES` (`engine/core/builtin_packages.py`), after the capabilities
-every probe feeds.
+every probe feeds. An extension can advertise a module of the same shape, so
+its `AXIS_DESCRIPTIONS` explain its rate axes in the evidence cards too:
+
+```toml
+[project.entry-points."usersim.capabilities"]
+my_bookings = "my_bookings.capabilities"
+```
+
+A description for an axis something else already describes is ignored, with a
+warning, as a capability id already taken is.
 
 What evaluation and reporting read from a built-in probe lives in a
 definitions-only module of its package, `capabilities.py` for the report and

@@ -340,6 +340,51 @@ PAIR = (PARTNER,)
         ids = [d.id for d in capability_definitions()]
         assert ids.count(builtin_id) == 1
 
+    MODULE = (
+        SOURCE
+        + """
+CAPABILITIES = (PARTNER,)
+AXIS_DESCRIPTIONS = {"partner_axis": "Share of turns the partner probe counts."}
+"""
+    )
+
+    def test_a_capabilities_module_gives_its_capabilities_and_axis_descriptions(self, extension) -> None:
+        """The same shape as a built-in package's capabilities.py."""
+        from usersim.taxonomy.capabilities import axis_description, capability_definitions
+
+        extension("ext_cap_mod6.py", self.MODULE, ("partner_capabilities", "ext_cap_mod6", CAPABILITIES))
+
+        assert "partner_capability" in [d.id for d in capability_definitions()]
+        assert axis_description("partner_axis") == "Share of turns the partner probe counts."
+
+    def test_a_module_without_capabilities_is_reported(self, extension) -> None:
+        from usersim.engine.core._extensions import extension_records
+        from usersim.taxonomy.capabilities import capability_definitions
+
+        extension("ext_cap_mod7.py", "AXIS_DESCRIPTIONS = {}\n", ("partner_capabilities", "ext_cap_mod7", CAPABILITIES))
+
+        capability_definitions()
+        (record,) = [r for r in extension_records() if r.name == "partner_capabilities"]
+        assert record.problem == "module ext_cap_mod7 defines no CAPABILITIES"
+
+    def test_a_description_of_an_axis_already_described_is_rejected(self, extension, caplog) -> None:
+        """Which text a reviewer reads must not depend on what else is installed."""
+        from usersim.engine.core._extensions import extension_records
+        from usersim.taxonomy.capabilities import axis_description
+
+        builtin = axis_description("language_appropriateness")
+        extension(
+            "ext_cap_mod8.py",
+            self.SOURCE + 'CAPABILITIES = (PARTNER,)\nAXIS_DESCRIPTIONS = {"language_appropriateness": "Mine."}\n',
+            ("partner_capabilities", "ext_cap_mod8", CAPABILITIES),
+        )
+
+        with caplog.at_level(logging.WARNING, logger="usersim.engine"):
+            assert axis_description("language_appropriateness") == builtin
+        assert "axis description 'language_appropriateness'" in caplog.text
+        (record,) = [r for r in extension_records() if r.name == "partner_capabilities"]
+        assert record.problem == "axis 'language_appropriateness' is already described by the built-ins"
+
 
 class TestLayering:
     """Config-time construction stays clear of the reporting layer; ``test_layering.py`` states the layers."""

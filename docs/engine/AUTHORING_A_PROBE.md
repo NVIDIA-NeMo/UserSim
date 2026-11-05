@@ -1288,7 +1288,7 @@ The module holds definitions only and
 imports nothing from the probe, so the report reads it without importing your
 probe. `AXIS_DESCRIPTIONS` is optional: it explains a rate axis in an evidence
 card, where a judge axis carries its own reasoning. A probe shipped as an
-extension contributes the same definitions through the `usersim.capabilities`
+extension contributes the same module through the `usersim.capabilities`
 entry point instead
 ([`architecture/plugins.md`](../../architecture/plugins.md#capabilities-the-seam-that-is-easy-to-miss)).
 

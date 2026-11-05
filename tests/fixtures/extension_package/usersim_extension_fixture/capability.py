@@ -3,18 +3,22 @@
 
 from usersim.extension import CapabilityDefinition, EvidenceSource
 
-CAPABILITY = CapabilityDefinition(
-    id="fixture_capability",
-    label="Fixture Capability",
-    description="Contributed by an out-of-tree package.",
-    sources=(
-        EvidenceSource(
-            probe="fixture_probe",
-            scorer="fixture_scorer",
-            axes=("fixture_axis",),
+CAPABILITIES = (
+    CapabilityDefinition(
+        id="fixture_capability",
+        label="Fixture Capability",
+        description="Contributed by an out-of-tree package.",
+        sources=(
+            EvidenceSource(
+                probe="fixture_probe",
+                scorer="fixture_scorer",
+                axes=("fixture_axis",),
+            ),
         ),
+        threshold=0.8,
+        scale="rate",
+        aggregation_policy="mean",
     ),
-    threshold=0.8,
-    scale="rate",
-    aggregation_policy="mean",
 )
+
+AXIS_DESCRIPTIONS = {"fixture_axis": "Share of turns the fixture probe counts."}

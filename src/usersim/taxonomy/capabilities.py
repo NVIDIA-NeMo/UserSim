@@ -10,19 +10,24 @@ instruments; capabilities are behavioral claims.
 The capabilities every probe's rows feed are defined here. A built-in probe
 package declares its own in its ``capabilities.py``, read in the order of
 ``BUILTIN_PACKAGES``, and an installed package contributes its own through the
-``usersim.capabilities`` entry point.
+``usersim.capabilities`` entry point, which may name a module of the same shape,
+with ``CAPABILITIES`` and ``AXIS_DESCRIPTIONS``.
 """
 
 from __future__ import annotations
 
 import functools
 import importlib
+import logging
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import ModuleType
 from typing import Iterable, Literal, Mapping
 
 from usersim.engine.core.builtin_packages import builtin_modules
+
+_logger = logging.getLogger("usersim.engine")
 
 ALL_PROBES = "*"
 
@@ -70,20 +75,34 @@ class CapabilityDefinition:
     row_filter: Mapping[str, str] = field(default_factory=dict)
 
 
+def _contribution(obj: object) -> tuple[tuple[CapabilityDefinition, ...], Mapping[str, str]]:
+    """The capability definitions and axis descriptions one ``usersim.capabilities`` entry point gives.
+
+    It may name a ``CapabilityDefinition``, an iterable of them, or a module
+    shaped like a built-in package's ``capabilities.py``: ``CAPABILITIES`` and,
+    optionally, ``AXIS_DESCRIPTIONS``.
+    """
+    if isinstance(obj, ModuleType):
+        return tuple(getattr(obj, "CAPABILITIES", ())), dict(getattr(obj, "AXIS_DESCRIPTIONS", {}))
+    if isinstance(obj, CapabilityDefinition):
+        return (obj,), {}
+    return tuple(obj), {}
+
+
 def _extension_capabilities() -> tuple[CapabilityDefinition, ...]:
     """Capabilities advertised under ``usersim.capabilities``.
 
-    An entry point may resolve to a single ``CapabilityDefinition`` or to an
+    An entry point may resolve to a single ``CapabilityDefinition``, to an
     iterable of them, since a package adding a probe usually adds the two or
-    three capabilities that probe provides evidence for.
+    three capabilities that probe provides evidence for, or to a module with
+    ``CAPABILITIES`` (see ``_contribution``). A module without
+    ``CAPABILITIES`` contributes none, and ``usersim smoke`` reports it.
 
     A definition whose id is already defined, by a built-in or by an entry
     point loaded before it, is dropped with a warning naming both: the
     report addresses cells by capability id, so a duplicate would make which
     cell got rendered depend on load order.
     """
-    import logging
-
     from usersim.engine.core._extensions import (
         CAPABILITIES,
         extension_source,
@@ -95,10 +114,13 @@ def _extension_capabilities() -> tuple[CapabilityDefinition, ...]:
     found: list[CapabilityDefinition] = []
     for name, obj in load_extensions(CAPABILITIES):
         source = extension_source(CAPABILITIES, name)
-        candidates = (obj,) if isinstance(obj, CapabilityDefinition) else tuple(obj)
+        if isinstance(obj, ModuleType) and not hasattr(obj, "CAPABILITIES"):
+            note_extension_problem(CAPABILITIES, name, f"module {obj.__name__} defines no CAPABILITIES")
+            continue
+        candidates, _ = _contribution(obj)
         for definition in candidates:
             if definition.id in owners:
-                logging.getLogger("usersim.engine").warning(
+                _logger.warning(
                     "  |-- extensions: capability %r from %s is already defined by %s; ignoring it.",
                     definition.id,
                     source,
@@ -500,6 +522,40 @@ def _axis_descriptions() -> dict[str, str]:
     return descriptions
 
 
+def axis_descriptions() -> dict[str, str]:
+    """Every registered axis description: the shared ones, each built-in package's, then each extension's.
+
+    An extension gives them through a ``usersim.capabilities`` entry point that
+    names a module with ``AXIS_DESCRIPTIONS``. A description for an axis the
+    built-ins or an entry point loaded before it describe is dropped with a
+    warning naming both, as a duplicate capability id is.
+    """
+    from usersim.engine.core._extensions import (
+        CAPABILITIES,
+        extension_source,
+        load_extensions,
+        note_extension_problem,
+    )
+
+    descriptions = dict(_axis_descriptions())
+    owners = dict.fromkeys(descriptions, "the built-ins")
+    for name, obj in load_extensions(CAPABILITIES):
+        source = extension_source(CAPABILITIES, name)
+        for axis, text in _contribution(obj)[1].items():
+            if axis in owners:
+                _logger.warning(
+                    "  |-- extensions: axis description %r from %s is already given by %s; ignoring it.",
+                    axis,
+                    source,
+                    owners[axis],
+                )
+                note_extension_problem(CAPABILITIES, name, f"axis {axis!r} is already described by {owners[axis]}")
+                continue
+            owners[axis] = source
+            descriptions[axis] = text
+    return descriptions
+
+
 def axis_description(axis: str) -> str:
     """Reviewer-facing description of ``axis``; ``""`` when none is registered."""
-    return _axis_descriptions().get(axis, "")
+    return axis_descriptions().get(axis, "")

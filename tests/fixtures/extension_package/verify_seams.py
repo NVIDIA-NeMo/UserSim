@@ -68,10 +68,15 @@ check("usersim.backends", "fixture_backend" in backends, f"saw {backends}")
 
 # 5. Capability — and, crucially, that it reaches a rendered report cell
 from usersim.reporting.capability_report import capability_order  # noqa: E402
-from usersim.taxonomy.capabilities import capability_definitions  # noqa: E402
+from usersim.taxonomy.capabilities import axis_description, capability_definitions  # noqa: E402
 
 ids = [d.id for d in capability_definitions()]
 check("usersim.capabilities", "fixture_capability" in ids)
+check(
+    "a capabilities module gives axis descriptions",
+    axis_description("fixture_axis") == "Share of turns the fixture probe counts.",
+    repr(axis_description("fixture_axis")),
+)
 check(
     "capability reaches the report",
     "fixture_capability" in [c for c, _ in capability_order()],
