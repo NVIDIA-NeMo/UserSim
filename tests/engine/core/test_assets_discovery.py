@@ -64,15 +64,14 @@ class TestOwnFolderResolution:
 class TestOverrides:
     def test_no_override_leaves_the_search_path_empty(self, monkeypatch) -> None:
         monkeypatch.delenv("USERSIM_ASSET_PATH", raising=False)
-        monkeypatch.delenv("USERSIM_ASSETS_DIR", raising=False)
         assert asset_search_path() == ()
 
     def test_env_var_takes_precedence(self, tmp_path: Path, monkeypatch) -> None:
-        monkeypatch.setenv("USERSIM_ASSETS_DIR", str(tmp_path))
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(tmp_path))
         assert asset_search_path()[0] == tmp_path
 
     def test_runtime_context_beats_env(self, tmp_path: Path, monkeypatch) -> None:
-        monkeypatch.setenv("USERSIM_ASSETS_DIR", str(tmp_path / "env"))
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(tmp_path / "env"))
         ctx = tmp_path / "ctx"
         token = set_runtime_assets_dir(ctx)
         try:

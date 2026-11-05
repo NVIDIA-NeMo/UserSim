@@ -109,7 +109,7 @@ class TestRenderPrompt:
 class TestAccessorsResolveAtCallTime:
     """Constants bind at import; probes import at plugin bootstrap, before a
     run's ``assets_dir`` is known. Only re-resolving per call lets
-    ``--assets-dir`` / ``USERSIM_ASSETS_DIR`` govern prompts.
+    ``--assets-dir`` / ``USERSIM_ASSET_PATH`` govern prompts.
     """
 
     @pytest.mark.parametrize("probe", THEME_PROBES)

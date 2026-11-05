@@ -335,8 +335,8 @@ class BaseProbe:
     # package or, for a built-in, its own folder: an absolute path, such as
     # ``Path(__file__).parent / "assets"`` (``@register_probe`` refuses a
     # relative one). Searched after the deliberate overrides (the runtime
-    # override, ``USERSIM_ASSET_PATH`` and ``USERSIM_ASSETS_DIR``). ``None``
-    # searches the overrides only.
+    # override and ``USERSIM_ASSET_PATH``). ``None`` searches the overrides
+    # only.
     assets_root: Path | None = None
 
     @classmethod

@@ -458,7 +458,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `tools_column` | str? | `None` | The column `tool_calling` reads its tools from; `None` reads `tools`, the column of its seed table |
 | `toolset_name_column` | str? | `None` | Read by no probe; a stored config may set it |
 | `locale` | str | `"en_US"` | Locale for conversation language |
-| `assets_dir` | str? | `None` | The asset root every probe is pinned to (`--assets-dir`); `None` reads each probe's own assets, after any `USERSIM_ASSET_PATH` or `USERSIM_ASSETS_DIR` override |
+| `assets_dir` | str? | `None` | The asset root every probe is pinned to (`--assets-dir`); `None` reads each probe's own assets, after any `USERSIM_ASSET_PATH` override |
 | `max_tools` | int | `5` | Max tools sampled per row (tool_calling) |
 | `max_turns` | int | `5` | Max conversation turns |
 | `max_steps` | int | `10` | Max tool steps per turn |

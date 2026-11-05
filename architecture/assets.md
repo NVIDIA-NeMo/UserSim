@@ -27,7 +27,6 @@ of deliberate overrides, highest priority first:
 
 1. the per-context override set by `set_runtime_assets_dir`
 2. each entry of `$USERSIM_ASSET_PATH` (`os.pathsep`-separated)
-3. `$USERSIM_ASSETS_DIR`
 
 `probe_assets_dir()` walks those roots, then the probe's own, and takes the
 first that holds the probe. An override without a probe's folder leaves that

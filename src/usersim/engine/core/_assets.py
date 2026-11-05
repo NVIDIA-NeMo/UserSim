@@ -14,7 +14,6 @@ Resolution walks an ordered **search path**, highest priority first:
 
 1. the per-context override set by :func:`set_runtime_assets_dir`;
 2. each entry of ``$USERSIM_ASSET_PATH`` (``os.pathsep``-separated);
-3. ``$USERSIM_ASSETS_DIR``;
 
 and then the probe's own root, so a deliberate override wins over it.
 :func:`probe_assets_dir` takes the first root that actually holds the probe,
@@ -79,10 +78,6 @@ def _override_roots() -> list[Path]:
     search = os.environ.get(ASSET_PATH_ENV_VAR)
     if search:
         roots.extend(Path(entry) for entry in search.split(os.pathsep) if entry)
-
-    env_override = os.environ.get("USERSIM_ASSETS_DIR")
-    if env_override:
-        roots.append(Path(env_override))
 
     return roots
 

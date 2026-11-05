@@ -116,7 +116,7 @@ User message to judge:
 # IMPORT time. Probes are imported at plugin bootstrap, before a run's
 # ``assets_dir`` is known, so a per-run root would never reach them. These
 # accessors re-resolve on every call, which is what makes
-# ``--assets-dir`` / ``USERSIM_ASSETS_DIR`` govern prompts the same way it
+# ``--assets-dir`` / ``USERSIM_ASSET_PATH`` govern prompts the same way it
 # already governs seeds and banks. The constants are kept for callers that
 # import them directly.
 

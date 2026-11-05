@@ -129,8 +129,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default=None,
         help=(
             "Read every probe's assets from this folder, which holds a <probe>/ folder per probe. "
-            "Without it, each probe reads the banks it ships with, after any USERSIM_ASSET_PATH or "
-            "USERSIM_ASSETS_DIR override."
+            "Without it, each probe reads the banks it ships with, after any USERSIM_ASSET_PATH override."
         ),
     )
     p.add_argument(
