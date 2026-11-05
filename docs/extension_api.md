@@ -184,7 +184,7 @@ suite can load.
 | `probe_conformance_problems` | The same findings, as a list |
 | `assert_scorer_conforms` | Fails with every problem found in a scorer, optionally scoring a sample row |
 | `scorer_conformance_problems` | The same findings, as a list |
-| `run_episode` | Runs one episode of a probe offline, as `usersim simulate` runs it |
+| `run_episode` | Runs one episode of a probe offline, as `usersim simulate` runs it, with scripted models or ones you give by alias |
 | `EpisodeRun` | What `run_episode` returns: the row and every prompt sent |
 | `ScriptedModel` | A model stand-in that answers from a script |
 | `assert_hosted_parity` | Fails when a probe run through a host differs from the same probe run alone |

@@ -595,6 +595,7 @@ async def run_episode(
     profile: Mapping[str, Any] | None = None,
     language: str = "English",
     model_factory: Callable[[str], Any] = ScriptedModel,
+    models: Mapping[str, Any] | None = None,
 ) -> EpisodeRun:
     """Run one episode of ``probe`` with scripted models, as ``usersim simulate`` runs it.
 
@@ -603,15 +604,23 @@ async def run_episode(
     comes from the same generator a run uses; ``prompts`` holds each request
     the models received, in order. Subclass ``ScriptedModel`` to script other
     replies.
+
+    ``models`` adds a model by alias, such as one the probe names in
+    ``model_aliases``, or replaces the scripted model of a conversation alias.
+    A ``ScriptedModel`` given there records its requests in ``prompts`` too.
     """
     from usersim.engine.generator import ConversationSimulatorGenerator
 
     prompts: list[dict[str, Any]] = []
-    models = _scripted_models(model_factory, prompts)
+    run_models = _scripted_models(model_factory, prompts)
+    for alias, model in (models or {}).items():
+        if isinstance(model, ScriptedModel):
+            model.prompts = prompts
+        run_models[alias] = model
     runtime = _episode_runtime(
-        probe, models, config=config, persona=persona, data=data, profile=profile, language=language
+        probe, run_models, config=config, persona=persona, data=data, profile=profile, language=language
     )
-    row = await ConversationSimulatorGenerator.with_models(config, models).agenerate(runtime.preamble.to_row())
+    row = await ConversationSimulatorGenerator.with_models(config, run_models).agenerate(runtime.preamble.to_row())
     return EpisodeRun(row=row, prompts=prompts)
 
 

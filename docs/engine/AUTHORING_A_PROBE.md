@@ -297,7 +297,9 @@ the file lacks is left out, and the probe handles its absence: `get` returns
 run's setup fingerprint counts the settings of each declared model. `cfg` is
 the run's `ConversationSimulatorConfig`, for an alias that is itself a setting:
 `financial_services` declares the model named by `finance_embedding_model_alias`,
-which embeds its search queries, and searches lexically without it.
+which embeds its search queries, and searches lexically without it. In a test,
+pass the model to `run_episode` by alias, as
+`models={"my_probe_critic_model": critic}`.
 
 ---
 
@@ -1074,7 +1076,10 @@ the declared columns; its JSON columns, such as `conversation_messages` and
 `simulation_outcome`, hold strings. `run.prompts`
 lists every request the models received, in order, with its role and messages.
 To script other replies, subclass `ScriptedModel`, override `CONTENT`, and pass
-the class as `model_factory`.
+the class as `model_factory`. `models` gives a model by alias: one your probe
+names in `model_aliases`, or one that replaces the scripted model of a
+conversation alias. A `ScriptedModel` given there records its requests in
+`run.prompts` with the others.
 
 Some built-in probes' tests patch `acall_llm` in `core.simulation` and
 `core.judges`, the two modules that call it, to control each reply turn by

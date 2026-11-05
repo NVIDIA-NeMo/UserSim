@@ -14,8 +14,7 @@ from typing import Any
 
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.probes import declared_model_aliases
-from usersim.engine.generator import ConversationSimulatorGenerator
-from usersim.testing import ScriptedModel, _episode_runtime, _scripted_models
+from usersim.testing import ScriptedModel, run_episode
 
 PERSONA = {"first_name": "Sarah", "last_name": "Johnson", "age": 35, "city": "Seattle"}
 
@@ -45,13 +44,9 @@ async def test_a_row_gets_the_declared_models_the_registry_has(register_test_pro
     )
     config = ConversationSimulatorConfig(name="conversation_messages", max_turns=1)
     critic = ScriptedModel("critic")
-    models = {**_scripted_models(ScriptedModel, []), "ext_critic_model": critic}
-    runtime = _episode_runtime(
-        "ext_critic", models, config=config, persona=PERSONA, data=None, profile=None, language="English"
-    )
 
-    row = await ConversationSimulatorGenerator.with_models(config, models).agenerate(runtime.preamble.to_row())
+    run = await run_episode("ext_critic", config=config, persona=PERSONA, models={"ext_critic_model": critic})
 
-    assert row["conversation_status"] is True
+    assert run.row["conversation_status"] is True
     assert seen["ext_critic_model"] is critic
     assert "ext_absent_model" not in seen

@@ -149,7 +149,8 @@ When porting one of the templates into a new module:
       of `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] If the probe calls a model beyond the conversation's own, name its
       alias in a `model_aliases` classmethod (step 2 of
-      `docs/engine/AUTHORING_A_PROBE.md`).
+      `docs/engine/AUTHORING_A_PROBE.md`), and give the tests a model for
+      it with `run_episode(..., models={alias: model})`.
 - [ ] Keep the probe's own per-row data under metadata keys of its own.
       The loop writes the keys in `RESERVED_METADATA_KEYS`
       (`core/simulation.py`); a probe reads them, and

@@ -85,6 +85,23 @@ async def test_every_registered_probe_runs_to_completion_with_scripted_models(pr
     assert run.prompts and all(prompt["messages"] for prompt in run.prompts)
 
 
+async def test_a_model_given_for_an_alias_answers_for_it_and_records_its_requests() -> None:
+    class Terse(ScriptedModel):
+        CONTENT = {**ScriptedModel.CONTENT, "assistant": "Take the train; it is quicker."}
+
+    run = await run_episode(
+        "general_open_ended",
+        config=_config("general_open_ended"),
+        persona=_PERSONA,
+        data=_data("general_open_ended"),
+        models={"assistant_model": Terse("assistant")},
+    )
+
+    replies = [m["content"] for m in json.loads(run.row["conversation_messages"]) if m["role"] == "assistant"]
+    assert replies and set(replies) == {"Take the train; it is quicker."}
+    assert "assistant" in {prompt["role"] for prompt in run.prompts}
+
+
 #: Probes with no simulated user, which run their own loop and send nothing to the judge.
 _NO_JUDGE_REQUESTS = frozenset({"safety_agentic"})
 
