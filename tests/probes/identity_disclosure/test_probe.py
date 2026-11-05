@@ -19,8 +19,6 @@ import yaml
 
 import usersim.cli as cli_pkg
 import usersim.engine.generator  # noqa: F401  (populates the registry)
-from usersim.cli._models import load_models_config
-from usersim.cli.model_catalog import known_inference_models
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core import probes as core_probes
 from usersim.engine.core import translation
@@ -30,6 +28,8 @@ from usersim.engine.core.localized import LocalizedText
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus, Provenance, WarningKind
 from usersim.engine.core.probes import register_probe, resolve_probe
 from usersim.engine.core.simulation import _ASSISTANT_REFUSAL_ECHO_PHRASES, _FOURTH_WALL_PHRASES
+from usersim.engine.model_catalog import known_inference_models
+from usersim.engine.models_file import load_models_config
 from usersim.engine.probes.identity_disclosure import probe as probe_gen
 from usersim.engine.probes.identity_disclosure import scorer as identity_scorer
 from usersim.engine.probes.identity_disclosure.probe import (

@@ -23,9 +23,16 @@ import pandas as pd
 import pytest
 
 from usersim import cli
-from usersim.cli._models import (
+from usersim.cli._pipeline import (
+    DEFAULT_PROBE_MIX,
+    build_simulator_config_builder,
+    known_probes,
+)
+from usersim.cli.evaluate import _parse_csv_or_none, _parse_judges
+from usersim.cli.simulate import _parse_probe_mix
+from usersim.engine.errors import ConfigError
+from usersim.engine.models_file import (
     REQUIRED_SIMULATOR_ALIASES,
-    ConfigError,
     ModelsConfig,
     ModelSpec,
     ProviderSpec,
@@ -34,13 +41,6 @@ from usersim.cli._models import (
     require_aliases,
     warn_if_missing_api_key,
 )
-from usersim.cli._pipeline import (
-    DEFAULT_PROBE_MIX,
-    build_simulator_config_builder,
-    known_probes,
-)
-from usersim.cli.evaluate import _parse_csv_or_none, _parse_judges
-from usersim.cli.simulate import _parse_probe_mix
 
 # ---------------------------------------------------------------------------
 # Top-level parser
@@ -209,7 +209,7 @@ class TestToDataDesignerKwargs:
     """
 
     def test_no_custom_providers_returns_empty_kwargs(self):
-        from usersim.cli._models import to_data_designer_kwargs
+        from usersim.engine.models_file import to_data_designer_kwargs
 
         cfg = ModelsConfig(
             providers=(),
@@ -218,7 +218,7 @@ class TestToDataDesignerKwargs:
         assert to_data_designer_kwargs(cfg) == {}
 
     def test_custom_provider_merges_with_builtin_nvidia(self):
-        from usersim.cli._models import to_data_designer_kwargs
+        from usersim.engine.models_file import to_data_designer_kwargs
 
         cfg = ModelsConfig(
             providers=(
@@ -240,7 +240,7 @@ class TestToDataDesignerKwargs:
         assert "nvidia" in names  # built-in merged in for assistant_model
 
     def test_custom_provider_overrides_builtin_on_name_conflict(self):
-        from usersim.cli._models import to_data_designer_kwargs
+        from usersim.engine.models_file import to_data_designer_kwargs
 
         cfg = ModelsConfig(
             providers=(
@@ -1200,7 +1200,7 @@ class TestConfigErrorPresentation:
     """
 
     def test_main_presents_config_error_without_a_traceback(self, caplog):
-        from usersim.cli._errors import ConfigError
+        from usersim.engine.errors import ConfigError
 
         def _raises(args):
             raise ConfigError("toolset seed not found: /nope.parquet")
@@ -1219,8 +1219,8 @@ class TestConfigErrorPresentation:
     def test_missing_toolset_seed_raises_config_error(self, tmp_path):
         """The real path: an explicit ``--toolset-seed-path`` that is not
         there is a user error, not a crash."""
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import resolve_seed_dataset_path
+        from usersim.engine.errors import ConfigError
 
         with pytest.raises(ConfigError, match="seed table not found"):
             resolve_seed_dataset_path(

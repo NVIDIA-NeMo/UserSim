@@ -286,8 +286,8 @@ class TestProbeAssetPreflight:
     """
 
     def test_missing_probe_directory_is_rejected(self, tmp_path: Path) -> None:
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         with pytest.raises(ConfigError) as exc:
             verify_probe_assets({"financial_services": 1.0}, ["en_US"], tmp_path)
@@ -300,8 +300,8 @@ class TestProbeAssetPreflight:
         assert "feature request" not in message
 
     def test_missing_locale_subtree_is_rejected(self) -> None:
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         with pytest.raises(ConfigError) as exc:
             verify_probe_assets({"financial_services": 1.0}, ["en_SG"], None)
@@ -312,8 +312,8 @@ class TestProbeAssetPreflight:
 
     def test_a_locale_whose_bank_does_not_load_is_rejected(self, finance_assets_without_fr_tasks: Path) -> None:
         """A locale folder that exists is not enough: without tasks, every row aborts."""
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         with pytest.raises(ConfigError) as exc:
             verify_probe_assets({"financial_services": 1.0}, ["fr_FR"], finance_assets_without_fr_tasks)
@@ -330,8 +330,8 @@ class TestProbeAssetPreflight:
         verify_probe_assets(mix, ["bn_Beng_IN"], None)
 
     def test_india_variant_is_rejected_when_its_base_bank_is_absent(self, tmp_path: Path) -> None:
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         (tmp_path / "financial_services" / "en_US").mkdir(parents=True)
         (tmp_path / "financial_services" / "en_US" / "bank.yaml").write_text("{}")
@@ -347,8 +347,8 @@ class TestProbeAssetPreflight:
         verify_probe_assets(mix, ["hi_Deva_IN", "hi_Latn_IN"], None)
 
     def test_the_hindi_locales_are_rejected_when_the_en_in_bank_is_absent(self, tmp_path: Path) -> None:
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         (tmp_path / "financial_services" / "en_US").mkdir(parents=True)
         (tmp_path / "financial_services" / "en_US" / "bank.yaml").write_text("{}")
@@ -357,8 +357,8 @@ class TestProbeAssetPreflight:
         assert "hi_Deva_IN (through en_IN): no bank; hi_Latn_IN (through en_IN): no bank" in str(exc.value)
 
     def test_a_refusal_names_the_locales_that_run_on_another_bank(self) -> None:
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         with pytest.raises(ConfigError) as exc:
             verify_probe_assets({"financial_services": 1.0}, ["pt_BR"], None)
@@ -367,8 +367,8 @@ class TestProbeAssetPreflight:
         assert can_run.endswith(", plus hi_Deva_IN, hi_Latn_IN and the India language variants through en_IN")
 
     def test_a_locale_without_a_bank_says_how_to_ask_for_one(self) -> None:
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         with pytest.raises(ConfigError) as exc:
             verify_probe_assets({"financial_services": 1.0}, ["pt_BR"], None)
@@ -403,8 +403,8 @@ class TestProbeAssetPreflight:
 
     def test_a_probe_declares_its_locale_pre_flight(self, tmp_path: Path, register_test_probe) -> None:
         """A probe from another package is checked by its own class, and its refusal links its own guide."""
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         for locale, bank in (("en_US", "recipes: [curry]\n"), ("de_DE", "")):
             (tmp_path / "ext_banks" / locale).mkdir(parents=True)
@@ -432,8 +432,8 @@ class TestProbeAssetPreflight:
 
     def test_a_probe_names_the_bank_a_locale_runs_on(self, tmp_path: Path, register_test_probe) -> None:
         """The pre-flight checks the bank the class's bank_locale picks, not the locale's own folder."""
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         (tmp_path / "ext_banks" / "shared").mkdir(parents=True)
         bank = tmp_path / "ext_banks" / "shared" / "bank.yaml"
@@ -455,8 +455,8 @@ class TestProbeAssetPreflight:
         )
 
     def test_every_missing_probe_reported_at_once(self, tmp_path: Path) -> None:
-        from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.errors import ConfigError
 
         mix = {"financial_services": 0.5, "sov_ai_facts": 0.5}
         with pytest.raises(ConfigError) as exc:

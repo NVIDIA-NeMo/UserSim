@@ -15,7 +15,7 @@ run from a script or CI without opening Jupyter:
 Each subcommand is implemented in its own module under :mod:`cli`.
 The shared pipeline-construction helpers live in :mod:`cli._pipeline`
 (used by both the CLI and the notebooks under ``notebooks/``). Model
-configuration is loaded from a TOML file via :mod:`cli._models`; a
+configuration is loaded from a TOML file via :mod:`usersim.engine.models_file`; a
 sensible default ships at ``cli/models_default.toml``.
 
 Identity: ``persona_uuid`` is a content hash of the persona, and
@@ -34,7 +34,7 @@ import logging
 import sys
 
 from usersim import __version__
-from usersim.cli._errors import ConfigError
+from usersim.engine.errors import ConfigError
 
 
 def _register_extension_commands(subparsers: argparse._SubParsersAction) -> None:

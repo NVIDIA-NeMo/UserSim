@@ -41,7 +41,6 @@ from collections import Counter
 from fractions import Fraction
 from pathlib import Path
 
-from usersim.cli._errors import ConfigError
 from usersim.cli._persona_language import persona_dataset_report
 from usersim.cli._pipeline import (
     clear_seed_columns_of_other_probes,
@@ -50,6 +49,7 @@ from usersim.cli._pipeline import (
     verify_probe_assets,
     verify_probe_locales,
 )
+from usersim.engine.errors import ConfigError
 
 logger = logging.getLogger("usersim.cli.simulate")
 
@@ -357,7 +357,7 @@ def _parse_probe_mix(spec: str) -> dict:
 
 
 def run(args: argparse.Namespace) -> int:
-    from usersim.cli._models import (
+    from usersim.engine.models_file import (
         REQUIRED_SIMULATOR_ALIASES,
         assistant_replays_reasoning,
         default_models_path,
@@ -537,7 +537,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         prepare_episode_inputs,
         simulate_inputs_to_dataset,
     )
-    from usersim.cli._models import warn_if_missing_api_key
+    from usersim.engine.models_file import warn_if_missing_api_key
 
     defaults = args._stored_row_flag_defaults
     given = [flag for dest, flag in _STORED_ROW_FLAGS.items() if getattr(args, dest) != defaults[dest]]
@@ -645,7 +645,6 @@ def _simulate_to_parquet(
     max_assistant_attempts=1,
     store_reasoning=True,
 ) -> int:
-    from usersim.cli._models import assistant_replays_reasoning
     from usersim.cli._persona_language import (
         DEFAULT_PERSONA_DATASETS_DIR,
         log_persona_language_population,
@@ -661,6 +660,7 @@ def _simulate_to_parquet(
         sampled_run_to_resume,
         save_sampled_rows,
     )
+    from usersim.engine.models_file import assistant_replays_reasoning
 
     started_at = time.time()
     out = Path(out).resolve()

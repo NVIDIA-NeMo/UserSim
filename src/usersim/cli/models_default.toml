@@ -6,7 +6,7 @@
 # models_openrouter.toml. For any other OpenAI-compatible endpoint, declare a
 # provider in your own file and pass `--models`. See CONTRIBUTING.md.
 #
-# Per-model sampling parameters live in cli/model_catalog.py. Per-alias knobs
+# Per-model sampling parameters live in engine/model_catalog.py. Per-alias knobs
 # (max_parallel_requests, timeout, max_tokens) go here and win over the catalog.
 #
 # `replay_reasoning = true` on `assistant_model` sends it the reasoning of its

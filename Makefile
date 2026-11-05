@@ -233,7 +233,7 @@ HEALTH_PROBE    ?= sov_ai_dynamic
 # is red until every secret is provisioned, which trains people to ignore it.
 define REQUIRE_KEYS_PY
 import sys
-from usersim.cli._models import load_models_config, required_api_key_env_vars
+from usersim.engine.models_file import load_models_config, required_api_key_env_vars
 config = sys.argv[1]
 missing = sorted(v for v in required_api_key_env_vars(load_models_config(config)) if not __import__("os").environ.get(v))
 if missing:

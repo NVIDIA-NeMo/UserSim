@@ -56,7 +56,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         metavar="ALIAS=MODEL",
         help="Override a model alias, e.g. --model asset_judge_model="
         "openai/gpt-oss-120b. Repeatable. The provider is chosen from "
-        "cli/model_catalog.py; a model it does not list as self-hostable "
+        "engine/model_catalog.py; a model it does not list as self-hostable "
         "needs a [[providers]] entry in the models file.",
     )
     p.add_argument(
@@ -73,14 +73,13 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
 def run(args: argparse.Namespace) -> int:
     from usersim.cli._models import (
-        ConfigError,
         apply_model_overrides,
         apply_parallel_overrides,
-        default_models_path,
-        load_models_config,
         parse_cli_model_overrides,
         parse_cli_parallel_overrides,
     )
+    from usersim.engine.errors import ConfigError
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     dom = get_domain(args.domain)
     if dom.evaluate is None:

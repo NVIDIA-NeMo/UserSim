@@ -200,11 +200,11 @@ def _cli_built_simulator_config(probe_type: str, locale: str) -> ConversationSim
     ``build_simulator_config_builder`` so a regression in either
     path-composition site fails this test.
     """
-    from usersim.cli._models import default_models_path, load_models_config
     from usersim.cli._pipeline import (
         build_simulator_config_builder,
         resolve_seed_dataset_for_mix,
     )
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     models = load_models_config(default_models_path())
 

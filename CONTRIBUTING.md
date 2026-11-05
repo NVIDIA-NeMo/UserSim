@@ -226,7 +226,7 @@ Without it the project defaults (`temperature = 0.7`, `top_p = 0.95`) apply and
 the call fails. `max_tokens` is droppable the same way.
 
 Adding a model means adding it to
-[`model_catalog.py`](src/usersim/cli/model_catalog.py) as well, so its sampling
+[`model_catalog.py`](src/usersim/engine/model_catalog.py) as well, so its sampling
 parameters resolve. `usersim smoke` fails if a shipped config names a model the
 catalog does not define. A model absent from `VLLM_DEFAULTS` also needs an
 explicitly declared provider: overriding an alias to one without a provider to

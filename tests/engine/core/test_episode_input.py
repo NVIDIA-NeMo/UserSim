@@ -188,7 +188,7 @@ def test_a_probe_that_reads_no_theme_gets_a_placeholder(register_test_probe, tmp
 
 def test_a_probe_with_no_themes_for_the_locale_is_refused(register_test_probe, tmp_path) -> None:
     """An empty list leaves the sampler nothing to draw for the probe's rows."""
-    from usersim.cli._errors import ConfigError
+    from usersim.engine.errors import ConfigError
 
     register_test_probe(
         "ext_no_themes",

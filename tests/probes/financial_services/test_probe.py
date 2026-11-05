@@ -1660,7 +1660,7 @@ async def test_dynamic_scorer_grounded_judge_ok():
     # gpt-5.5 -- the default evaluator_model -- rejects it with a 400, "temperature
     # does not support 0 with this model", which failed every dynamic row the first
     # time this scorer was really dispatched. Per-model sampling policy belongs in
-    # cli/model_catalog.py, which already encodes it.
+    # engine/model_catalog.py, which already encodes it.
     assert "temperature" not in captured
 
 

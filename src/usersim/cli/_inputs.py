@@ -275,7 +275,7 @@ def _model_settings(models: Any, aliases: list[str]) -> tuple[dict[str, Any], di
     The readable form names a provider's extra headers without their values,
     which may be credentials; the hashed form carries a digest of them.
     """
-    from usersim.cli._models import resolved_model_providers, to_model_configs
+    from usersim.engine.models_file import resolved_model_providers, to_model_configs
 
     configs = {config.alias: config for config in to_model_configs(models)}
     providers = {provider.name: provider for provider in resolved_model_providers(models)}
@@ -497,8 +497,8 @@ def _run_config(inputs: EpisodeInputs, models: Any) -> dict[str, Any]:
     earlier reasoning is replayed does too, as in a plain run. Raises
     ``ConfigError`` for a models file that cannot replay.
     """
-    from usersim.cli._models import assistant_replays_reasoning
     from usersim.engine.config import ConversationSimulatorConfig
+    from usersim.engine.models_file import assistant_replays_reasoning
 
     store_reasoning = ConversationSimulatorConfig.model_validate(dict(inputs.config)).store_reasoning
     return {

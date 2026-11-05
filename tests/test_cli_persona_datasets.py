@@ -15,9 +15,9 @@ import pytest
 from data_designer.config.utils.constants import AVAILABLE_LOCALES, LOCALES_WITH_MANAGED_DATASETS
 
 from usersim import cli
-from usersim.cli._models import bundled_models_path
 from usersim.cli._persona_language import persona_dataset_report, persona_datasets_dir
 from usersim.engine.core.locale import SHIPPED_LOCALES
+from usersim.engine.models_file import bundled_models_path
 
 
 def _cli(*args: str) -> list[str]:

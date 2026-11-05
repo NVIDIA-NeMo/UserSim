@@ -57,7 +57,7 @@ from usersim.engine.core.manifest import (
 
 @dataclass(frozen=True)
 class _StubModelSpec:
-    """Mirror of ``cli._models.ModelSpec`` with the fields the manifest reads."""
+    """Mirror of ``usersim.engine.models_file.ModelSpec`` with the fields the manifest reads."""
 
     alias: str
     model: str
@@ -72,7 +72,7 @@ class _StubModelSpec:
 
 @dataclass(frozen=True)
 class _StubProviderSpec:
-    """Mirror of ``cli._models.ProviderSpec``."""
+    """Mirror of ``usersim.engine.models_file.ProviderSpec``."""
 
     name: str
     endpoint: str

@@ -535,7 +535,7 @@ async def _score_dynamic(
             #     evaluator_model) returns 400 "temperature does not support 0 with
             #     this model", which failed every dynamic row the first time this
             #     scorer was actually dispatched.
-            # Per-model sampling policy belongs in cli/model_catalog.py, which
+            # Per-model sampling policy belongs in engine/model_catalog.py, which
             # already expresses exactly this (including ``None`` for models that
             # reject the parameter) -- so let the alias's own config apply.
             response_format={

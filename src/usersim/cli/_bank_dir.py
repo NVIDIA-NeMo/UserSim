@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from usersim.cli._errors import ConfigError
 from usersim.engine.core._assets import shipped_assets_dir
+from usersim.engine.errors import ConfigError
 
 
 def default_bank_dir(domain: str, locale: str, *, flag: str) -> Path:

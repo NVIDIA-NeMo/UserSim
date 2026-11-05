@@ -225,8 +225,8 @@ class TestNewRunIdWiring:
         DataDesigner whose ``create().load_dataset()`` returns our
         synthetic frame. This isolates the run-id wiring without
         needing API keys."""
-        from usersim.cli._models import default_models_path, load_models_config
         from usersim.cli.simulate import _simulate_to_parquet
+        from usersim.engine.models_file import default_models_path, load_models_config
 
         out = tmp_path / "trajs"
         out.mkdir()
@@ -321,8 +321,8 @@ class TestNewRunIdWiring:
         """``skip_existing=True`` resumes into the most-recent
         existing run; the FRESH trajectory lands in that same run
         partition, not a new one."""
-        from usersim.cli._models import default_models_path, load_models_config
         from usersim.cli.simulate import _simulate_to_parquet
+        from usersim.engine.models_file import default_models_path, load_models_config
 
         out = tmp_path / "trajs"
         out.mkdir()
@@ -372,8 +372,8 @@ class TestNewRunIdWiring:
 
 def test_context_failure_row_survives_cli_storage(tmp_path: Path) -> None:
     """A structured partial failure is a row, not a Data Designer omission."""
-    from usersim.cli._models import default_models_path, load_models_config
     from usersim.cli.simulate import _simulate_to_parquet
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     out = tmp_path / "trajs"
     models = load_models_config(default_models_path())
@@ -424,8 +424,8 @@ def test_each_batch_gets_its_own_artifacts_and_the_manifest_its_start(tmp_path: 
     from types import SimpleNamespace
 
     from usersim.cli import simulate
-    from usersim.cli._models import default_models_path, load_models_config
     from usersim.engine.core.manifest import load_run_manifest
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     folders: list[Path] = []
 
@@ -471,7 +471,7 @@ def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path:
     import logging
 
     from usersim.cli import simulate
-    from usersim.cli._models import default_models_path, load_models_config
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     def unsupported(*args, **kwargs):
         raise OSError(errno.ENOSYS, "flock is not supported here")

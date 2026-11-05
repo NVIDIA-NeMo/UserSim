@@ -37,7 +37,6 @@ from test_simulator_pipeline_e2e import _mock_call_llm_side_effect
 
 from usersim import cli
 from usersim.cli import _inputs
-from usersim.cli._errors import ConfigError
 from usersim.cli._inputs import (
     INPUT_ID_COLUMN,
     load_episode_inputs,
@@ -45,14 +44,15 @@ from usersim.cli._inputs import (
     setup_fingerprint,
     simulate_inputs_to_dataset,
 )
-from usersim.cli._models import ModelsConfig, ProviderSpec, default_models_path, load_models_config
-from usersim.cli._models import to_model_configs as _real_to_model_configs
 from usersim.cli._pipeline import materialize_episode_inputs
 from usersim.engine import generator as generator_module
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.manifest import load_run_manifest
 from usersim.engine.core.missing import none_for_missing
 from usersim.engine.core.storage import list_runs, read_partitioned_dataset
+from usersim.engine.errors import ConfigError
+from usersim.engine.models_file import ModelsConfig, ProviderSpec, default_models_path, load_models_config
+from usersim.engine.models_file import to_model_configs as _real_to_model_configs
 
 #: Every simulator-side module that holds its own reference to ``acall_llm``,
 #: plus the module itself for the code that imports it at call time.
@@ -841,8 +841,8 @@ def test_rows_that_cannot_run_are_refused(rows, edit, message):
 
 def test_the_library_refuses_stored_rows_whose_banks_are_missing_before_any_model_call(rows, tmp_path):
     """``simulate_episode_inputs`` runs the CLI's pre-flight, so a host learns of a missing bank up front."""
-    from usersim.cli._models import bundled_models_path
     from usersim.engine.external import simulate_episode_inputs
+    from usersim.engine.models_file import bundled_models_path
 
     empty = tmp_path / "empty"
     empty.mkdir()
@@ -853,8 +853,8 @@ def test_the_library_refuses_stored_rows_whose_banks_are_missing_before_any_mode
 
 def test_the_library_refuses_a_mix_whose_banks_are_missing_before_materializing(tmp_path):
     """``materialize_episode_inputs`` runs the CLI's pre-flight for its locale."""
-    from usersim.cli._models import bundled_models_path
     from usersim.engine.external import materialize_episode_inputs as materialize
+    from usersim.engine.models_file import bundled_models_path
 
     empty = tmp_path / "empty"
     empty.mkdir()

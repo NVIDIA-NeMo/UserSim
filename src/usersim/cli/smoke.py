@@ -203,7 +203,7 @@ def _check_imports(report: SmokeReport) -> None:
 
 def _check_models_config(report: SmokeReport) -> None:
     try:
-        from usersim.cli._models import (
+        from usersim.engine.models_file import (
             REQUIRED_SIMULATOR_ALIASES,
             default_models_path,
             load_models_config,
@@ -226,18 +226,18 @@ def _check_model_catalog(report: SmokeReport) -> None:
     """Verify every TOML in ``cli/`` resolves cleanly against the catalog.
 
     Catches catalog drift: a model named in a shipped TOML that is absent
-    from ``cli/model_catalog.py:INFERENCE_DEFAULTS`` (or, for embedding
+    from ``engine/model_catalog.py:INFERENCE_DEFAULTS`` (or, for embedding
     aliases, from the embedding catalog). Drift means a run silently falls
     back to project defaults instead of the intended per-model parameters,
     so this check fails rather than warning.
     """
     try:
-        from usersim.cli._models import load_models_config
-        from usersim.cli.model_catalog import (
+        from usersim.engine.model_catalog import (
             is_embedding_model,
             known_embedding_models,
             known_inference_models,
         )
+        from usersim.engine.models_file import load_models_config
 
         toml_paths = sorted(Path(__file__).parent.glob("models_*.toml"))
         if not toml_paths:

@@ -288,7 +288,12 @@ def _run_pipeline(rows: list[dict[str, Any]], monkeypatch, tmp_path):
     import pandas as pd
     from data_designer.interface import DataDesigner
 
-    from usersim.cli._models import bundled_models_path, load_models_config, to_data_designer_kwargs, to_model_configs
+    from usersim.engine.models_file import (
+        bundled_models_path,
+        load_models_config,
+        to_data_designer_kwargs,
+        to_model_configs,
+    )
 
     monkeypatch.setenv("NVIDIA_API_KEY", "not-used")
     models = load_models_config(bundled_models_path())

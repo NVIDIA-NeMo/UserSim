@@ -13,7 +13,7 @@ Two pipelines are exposed:
   that reads a trajectory parquet and emits a wide evaluator cell
   (per-axis × per-judge scores + scorer outputs) for each row.
 
-Both builders take a ``ModelsConfig`` (loaded by :mod:`cli._models`)
+Both builders take a ``ModelsConfig`` (loaded by :mod:`usersim.engine.models_file`)
 and a small set of pipeline knobs. They are pure factory functions —
 they do not call the network or write files; the caller invokes
 ``DataDesigner.create(builder, num_records=N).load_dataset()`` (or
@@ -36,13 +36,6 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
-from usersim.cli._errors import ConfigError
-from usersim.cli._models import (
-    ModelsConfig,
-    assistant_replays_reasoning,
-    to_data_designer_kwargs,
-    to_model_configs,
-)
 from usersim.cli._persona_language import (
     DEFAULT_PERSONA_DATASETS_DIR,
     persona_sampler_params,
@@ -52,7 +45,14 @@ from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES, p
 from usersim.engine.core.persona import persona_name_template
 from usersim.engine.core.probes import BUILTIN_PROBE_MODULES, NO_THEME, SEED_DATASET_SUFFIXES, resolve_probe
 from usersim.engine.core.probes import known_probes as _known_probes
+from usersim.engine.errors import ConfigError
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
+from usersim.engine.models_file import (
+    ModelsConfig,
+    assistant_replays_reasoning,
+    to_data_designer_kwargs,
+    to_model_configs,
+)
 
 if TYPE_CHECKING:
     from usersim.engine.core.probes import BaseProbe

@@ -1091,7 +1091,8 @@ def test_cli_gen_assets_dry_run():
 
 def test_generate_corpus_validates_endpoints_before_network():
     """generate_corpus fails fast (offline) if the gen model aliases are absent."""
-    from usersim.cli._models import ConfigError, ModelsConfig, ModelSpec
+    from usersim.engine.errors import ConfigError
+    from usersim.engine.models_file import ModelsConfig, ModelSpec
     from usersim.engine.probes.financial_services.asset_gen.pipeline import generate_corpus
 
     cfg = ModelsConfig(
@@ -1111,7 +1112,7 @@ def test_default_models_config_declares_gen_aliases():
     """
     # bundled_models_path, not default_models_path: this asserts what ships,
     # and default_models_path honours a developer's models.local.toml.
-    from usersim.cli._models import bundled_models_path, load_models_config
+    from usersim.engine.models_file import bundled_models_path, load_models_config
     from usersim.engine.probes.financial_services.asset_gen.pipeline import validate_generation_models
 
     cfg = load_models_config(bundled_models_path())

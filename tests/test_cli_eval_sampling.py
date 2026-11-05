@@ -14,9 +14,9 @@ import pytest
 
 from usersim import cli
 from usersim.cli import _pipeline
-from usersim.cli._models import bundled_models_path
 from usersim.engine.core.storage import read_partitioned_dataset, run_subroot, write_partitioned_dataset
 from usersim.engine.evaluator.scorers import GENERIC_SCORERS
+from usersim.engine.models_file import bundled_models_path
 from usersim.reporting import EVAL_STORE_MANIFEST_FILENAME, read_eval_sample_manifest, record_eval_sample_pass
 
 RUN_ID = "1700000000"

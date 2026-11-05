@@ -18,19 +18,19 @@ from pathlib import Path
 
 import pytest
 
-from usersim.cli._errors import ConfigError
-from usersim.cli._models import (
-    ModelsConfig,
-    ProviderSpec,
-    apply_model_overrides,
-    assistant_replays_reasoning,
-    default_models_path,
-    load_models_config,
-)
+from usersim.cli._models import apply_model_overrides
 from usersim.cli._pipeline import build_simulator_config_builder
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.episode_input import construct_episode_preamble
 from usersim.engine.core.manifest import SimulationConfigSnapshot, build_run_manifest
+from usersim.engine.errors import ConfigError
+from usersim.engine.models_file import (
+    ModelsConfig,
+    ProviderSpec,
+    assistant_replays_reasoning,
+    default_models_path,
+    load_models_config,
+)
 
 
 def _models(providers=(), **by_alias):

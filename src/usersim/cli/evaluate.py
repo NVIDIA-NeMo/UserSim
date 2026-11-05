@@ -298,11 +298,7 @@ def _report_judge_verdicts(cells: Iterable[Any]) -> bool:
 
 
 def run(args: argparse.Namespace) -> int:
-    from usersim.cli._models import (
-        default_models_path,
-        load_models_config,
-        warn_if_missing_api_key,
-    )
+    from usersim.engine.models_file import default_models_path, load_models_config, warn_if_missing_api_key
 
     models_path = args.models or default_models_path()
     models = load_models_config(models_path)

@@ -76,9 +76,9 @@ def materialize_episode_inputs(
     and raises ``ValueError`` when a probe in ``probe_mix`` has no usable bank
     for ``locale`` under ``assets_dir``.
     """
-    from usersim.cli._models import default_models_path, load_models_config
     from usersim.cli._pipeline import materialize_episode_inputs as _materialize
     from usersim.cli._pipeline import verify_probe_assets
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     resolved_assets_dir = assets_dir.resolve() if assets_dir is not None else None
     verify_probe_assets(probe_mix, [locale], resolved_assets_dir)
@@ -133,8 +133,13 @@ def simulate_episode_inputs(
     written and skipped.
     """
     from usersim.cli._inputs import prepare_episode_inputs, simulate_inputs_to_dataset
-    from usersim.cli._models import REQUIRED_SIMULATOR_ALIASES, default_models_path, load_models_config, require_aliases
     from usersim.cli._pipeline import verify_probe_locales
+    from usersim.engine.models_file import (
+        REQUIRED_SIMULATOR_ALIASES,
+        default_models_path,
+        load_models_config,
+        require_aliases,
+    )
 
     path = models_path or default_models_path()
     models = load_models_config(path)
@@ -174,8 +179,8 @@ def model_facades(models_path: Path | None = None, *, aliases: Sequence[str] | N
     from data_designer.engine.models.clients.adapters.http_model_client import ClientConcurrencyMode
     from data_designer.interface import DataDesigner
 
-    from usersim.cli._errors import ConfigError
-    from usersim.cli._models import (
+    from usersim.engine.errors import ConfigError
+    from usersim.engine.models_file import (
         default_models_path,
         load_models_config,
         to_data_designer_kwargs,
@@ -221,7 +226,7 @@ def replays_assistant_reasoning(models_path: Path | None = None, *, store_reason
     a setup that cannot replay (the switch on another alias, reasoning not
     stored, or a provider that drops reasoning).
     """
-    from usersim.cli._models import assistant_replays_reasoning, default_models_path, load_models_config
+    from usersim.engine.models_file import assistant_replays_reasoning, default_models_path, load_models_config
 
     models = load_models_config(models_path or default_models_path())
     return assistant_replays_reasoning(models, store_reasoning=store_reasoning)

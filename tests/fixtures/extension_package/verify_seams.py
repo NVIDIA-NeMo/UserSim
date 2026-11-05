@@ -107,8 +107,8 @@ check("output_columns joins the run's columns", "fixture_probe_marker" in kept, 
 
 # The pre-flight checks a contributed probe's locale banks with the check its
 # class declares, and a refusal links the probe's own authoring guide.
-from usersim.cli._errors import ConfigError  # noqa: E402
 from usersim.cli._pipeline import verify_probe_assets  # noqa: E402
+from usersim.engine.errors import ConfigError
 
 
 def preflight_refusal(locales: list[str]) -> str:

@@ -23,7 +23,6 @@ import pandas as pd
 import pytest
 
 from usersim import cli
-from usersim.cli._errors import ConfigError
 from usersim.cli._pipeline import (
     clear_seed_columns_of_other_probes,
     resolve_seed_dataset_path,
@@ -32,6 +31,7 @@ from usersim.cli._pipeline import (
 )
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.probes import SEED_DATASET_SUFFIXES, resolve_probe
+from usersim.engine.errors import ConfigError
 from usersim.engine.probes.tool_calling.probe import _normalize_tool_list
 
 
@@ -224,9 +224,9 @@ class TestSeedColumnsStayWithTheirReader:
         import sys
         from unittest.mock import patch
 
-        from usersim.cli._models import default_models_path, load_models_config
         from usersim.cli.simulate import _simulate_to_parquet
         from usersim.engine.core.storage import list_runs, read_partitioned_dataset
+        from usersim.engine.models_file import default_models_path, load_models_config
 
         class _Result:
             def load_dataset(self):
@@ -438,8 +438,8 @@ class TestPipelineRejectsToolCallingWithoutASeed:
     """
 
     def _build(self, mix, seed, assets_dir=None):
-        from usersim.cli._models import default_models_path, load_models_config
         from usersim.cli._pipeline import build_simulator_config_builder
+        from usersim.engine.models_file import default_models_path, load_models_config
 
         return build_simulator_config_builder(
             locale="en_US",

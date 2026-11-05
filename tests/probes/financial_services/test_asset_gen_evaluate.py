@@ -160,7 +160,8 @@ def test_shape_scorecard_aggregates_and_flags_low():
 
 
 def test_validate_eval_models_requires_judge():
-    from usersim.cli._models import ConfigError, ModelsConfig, ModelSpec
+    from usersim.engine.errors import ConfigError
+    from usersim.engine.models_file import ModelsConfig, ModelSpec
 
     cfg = ModelsConfig(providers=(), models=(ModelSpec(alias="doc_gen_model", model="m", provider="nvidia"),))
     with pytest.raises(ConfigError):

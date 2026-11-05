@@ -13,7 +13,7 @@ appears in ``ModelSpec.model`` / ``[[models]] model = "..."``):
 - ``INFERENCE_DEFAULTS`` -- DD ``ChatCompletionInferenceParams`` defaults that
   are genuinely per-model (model-architecture properties: which sampling
   parameters the model expects, which ``extra_body`` knobs it accepts).
-  Consumed by ``cli/_models.py:_to_model_spec`` to fill in any field the TOML
+  Consumed by ``engine/models_file.py:_to_model_spec`` to fill in any field the TOML
   omits. Explicit TOML values always win.
 
 - ``VLLM_DEFAULTS`` -- vLLM server-config defaults, for models you intend to
