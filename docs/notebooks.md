@@ -21,6 +21,12 @@ Outputs are stripped from the committed notebooks, so you will see source
 only until you run them. That keeps machine-specific paths and endpoint URLs
 out of the repository, and keeps the repository small.
 
+`tests/test_notebooks.py` checks the committed notebooks against the code
+without running them: each name a notebook imports from `usersim` resolves,
+and each keyword argument it passes to an imported function or settings class
+is one that function or class takes. A change that renames either updates the
+notebooks with it.
+
 ## The notebooks
 
 **[`01_simulate.ipynb`](../notebooks/01_simulate.ipynb)** drives the simulator
