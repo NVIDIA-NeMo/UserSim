@@ -131,7 +131,7 @@ class TestForkSafety:
 
 
 class TestCodeowners:
-    """GitHub does not fail a push for naming a team that does not exist; it
+    """GitHub does not fail a push for naming an owner that does not exist; it
     just requests review from nobody, which looks identical to a repository
     with no CODEOWNERS at all."""
 
@@ -140,6 +140,11 @@ class TestCodeowners:
     KNOWN_TEAMS = {
         "@NVIDIA-NeMo/user_sim_maintainers",  # admin
         "@NVIDIA-NeMo/user_sim_team",  # write
+    }
+    #: The users with write access who own a path of their own. Extend this when
+    #: one is given write access, not to make a test pass.
+    KNOWN_USERS = {
+        "@isarasua",  # the health_disclosure probes
     }
 
     def _rules(self) -> list[tuple[str, list[str]]]:
@@ -152,13 +157,20 @@ class TestCodeowners:
                 rules.append((pattern, owners))
         return rules
 
-    def test_every_owner_is_a_team_that_exists(self) -> None:
+    def test_every_owner_is_a_team_or_user_that_exists(self) -> None:
         for pattern, owners in self._rules():
             assert owners, f"CODEOWNERS pattern {pattern!r} names no owner."
             for owner in owners:
-                assert owner in self.KNOWN_TEAMS, (
-                    f"CODEOWNERS assigns {pattern!r} to {owner}, which is not a known team. GitHub would request review from nobody."
+                assert owner in self.KNOWN_TEAMS | self.KNOWN_USERS, (
+                    f"CODEOWNERS assigns {pattern!r} to {owner}, which is not a known team or user. GitHub would request review from nobody."
                 )
+
+    def test_the_team_owns_every_built_in_probe(self) -> None:
+        rules = self._rules()
+        assert "@NVIDIA-NeMo/user_sim_team" in dict(rules).get("*", []), "the default owner is not the team"
+        for pattern, owners in rules:
+            if pattern.startswith(("/src/usersim/engine/probes/", "/tests/probes/")):
+                assert "@NVIDIA-NeMo/user_sim_team" in owners, f"{pattern} leaves the team out"
 
     def test_there_is_a_default_owner(self) -> None:
         assert any(pattern == "*" for pattern, _ in self._rules()), (

@@ -432,12 +432,14 @@ A probe belongs in this repository when all of these hold:
   reproduces a standalone run.
 - **Its README** says which locales it supports, how its assets were produced
   and how to add a locale.
-- **It has an owner:** a GitHub team with write access to this repository,
-  listed in [`.github/CODEOWNERS`](.github/CODEOWNERS) for the probe's
-  directories and in `KNOWN_TEAMS` in `tests/test_ci_workflows.py`, which
-  refuses a CODEOWNERS team missing from that list. A probe from a contributor
-  without write access is co-owned by a maintainer who agrees to it when the
-  issue is triaged.
+- **It has an owner:** `@NVIDIA-NeMo/user_sim_team`, the default owner in
+  [`.github/CODEOWNERS`](.github/CODEOWNERS), owns every built-in probe. A
+  GitHub team or user with write access to this repository who owns a probe
+  with it gets a line for the probe's directories that names both, and is
+  listed in `KNOWN_TEAMS` or `KNOWN_USERS` in `tests/test_ci_workflows.py`,
+  which refuses a CODEOWNERS owner missing from both. A probe from a
+  contributor without write access is co-owned by a maintainer who agrees to it
+  when the issue is triaged.
 - **Its pull request fills in "Results impact"**, saying what the probe adds to
   a run's results.
 
