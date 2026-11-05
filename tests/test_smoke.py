@@ -189,6 +189,18 @@ class TestProbeAssetsCheck:
         assert not report.all_passed
         assert report.results[-1].detail == "1 problem(s): broken_probe: asset_problems raised KeyError: 'fr_FR'"
 
+    def test_a_missing_seed_table_fails_the_check(self, register_test_probe, tmp_path):
+        (tmp_path / "seeded_probe").mkdir()
+        register_test_probe("seeded_probe", seed_dataset="rows", assets_root=tmp_path)
+
+        report = SmokeReport()
+        _check_probe_assets(report)
+
+        assert not report.all_passed
+        detail = report.results[-1].detail
+        assert detail.startswith("1 problem(s): seeded_probe: ")
+        assert "holds neither of rows.parquet, rows.jsonl; it must hold one" in detail
+
     def test_names_the_first_three_problems_and_counts_the_rest(self, register_test_probe):
         missing = [f"no bank for {locale}" for locale in ("de_DE", "fr_FR", "ja_JP", "ko_KR", "pt_BR")]
         register_test_probe("unbanked_probe", asset_problems=classmethod(lambda cls: missing))
