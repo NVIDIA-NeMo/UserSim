@@ -655,7 +655,7 @@ def _simulate_to_parquet(
         log_persona_language_population,
         persona_language_filter,
     )
-    from usersim.cli._pipeline import build_simulator_config_builder
+    from usersim.cli._pipeline import build_simulator_config_builder, simulator_config
     from usersim.engine.core.locale import persona_dataset_locale
     from usersim.engine.core.manifest import write_simulator_manifest
     from usersim.engine.core.storage import (
@@ -665,7 +665,6 @@ def _simulate_to_parquet(
         sampled_run_to_resume,
         save_sampled_rows,
     )
-    from usersim.engine.models_file import assistant_replays_reasoning
 
     started_at = time.time()
     out = Path(out).resolve()
@@ -712,6 +711,17 @@ def _simulate_to_parquet(
     if (report := persona_dataset_report(run_locales)) is not None:
         raise ConfigError(report)
 
+    # One set of settings makes each locale's simulator column and the
+    # manifest's record of it, so the manifest describes the rows.
+    run_settings = {
+        "models": models,
+        "assets_dir": assets_dir,
+        "max_turns": max_turns,
+        "max_assistant_attempts": max_assistant_attempts,
+        "store_reasoning": store_reasoning,
+        "random_seed": random_seed,
+        "probe_options": probe_options,
+    }
     total_written = 0
     # What the persona sampler actually narrowed to, per locale. Recorded
     # rather than the flag: the two disagree wherever the corpus has no
@@ -738,16 +748,10 @@ def _simulate_to_parquet(
             )
         data_designer, builder = build_simulator_config_builder(
             locale=locale,
-            models=models,
-            assets_dir=assets_dir,
-            max_turns=max_turns,
-            max_assistant_attempts=max_assistant_attempts,
-            store_reasoning=store_reasoning,
             probe_mix=probe_mix,
             match_persona_language=match_persona_language,
             toolset_seed_path=toolset_seed_path,
-            random_seed=random_seed,
-            probe_options=probe_options,
+            **run_settings,
         )
         if seed_source is not None:
             n = _count_rows_for_locale(panel, locale)
@@ -800,13 +804,6 @@ def _simulate_to_parquet(
     # invocation; the manifest's ``trajectories_completed`` comes from
     # re-reading the parquet partitions for this run.
     requested_per_locale: dict[str, int] = {l: int(num_rows) for l in run_locales} if num_rows else {}
-    sim_cfg_for_manifest = _build_sim_config_for_manifest(
-        max_turns=max_turns,
-        random_seed=random_seed,
-        probe_options=probe_options,
-        store_reasoning=store_reasoning,
-        replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
-    )
     try:
         manifest_path_written = write_simulator_manifest(
             run_id=run_id,
@@ -814,7 +811,7 @@ def _simulate_to_parquet(
             trajectory_root=out,
             models_config=models,
             models_config_path=models_path,
-            sim_config=sim_cfg_for_manifest,
+            sim_config=simulator_config(locale=run_locales[0], **run_settings),
             locales_requested=run_locales,
             probe_mix=probe_mix,
             toolset_seed_path=toolset_seed_path,
@@ -827,36 +824,6 @@ def _simulate_to_parquet(
     except Exception as e:  # pragma: no cover — defensive: never fail a run on manifest issues
         logger.warning("failed to write run manifest: %s", e)
     return 0
-
-
-def _build_sim_config_for_manifest(
-    *,
-    max_turns: int,
-    random_seed,
-    store_reasoning: bool = True,
-    replay_assistant_reasoning: bool = False,
-    probe_options=None,
-):
-    """Snapshot the sim-config knobs the manifest captures.
-
-    Mirrors what ``cli/_pipeline.build_simulator_config_builder`` passes
-    to ``ConversationSimulatorConfig``. Default fields fall through from
-    the Pydantic config class so that any future default change is
-    picked up automatically by the manifest snapshot.
-    """
-    from usersim.engine.config import ConversationSimulatorConfig
-
-    return ConversationSimulatorConfig(
-        name="conversation_messages",
-        locale="placeholder",
-        max_turns=max_turns,
-        context_compression=True,
-        compression_window=1,
-        random_seed=random_seed,
-        store_reasoning=store_reasoning,
-        replay_assistant_reasoning=replay_assistant_reasoning,
-        probe_options=probe_options or {},
-    )
 
 
 def _locales_from_panel(panel_path: Path) -> list[str]:

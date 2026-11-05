@@ -17,12 +17,13 @@ from types import SimpleNamespace
 import pytest
 
 from usersim import cli
-from usersim.cli._pipeline import verify_probe_options
-from usersim.cli.simulate import _build_sim_config_for_manifest, _parse_probe_options
+from usersim.cli._pipeline import simulator_config, verify_probe_options
+from usersim.cli.simulate import _parse_probe_options
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.manifest import _sim_config_from_dict, build_run_manifest
 from usersim.engine.core.probes import BaseProbe, probe_options_problems
 from usersim.engine.errors import ConfigError
+from usersim.engine.models_file import default_models_path, load_models_config
 from usersim.testing import probe_conformance_problems
 
 
@@ -106,7 +107,9 @@ def test_the_manifest_records_a_run_s_settings_and_reads_them_back() -> None:
         started_at_epoch=1700000001,
         finished_at_epoch=1700000002,
         models_config=SimpleNamespace(providers=(), models=()),
-        sim_config=_build_sim_config_for_manifest(max_turns=2, random_seed=None, probe_options=settings),
+        sim_config=simulator_config(
+            locale="en_US", models=load_models_config(default_models_path()), max_turns=2, probe_options=settings
+        ),
         locales_requested=["en_US"],
         probe_mix={"general_open_ended": 1.0},
         trajectory_df=None,

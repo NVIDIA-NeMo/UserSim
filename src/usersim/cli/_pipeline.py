@@ -8,7 +8,8 @@ Two pipelines are exposed:
 - :func:`build_simulator_config_builder` — assembles a ``ConfigBuilder``
   that produces trajectory rows (``conversation_messages`` + side-effect
   columns including ``simulation_outcome``, ``simulation_traces``,
-  ``persona_uuid``, ``trajectory_id``).
+  ``persona_uuid``, ``trajectory_id``). Its simulator column's config is
+  :func:`simulator_config`, which the run's manifest records too.
 - :func:`build_evaluator_config_builder` — assembles a ``ConfigBuilder``
   that reads a trajectory parquet and emits a wide evaluator cell
   (per-axis × per-judge scores + scorer outputs) for each row.
@@ -62,6 +63,7 @@ from usersim.engine.models_file import (
 )
 
 if TYPE_CHECKING:
+    from usersim.engine.config import ConversationSimulatorConfig
     from usersim.engine.core.probes import BaseProbe
 
 logger = logging.getLogger("usersim.cli.pipeline")
@@ -411,6 +413,44 @@ def _recorded_assets_dir(assets_dir: Path | str | None) -> str | None:
     return str(Path(assets_dir).resolve()) if assets_dir is not None else None
 
 
+#: The column the simulator writes each row's conversation to.
+SIMULATOR_COLUMN = "conversation_messages"
+
+
+def simulator_config(
+    *,
+    locale: str,
+    models: ModelsConfig,
+    assets_dir: Path | None = None,
+    max_turns: int = 5,
+    max_assistant_attempts: int = 1,
+    store_reasoning: bool = True,
+    verbosity: int = 1,
+    random_seed: int | None = None,
+    probe_options: Mapping[str, Mapping[str, Any]] | None = None,
+) -> ConversationSimulatorConfig:
+    """The simulator column's config for one locale of a run.
+
+    A run's rows are made with it, stored rows carry it, and the run's
+    manifest records it: pass a run's manifest the config this function
+    gives for the same settings the rows were made with.
+    """
+    from usersim.engine.config import ConversationSimulatorConfig
+
+    return ConversationSimulatorConfig(
+        name=SIMULATOR_COLUMN,
+        locale=locale,
+        assets_dir=_recorded_assets_dir(assets_dir),
+        max_turns=max_turns,
+        max_assistant_attempts=max_assistant_attempts,
+        store_reasoning=store_reasoning,
+        replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
+        verbosity=verbosity,
+        random_seed=random_seed,
+        probe_options=probe_options or {},
+    )
+
+
 def build_simulator_config_builder(
     *,
     locale: str,
@@ -429,15 +469,12 @@ def build_simulator_config_builder(
     """Build a Data Designer ConfigBuilder for the conversation simulator.
 
     Returns ``(data_designer, config_builder)`` so the caller can
-    invoke ``data_designer.create(config_builder, num_records=N)``.
-    ``random_seed`` is forwarded to
-    ``ConversationSimulatorConfig.random_seed`` so tool sampling is
-    reproducible per run.
+    invoke ``data_designer.create(config_builder, num_records=N)``. The
+    simulator column's config is :func:`simulator_config` of the same
+    settings; ``random_seed`` makes tool sampling reproducible per run.
     """
     import data_designer.config as dd
     from data_designer.interface import DataDesigner
-
-    from usersim.engine.config import ConversationSimulatorConfig
 
     probe_mix = probe_mix or DEFAULT_PROBE_MIX
 
@@ -457,22 +494,16 @@ def build_simulator_config_builder(
     )
 
     config_builder.add_column(
-        ConversationSimulatorConfig(
-            name="conversation_messages",
-            persona_column="persona",
-            probe_type_column="probe_type",
-            theme_column="theme",
+        simulator_config(
             locale=locale,
-            assets_dir=_recorded_assets_dir(assets_dir),
+            models=models,
+            assets_dir=assets_dir,
             max_turns=max_turns,
             max_assistant_attempts=max_assistant_attempts,
             store_reasoning=store_reasoning,
-            replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
-            context_compression=True,
-            compression_window=1,
             verbosity=verbosity,
             random_seed=random_seed,
-            probe_options=probe_options or {},
+            probe_options=probe_options,
         )
     )
 
@@ -555,7 +586,6 @@ def materialize_episode_inputs(
     import data_designer.config as dd
     from data_designer.interface import DataDesigner
 
-    from usersim.engine.config import ConversationSimulatorConfig
     from usersim.engine.core.episode_input import construct_probe_episode
 
     designer = DataDesigner(**to_data_designer_kwargs(models))
@@ -571,16 +601,15 @@ def materialize_episode_inputs(
         match_persona_language=match_persona_language,
         drop_persona=False,
     )
-    config = ConversationSimulatorConfig(
-        name="conversation_messages",
+    config = simulator_config(
         locale=locale,
-        assets_dir=_recorded_assets_dir(assets_dir),
-        random_seed=random_seed,
+        models=models,
+        assets_dir=assets_dir,
         max_turns=max_turns,
         max_assistant_attempts=max_assistant_attempts,
         store_reasoning=store_reasoning,
-        replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
-        probe_options=probe_options or {},
+        random_seed=random_seed,
+        probe_options=probe_options,
     )
     model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}
     sampled = designer.preview(builder, num_records=num_rows).dataset

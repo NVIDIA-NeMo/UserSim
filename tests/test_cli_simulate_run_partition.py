@@ -464,6 +464,54 @@ def test_each_batch_gets_its_own_artifacts_and_the_manifest_its_start(tmp_path: 
     assert tmp_path not in folders[0].parents
 
 
+def test_the_manifest_records_the_settings_the_rows_were_made_with(tmp_path: Path, monkeypatch) -> None:
+    """The manifest's simulation config comes from the settings each locale's simulator column was built with."""
+    from usersim.cli import simulate
+    from usersim.engine.core.manifest import load_run_manifest
+    from usersim.engine.models_file import default_models_path, load_models_config
+
+    built: list[dict] = []
+
+    class _FakeResult:
+        def load_dataset(self):
+            return _synthetic_trajectory("SETTINGS")
+
+    class _FakeDD:
+        def create(self, builder, num_records=None, artifact_path=None):
+            return _FakeResult()
+
+    def fake_builder(**kwargs):
+        built.append(kwargs)
+        return _FakeDD(), object()
+
+    monkeypatch.chdir(tmp_path)
+    out = tmp_path / "trajs"
+    settings = {"financial_services": {"tier_mix": 0.3}}
+    with patch("usersim.cli._pipeline.build_simulator_config_builder", fake_builder):
+        rc = simulate._simulate_to_parquet(
+            models=load_models_config(default_models_path()),
+            models_path=default_models_path(),
+            panel=None,
+            locales=["en_US"],
+            num_rows=1,
+            out=out,
+            assets_dir=None,
+            max_turns=1,
+            max_assistant_attempts=2,
+            probe_mix={"general_open_ended": 1.0},
+            probe_options=settings,
+            random_seed=42,
+            skip_existing=False,
+        )
+
+    assert rc == 0
+    (run_id,) = list_runs(out)
+    recorded = load_run_manifest(run_id, out).simulation_config
+    assert [(kwargs["max_assistant_attempts"], kwargs["probe_options"]) for kwargs in built] == [(2, settings)]
+    assert (recorded.max_turns, recorded.max_assistant_attempts, recorded.random_seed) == (1, 2, 42)
+    assert recorded.probe_options == settings
+
+
 def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path: Path, monkeypatch, caplog) -> None:
     """Shared filesystems such as Lustre are often mounted without ``flock``; a run is written there anyway."""
     fcntl = pytest.importorskip("fcntl")

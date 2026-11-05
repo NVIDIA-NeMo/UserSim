@@ -288,4 +288,7 @@ def test_the_simulate_notebook_records_the_switch_in_its_manifest():
     notebook = Path(__file__).resolve().parents[1] / "notebooks" / "01_simulate.ipynb"
     source = "\n".join("".join(cell["source"]) for cell in json.loads(notebook.read_text())["cells"])
 
-    assert "replay_assistant_reasoning=assistant_replays_reasoning(MODELS" in source
+    # The manifest's config is simulator_config of the run's settings, whose
+    # models decide replay, as they do for the rows.
+    assert "sim_config=simulator_config(locale=LOCALES[0], **RUN_SETTINGS)" in source
+    assert "RUN_SETTINGS = dict(\n    models=MODELS," in source
