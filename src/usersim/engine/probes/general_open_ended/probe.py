@@ -33,15 +33,8 @@ from usersim.extension import (
     render_prompt,
 )
 
-# ── Probe metadata ──────────────────────────────────────────────────
-# Bumping ``PROMPT_VERSION`` invalidates prior evaluator rows on
-# re-run, since the dedup key includes it.
 
-PROBE_VARIANTS: list[str] = ["default"]  # topic-conditioned via theme; single variant today
-PROMPT_VERSION: str = "v1.0"
-
-
-@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe
 class OpenEndedProbe(BaseProbe):
     """Open-ended conversation probe.
 
@@ -52,6 +45,9 @@ class OpenEndedProbe(BaseProbe):
     """
 
     label = "general_open_ended"
+    # Bump on any semantic change to the probe's prompts or task derivation.
+    # One variant: the topic comes from the row's theme.
+    prompt_version = "v1.0"
     assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests information-seeking conversations across diverse personas: accurate, "

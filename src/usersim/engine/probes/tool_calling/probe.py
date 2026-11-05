@@ -71,13 +71,6 @@ from usersim.extension import language_instruction as _language_instruction
 
 logger = logging.getLogger("usersim.engine")
 
-# ── Scenario metadata ────────────────────────────────────────────────
-# See general_educational/probe.py for the contract. `probe_variant` is
-# carried on the trajectory; the evaluator reads it for stratification.
-
-PROBE_VARIANTS: list[str] = ["default"]  # tool-category via toolset_category column; single variant today
-PROMPT_VERSION: str = "v1.2"
-
 MODEL_API_RESPONSE = "api_response_model"
 
 
@@ -252,7 +245,7 @@ async def _simulate_tool_response(
 # ---------------------------------------------------------------------------
 
 
-@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe
 class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """Tool-calling probe.
 
@@ -274,6 +267,9 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """
 
     label = "tool_calling"
+    # Bump on any semantic change to the probe's prompts or task derivation.
+    # One variant: the tool category is the row's ``toolset_category``.
+    prompt_version = "v1.2"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe

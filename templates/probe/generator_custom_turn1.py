@@ -60,10 +60,7 @@ def _demo_taxonomy_loader(locale: str = "en_US"):
     raise NotImplementedError("replace with your real taxonomy loader")
 
 
-@register_probe(
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoCustomTurn1Probe(BankBackedProbe):
     """Bank-anchored, generated-in-voice turn-1 probe."""
 

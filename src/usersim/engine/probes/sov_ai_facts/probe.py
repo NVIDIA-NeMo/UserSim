@@ -79,24 +79,6 @@ from usersim.extension import (
 
 logger = logging.getLogger("usersim.engine")
 
-# ── Probe metadata ────────────────────────────────────────────────────
-# Bumping ``PROMPT_VERSION`` invalidates prior evaluator rows on
-# re-run, since the dedup key includes it. Bump on any semantic change
-# to the user-agent prompts (or to the follow-up instruction).
-
-# Probe discriminator is the picked fact's ``category`` (e.g.
-# ``brazil-geography``). Because the category is only known after
-# ``derive_task`` runs, the probe overrides ``probe_variant`` to the
-# fact's category in ``build_result_extras``. The dispatcher seeds
-# ``probe_variant = "default"`` initially; that seed is reflected in
-# ``trajectory_id`` but the final parquet row carries the real
-# discriminator. (Trajectory-id stability vs per-row category split
-# is a known trade-off — `trajectory_id` is computed before
-# `derive_task` runs, so it carries the seed default; the parquet row
-# carries the per-fact category.)
-PROBE_VARIANTS: list[str] = ["default"]
-PROMPT_VERSION: str = "v1.0"
-
 # ---------------------------------------------------------------------------
 # Bank-loading aliases (parallel to sov_ai_multilingual_parity / sov_ai_dynamic)
 # ---------------------------------------------------------------------------
@@ -151,7 +133,7 @@ class SovAiFactsProbeError(ValueError):
 # ---------------------------------------------------------------------------
 
 
-@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe
 class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     """Sovereign-AI factual-knowledge probe.
 
@@ -162,6 +144,12 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "sov_ai_facts"
+    # Bump on any semantic change to the user-agent prompts or the follow-up
+    # instruction. The variant stays "default": the picked fact's category
+    # (e.g. ``brazil-geography``) is known only after ``derive_task`` runs, so
+    # ``build_result_extras`` records it as the row's probe_variant, while
+    # ``trajectory_id`` carries "default".
+    prompt_version = "v1.0"
     assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests recall of locale-specific (sovereign) facts drawn from a curated bank, "

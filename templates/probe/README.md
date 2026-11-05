@@ -62,9 +62,9 @@ authoring tutorial.
 ## The contract a probe class must satisfy
 
 A probe class is a `BaseProbe` subclass (plus an optional mixin)
-decorated with `@register_probe(...)`. The decorator sets two
-class attributes (`prompt_version` / `variants`); the
-smoke check verifies they're present. A probe ported from this template
+decorated with `@register_probe`. The decorator checks its class
+attributes, `prompt_version` and `variants` among them, and refuses a
+malformed one. A probe ported from this template
 keeps its banks beside its code, under
 `src/usersim/engine/probes/<your_probe>/assets/<your_probe>/`, and sets
 `assets_root` to that `assets/` folder, as a probe shipped in its own

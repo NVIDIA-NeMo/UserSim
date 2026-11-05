@@ -515,28 +515,25 @@ Strictly respond in the following format:
 from usersim.extension import register_probe
 
 
-@register_probe(
-    prompt_version="v1.0",     # MyProbe.prompt_version
-    variants=("default",),     # MyProbe.variants
-)
+@register_probe
 class MyProbe(BankBackedProbe):
     label = "my_probe"
+    prompt_version = "v1.1"      # bump on any change to what the probe asks
+    variants = ("default",)      # a row records the first unless it names one
     ...
 ```
 
-The decorator does TWO things in one call:
+The decorator checks the class's declarations and adds it to
+`_PROBE_REGISTRY` keyed by `cls.label`. Pick a label no other probe uses:
+registering a second class under a label that is already taken raises
+`ProbeRegistrationError`, naming both classes. The probe's rows are stored
+under its label, in their `probe_family` column and their `probe_family=`
+folder.
 
-1. Sets `prompt_version` / `variants` on the class, where the dispatcher
-   and the smoke check read them. It also sets them on the class's module
-   as `PROMPT_VERSION` / `PROBE_VARIANTS`; with two probes in one module,
-   those hold whichever was registered last.
-2. Adds the class to `_PROBE_REGISTRY` keyed by `cls.label`. Pick a label
-   no other probe uses: registering a second class under a label that is
-   already taken raises `ProbeRegistrationError`, naming both classes. The
-   probe's rows are stored under its label, in their `probe_family` column
-   and their `probe_family=` folder.
-
-Both surfaces are what the dispatcher reads.
+`prompt_version` and `variants` default to `"v1.0"` and `("default",)`, so
+a probe that keeps both declares neither. The dispatcher reads them from the
+class, and the label, the first variant and the prompt version go into each
+row's `trajectory_id`.
 
 After this, add your package's name to `BUILTIN_PACKAGES` in
 [`usersim/engine/core/builtin_packages.py`](../../src/usersim/engine/core/builtin_packages.py).
@@ -636,9 +633,9 @@ Every check should report `[OK]`. Confirm your probe appears in the
 ```
 
 If your probe doesn't show up, a package missing from `BUILTIN_PACKAGES`
-is the most likely cause. If it shows up but `prompt_version missing` fires, the
-`@register_probe` decorator didn't run (check for an import-time
-exception in your module).
+is the most likely cause. The next is an exception while your module
+imports, such as `@register_probe` refusing one of the class's
+declarations.
 
 A probe that checks its assets is named on the `probe assets` line, which
 fails with the first problems its `asset_problems` finds.
@@ -839,9 +836,6 @@ from usersim.extension import (
     register_probe,
 )
 
-PROBE_VARIANTS = ["default"]
-PROMPT_VERSION = "v1.0"
-
 BOOK_APPOINTMENT = {
     "type": "function",
     "function": {
@@ -863,10 +857,7 @@ def _bank_loader(locale: str):
     return read_booking_bank(BookingsProbe.assets_dir() / locale)
 
 
-@register_probe(
-    prompt_version=PROMPT_VERSION,
-    variants=tuple(PROBE_VARIANTS),
-)
+@register_probe
 class BookingsProbe(ToolExecutionMixin, BankBackedProbe):
     label = "bookings"
     assets_root = Path(__file__).parent / "assets"  # holds bookings/
@@ -1100,14 +1091,15 @@ Python's MRO resolves left-to-right; mixin overrides need to come
 first so they shadow `BaseProbe` defaults. Get this wrong and the
 mixin's hooks silently never fire.
 
-### 5. `@register_probe` sets the class metadata AND the registry entry
+### 5. `@register_probe` checks the class's declarations
 
-The decorator does both in one call. Pass the prompt version and
-variants to it rather than assigning `prompt_version` / `variants` on
-the class: the decorator overwrites them. That keeps one
-place to bump `prompt_version`. Read them from the class
-(`MyProbe.prompt_version`), not from the module's `PROMPT_VERSION`,
-which two probes in one module overwrite.
+`prompt_version` and `variants` are class attributes like every other
+declaration. `@register_probe` refuses a class whose `prompt_version` is not
+a non-empty string, or whose `variants` is not a non-empty tuple of
+non-empty strings, so a list or a bare string fails when the module
+imports, not partway through a run. Bump `prompt_version` on any change to
+what the probe asks: it goes into `trajectory_id`, so a re-run makes new
+rows instead of reusing the ones the old version wrote.
 
 ### 6. `bank_version_key` controls where reporting reads the bank version
 

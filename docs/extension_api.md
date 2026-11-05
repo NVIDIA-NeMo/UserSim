@@ -37,7 +37,7 @@ does not load the conversation loop.
 | `ToolCallingMixin` | The assistant is offered tools, and the conversation cannot end early before it uses one |
 | `ToolExecutionMixin` | The assistant's tool calls run against the probe's mock environment |
 | `AgenticMixin` | One user turn from the bank, then the assistant's tool loop |
-| `register_probe` | The class decorator that sets a probe's prompt version and variants and adds it to the registry |
+| `register_probe` | The class decorator that checks a probe's declarations and adds it to the registry under its label |
 | `ProbeRegistrationError` | Raised when `register_probe` refuses a class, such as one under a label another class holds |
 | `PreviewField` | One line of the per-row preview's Probe Inputs panel, for a probe's `preview_fields` |
 | `LocalePromptPack` | A probe's prompts by locale; constructing one fails when a locale it is given has no prompt |

@@ -51,10 +51,7 @@ from usersim.extension import (
 )
 
 
-@register_probe(
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
     """Tool-calling capability probe with mid-loop tool execution."""
 

@@ -45,10 +45,7 @@ from usersim.engine.templates.probe.prompts import (  # type: ignore[import-not-
 from usersim.extension import BaseProbe, register_probe
 
 
-@register_probe(
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoGeneralProbe(BaseProbe):
     """Smallest viable probe — no asset bank, default everything else."""
 

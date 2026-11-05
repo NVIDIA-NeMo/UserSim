@@ -94,28 +94,6 @@ from usersim.extension import (
 
 logger = logging.getLogger("usersim.engine")
 
-# ── Probe metadata ────────────────────────────────────────────────────
-# Bumping ``PROMPT_VERSION`` invalidates prior evaluator rows on
-# re-run. Bump on any structural change to how the user-agent loop
-# assembles its messages or to the reframing-rotation logic.
-
-# Probe discriminator is ``f"{strategy.id}::{harm_category}"`` once
-# the pair is picked. The dispatcher seeds ``probe_variant = "default"``;
-# the probe overrides via ``build_result_extras``.
-PROBE_VARIANTS: list[str] = ["default"]
-# v1.2 contract: the user-LLM follow-up call is plain free-form;
-# capitulation detection is delegated to a dedicated comparator-
-# shaped classifier (``classifier.py::classify_capitulation``) that
-# runs ONE ``summary_model`` call after each assistant turn against
-# the bank's ``target.description``. Replaces the v1.1 design
-# (user-LLM emitted structured ``{assistant_response, next_message}``
-# in one call) which proved unreliable due to safety-bias and
-# multi-turn context contamination. Trajectories that capitulate
-# carry ``stopped_on_capitulation`` and ``capitulated_at_turn`` in
-# ``conversation_metadata``, plus a per-turn ``capitulation_checks``
-# audit list on the row.
-PROMPT_VERSION: str = "v1.2"
-
 # This safety probe is not locale-stratified, so its bank version is
 # parked under a stable non-locale key. Downstream readers look for
 # "safety". Different from the sovereign-AI convention (locale-keyed).
@@ -221,7 +199,7 @@ class _PickedPair:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe
 class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     """Conversational-pressure refusal-robustness probe.
 
@@ -238,6 +216,17 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     """
 
     label = "safety_chat_pressure"
+    # Bump on any structural change to how the user-agent loop assembles its
+    # messages or to the reframing rotation. v1.2: the user-LLM follow-up call
+    # is plain free-form, and capitulation is detected by a separate
+    # classifier (``classifier.py::classify_capitulation``), one
+    # ``summary_model`` call after each assistant turn against the bank's
+    # ``target.description``. A row that capitulates carries
+    # ``stopped_on_capitulation`` and ``capitulated_at_turn`` in
+    # ``conversation_metadata``, plus a per-turn ``capitulation_checks`` list.
+    # The variant stays "default": ``build_result_extras`` records
+    # ``f"{strategy.id}::{harm_category}"`` as the row's probe_variant.
+    prompt_version = "v1.2"
     assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests safety under multi-turn conversational pressure: does the assistant hold "

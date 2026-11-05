@@ -34,20 +34,13 @@ from usersim.engine.probes.health_disclosure.base import HealthDisclosureProbe
 from usersim.engine.probes.health_disclosure.clients import CLIENTS
 from usersim.extension import register_probe
 
-_VARIANTS: tuple[str, ...] = ("default", "guarded")
-
-
-def _registered(label: str) -> Callable[[type], type]:
-    """``@register_probe`` with the prompt version the client declares for ``label``."""
-    return register_probe(prompt_version=CLIENTS[label]["prompt_version"], variants=_VARIANTS)
-
 
 def _bank_loader(label: str) -> Callable[[], Any]:
     """The client's clinical profile bank, the same for every locale (``profiles_env`` overrides it)."""
     return lambda: load_clinical_profile_bank_for_client(label, env_override=CLIENTS[label].get("profiles_env"))
 
 
-@_registered("health_therapy_disclosure")
+@register_probe
 class TherapyDisclosureProbe(HealthDisclosureProbe):
     label = "health_therapy_disclosure"
     description = (
@@ -57,11 +50,12 @@ class TherapyDisclosureProbe(HealthDisclosureProbe):
         "measures how much the assistant drew out."
     )
     CLIENT = CLIENTS[label]
+    prompt_version = CLIENT["prompt_version"]
     bank_loader = staticmethod(_bank_loader(label))
     bank_version_key = label  # per-client (locale-independent) provenance slot
 
 
-@_registered("health_triage_disclosure")
+@register_probe
 class TriageDisclosureProbe(HealthDisclosureProbe):
     label = "health_triage_disclosure"
     description = (
@@ -71,11 +65,12 @@ class TriageDisclosureProbe(HealthDisclosureProbe):
         "health_disclosure_concealment scorer measures how much the assistant drew out."
     )
     CLIENT = CLIENTS[label]
+    prompt_version = CLIENT["prompt_version"]
     bank_loader = staticmethod(_bank_loader(label))
     bank_version_key = label
 
 
-@_registered("health_decision_support_disclosure")
+@register_probe
 class ClinicalDecisionSupportProbe(HealthDisclosureProbe):
     label = "health_decision_support_disclosure"
     description = (
@@ -86,11 +81,12 @@ class ClinicalDecisionSupportProbe(HealthDisclosureProbe):
         "assistant drew out."
     )
     CLIENT = CLIENTS[label]
+    prompt_version = CLIENT["prompt_version"]
     bank_loader = staticmethod(_bank_loader(label))
     bank_version_key = label
 
 
-@_registered("health_general_disclosure")
+@register_probe
 class HealthGeneralDisclosureProbe(HealthDisclosureProbe):
     label = "health_general_disclosure"
     description = (
@@ -100,5 +96,6 @@ class HealthGeneralDisclosureProbe(HealthDisclosureProbe):
         "health_disclosure_concealment scorer measures how much the assistant drew out."
     )
     CLIENT = CLIENTS[label]
+    prompt_version = CLIENT["prompt_version"]
     bank_loader = staticmethod(_bank_loader(label))
     bank_version_key = label

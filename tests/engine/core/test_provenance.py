@@ -1,19 +1,16 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for core/provenance.py and probe-module metadata constants.
+"""Tests for core/provenance.py.
 
 Scope:
 - ``get_code_sha`` returns a string (or None) and is callable repeatedly.
 - ``USERSIM_CODE_SHA`` env var overrides git probing.
 - ``get_nemotron_personas_version`` honours the env override.
-- Every shipped probe module declares ``PROBE_VARIANTS`` /
-  ``PROMPT_VERSION``.
 """
 
 from __future__ import annotations
 
-import importlib
 import json
 from collections.abc import Callable
 from importlib import metadata
@@ -157,29 +154,3 @@ class TestNemotronPersonasVersion:
     def test_env_override(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("USERSIM_NEMOTRON_PERSONAS_VERSION", "2026-03")
         assert provenance_module.get_nemotron_personas_version() == "2026-03"
-
-
-@pytest.mark.parametrize(
-    "module_path",
-    [
-        "usersim.engine.probes.general_open_ended.probe",
-        "usersim.engine.probes.general_educational.probe",
-        "usersim.engine.probes.tool_calling.probe",
-    ],
-)
-class TestProbeMetadata:
-    """Every shipped probe declares the two metadata constants."""
-
-    def test_has_probe_variants(self, module_path: str) -> None:
-        # Migrated probes declare ``PROBE_VARIANTS`` as a list at
-        # source time but ``@register_probe`` coerces to tuple to
-        # signal immutability — accept either sequence type.
-        mod = importlib.import_module(module_path)
-        variants = getattr(mod, "PROBE_VARIANTS", None)
-        assert isinstance(variants, (list, tuple)) and variants
-        assert all(isinstance(v, str) and v for v in variants)
-
-    def test_has_prompt_version(self, module_path: str) -> None:
-        mod = importlib.import_module(module_path)
-        pv = getattr(mod, "PROMPT_VERSION", None)
-        assert isinstance(pv, str) and pv

@@ -62,6 +62,9 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
     (one bank per client; see ``probe.py``).
     """
 
+    #: ``default`` is a plain incremental-disclosure user; ``guarded`` turns on
+    #: the Guard-paced move-space for the row.
+    variants = ("default", "guarded")
     #: The four clients' banks, each in its own ``<label>/`` folder.
     assets_root = Path(__file__).parent / "assets"
     #: Set by each client subclass to a config dict from ``clients.py``.

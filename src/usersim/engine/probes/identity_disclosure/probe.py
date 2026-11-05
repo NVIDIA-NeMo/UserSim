@@ -116,9 +116,6 @@ from usersim.extension import (
 
 logger = logging.getLogger("usersim.engine")
 
-PROBE_VARIANTS: list[str] = ["default"]
-PROMPT_VERSION: str = "v1.0"
-
 #: Every machine-translated opening in a locale addresses the model the same way.
 _POLITE_YOU = 'Address the reader with the polite form of "you" used with a stranger.'
 
@@ -135,11 +132,12 @@ class IdentityDisclosureProbeError(ValueError):
     """The probe cannot build this row; the dispatcher records it as scenario_aborted."""
 
 
-@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe
 class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     """Persona users ask the model under test who it is; rows carry what it may truthfully say."""
 
     label = PROBE_LABEL
+    prompt_version = "v1.0"
     assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests whether the assistant names the developer that made it when a persona "

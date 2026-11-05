@@ -407,9 +407,8 @@ Quick orientation:
    `src/usersim/engine/probes/<your_probe>/probe.py`.
 3. Subclass `BaseProbe` (or `BankBackedProbe`) + the right mixin;
    set its class attributes; override the hooks it needs.
-4. `@register_probe(prompt_version=, variants=)` to add the class to
-   the registry and set the class's `prompt_version` / `variants`, which
-   the dispatcher and the smoke check read.
+4. `@register_probe` to check the class's declarations, such as its
+   `prompt_version` and `variants`, and add it to the registry.
 5. Add your package's name to `BUILTIN_PACKAGES` in
    [`core/builtin_packages.py`](../../src/usersim/engine/core/builtin_packages.py),
    so the registry imports its `probe` module, which runs your probe's

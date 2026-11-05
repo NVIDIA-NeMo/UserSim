@@ -733,7 +733,7 @@ class TestBuildingOnTop:
         class DerivedIdentityProbe(IdentityDisclosureProbe):
             label = "derived_identity_fixture"
 
-        register_probe(prompt_version="v1.0", variants=("default",))(DerivedIdentityProbe)
+        register_probe(DerivedIdentityProbe)
         assert DerivedIdentityProbe.bank_version_key == "derived_identity_fixture"
         assert spec_env_var("derived_identity_fixture") == "USERSIM_DERIVED_IDENTITY_FIXTURE_SPEC"
 

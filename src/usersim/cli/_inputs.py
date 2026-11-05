@@ -344,7 +344,7 @@ def _prompt_versions() -> dict[str, str]:
     """The prompt version of every registered probe, read as the episode preamble reads it."""
     from usersim.engine.core.probes import known_probes, resolve_probe
 
-    return {label: str(resolve_probe(label).prompt_version or "v1.0") for label in known_probes()}
+    return {label: resolve_probe(label).prompt_version for label in known_probes()}
 
 
 def _data_designer_version() -> str | None:

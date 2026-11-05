@@ -125,7 +125,7 @@ def extra_column_probe(restored_registries):
         _FailingConstructorProbe,
         _EchoingProbe,
     ):
-        register_probe(prompt_version="v1.0", variants=("default",))(probe)
+        register_probe(probe)
     return _PROBE
 
 

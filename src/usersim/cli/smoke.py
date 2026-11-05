@@ -23,9 +23,8 @@ Checks performed:
 6. **dry-run subcommands** — the four LLM-driven subcommands accept
    their typical argument sets without touching the network.
 7. **probe registry** — every probe in
-   ``usersim.engine.core.probes.known_probes()`` resolves
-   to a class that carries ``prompt_version`` / ``variants``
-   metadata.
+   ``usersim.engine.core.probes.known_probes()`` resolves to its
+   class; ``@register_probe`` has checked each class's declarations.
 8. **probe assets** — every registered probe's ``asset_problems()``
    comes back empty: each probe checks the assets it ships, such as a
    bank per locale, so a default path pointing at a missing directory
@@ -367,14 +366,7 @@ def _check_scorer_registry(report: SmokeReport) -> None:
 
 
 def _check_probe_registry(report: SmokeReport) -> None:
-    """Confirm every registered probe resolves and exposes metadata.
-
-    Catches the regression where a probe's metadata is dropped: each
-    probe class registered in ``_PROBE_REGISTRY`` must carry
-    ``prompt_version`` (string) and ``variants`` (non-empty sequence).
-    These drive trajectory metadata and reporting joins; missing them
-    silently corrupts downstream aggregation.
-    """
+    """Confirm the registry holds probes and every one resolves to its class."""
     try:
         from usersim.engine.core.probes import known_probes, resolve_probe
 
@@ -394,15 +386,9 @@ def _check_probe_registry(report: SmokeReport) -> None:
     failures: list[str] = []
     for probe_name in probe_names:
         try:
-            probe_cls = resolve_probe(probe_name)
+            resolve_probe(probe_name)
         except Exception as e:
             failures.append(f"{probe_name}: resolve raised {type(e).__name__}: {e}")
-            continue
-        # ``@register_probe`` sets these on the class.
-        if not isinstance(probe_cls.prompt_version, str) or not probe_cls.prompt_version:
-            failures.append(f"{probe_name}: prompt_version missing or non-string")
-        if not isinstance(probe_cls.variants, (list, tuple)) or not probe_cls.variants:
-            failures.append(f"{probe_name}: variants missing or empty")
 
     if failures:
         report.add(

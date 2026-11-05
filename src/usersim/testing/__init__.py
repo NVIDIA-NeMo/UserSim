@@ -130,13 +130,6 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"{cls.__qualname__}. Two probes cannot share a label."
         )
 
-    # @register_probe sets these on the class, where the dispatcher reads them.
-    for attr in ("prompt_version", "variants"):
-        if getattr(cls, attr, None) in (None, "", ()):
-            problems.append(
-                f"{cls.__qualname__}.{attr} is unset. Use @register_probe rather than assigning to the registry directly."
-            )
-
     for method in _REQUIRED_PROBE_METHODS:
         impl = getattr(cls, method, None)
         if impl is None:

@@ -90,10 +90,7 @@ def _demo_locale_bank_check(locale_dir: Path) -> None:
     raise NotImplementedError("replace with a load of one locale's bank")
 
 
-@register_probe(
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     """Verbatim-turn-1 probe driven by a curated asset bank.
 

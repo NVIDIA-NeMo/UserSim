@@ -7,16 +7,13 @@ base class, the hooks, the mixins. For the catalog of what ships, see
 
 ## Registration
 
-`@register_probe` on a `BaseProbe` subclass does everything: it sets the
-class attributes the dispatcher reads (`prompt_version`, `variants`) and
-adds the class to the registry under its `label`, which its rows store as
-`probe_family`. Each probe carries its own, so two probes defined in one
-module record their own prompt versions. The decorator also sets the same
-values on the module as `PROMPT_VERSION` and `PROBE_VARIANTS`; with two
-probes in one module those hold whichever was registered last.
+`@register_probe` on a `BaseProbe` subclass does everything: it checks the
+class's declarations and adds it to the registry under its `label`, which
+its rows store as `probe_family`. Everything else about the probe, its
+`prompt_version` and `variants` included, is a class attribute.
 
 ```python
-@register_probe(prompt_version="v1.0", variants=("default",))
+@register_probe
 class OpenEndedProbe(BaseProbe):
     label = "general_open_ended"
 ```
@@ -121,7 +118,8 @@ than into a branch on its label.
 | Declaration | Default | Read by |
 |---|---|---|
 | `label` | none: required | the registry, every stage that names the probe, and the row's `trajectory_id` and `probe_family` column |
-| `prompt_version`, `variants` | set by `@register_probe` | the row's `trajectory_id` and provenance |
+| `prompt_version` | `"v1.0"` | the row's `trajectory_id` and provenance |
+| `variants` | `("default",)` | the row's `probe_variant` when the row names none, and so its `trajectory_id` |
 | `description` | `""` | the per-row preview and the capability report, beside the probe's rows |
 | `preview_fields` | `()` | the per-row preview's Probe Inputs panel |
 | `default_scorers` | `()` | `usersim eval --scorers auto`, for a run that holds the probe's rows |

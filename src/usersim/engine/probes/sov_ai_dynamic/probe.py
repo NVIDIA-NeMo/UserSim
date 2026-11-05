@@ -83,21 +83,6 @@ from usersim.extension import (
 
 logger = logging.getLogger("usersim.engine")
 
-# ── Probe metadata ────────────────────────────────────────────────────
-# Bumping ``PROMPT_VERSION`` invalidates prior evaluator rows on
-# re-run, since the dedup key includes it. Bump on any semantic change
-# to the user-agent prompts (or to the follow-up instruction).
-
-# Probe discriminator is the picked category's id (e.g.
-# ``brazil-history``). Because the category is only known after
-# ``derive_probe`` runs, the probe overrides ``probe_variant`` to the
-# category id in ``build_result_extras``. The dispatcher seeds
-# ``probe_variant = "default"`` initially; that seed is reflected in
-# ``trajectory_id`` but the final parquet row carries the real
-# discriminator.
-PROBE_VARIANTS: list[str] = ["default"]
-PROMPT_VERSION: str = "v1.0"
-
 # ---------------------------------------------------------------------------
 # Taxonomy-loading aliases (parallel to sov_ai_facts / sov_ai_multilingual_parity)
 # ---------------------------------------------------------------------------
@@ -165,7 +150,7 @@ class _PickedProbe:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe
 class SovAiDynamicProbe(BankBackedProbe):
     """Population-probing dynamic-coverage probe.
 
@@ -177,6 +162,12 @@ class SovAiDynamicProbe(BankBackedProbe):
     """
 
     label = "sov_ai_dynamic"
+    # Bump on any semantic change to the user-agent prompts or the follow-up
+    # instruction. The variant stays "default": the picked category (e.g.
+    # ``brazil-history``) is known only after ``derive_probe`` runs, so
+    # ``build_result_extras`` records its id as the row's probe_variant, while
+    # ``trajectory_id`` carries "default".
+    prompt_version = "v1.0"
     assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests locale-specific knowledge where no curated answer exists: a "

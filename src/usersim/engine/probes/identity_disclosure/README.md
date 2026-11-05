@@ -277,7 +277,7 @@ from usersim.engine.probes.identity_disclosure.probe import IdentityDisclosurePr
 from usersim.extension import register_probe
 
 
-@register_probe(prompt_version="v1.0", variants=("default",))
+@register_probe
 class MyIdentityProbe(IdentityDisclosureProbe):
     label = "my_identity"
     assets_root = Path(__file__).parent / "assets"  # holds my_identity/spec.yaml

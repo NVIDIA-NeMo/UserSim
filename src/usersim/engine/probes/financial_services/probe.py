@@ -87,9 +87,6 @@ from usersim.extension import persona_uuid as compute_persona_uuid
 
 logger = logging.getLogger("usersim.engine")
 
-PROBE_VARIANTS: list[str] = ["default"]
-PROMPT_VERSION: str = "v1.2"
-
 _KB_BODY_RETENTION_USER_TURNS = 8
 
 #: Task param slots whose value names a PERSON the customer brings into the request --
@@ -299,12 +296,10 @@ class _PickedTask:
     bank_version: str
 
 
-@register_probe(
-    prompt_version=PROMPT_VERSION,
-    variants=tuple(PROBE_VARIANTS),
-)
+@register_probe
 class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     label = "financial_services"
+    prompt_version = "v1.2"
     assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests financial customer-support / advisory grounded in a per-institution "

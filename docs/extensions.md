@@ -202,7 +202,7 @@ def draw_booking(appointment: Appointment, rng: random.Random) -> Booking:
     )
 
 
-@register_probe(prompt_version="v1.0", variants=("default",))
+@register_probe
 class BookingProbe(ToolExecutionMixin, BankBackedProbe):
     label = "my_bookings"
     description = (

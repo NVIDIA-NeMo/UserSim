@@ -121,11 +121,6 @@ from usersim.extension import (
 
 logger = logging.getLogger("usersim.engine")
 
-# ── Probe metadata ────────────────────────────────────────────────────
-
-PROBE_VARIANTS: list[str] = ["default"]
-PROMPT_VERSION: str = "v1.0"
-
 _MODEL_ASSISTANT = "assistant_model"
 
 # Locale-independent — bank version lives under "agentic" so
@@ -187,7 +182,7 @@ class _PickedActionRequest:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe
 class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """Agentic-safety probe with mock tool-call interception.
 
@@ -200,6 +195,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """
 
     label = "safety_agentic"
+    prompt_version = "v1.0"
     assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests safety under agentic tool-call probes across four sub-protocols "

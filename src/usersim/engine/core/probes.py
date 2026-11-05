@@ -27,9 +27,9 @@ Public surface for new probe authors:
 - ``LocalePromptPack`` — per-locale prompt registry with all-locales-
   or-fail validation at construction time. Replaces the per-probe
   ``_SYSTEM_PROMPTS: dict`` + ``PromptsUnavailableError`` boilerplate.
-- ``@register_probe`` — single-annotation registration. Sets the
-  class's ``prompt_version`` / ``variants`` AND registers the class
-  in ``_PROBE_REGISTRY`` under its label in one call.
+- ``@register_probe`` — single-annotation registration. Checks the
+  class's declarations and registers it in ``_PROBE_REGISTRY`` under
+  its label.
 - ``known_probes()`` / ``resolve_probe()`` — the public read surface
   on the registry.
 
@@ -46,7 +46,6 @@ from __future__ import annotations
 
 import importlib
 import logging
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
@@ -289,7 +288,7 @@ class BaseProbe:
 
     Subclassing pattern (the minimum-viable probe is ~10 lines)::
 
-        @register_probe(prompt_version="v1.0", variants=("default",))
+        @register_probe
         class MyProbe(BaseProbe):
             label = "my_probe"
             def __init__(self, *, persona, locale, language, models,
@@ -309,11 +308,14 @@ class BaseProbe:
     # The probe's name, which ``--probe-mix`` selects and each of its rows
     # stores as ``probe_type`` and ``probe_family``.
     label: str = "<unset>"
-    # Set by ``@register_probe``. The label, the first variant and the prompt
-    # version go into ``trajectory_id``; the prompt version is also recorded
-    # in provenance.
-    prompt_version: str = ""
-    variants: tuple[str, ...] = ()
+    # The version of the probe's prompts and task derivation. The label, the
+    # first variant and the prompt version go into ``trajectory_id``, and the
+    # prompt version is recorded in provenance, so bump it on any change to
+    # what the probe asks: a re-run then makes new rows instead of reusing the
+    # ones the old version wrote.
+    prompt_version: str = "v1.0"
+    # The probe's variants; a row records the first unless it names one.
+    variants: tuple[str, ...] = ("default",)
 
     # A paragraph on what the probe tests, shown with each of its rows in the
     # per-row preview and in the capability report's evidence. Empty shows none.
@@ -1470,20 +1472,22 @@ def _definition(cls: type) -> str:
     return f"{cls.__module__}.{cls.__qualname__}"
 
 
-def register_probe(
-    *,
-    prompt_version: str,
-    variants: Sequence[str],
-) -> Callable[[type[BaseProbe]], type[BaseProbe]]:
-    """Single-annotation registration of a ``BaseProbe`` subclass.
+def _declaration_problem(cls: type[BaseProbe]) -> str | None:
+    """What is wrong with ``cls.prompt_version`` or ``cls.variants``, or None."""
+    if not isinstance(cls.prompt_version, str) or not cls.prompt_version:
+        return f"prompt_version must be a non-empty string, such as 'v1.0'; got {cls.prompt_version!r}"
+    variants = cls.variants
+    if not isinstance(variants, tuple) or not variants or not all(isinstance(v, str) and v for v in variants):
+        return f"variants must be a non-empty tuple of non-empty strings, such as ('default',); got {variants!r}"
+    return None
 
-    Sets ``prompt_version`` / ``variants`` on the class (the attributes the
-    dispatcher reads) AND adds the class to ``_PROBE_REGISTRY`` keyed by
-    ``cls.label``. The probe's rows are stored under its label.
 
-    The same values are also set on the class's module as
-    ``PROMPT_VERSION`` / ``PROBE_VARIANTS``. Two probes defined in one
-    module overwrite each other's module constants, so read the class.
+def register_probe(cls: type[BaseProbe]) -> type[BaseProbe]:
+    """Register a ``BaseProbe`` subclass under its ``label``, in ``_PROBE_REGISTRY``.
+
+    The class declares everything about itself as class attributes:
+    ``prompt_version`` and ``variants`` default to ``"v1.0"`` and
+    ``("default",)``. The probe's rows are stored under its label.
 
     A label belongs to one probe. Registering the same class again, or the
     class a reloaded module redefines, updates the entry; a different class
@@ -1493,59 +1497,53 @@ def register_probe(
     would resolve against whatever directory a run starts in. So is a class
     whose ``output_columns`` names a column the engine writes for every probe,
     and one whose ``placeholder_warning_kind`` does not mark placeholder
-    content, since the report would not count its rows as placeholder.
+    content, since the report would not count its rows as placeholder. A
+    ``prompt_version`` that is not a non-empty string, or ``variants`` that
+    is not a non-empty tuple of non-empty strings, is refused too.
 
     The class itself IS the registration: there is no central registry
     entry or ``simulate_*`` function to add alongside it.
 
     Example::
 
-        @register_probe(prompt_version="v1.0", variants=("default",))
+        @register_probe
         class OpenEndedProbe(BaseProbe):
             label = "general_open_ended"
+            prompt_version = "v1.1"
             ...
     """
-
-    def decorator(cls: type[BaseProbe]) -> type[BaseProbe]:
-        if not isinstance(cls, type) or not issubclass(cls, BaseProbe):
-            raise ProbeRegistrationError(f"@register_probe: {cls!r} is not a subclass of BaseProbe")
-        label = getattr(cls, "label", "<unset>")
-        if not isinstance(label, str) or label == "<unset>":
-            raise ProbeRegistrationError(
-                f"@register_probe: {cls.__name__} must set a class-level `label` string before decoration"
-            )
-        existing = _PROBE_REGISTRY.get(label)
-        if existing is not None and existing is not cls and _definition(existing) != _definition(cls):
-            raise ProbeRegistrationError(
-                f"@register_probe: label {label!r} is already registered by {_definition(existing)}, "
-                f"so {_definition(cls)} cannot take it. Give the probe a label no other probe uses."
-            )
-        if cls.assets_root is not None and not Path(cls.assets_root).is_absolute():
-            raise ProbeRegistrationError(
-                f"@register_probe: {_definition(cls)} declares the relative assets_root "
-                f"{str(cls.assets_root)!r}, which would resolve against the working directory. Build it "
-                'from the module\'s location, such as Path(__file__).parent / "assets".'
-            )
-        problem = output_columns_problem(cls.output_columns)
+    if not isinstance(cls, type) or not issubclass(cls, BaseProbe):
+        raise ProbeRegistrationError(f"@register_probe: {cls!r} is not a subclass of BaseProbe")
+    label = getattr(cls, "label", "<unset>")
+    if not isinstance(label, str) or label == "<unset>":
+        raise ProbeRegistrationError(
+            f"@register_probe: {cls.__name__} must set a class-level `label` string before decoration"
+        )
+    existing = _PROBE_REGISTRY.get(label)
+    if existing is not None and existing is not cls and _definition(existing) != _definition(cls):
+        raise ProbeRegistrationError(
+            f"@register_probe: label {label!r} is already registered by {_definition(existing)}, "
+            f"so {_definition(cls)} cannot take it. Give the probe a label no other probe uses."
+        )
+    problem = _declaration_problem(cls)
+    if problem:
+        raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.{problem}")
+    if cls.assets_root is not None and not Path(cls.assets_root).is_absolute():
+        raise ProbeRegistrationError(
+            f"@register_probe: {_definition(cls)} declares the relative assets_root "
+            f"{str(cls.assets_root)!r}, which would resolve against the working directory. Build it "
+            'from the module\'s location, such as Path(__file__).parent / "assets".'
+        )
+    problem = output_columns_problem(cls.output_columns)
+    if problem:
+        raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.output_columns {problem}")
+    if hasattr(cls, "placeholder_warning_kind"):
+        problem = placeholder_warning_kind_problem(cls.placeholder_warning_kind)
         if problem:
-            raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.output_columns {problem}")
-        if hasattr(cls, "placeholder_warning_kind"):
-            problem = placeholder_warning_kind_problem(cls.placeholder_warning_kind)
-            if problem:
-                raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.placeholder_warning_kind {problem}")
+            raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.placeholder_warning_kind {problem}")
 
-        cls.prompt_version = prompt_version
-        cls.variants = tuple(variants)
-
-        module = sys.modules.get(cls.__module__)
-        if module is not None:
-            module.PROMPT_VERSION = prompt_version
-            module.PROBE_VARIANTS = tuple(variants)
-
-        _PROBE_REGISTRY[label] = cls
-        return cls
-
-    return decorator
+    _PROBE_REGISTRY[label] = cls
+    return cls
 
 
 def load_builtin_probes() -> None:

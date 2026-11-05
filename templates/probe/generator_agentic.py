@@ -77,10 +77,7 @@ def _demo_agentic_loader():
     raise NotImplementedError("replace with your real agentic-bank loader")
 
 
-@register_probe(
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     """Single-user-turn + multi-assistant-turn tool-interception probe."""
 

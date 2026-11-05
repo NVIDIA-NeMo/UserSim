@@ -108,10 +108,7 @@ def _demo_pressure_loader():
     raise NotImplementedError("replace with your real pressure-bank loader")
 
 
-@register_probe(
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
     """Multi-turn reframing-rotation probe."""
 

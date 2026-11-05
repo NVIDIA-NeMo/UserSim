@@ -67,17 +67,6 @@ from usersim.extension import (
 
 logger = logging.getLogger("usersim.engine")
 
-# ── Probe metadata ────────────────────────────────────────────────────
-# Bumping ``PROMPT_VERSION`` invalidates prior evaluator rows on
-# re-run, since the dedup key includes it. Bump on any semantic change
-# to the user-agent system prompts or follow-up instruction.
-
-# Probe discriminator is the query's id (e.g. ``Q-MEDS-001``). The
-# dispatcher seeds ``probe_variant = "default"``; the probe overrides
-# it to the picked query's id once known.
-PROBE_VARIANTS: list[str] = ["default"]
-PROMPT_VERSION: str = "v1.0"
-
 # ---------------------------------------------------------------------------
 # Bank-loading aliases (parallel to sov_ai_facts / sov_ai_dynamic modules)
 # ---------------------------------------------------------------------------
@@ -133,7 +122,7 @@ class SovAiMultilingualParityProbeError(ValueError):
 # ---------------------------------------------------------------------------
 
 
-@register_probe(prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
+@register_probe
 class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     """Multilingual respect-parity / quality-consistency probe.
 
@@ -143,6 +132,11 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "sov_ai_multilingual_parity"
+    # Bump on any semantic change to the user-agent system prompts or the
+    # follow-up instruction. The variant stays "default": the probe records
+    # the picked query's id (e.g. ``Q-MEDS-001``) as the row's probe_variant
+    # once it is known.
+    prompt_version = "v1.0"
     assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests respect and calibration on the same question asked in every locale: does "

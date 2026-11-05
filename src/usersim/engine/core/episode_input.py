@@ -158,14 +158,10 @@ def construct_episode_preamble(
     probe_cls = resolve_probe(probe_type)
     explicit_variant = resolved.get("probe_variant")
     probe_variant = (
-        explicit_variant
-        if isinstance(explicit_variant, str) and explicit_variant
-        else str(probe_cls.variants[0])
-        if probe_cls.variants
-        else "default"
+        explicit_variant if isinstance(explicit_variant, str) and explicit_variant else probe_cls.variants[0]
     )
     probe_family = probe_cls.label
-    prompt_version = str(probe_cls.prompt_version or "v1.0")
+    prompt_version = probe_cls.prompt_version
     raw_provenance = resolved.get("usersim_provenance")
     if isinstance(raw_provenance, str):
         raw_provenance = json.loads(raw_provenance)
