@@ -35,7 +35,7 @@ from test_simulator_pipeline_e2e import _cli_built_simulator_config
 from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
 from usersim.engine.probes.health_disclosure import move_runtime as mr
 from usersim.engine.probes.health_disclosure import realized_audit as ra
-from usersim.engine.probes.health_disclosure import therapy
+from usersim.engine.probes.health_disclosure.probe import TherapyDisclosureProbe
 
 MAX_TURNS = 8
 
@@ -50,7 +50,7 @@ class _State:
 
 def _guarded_probe():
     """A guarded-variant probe without the heavy __init__ (no prompt build)."""
-    p = object.__new__(therapy.TherapyDisclosureProbe)
+    p = object.__new__(TherapyDisclosureProbe)
     p._persona = {"uuid": "u-e2e"}
     p._data = {"probe_variant": "guarded", "trajectory_id": "t-e2e"}
     p._models = {"user_model": object()}

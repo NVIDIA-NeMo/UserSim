@@ -21,12 +21,6 @@ from usersim.engine.probes.health_disclosure import (
     clients as C,
 )
 from usersim.engine.probes.health_disclosure import (
-    decision_support,
-    general,
-    therapy,
-    triage,
-)
-from usersim.engine.probes.health_disclosure import (
     move_runtime as mr,
 )
 from usersim.engine.probes.health_disclosure.mixin import GuardedMoveMixin
@@ -38,6 +32,7 @@ from usersim.engine.probes.health_disclosure.moves import (
     Move,
     PatientEnv,
 )
+from usersim.engine.probes.health_disclosure.probe import TherapyDisclosureProbe
 from usersim.engine.probes.health_disclosure.prompts import (
     make_gate_prompt,
 )
@@ -613,17 +608,21 @@ class TestRuntime:
 # ---------------------------------------------------------------------------
 class TestRegisteredMetadata:
     @pytest.mark.parametrize(
-        "mod,label,family",
+        "label",
         [
-            (therapy, "health_therapy_disclosure", "health_therapy_disclosure"),
-            (triage, "health_triage_disclosure", "health_triage_disclosure"),
-            (decision_support, "health_decision_support_disclosure", "health_decision_support_disclosure"),
-            (general, "health_general_disclosure", "health_general_disclosure"),
+            "health_therapy_disclosure",
+            "health_triage_disclosure",
+            "health_decision_support_disclosure",
+            "health_general_disclosure",
         ],
     )
-    def test_registered_metadata(self, mod, label, family):
-        # The registered class binds the right label + config.
-        cls = [c for c in vars(mod).values() if isinstance(c, type) and getattr(c, "label", None) == label][0]
+    def test_registered_metadata(self, label):
+        # The registered class is defined in probe.py and binds the right label + config.
+        from usersim.engine.core.probes import resolve_probe
+
+        cls = resolve_probe(label)
+        family = label
+        assert cls.__module__ == "usersim.engine.probes.health_disclosure.probe"
         assert cls.CLIENT["family"] == family
         assert cls.family == family
         assert isinstance(cls.prompt_version, str) and cls.prompt_version
@@ -646,7 +645,7 @@ class _ExtrasState:
 def _new_probe(data=None):
     """A TherapyDisclosureProbe instance WITHOUT running the heavy __init__
     (no prompt building / LLM). Enough to exercise the mixin seam directly."""
-    p = object.__new__(therapy.TherapyDisclosureProbe)
+    p = object.__new__(TherapyDisclosureProbe)
     p._persona = {"uuid": "u-test"}
     p._data = data or {}
     p._models = {}
@@ -655,7 +654,7 @@ def _new_probe(data=None):
 
 class TestGuardedMoveMixin:
     def test_config_hook_returns_client(self):
-        assert _new_probe().guarded_move_config() is therapy.TherapyDisclosureProbe.CLIENT
+        assert _new_probe().guarded_move_config() is TherapyDisclosureProbe.CLIENT
 
     async def test_disabled_by_default(self, monkeypatch):
         monkeypatch.delenv("USERSIM_DISCLOSURE_MOVES", raising=False)

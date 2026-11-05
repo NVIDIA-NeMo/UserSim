@@ -5,7 +5,7 @@
 
 Everything that differs between the client-shaped probes lives here so the
 base probe + move/Guard runtime stay generic. Adding a client is a new
-entry in ``CLIENTS`` plus a thin module that registers it (see therapy.py).
+entry in ``CLIENTS`` plus a class in ``probe.py`` that registers it.
 
     ┌── what varies per client ──────────────────────────────────────────────┐
     │ topic vocabulary (+ which topics are "gated" / paced)                    │

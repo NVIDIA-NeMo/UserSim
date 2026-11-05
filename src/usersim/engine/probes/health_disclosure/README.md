@@ -22,13 +22,12 @@ content once the assistant (the system under test) earns it.
 | `prompts.py` | The four user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `probes/health_disclosure/realized_audit.py`, since the audit runs in the evaluator. |
 | `clients.py` | **Per-client config** (topics, risk meaning, roles, proposal framing). Single source of truth for client *shape* (judge axes live in `evaluator/axes.py`). |
 | `base.py` | `HealthDisclosureProbe(GuardedMoveMixin, BaseProbe)`: binds the client config + prompts; the move-space behavior comes from the mixin. |
-| `therapy.py` / `triage.py` / `decision_support.py` / `general.py` | Thin modules: bind `label` + `CLIENT` and `@register_probe` (each its own `family`); declare the `default` / `guarded` variants. |
+| `probe.py` | The four probe classes, one per client: each binds `label` + `CLIENT` and registers with `@register_probe` under its own `family`, with the `default` / `guarded` variants. |
 
-Adding a client = one entry in `CLIENTS` + one thin module (copy `triage.py`)
-+ its judge axes in `evaluator/axes.py::PROBE_SCORES` + a bundled bank under
-`assets/<label>/sample.yaml` (with its label in
-`bank.CLIENT_PROBE_LABELS`) + its module path in
-`core/probes.py::BUILTIN_PROBE_MODULES`.
+Adding a client = one entry in `CLIENTS` + one class in `probe.py` (copy
+`TriageDisclosureProbe`) + its judge axes in `evaluator/axes.py::PROBE_SCORES` +
+a bundled bank under `assets/<label>/sample.yaml` (with its label in
+`bank.CLIENT_PROBE_LABELS`).
 
 > **Reusing the move-space elsewhere.** `GuardedMoveMixin` hardcodes nothing
 > domain-specific: a probe family in another domain can compose it and supply its own
