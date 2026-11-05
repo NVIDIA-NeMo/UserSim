@@ -334,14 +334,17 @@ def clear_seed_columns_of_other_probes(
     assets_dir: Path | str | None = None,
     seed_dataset_path: Path | str | None = None,
 ) -> Any:
-    """``df`` with the seed table's columns emptied on every row of a probe that does not read the table.
+    """``df``, rows a run's Data Designer made, with the seed table's columns emptied on every row of another probe.
 
     Data Designer gives each row of a run the columns of one seed-table row,
-    whatever the row's probe, so without this a row of another probe in the
-    mix would record the seed row it drew: a toolset its conversation never
-    offered, say. The table is the one the run attaches, resolved from the
-    same arguments, and ``df`` comes back unchanged when no probe in the mix
-    reads one.
+    whatever the row's probe, and keeps them in the rows it returns. The
+    probe of such a row already saw them empty (``construct_episode_preamble``
+    empties them by the config's ``seed_dataset_columns``); without this the
+    saved row would still record the seed row it drew: a toolset its
+    conversation never offered, say. The table is the one the run attaches,
+    resolved from the same arguments, and ``df`` comes back unchanged when no
+    probe in the mix reads one. Stored rows from ``materialize_episode_inputs``
+    need none of this: they hold the episode's own data.
     """
     seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, seed_dataset_path)
     reader = seed_dataset_probe(probe_mix)
@@ -428,6 +431,7 @@ def simulator_config(
     verbosity: int = 1,
     random_seed: int | None = None,
     probe_options: Mapping[str, Mapping[str, Any]] | None = None,
+    seed_dataset_columns: Sequence[str] = (),
 ) -> ConversationSimulatorConfig:
     """The simulator column's config for one locale of a run.
 
@@ -448,6 +452,7 @@ def simulator_config(
         verbosity=verbosity,
         random_seed=random_seed,
         probe_options=probe_options or {},
+        seed_dataset_columns=list(seed_dataset_columns),
     )
 
 
@@ -482,7 +487,7 @@ def build_simulator_config_builder(
     data_designer = DataDesigner(**dd_kwargs)
     _set_run_config(data_designer, dd)
     config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
-    _add_episode_input_columns(
+    seed_path = _add_episode_input_columns(
         config_builder,
         dd,
         locale=locale,
@@ -504,6 +509,7 @@ def build_simulator_config_builder(
             verbosity=verbosity,
             random_seed=random_seed,
             probe_options=probe_options,
+            seed_dataset_columns=seed_dataset_columns(seed_path) if seed_path is not None else (),
         )
     )
 
@@ -527,8 +533,11 @@ def _add_episode_input_columns(
     seed_dataset_path: Path | None,
     match_persona_language: bool,
     drop_persona: bool,
-) -> None:
-    """Install the one canonical persona, probe, theme and seed-table sampler graph."""
+) -> Path | None:
+    """Install the one canonical persona, probe, theme and seed-table sampler graph.
+
+    Returns the seed table it attaches, or ``None`` when no probe in the mix reads one.
+    """
     persona_locale = persona_dataset_locale(locale, datasets_dir=DEFAULT_PERSONA_DATASETS_DIR)
     unknown = [key for key in probe_mix if key not in set(known_probes())]
     if unknown:
@@ -565,6 +574,7 @@ def _add_episode_input_columns(
             params=dd.SubcategorySamplerParams(category="probe_type", values=themes),
         )
     )
+    return seed_path
 
 
 def materialize_episode_inputs(
@@ -591,7 +601,7 @@ def materialize_episode_inputs(
     designer = DataDesigner(**to_data_designer_kwargs(models))
     _set_run_config(designer, dd)
     builder = dd.DataDesignerConfigBuilder()
-    _add_episode_input_columns(
+    seed_path = _add_episode_input_columns(
         builder,
         dd,
         locale=locale,
@@ -610,21 +620,21 @@ def materialize_episode_inputs(
         store_reasoning=store_reasoning,
         random_seed=random_seed,
         probe_options=probe_options,
+        seed_dataset_columns=seed_dataset_columns(seed_path) if seed_path is not None else (),
     )
     model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}
     sampled = designer.preview(builder, num_records=num_rows).dataset
     if sampled is None:
         return []
-    sampled = clear_seed_columns_of_other_probes(
-        sampled, probe_mix=probe_mix, assets_dir=assets_dir, seed_dataset_path=seed_dataset_path
-    )
     # ``usersim_config`` rides on the materialized row only. It is what lets a
     # host restore the episode with ProbeEpisodeRuntime.from_resolved_row; the
     # simulator's own trajectory rows do not repeat it.
     config_snapshot = config.model_dump(mode="json")
-    # Parquet cannot hold an empty mapping, and the config's default restores it.
-    if not config_snapshot["probe_options"]:
-        del config_snapshot["probe_options"]
+    # Parquet cannot hold an empty mapping or list, and the config's defaults
+    # restore them.
+    for key in ("probe_options", "seed_dataset_columns"):
+        if not config_snapshot[key]:
+            del config_snapshot[key]
     rows: list[dict[str, Any]] = []
     for row in sampled.to_dict(orient="records"):
         resolved = construct_probe_episode(row, config=config, models=model_identities).preamble.to_row()

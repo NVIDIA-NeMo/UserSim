@@ -156,6 +156,12 @@ def construct_episode_preamble(
     )
     probe_type = str(resolved[probe_type_column])
     probe_cls = resolve_probe(probe_type)
+    # A probe that reads no seed table sees the run's seed columns empty, in a
+    # direct run, a materialized row and a replay alike.
+    if probe_cls.seed_dataset is None:
+        for column in config.seed_dataset_columns:
+            if column in resolved:
+                resolved[column] = None
     explicit_variant = resolved.get("probe_variant")
     probe_variant = (
         explicit_variant if isinstance(explicit_variant, str) and explicit_variant else probe_cls.variants[0]

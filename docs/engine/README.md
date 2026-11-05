@@ -474,6 +474,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `replay_assistant_reasoning` | bool | `False` | Send the assistant model the reasoning of its own earlier messages (`replay_reasoning = true` on `assistant_model` in the models TOML). Needs `store_reasoning`; the assistant's history is then not compressed. No other model receives the assistant's reasoning during a simulation |
 | `verbosity` | int | `1` | Logging detail: 0=quiet, 1=normal, 2=detailed |
 | `probe_options` | dict | `{}` | Each probe's settings, by label, checked against its `Options` before any model call (`--probe-option PROBE.SETTING=VALUE`); `financial_services` and `tool_calling` list theirs in their READMEs |
+| `seed_dataset_columns` | list[str] | `[]` | The columns of the seed table the run attaches, set by the run builder; a row of a probe that reads no seed table sees them empty |
 | `random_seed` | int? | `None` | Seed for reproducible tool sampling |
 
 ## Side-Effect Columns

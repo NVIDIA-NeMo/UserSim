@@ -147,6 +147,12 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # ``self.options``. A probe left out runs on its defaults.
     probe_options: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
+    # The columns of the seed table the run attaches. Data Designer gives every
+    # row one row of that table; a row of a probe that reads no seed table
+    # gets these columns empty, so it neither sees nor records a seed row its
+    # conversation never used.
+    seed_dataset_columns: list[str] = Field(default_factory=list)
+
     # Reproducibility
     random_seed: int | None = None
 

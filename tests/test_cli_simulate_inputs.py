@@ -940,6 +940,17 @@ def test_a_run_s_probe_settings_reach_its_stored_rows_and_their_replay(register_
     assert all(config.probe_options == {"ext_options": {"party_size": 4}} for config in configs)
 
 
+def test_a_stored_row_keeps_the_seed_table_s_row_only_for_the_probe_that_reads_it(rows):
+    columns = rows[0]["usersim_config"]["seed_dataset_columns"]
+    assert {"tools", "toolset_source"} <= set(columns)
+    for row in rows:
+        if row["probe_type"] == "tool_calling":
+            # Every toolset has tools and a source; only some have a name.
+            assert row["tools"] and row["toolset_source"]
+        else:
+            assert [row[column] for column in columns] == [None] * len(columns)
+
+
 def test_stored_rows_whose_settings_a_probe_rejects_stop_before_any_model_call(rows, tmp_path, caplog):
     rejected = _edited(rows, lambda r: [row["usersim_config"].update(probe_options={"no_such_probe": {}}) for row in r])
     argv = ["simulate", "--inputs", str(_write(rejected, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]

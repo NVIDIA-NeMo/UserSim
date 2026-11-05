@@ -258,6 +258,21 @@ def test_two_probes_in_one_module_record_their_own_metadata(
     )
 
 
+def test_a_probe_that_reads_no_seed_table_sees_the_run_s_seed_columns_empty() -> None:
+    """Data Designer gives every row of a run a row of its seed table; only the probe that reads it sees it."""
+    data, config, models = _pinned_inputs("tool_calling")
+    config = config.model_copy(update={"seed_dataset_columns": ["toolset_name", "num_tools"]})
+    seeded = {**data, "toolset_name": "Weather", "num_tools": 3}
+
+    tool = construct_episode_preamble(seeded, config=config, models=models)
+    general = construct_episode_preamble(
+        {**seeded, "probe_type": "general_open_ended", "theme": '{"type": "cooking"}'}, config=config, models=models
+    )
+
+    assert (tool.data["toolset_name"], tool.data["num_tools"]) == ("Weather", 3)
+    assert (general.data["toolset_name"], general.data["num_tools"]) == (None, None)
+
+
 @pytest.mark.parametrize("empty", [float("nan"), pd.NA], ids=["nan", "na"])
 def test_an_empty_persona_field_changes_no_identity_or_setting(empty) -> None:
     """pandas holds an empty persona field as None, NaN or NA depending on its
