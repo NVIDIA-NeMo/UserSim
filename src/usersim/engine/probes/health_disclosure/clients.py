@@ -15,9 +15,9 @@ entry in ``CLIENTS`` plus a class in ``probe.py`` that registers it.
     │ the move-proposal framing (self/counterpart nouns + pacing hint)         │
     └─────────────────────────────────────────────────────────────────────────┘
 
-The (PROVISIONAL) judge axes for each client live inline in
-``evaluator/axes.py::PROBE_SCORES`` (keyed by label), like every other
-probe — the evaluator does not import this package. See this probe's README
+The (PROVISIONAL) judge axes for each client live in this package's
+``axes.py`` (``JUDGE_AXES``, keyed by label), which imports no probe code, so
+the evaluator reads them without loading a probe. See this probe's README
 ("Changing the judge axes").
 """
 

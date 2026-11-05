@@ -429,8 +429,9 @@ hook), see the source-of-truth docstrings in
 [`src/usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py).
 
 **Assistant evaluation is configured separately** via
-`TrajectoryEvaluatorConfig` (see Trajectory Evaluator section). Add
-new axes to `evaluator/axes.py::PROBE_SCORES` if needed; add a
+`TrajectoryEvaluatorConfig` (see Trajectory Evaluator section). Declare
+the probe's own judge axes, if it needs any, in `JUDGE_AXES` in its package's
+`axes.py`; add a
 scorer as `scorer.py` in the probe's package
 (`engine/probes/your_probe/scorer.py`), which registers on import once the
 package is in `BUILTIN_PACKAGES`; name it in `--scorers` to

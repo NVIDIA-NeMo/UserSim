@@ -11,11 +11,11 @@ import pytest
 
 from usersim.cli import _build_parser
 from usersim.cli._pipeline import build_evaluator_config_builder, evaluate_dataframe
-from usersim.engine.evaluator.axes import PROBE_SCORES, select_axes
+from usersim.engine.evaluator.axes import probe_scores, select_axes
 from usersim.engine.evaluator.config import JudgeSpecConfig, TrajectoryEvaluatorConfig
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION, EVAL_USER_PROMPT, render_rubric
 
-_FAMILIES = ["general_open_ended", *sorted(PROBE_SCORES)]
+_FAMILIES = ["general_open_ended", *sorted(probe_scores())]
 
 
 @pytest.mark.parametrize("family", _FAMILIES)

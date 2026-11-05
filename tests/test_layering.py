@@ -10,7 +10,9 @@ it imports no probe package: the registry loads the built-ins by module path.
 ``taxonomy`` sits below ``reporting``, so it imports neither that nor what is
 above it. The extension API exports nothing from the CLI. Probe packages reach
 the rest of ``usersim`` only through ``usersim.extension`` and
-``usersim.testing``, which ``test_probe_private_imports.py`` checks.
+``usersim.testing``, which ``test_probe_private_imports.py`` checks. A probe
+package's ``axes.py`` and ``capabilities.py``, which evaluation and reporting
+import, import no probe code.
 
 ``engine/external.py`` is the one exception: the run pipeline it drives still
 lives in ``cli``, so it may import exactly the modules ``_EXTERNAL_CLI_IMPORTS``
@@ -34,6 +36,9 @@ _RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
         ("usersim.cli", "usersim.asset_gen", "usersim.reporting", "usersim.selection", "usersim.engine.probes"),
     ),
 )
+
+#: The modules of a probe package that evaluation and reporting import: definitions only.
+_DEFINITIONS_MODULES = ("axes.py", "capabilities.py")
 
 #: The CLI modules ``engine/external.py`` imports, for the run pipeline that lives there.
 _EXTERNAL_CLI_IMPORTS = frozenset({"usersim.cli._inputs", "usersim.cli._pipeline"})
@@ -85,3 +90,17 @@ def test_the_extension_api_exports_nothing_from_the_cli() -> None:
     from_cli = sorted(module for module in usersim.extension._EXPORTS if module.startswith("usersim.cli"))
 
     assert not from_cli, f"usersim.extension exports names from {from_cli}"
+
+
+def test_a_probe_packages_definitions_import_no_probe_code() -> None:
+    """``usersim eval`` and the report import these modules, so importing one must import no probe."""
+    probes = _SRC / "engine" / "probes"
+    modules = sorted(path for name in _DEFINITIONS_MODULES for path in probes.glob(f"*/{name}"))
+    assert modules, f"no definitions module found under {probes}"
+    offenders = [
+        f"{path.relative_to(_SRC.parent)} imports {module}"
+        for path in modules
+        for module in sorted(_imports(path))
+        if module.startswith("usersim.engine.probes")
+    ]
+    assert not offenders, "\n".join(offenders)

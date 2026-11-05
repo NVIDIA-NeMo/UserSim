@@ -25,9 +25,9 @@ naming both classes, so give each probe a label of its own.
 Shipped probes are listed by package in `BUILTIN_PACKAGES`
 (`core/builtin_packages.py`); the registry imports each package's `probe`
 module the first time a probe is looked up, which is when their decorators
-run, and the scorer registry, the capability report and the asset commands
-read the package's `scorer`, `capabilities` and `asset_domain` modules from
-the same list. Out-of-tree probes are
+run, and the scorer registry, the capability report, the evaluator and the
+asset commands read the package's `scorer`, `capabilities`, `axes` and
+`asset_domain` modules from the same list. Out-of-tree probes are
 imported through the `usersim.probes` entry-point group instead.
 
 ## Hooks

@@ -5,10 +5,11 @@
 
 Each package under ``usersim.engine.probes`` keeps its probe in ``probe.py``,
 and, when it has them, its scorer in ``scorer.py``, its capability rows in
-``capabilities.py`` and its asset domain in ``asset_domain.py``. The probe
-registry, the scorer registry, the capability report and ``usersim gen-assets``
-each find the modules of the kind they read from this roster, by name, so a
-built-in is registered by its folder and one line here.
+``capabilities.py``, its judge axes in ``axes.py`` and its asset domain in
+``asset_domain.py``. The probe registry, the scorer registry, the capability
+report, the evaluator and ``usersim gen-assets`` each find the modules of the
+kind they read from this roster, by name, so a built-in is registered by its
+folder and one line here.
 
 The roster's order is the order of the capability report's rows. Packages are
 named, not imported, because every probe module imports the probe substrate;

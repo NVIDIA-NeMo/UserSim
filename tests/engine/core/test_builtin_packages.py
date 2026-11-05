@@ -4,8 +4,8 @@
 """The roster of built-in probe packages, and what a package on it registers.
 
 ``BUILTIN_PACKAGES`` names every package under ``usersim/engine/probes/``. A
-package on it registers its probe, and its scorer, capability rows and asset
-domain when it has them, by the names of its modules alone.
+package on it registers its probe, and its scorer, capability rows, judge axes
+and asset domain when it has them, by the names of its modules alone.
 """
 
 from __future__ import annotations
@@ -99,12 +99,22 @@ _THROWAWAY = {
         )
         AXIS_DESCRIPTIONS = {"throwaway.axis": "What the throwaway axis measures."}
     """,
+    "axes.py": """
+        from data_designer.config.column_configs import Score
+
+        JUDGE_AXES = {
+            "throwaway_probe": [
+                Score(name="throwaway_axis", description="A judge axis a throwaway package declares.", options={1: "No", 5: "Yes"}),
+            ],
+        }
+    """,
 }
 
 
 @pytest.fixture
 def throwaway_package(tmp_path, monkeypatch, restored_registries):
     """A package named ``throwaway_pkg`` under ``usersim.engine.probes``, on the roster."""
+    from usersim.engine.evaluator import axes
     from usersim.taxonomy import capabilities
 
     folder = tmp_path / "throwaway_pkg"
@@ -115,15 +125,18 @@ def throwaway_package(tmp_path, monkeypatch, restored_registries):
     monkeypatch.setattr(builtin_packages, "BUILTIN_PACKAGES", (*BUILTIN_PACKAGES, "throwaway_pkg"))
     capabilities._builtin_capabilities.cache_clear()
     capabilities._axis_descriptions.cache_clear()
+    axes.probe_scores.cache_clear()
     yield
     for module in [name for name in sys.modules if name.startswith(f"{BUILTIN_ROOT}.throwaway_pkg")]:
         del sys.modules[module]
     capabilities._builtin_capabilities.cache_clear()
     capabilities._axis_descriptions.cache_clear()
+    axes.probe_scores.cache_clear()
 
 
-def test_a_package_on_the_roster_registers_its_probe_scorer_and_capabilities(throwaway_package) -> None:
+def test_a_package_on_the_roster_registers_its_probe_scorer_capabilities_and_axes(throwaway_package) -> None:
     from usersim.engine.core.probes import known_probes
+    from usersim.engine.evaluator.axes import axes_for_probe
     from usersim.engine.evaluator.scorers import list_scorers, load_default_scorers
     from usersim.taxonomy.capabilities import axis_description, capability_definitions
 
@@ -133,3 +146,4 @@ def test_a_package_on_the_roster_registers_its_probe_scorer_and_capabilities(thr
     assert "throwaway_scorer" in list_scorers()
     assert "throwaway_capability" in {definition.id for definition in capability_definitions()}
     assert axis_description("throwaway.axis") == "What the throwaway axis measures."
+    assert "throwaway_axis" in {axis.name for axis in axes_for_probe("throwaway_probe")}

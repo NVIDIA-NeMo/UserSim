@@ -9,13 +9,13 @@ import pytest
 
 from usersim.engine.evaluator.axes import (
     GUARDRAIL_AXES,
-    PROBE_SCORES,
     QUALITY_AXES,
     UNIVERSAL_SCORES,
     AxisCategory,
     all_axis_names,
     axes_for_probe,
     axis_category,
+    probe_scores,
     select_axes,
 )
 
@@ -37,10 +37,10 @@ class TestUniversalScores:
 
 class TestProbeScores:
     def test_known_probes_have_extra_axes(self) -> None:
-        assert "tool_calling" in PROBE_SCORES
-        assert "general_educational" in PROBE_SCORES
-        assert len(PROBE_SCORES["tool_calling"]) >= 2  # leaking + correctness
-        assert len(PROBE_SCORES["general_educational"]) >= 1  # pedagogical
+        assert "tool_calling" in probe_scores()
+        assert "general_educational" in probe_scores()
+        assert len(probe_scores()["tool_calling"]) >= 2  # leaking + correctness
+        assert len(probe_scores()["general_educational"]) >= 1  # pedagogical
 
     def test_unknown_probe_returns_universal_only(self) -> None:
         result = axes_for_probe("nonexistent_probe")
@@ -52,7 +52,7 @@ class TestAllAxisNames:
         names = all_axis_names()
         for s in UNIVERSAL_SCORES:
             assert s.name in names
-        for scores in PROBE_SCORES.values():
+        for scores in probe_scores().values():
             for s in scores:
                 assert s.name in names
 

@@ -11,6 +11,12 @@ ensemble of two or more must span at least two architecturally diverse model
 families, validated when the config is built and again at run time, so an
 ensemble never rests on one model family. A single judge is allowed.
 
+Every row is judged on the axes every probe shares. A built-in probe whose
+rows need axes of their own declares them in its package's `axes.py`, as
+`JUDGE_AXES` keyed by the probe's label, which is the row's `probe_family`.
+The evaluator reads those modules in the order of `BUILTIN_PACKAGES`, on first
+use, and never a probe's `probe.py`.
+
 **Scorers** are per-probe functions over stored columns, each returning a
 structured verdict rather than a free-form opinion. Three are fully
 deterministic (`language_compliance`, `refusal_basics`, `response_shape`) and

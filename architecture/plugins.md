@@ -105,6 +105,12 @@ in its package's `capabilities.py`, which the report reads in the order of
 `BUILTIN_PACKAGES` (`engine/core/builtin_packages.py`), after the capabilities
 every probe feeds.
 
+What evaluation and reporting read from a built-in probe lives in a
+definitions-only module of its package, `capabilities.py` for the report and
+`axes.py` for the judges, which imports no probe code. `usersim eval` and the
+report load those modules and never a probe's `probe.py`, so a probe whose code
+fails to import still has its rows judged and reported.
+
 ## Validating an extension
 
 `usersim.testing` publishes the conformance checks that run against every

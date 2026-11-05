@@ -22,10 +22,10 @@ content once the assistant (the system under test) earns it.
 | `prompts.py` | The four user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `probes/health_disclosure/realized_audit.py`, since the audit runs in the evaluator. |
 | `clients.py` | **Per-client config** (topics, risk meaning, roles, proposal framing). Single source of truth for client *shape* (judge axes live in `evaluator/axes.py`). |
 | `base.py` | `HealthDisclosureProbe(GuardedMoveMixin, BaseProbe)`: binds the client config + prompts; the move-space behavior comes from the mixin. |
-| `probe.py` | The four probe classes, one per client: each binds `label` + `CLIENT` and registers with `@register_probe` under its own `family`, with the `default` / `guarded` variants. |
+| `probe.py` | The four probe classes, one per client: each binds `label` + `CLIENT` and registers with `@register_probe`; its rows are stored under its label, with the `default` / `guarded` variants. |
 
 Adding a client = one entry in `CLIENTS` + one class in `probe.py` (copy
-`TriageDisclosureProbe`) + its judge axes in `evaluator/axes.py::PROBE_SCORES` +
+`TriageDisclosureProbe`) + its judge axes in `axes.py::JUDGE_AXES` +
 a bundled bank under `assets/<label>/sample.yaml` (with its label in
 `bank.CLIENT_PROBE_LABELS`).
 
@@ -258,15 +258,15 @@ The per-client judge axes are authored defaults on a generic 1-5 ladder.
 A clinical deployment should replace them with a rubric validated by its own
 clinicians; the axes are declared in one place to make that a single edit.
 
-They live inline in **`evaluator/axes.py`** (`PROBE_SCORES`, keyed by the probe's
-label): the same place every other probe declares its axes, so the evaluator
-never imports a probe package. Each axis is a name + a description on a generic
-1–5 ladder (`_md_axis(...)`). To change them:
+They live in this package's **`axes.py`** (`JUDGE_AXES`, keyed by the probe's
+label), a definitions-only module the evaluator imports without importing any
+probe code. Each axis is a name + a description on a generic 1–5 ladder
+(`_md_axis(...)`). To change them:
 
-1. Edit the probe's list in `evaluator/axes.py::PROBE_SCORES` (add/remove/reword axes).
+1. Edit the probe's list in `axes.py::JUDGE_AXES` (add/remove/reword axes).
 2. At eval time, restrict to specific axes with `--axes name1,name2` if desired.
 
-To replace the option ladder (the 1–5 wording), edit `_MD_LADDER` in `evaluator/axes.py`.
+To replace the option ladder (the 1–5 wording), edit `_MD_LADDER` in `axes.py`.
 
 ## Provenance
 The move-space + Guard are a general three-axis disclosure mechanism (dialogue act +

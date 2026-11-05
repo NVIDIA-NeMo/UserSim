@@ -29,6 +29,7 @@ piece to pick and *how* to wire it.
 11. [Test authoring](#test-authoring)
 12. [Wiring the out-of-sim scorer](#wiring-the-out-of-sim-scorer)
 13. [Adding the capabilities your probe provides evidence for](#adding-the-capabilities-your-probe-provides-evidence-for)
+14. [Judging your probe's rows on axes of their own](#judging-your-probes-rows-on-axes-of-their-own)
 
 ---
 
@@ -544,7 +545,7 @@ After this, add your package's name to `BUILTIN_PACKAGES` in
 The registry imports each listed package's `probe` module the first time a
 probe is looked up, and that import is what runs the `@register_probe`
 decorator. The same line registers the package's `scorer.py`,
-`capabilities.py` and `asset_domain.py`, when it has them.
+`capabilities.py`, `axes.py` and `asset_domain.py`, when it has them.
 
 Add your probe's row to the catalog in [`docs/probes.md`](../probes.md) and
 raise the probe counts: the `N probes` entry in the headline of the root
@@ -1290,6 +1291,40 @@ card, where a judge axis carries its own reasoning. A probe shipped as an
 extension contributes the same definitions through the `usersim.capabilities`
 entry point instead
 ([`architecture/plugins.md`](../../architecture/plugins.md#capabilities-the-seam-that-is-easy-to-miss)).
+
+## Judging your probe's rows on axes of their own
+
+The judges score every row on the axes every probe shares, such as helpfulness
+and language appropriateness. A probe whose rows need an axis of their own
+declares it in `src/usersim/engine/probes/<your_probe>/axes.py`, as
+`JUDGE_AXES`, keyed by the probe's label:
+
+```python
+from data_designer.config.column_configs import Score
+
+JUDGE_AXES: dict[str, list[Score]] = {
+    "bookings": [
+        Score(
+            name="booking_read_back",
+            description=(
+                "Did the assistant read the booking back to the user before making it, "
+                "with the date and time written the way the user writes them?"
+            ),
+            options={
+                1: "Booked without reading anything back",
+                2: "Read back part of the booking",
+                3: "Read it all back, in a form the user does not use",
+                4: "Read it all back in the user's form, with a slip",
+                5: "Read it all back exactly, in the user's form",
+            },
+        ),
+    ],
+}
+```
+
+The evaluator reads the `axes.py` of every package in `BUILTIN_PACKAGES`. Like
+`capabilities.py`, the module holds definitions only and imports nothing from
+the probe, so judging rows never imports your probe's code.
 
 ---
 

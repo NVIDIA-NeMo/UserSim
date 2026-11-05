@@ -33,7 +33,6 @@ _ALLOWED: dict[str, int] = {
     "cli/smoke.py": 2,
     "engine/core/builtin_packages.py": 10,  # the roster names every built-in package
     "engine/core/preview.py": 3,
-    "engine/evaluator/axes.py": 6,
     "reporting/capability_report.py": 1,
     "reporting/identity.py": 1,
 }

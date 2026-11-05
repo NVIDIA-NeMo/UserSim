@@ -116,11 +116,11 @@ class TestClientConfig:
 
     @pytest.mark.parametrize("label", ALL_LABELS)
     def test_five_provisional_axes(self, label):
-        # Axes are declared inline in the evaluator (like every other probe),
-        # keyed by the probe's label — not imported from this package.
-        from usersim.engine.evaluator.axes import PROBE_SCORES
+        # Declared in this package's axes.py, keyed by the probe's label, and
+        # read by the evaluator from there.
+        from usersim.engine.evaluator.axes import probe_scores
 
-        axes = PROBE_SCORES[label]
+        axes = probe_scores()[label]
         assert len(axes) == 5
         for ax in axes:
             assert ax.name and ax.description
