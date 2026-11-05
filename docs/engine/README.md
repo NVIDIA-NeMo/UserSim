@@ -383,7 +383,7 @@ end-to-end tutorial on writing a new probe against this substrate.
 ## Adding a new probe
 
 The end-to-end tutorial: decision tree on which shape to pick, full
-worked example (a `cooking_advisor` probe end-to-end), common
+worked example (a `bookings` probe end-to-end), common
 gotchas, test-authoring section: lives at
 [`docs/engine/AUTHORING_A_PROBE.md`](AUTHORING_A_PROBE.md). Read it
 first.
@@ -404,11 +404,11 @@ Quick orientation:
 
 1. Pick a shape from [the decision tree](AUTHORING_A_PROBE.md#step-0-pick-your-shape).
 2. Copy the matching `generator_*.py` to
-   `src/usersim/engine/probes/<your_probe>/generator.py`.
+   `src/usersim/engine/probes/<your_probe>/probe.py`.
 3. Subclass `BaseProbe` (or `BankBackedProbe`) + the right mixin;
-   set 2-3 class attributes; override 2-4 hooks.
-4. `@register_probe(family=, prompt_version=, variants=)` to wire
-   into `_PROBE_REGISTRY` and set the class's `family` /
+   set its class attributes; override the hooks it needs.
+4. `@register_probe(family=, prompt_version=, variants=)` to add the
+   class to the registry and set the class's `family` /
    `prompt_version` / `variants`, which the dispatcher and the smoke
    check read.
 5. Add your module's import path to `BUILTIN_PROBE_MODULES` in

@@ -18,7 +18,7 @@ piece to pick and *how* to wire it.
 
 1. [Step 0: pick your shape](#step-0-pick-your-shape)
 2. [Step 1: subclass `BaseProbe` + the right mixin](#step-1-subclass-baseprobe--the-right-mixin)
-3. [Step 2: configure 2-3 class attributes](#step-2-configure-2-3-class-attributes)
+3. [Step 2: configure the class attributes](#step-2-configure-the-class-attributes)
 4. [Step 3: wire the asset bank (skip if the probe is asset-free)](#step-3-wire-the-asset-bank)
 5. [Step 4: write your `LocalePromptPack`](#step-4-write-your-localepromptpack)
 6. [Step 5: write the user-judge gate prompt](#step-5-write-the-user-judge-gate-prompt)
@@ -28,6 +28,7 @@ piece to pick and *how* to wire it.
 10. [Common gotchas](#common-gotchas)
 11. [Test authoring](#test-authoring)
 12. [Wiring the out-of-sim scorer](#wiring-the-out-of-sim-scorer)
+13. [Adding the capabilities your probe provides evidence for](#adding-the-capabilities-your-probe-provides-evidence-for)
 
 ---
 
@@ -135,7 +136,7 @@ implementations.
 
 | Hook | Required? | Default | When you override |
 |---|---|---|---|
-| `label` (class attr) | yes | `<unset>` | Always set to `"my_probe"`. Must match `@register_probe(label=...)` |
+| `label` (class attr) | yes | `<unset>` | Always set to `"my_probe"`. `@register_probe` adds the class to the registry under it, and refuses a label another class holds |
 | `get_user_system_prompt()` | yes | raises | Always |
 | `get_assistant_system_prompt()` | yes | raises | Always: return `""` per pure-capability policy unless you have a research-grounded reason not to |
 | `get_tools_for_assistant()` | no | `None` | When you expose tools (tool_calling, agentic) |
@@ -178,7 +179,7 @@ notifying. See `docs/engine/EXTERNAL_PROBE_RUNTIME.md`.
 
 ---
 
-## Step 2: configure 2-3 class attributes
+## Step 2: configure the class attributes
 
 For `BankBackedProbe` subclasses:
 
@@ -320,30 +321,13 @@ no-arg on `TypeError`. So:
 
 Both work via the same `bank_loader` slot.
 
-### Module-level alias for test patchability
+### Give a test a bank of its own
 
-The substrate's `_load_bank_for_locale` calls `loader = type(self).bank_loader`.
-If your tests want to monkeypatch the loader, point at a module-level
-alias (not the class attr directly):
-
-```python
-# In your probe.py
-from usersim.engine.probes.my_probe.bank import load_my_bank_default
-
-_load_bank = load_my_bank_default  # tests patch this name
-
-
-def _bank_loader(locale: str = "en_US"):
-    return _load_bank(locale)
-
-
-class MyProbe(BankBackedProbe):
-    bank_loader = staticmethod(_bank_loader)
-```
-
-Now `patch.object(probe_gen, "_load_bank", return_value=synth_bank)`
-in tests intercepts at the module level: you don't need to know which
-class attribute the substrate calls.
+A test that needs a bank other than the one you ship writes it under
+`tmp_path/<label>/` and sets `USERSIM_ASSET_PATH` to `tmp_path` with
+`monkeypatch.setenv`. The asset lookup reads that path before your probe's own
+folder, so `assets_dir()` returns the test's folder and a loader that reads
+through it loads the test's bank; nothing is patched.
 
 ### The bank object contract
 
@@ -874,11 +858,8 @@ BOOK_APPOINTMENT = {
     },
 }
 
-_load_bank = read_booking_bank
-
-
 def _bank_loader(locale: str):
-    return _load_bank(BookingsProbe.assets_dir() / locale)
+    return read_booking_bank(BookingsProbe.assets_dir() / locale)
 
 
 @register_probe(
@@ -1257,8 +1238,7 @@ when you pass it a `sample_row`.
 
 Add the module path, `usersim.engine.probes.<your_probe>.scorer`, to
 [`evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES`](../../src/usersim/engine/evaluator/scorers/__init__.py)
-so the auto-load path picks it up. After that, name it at evaluation time
-(`usersim eval --scorers your_probe`), or list it in the probe's
+so the auto-load path picks it up, and list it in the probe's
 `default_scorers`:
 
 ```python
@@ -1269,7 +1249,11 @@ class MyProbe(BaseProbe):
 
 `usersim eval --scorers auto` then runs it whenever the run holds the probe's
 rows, beside the rule-based `language_compliance`, `refusal_basics` and
-`response_shape`, which `auto` runs for every probe. `assert_probe_conforms`
+`response_shape`, which `auto` runs for every probe. A probe whose
+capabilities read the scorer must list it there, or `--scorers auto` leaves
+those capabilities untested; `tests/engine/test_probe_default_scorers.py`
+checks every built-in. A scorer no probe lists runs only when a run names it
+(`usersim eval --scorers your_probe`). `assert_probe_conforms`
 reports a name in `default_scorers` that no registered scorer holds. The
 evaluator calls each scorer it runs on every row, so return early for rows from
 other probes, for example when your probe's join key is missing, as the
@@ -1277,7 +1261,7 @@ other probes, for example when your probe's join key is missing, as the
 or an `error` that starts with `no ` and contains `scorer skipped`: the
 capability report counts the row as not applicable rather than as evidence.
 [`tests/engine/evaluator/test_scorers_skip_other_probes.py`](../../tests/engine/evaluator/test_scorers_skip_other_probes.py)
-checks that every built-in probe's scorer skips another probe's row.
+checks that every scorer but the generic ones skips another probe's row.
 
 A scorer in your probe's package may write its label;
 [`tests/test_probe_names_in_shared_code.py`](../../tests/test_probe_names_in_shared_code.py)
