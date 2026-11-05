@@ -24,12 +24,7 @@ from unittest.mock import patch
 import pytest
 
 from usersim.engine.core._assets import probe_assets_dir
-from usersim.engine.evaluator.scorers import (
-    clear_registry,
-    get_scorer,
-    list_scorers,
-    load_default_scorers,
-)
+from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 from usersim.engine.probes.sov_ai_facts.bank import reset_fact_bank_cache
 from usersim.engine.probes.sov_ai_facts.scorer import (
     _ACCURACY,
@@ -51,15 +46,8 @@ from usersim.engine.probes.sov_ai_facts.scorer import (
 
 @pytest.fixture(autouse=True)
 def _reset_state_between_tests():
-    """Start each test with a clean fact-bank cache and a registry that
-    contains the bundled scorers.
-
-    Other test files in this package clear the scorer registry in their
-    own fixtures; without restoring the defaults here, our
-    registration-checking tests fail whenever they run after those.
-    """
+    """Start each test with a clean fact-bank cache."""
     reset_fact_bank_cache()
-    load_default_scorers()
     yield
     reset_fact_bank_cache()
 
@@ -196,24 +184,10 @@ def _axis_payload(
 
 class TestRegistration:
     def test_auto_registers_on_import(self) -> None:
-        # Ensure the side-effect of importing the module populates the registry.
-        # (The autouse fixture doesn't clear the registry — the scorer stays
-        # registered from any earlier import.)
         assert "sov_ai_facts" in list_scorers()
 
     def test_resolvable_via_registry(self) -> None:
-        # Compare by qualname rather than identity: ``load_default_scorers()``
-        # uses ``importlib.reload`` which produces a fresh function object,
-        # so the eagerly-imported reference at the top of this test module
-        # may no longer be the same instance the registry now holds.
-        fn = get_scorer("sov_ai_facts")
-        assert fn.__name__ == score_sov_ai_facts_trajectory.__name__
-        assert fn.__module__ == score_sov_ai_facts_trajectory.__module__
-
-    def test_reload_picks_up_registration(self) -> None:
-        clear_registry()
-        load_default_scorers()
-        assert "sov_ai_facts" in list_scorers()
+        assert get_scorer("sov_ai_facts") is score_sov_ai_facts_trajectory
 
 
 # ---------------------------------------------------------------------------

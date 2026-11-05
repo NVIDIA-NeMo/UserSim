@@ -28,12 +28,7 @@ from unittest.mock import patch
 import pytest
 
 from usersim.engine.core._assets import probe_assets_dir
-from usersim.engine.evaluator.scorers import (
-    clear_registry,
-    get_scorer,
-    list_scorers,
-    load_default_scorers,
-)
+from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 from usersim.engine.probes.safety_chat_pressure.bank import reset_pressure_bank_cache
 from usersim.engine.probes.safety_chat_pressure.scorer import (
     CONTEXTUAL_SAFETY_PERSISTENCE_AXIS,
@@ -53,13 +48,8 @@ SAMPLE_BANK_PATH = probe_assets_dir("safety_chat_pressure") / "sample.yaml"
 
 @pytest.fixture(autouse=True)
 def _reset_state_between_tests():
-    """Start each test with a clean pressure-bank cache and the bundled
-    scorers registered. Other test files clear the scorer registry in
-    their own fixtures; restoring defaults here keeps registration
-    tests order-independent.
-    """
+    """Start each test with a clean pressure-bank cache."""
     reset_pressure_bank_cache()
-    load_default_scorers()
     yield
     reset_pressure_bank_cache()
 
@@ -162,18 +152,7 @@ class TestRegistration:
         assert "safety_chat_pressure" in list_scorers()
 
     def test_resolvable_via_registry(self) -> None:
-        # Compare by qualname rather than identity (load_default_scorers
-        # uses importlib.reload — see the same pattern in the
-        # sov_ai_multilingual_parity / sov_ai_dynamic tests).
-        fn = get_scorer("safety_chat_pressure")
-        assert fn.__name__ == score_safety_chat_pressure_trajectory.__name__
-        assert fn.__module__ == score_safety_chat_pressure_trajectory.__module__
-
-    def test_clear_then_load_defaults_restores_registration(self) -> None:
-        clear_registry()
-        assert "safety_chat_pressure" not in list_scorers()
-        load_default_scorers()
-        assert "safety_chat_pressure" in list_scorers()
+        assert get_scorer("safety_chat_pressure") is score_safety_chat_pressure_trajectory
 
 
 # ---------------------------------------------------------------------------

@@ -5,8 +5,6 @@
 
 from __future__ import annotations
 
-import sys
-
 import pytest
 
 from usersim.engine.evaluator import scorers as scorers_module
@@ -55,11 +53,19 @@ class TestScorerRegistry:
         scorers_module.register_scorer("x", a)
         assert scorers_module.get_scorer("x") is a
 
-    def test_reloading_a_scorer_module_updates_its_scorer(self) -> None:
-        scorers_module.reload_scorers(["usersim.engine.evaluator.scorers.tool_use"])
-        first = scorers_module.get_scorer("tool_use")
-        scorers_module.reload_scorers(["usersim.engine.evaluator.scorers.tool_use"])
-        assert scorers_module.get_scorer("tool_use") is not first
+    def test_a_scorer_defined_again_in_the_same_place_takes_its_name(self) -> None:
+        """A module reloaded in a notebook defines its scorer again, as a new function of the same name."""
+
+        def define():
+            def scorer(traj, models):
+                return {"v": 1}
+
+            return scorer
+
+        first, again = define(), define()
+        scorers_module.register_scorer("x", first)
+        scorers_module.register_scorer("x", again)
+        assert scorers_module.get_scorer("x") is again
 
     def test_clear_registry(self) -> None:
         scorers_module.register_scorer("a", lambda t, m: {})
@@ -68,15 +74,13 @@ class TestScorerRegistry:
         scorers_module.clear_registry()
         assert scorers_module.list_scorers() == []
 
-    def test_reload_scorers_reruns_a_module_that_registers_nothing(self, tmp_path, monkeypatch) -> None:
-        # A throwaway module: reloading a real one replaces the objects it
-        # defines while other modules keep references to the old ones.
-        name = "usersim_test_registers_no_scorer"
-        (tmp_path / f"{name}.py").write_text("RUNS = globals().get('RUNS', 0) + 1\n", encoding="utf-8")
-        monkeypatch.syspath_prepend(str(tmp_path))
-        try:
-            scorers_module.reload_scorers([name])
-            assert sys.modules[name].RUNS == 2
-        finally:
-            sys.modules.pop(name, None)
-        assert scorers_module.list_scorers() == []
+
+def test_loading_the_bundled_scorers_again_keeps_the_registered_functions() -> None:
+    """Each scorer module is imported once, so the registry holds the function the module defines."""
+    from usersim.engine.evaluator.scorers import tool_use
+
+    registered = dict(scorers_module._REGISTRY)
+    scorers_module.load_default_scorers()
+
+    assert scorers_module._REGISTRY == registered
+    assert scorers_module.get_scorer("tool_use") is tool_use.score_tool_use_trajectory

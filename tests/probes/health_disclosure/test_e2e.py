@@ -32,7 +32,7 @@ import pyarrow as pa
 import pytest
 from test_simulator_pipeline_e2e import _cli_built_simulator_config
 
-from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
+from usersim.engine.evaluator.scorers import get_scorer
 from usersim.engine.probes.health_disclosure import move_runtime as mr
 from usersim.engine.probes.health_disclosure import realized_audit as ra
 from usersim.engine.probes.health_disclosure.probe import TherapyDisclosureProbe
@@ -202,7 +202,6 @@ async def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeyp
         }
 
     monkeypatch.setattr(ra, "acall_llm", fake_audit_llm)
-    load_default_scorers()
     out = await get_scorer("health_disclosure_concealment")(row, {"judge_model": object()})
 
     # The audit ran for real. This is the assertion the old tests could not make:
@@ -235,7 +234,6 @@ async def test_without_an_auditor_the_same_row_still_scores_on_intent(monkeypatc
     extras, transcript = await _run_producer(monkeypatch)
     row = {**_persist(extras), "conversation_messages": transcript}
 
-    load_default_scorers()
     out = await get_scorer("health_disclosure_concealment")(row, {})
 
     assert out["scorer_kind"] == "deterministic"

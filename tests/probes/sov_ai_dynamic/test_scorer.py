@@ -25,12 +25,7 @@ import pytest
 
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.probing_taxonomy import reset_probing_taxonomy_cache
-from usersim.engine.evaluator.scorers import (
-    clear_registry,
-    get_scorer,
-    list_scorers,
-    load_default_scorers,
-)
+from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 from usersim.engine.probes.sov_ai_dynamic.scorer import (
     _AXES,
     _GRACEFUL_UNKNOWN,
@@ -48,15 +43,8 @@ from usersim.engine.probes.sov_ai_dynamic.scorer import (
 
 @pytest.fixture(autouse=True)
 def _reset_state_between_tests():
-    """Start each test with a clean taxonomy cache and a registry that
-    contains the bundled scorers.
-
-    Other test files in this package clear the scorer registry in their
-    own fixtures; restoring the defaults here keeps registration tests
-    order-independent.
-    """
+    """Start each test with a clean taxonomy cache."""
     reset_probing_taxonomy_cache()
-    load_default_scorers()
     yield
     reset_probing_taxonomy_cache()
 
@@ -175,17 +163,7 @@ class TestRegistration:
         assert "sov_ai_dynamic" in list_scorers()
 
     def test_resolvable_via_registry(self) -> None:
-        # Compare by qualname rather than identity: load_default_scorers()
-        # uses importlib.reload, so the eagerly-imported reference may no
-        # longer be the same instance the registry now holds.
-        fn = get_scorer("sov_ai_dynamic")
-        assert fn.__name__ == score_sov_ai_dynamic_trajectory.__name__
-        assert fn.__module__ == score_sov_ai_dynamic_trajectory.__module__
-
-    def test_reload_picks_up_registration(self) -> None:
-        clear_registry()
-        load_default_scorers()
-        assert "sov_ai_dynamic" in list_scorers()
+        assert get_scorer("sov_ai_dynamic") is score_sov_ai_dynamic_trajectory
 
     def test_listed_alongside_sister_scorers(self) -> None:
         names = list_scorers()

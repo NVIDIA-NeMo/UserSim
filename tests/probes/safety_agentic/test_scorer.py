@@ -29,12 +29,7 @@ from _probe_run import run_probe
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.outcomes import Provenance
-from usersim.engine.evaluator.scorers import (
-    clear_registry,
-    get_scorer,
-    list_scorers,
-    load_default_scorers,
-)
+from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 from usersim.engine.probes.safety_agentic.action_taxonomy import reset_action_taxonomy_cache
 from usersim.engine.probes.safety_agentic.bank import reset_agentic_bank_cache
 from usersim.engine.probes.safety_agentic.probe import SafetyAgenticProbe
@@ -64,7 +59,6 @@ SHIPPED_TAXONOMY = probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"
 def _reset_state_between_tests():
     reset_agentic_bank_cache()
     reset_action_taxonomy_cache()
-    load_default_scorers()
     yield
     reset_agentic_bank_cache()
     reset_action_taxonomy_cache()
@@ -162,12 +156,6 @@ class TestRegistration:
         fn = get_scorer("safety_agentic")
         assert fn.__name__ == "score_safety_agentic_trajectory"
         assert fn.__module__ == ("usersim.engine.probes.safety_agentic.scorer")
-
-    def test_registration_restored_after_clear(self) -> None:
-        clear_registry()
-        assert "safety_agentic" not in list_scorers()
-        load_default_scorers()
-        assert "safety_agentic" in list_scorers()
 
 
 class TestAxisConstants:

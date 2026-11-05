@@ -15,17 +15,13 @@ import json
 import pandas as pd
 import pytest
 
-from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
+from usersim.engine.evaluator.scorers import get_scorer
 from usersim.engine.probes.health_disclosure import realized_audit as ra
 from usersim.engine.probes.health_disclosure import scorer as hd  # noqa: F401
 from usersim.engine.probes.health_disclosure.scorer import (
     score_health_disclosure_trajectory as score,
 )
 from usersim.taxonomy.eval_cell import scorer_state
-
-# Note: the registry may hold a reloaded copy of the module's fn (importlib.reload
-# in other tests re-runs register_scorer), so the registration test asserts by name
-# rather than object identity. Behavior tests call the direct import (same source).
 
 
 def _row(**over):
@@ -46,12 +42,7 @@ def _row(**over):
 
 class TestRegistration:
     def test_registered_under_stable_name(self):
-        # Reload defaults first so this is order-independent: a prior test may have
-        # reloaded/cleared the shared registry (see test_evaluator_scorers).
-        load_default_scorers()
-        fn = get_scorer("health_disclosure_concealment")
-        assert callable(fn)
-        assert fn.__name__ == "score_health_disclosure_trajectory"
+        assert get_scorer("health_disclosure_concealment") is score
 
 
 _MISSING_KEY = object()

@@ -10,21 +10,11 @@ from typing import Any
 
 import pytest
 
-from usersim.engine.evaluator.scorers import (
-    get_scorer,
-    list_scorers,
-    load_default_scorers,
-)
+from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 from usersim.engine.evaluator.scorers.refusal_basics import (
     REFUSAL_AXES,
     score_refusal_basics_trajectory,
 )
-
-
-@pytest.fixture(autouse=True)
-def _ensure_scorers_loaded():
-    load_default_scorers()
-    yield
 
 
 def _trajectory(

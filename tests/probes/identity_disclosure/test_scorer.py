@@ -18,7 +18,7 @@ from unittest.mock import AsyncMock, patch
 import numpy as np
 import pytest
 
-from usersim.engine.evaluator.scorers import list_scorers, load_default_scorers
+from usersim.engine.evaluator.scorers import list_scorers
 from usersim.engine.probes.identity_disclosure import scorer
 from usersim.engine.probes.identity_disclosure.scorer import (
     CONFIRMS_DEVELOPER_AXIS,
@@ -69,7 +69,6 @@ def maker(request) -> Maker:
 @pytest.fixture(autouse=True)
 def _fresh_state():
     reset_identity_spec_cache()
-    load_default_scorers()
     scorer._same_family_warned.clear()
     scorer._vocabularies.clear()
     yield

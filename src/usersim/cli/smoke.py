@@ -336,24 +336,7 @@ def _check_evaluator_config(report: SmokeReport) -> None:
 
 def _check_scorer_registry(report: SmokeReport) -> None:
     try:
-        from usersim.engine.evaluator.scorers import (
-            get_scorer,
-            list_scorers,
-            load_default_scorers,
-        )
-
-        # Defensively load defaults before inspecting. The scorer
-        # package eagerly registers on import, but tests in the
-        # plugin suite legitimately call ``clear_registry`` for
-        # isolation; running the smoke check inside the same pytest
-        # session as those tests would otherwise observe an empty
-        # registry. ``load_default_scorers`` is idempotent and is
-        # what production does at import time — calling it again
-        # mirrors production state without masking real
-        # registration bugs (an import-time failure in a scorer
-        # module would raise here and be caught by the outer
-        # ``except``).
-        load_default_scorers()
+        from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 
         names = sorted(list_scorers())
         if "tool_use" not in names:

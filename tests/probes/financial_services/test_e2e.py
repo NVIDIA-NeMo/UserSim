@@ -25,7 +25,7 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
+from usersim.engine.evaluator.scorers import get_scorer
 from usersim.engine.probes.financial_services import scorer as FS
 from usersim.engine.probes.financial_services.bank import (
     load_finance_bank_for_locale,
@@ -41,7 +41,6 @@ from usersim.selection.schemas import resolve_columns
 @pytest.fixture(autouse=True)
 def _fresh():
     reset_finance_bank_cache()
-    load_default_scorers()  # ensure the financial_services scorer is registered
     yield
     reset_finance_bank_cache()
 

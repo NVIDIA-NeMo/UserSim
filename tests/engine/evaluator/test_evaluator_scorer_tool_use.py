@@ -59,7 +59,6 @@ class TestRegistration:
     def test_tool_use_resolvable_via_get_scorer(self) -> None:
         # Auto-loaded on package import; fetching it should work without
         # any explicit registration step from the caller.
-        scorers_module.load_default_scorers()  # idempotent re-trigger
         fn = scorers_module.get_scorer("tool_use")
         assert fn is tool_use_module.score_tool_use_trajectory
 

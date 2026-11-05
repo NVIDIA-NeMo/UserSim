@@ -28,12 +28,7 @@ from unittest.mock import patch
 import pytest
 
 from usersim.engine.core._assets import probe_assets_dir
-from usersim.engine.evaluator.scorers import (
-    clear_registry,
-    get_scorer,
-    list_scorers,
-    load_default_scorers,
-)
+from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 from usersim.engine.probes.sov_ai_multilingual_parity.bank import reset_query_bank_cache
 from usersim.engine.probes.sov_ai_multilingual_parity.scorer import (
     _AXES,
@@ -55,14 +50,8 @@ SAMPLE_BANK_PATH = probe_assets_dir("sov_ai_multilingual_parity") / "sample.yaml
 
 @pytest.fixture(autouse=True)
 def _reset_state_between_tests():
-    """Start each test with a clean query-bank cache and the bundled
-    scorers registered.
-
-    Other test files clear the scorer registry in their own fixtures;
-    restoring defaults here keeps registration tests order-independent.
-    """
+    """Start each test with a clean query-bank cache."""
     reset_query_bank_cache()
-    load_default_scorers()
     yield
     reset_query_bank_cache()
 
@@ -171,18 +160,7 @@ class TestRegistration:
         assert "sov_ai_multilingual_parity" in list_scorers()
 
     def test_resolvable_via_registry(self) -> None:
-        # Compare by qualname rather than identity: load_default_scorers()
-        # uses importlib.reload, so the eagerly-imported reference may no
-        # longer be the same instance the registry now holds.
-        fn = get_scorer("sov_ai_multilingual_parity")
-        assert fn.__name__ == score_sov_ai_multilingual_parity_trajectory.__name__
-        assert fn.__module__ == score_sov_ai_multilingual_parity_trajectory.__module__
-
-    def test_clear_then_load_defaults_restores_registration(self) -> None:
-        clear_registry()
-        assert "sov_ai_multilingual_parity" not in list_scorers()
-        load_default_scorers()
-        assert "sov_ai_multilingual_parity" in list_scorers()
+        assert get_scorer("sov_ai_multilingual_parity") is score_sov_ai_multilingual_parity_trajectory
 
 
 # ---------------------------------------------------------------------------

@@ -623,7 +623,7 @@ The tables describe the main files.
 | `test_evaluator_config.py` | `TrajectoryEvaluatorConfig` validation, judge-family diversity, defaults |
 | `test_evaluator_generator.py` | `TrajectoryEvaluatorGenerator` (envelope, partial-re-run skip, scorer dispatch, error trapping) |
 | `test_evaluator_judges.py` | `JudgeFamily` registry, `infer_judge_family`, `validate_ensemble_diversity` |
-| `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `reload_scorers`) |
+| `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `load_default_scorers`) |
 | `test_evaluator_scorer_structured_output_schemas.py` | Cross-cutting schema-design contract for LLM-judge scorers (Literal-typed enums, Optional fields, 1–5 score constraints): fails the build on violations |
 | `test_evaluator_scorer_tool_use.py` | 8-axis tool-calling trajectory judge |
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |

@@ -38,7 +38,7 @@ from usersim.engine.core.probing_taxonomy import (
     load_probing_taxonomy_for,
     reset_probing_taxonomy_cache,
 )
-from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
+from usersim.engine.evaluator.scorers import get_scorer
 from usersim.engine.probes.financial_services import probe as G
 from usersim.engine.probes.financial_services import retrieval as R
 from usersim.engine.probes.financial_services import scorer as FS
@@ -89,19 +89,6 @@ def _fresh_taxonomy():
     reset_probing_taxonomy_cache()
     yield
     reset_probing_taxonomy_cache()
-
-
-@pytest.fixture(autouse=True)
-def _ensure_scorers_loaded():
-    """Re-register bundled scorers before each test.
-
-    Evaluator scorer tests (collected before ``probes/``) clear the scorer
-    registry in teardown; the package is already imported so the eager
-    ``load_default_scorers()`` on import will not re-fire. This idempotent
-    reload keeps ``get_scorer("financial_services")`` robust to test order.
-    """
-    load_default_scorers()
-    yield
 
 
 def _cfg(**kw):

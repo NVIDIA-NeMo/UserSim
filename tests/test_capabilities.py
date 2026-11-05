@@ -253,9 +253,8 @@ def test_every_declared_scorer_actually_exists() -> None:
     The symptom is indistinguishable from an untested model -- the cell reads
     Untested with n=0 -- so a typo here is invisible without this check.
     """
-    from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
+    from usersim.engine.evaluator.scorers import get_scorer
 
-    load_default_scorers()
     for scorer in scorers_required_by_capabilities():
         get_scorer(scorer)  # raises KeyError if unregistered
 

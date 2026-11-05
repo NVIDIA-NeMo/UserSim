@@ -177,8 +177,9 @@ JSON Schema to enforce anything against.
 
 from __future__ import annotations
 
+import importlib
 import logging
-from typing import Any, Awaitable, Callable, Iterable
+from typing import Any, Awaitable, Callable
 
 from usersim.engine.core.builtin_packages import builtin_modules
 
@@ -284,29 +285,13 @@ def list_scorers() -> list[str]:
 
 
 def clear_registry() -> None:
-    """Drop all registered scorers — primarily for test isolation."""
-    _REGISTRY.clear()
+    """Drop all registered scorers, for a test that starts from an empty registry.
 
-
-def reload_scorers(scorer_module_paths: Iterable[str]) -> None:
-    """Force re-execution of scorer modules so ``register_scorer`` fires.
-
-    Uses ``importlib.reload`` (not ``import_module``) so that previously-
-    imported modules re-trigger their top-level ``register_scorer(...)``
-    calls. This is what makes ``load_default_scorers()`` idempotently
-    correct even after a test's ``clear_registry()`` has wiped state.
-
-    Best-effort: a missing or import-error module is logged but not
-    fatal — other scorers still get a chance to register.
+    The bundled scorers register when their modules are first imported, so
+    they do not come back after this; ``usersim.testing.registry_snapshot``
+    puts them back when the test's block exits.
     """
-    import importlib
-
-    for path in scorer_module_paths:
-        try:
-            mod = importlib.import_module(path)
-            importlib.reload(mod)
-        except Exception as e:
-            logger.warning(f"  |-- evaluator.scorers: failed to (re)load {path!r}: {e}")
+    _REGISTRY.clear()
 
 
 # ── Bundled scorers shipped with this plugin ──────────────────────
@@ -324,8 +309,17 @@ DEFAULT_SCORER_MODULES: tuple[str, ...] = (
 
 
 def load_default_scorers() -> None:
-    """Ensure all bundled scorers are registered: this package's and each built-in package's. Idempotent."""
-    reload_scorers((*DEFAULT_SCORER_MODULES, *builtin_modules("scorer")))
+    """Import every bundled scorer module, this package's and each built-in package's, so each registers.
+
+    Each module registers its scorer the first time it is imported, so calling
+    this again changes nothing. A module that fails to import is logged, and
+    the others still register.
+    """
+    for module in (*DEFAULT_SCORER_MODULES, *builtin_modules("scorer")):
+        try:
+            importlib.import_module(module)
+        except Exception as e:
+            logger.warning(f"  |-- evaluator.scorers: failed to load {module!r}: {e}")
 
 
 # Eagerly load on package import so users do not have to call
