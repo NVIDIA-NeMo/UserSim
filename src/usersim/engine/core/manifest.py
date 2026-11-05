@@ -99,6 +99,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from usersim.engine.models_file import BUILTIN_PROVIDER_API_KEY_ENV, BUILTIN_PROVIDER_ENDPOINTS
+
 logger = logging.getLogger("usersim.engine")
 
 
@@ -658,21 +660,6 @@ def _decode_json_field(raw: Any) -> Any:
 # ---------------------------------------------------------------------------
 
 
-# Mirrors cli/_models.py::_BUILTIN_PROVIDER_API_KEY_ENV +
-# _BUILTIN_PROVIDER_ENDPOINTS. Duplicated here because usersim.engine
-# core must not depend on cli/. Keep in sync.
-_BUILTIN_PROVIDER_API_KEY_ENV: dict[str, str] = {
-    "nvidia": "NVIDIA_API_KEY",
-    "openai": "OPENAI_API_KEY",
-    "openrouter": "OPENROUTER_API_KEY",
-}
-_BUILTIN_PROVIDER_ENDPOINTS: dict[str, str] = {
-    "nvidia": "https://integrate.api.nvidia.com/v1",
-    "openai": "https://api.openai.com/v1",
-    "openrouter": "https://openrouter.ai/api/v1",
-}
-
-
 def _resolve_models(
     *,
     model_specs: Sequence[Any],
@@ -680,12 +667,12 @@ def _resolve_models(
 ) -> dict[str, ModelIdentity]:
     """Build the alias → :class:`ModelIdentity` map from the simulator's
     typed config (``ModelsConfig.models`` and ``.providers`` from
-    ``cli/_models.py``).
+    ``usersim.engine.models_file``).
 
     ``provider_specs`` carries custom-provider endpoint + api_key env-var
     mappings; built-in providers (``nvidia`` / ``openai`` / ``openrouter``)
-    fall back to the static dicts at module top so we never store the
-    resolved key value.
+    fall back to the provider tables in ``usersim.engine.models_file``, so
+    the resolved key value is never stored.
     """
     custom_by_name: dict[str, Any] = {p.name: p for p in provider_specs}
     out: dict[str, ModelIdentity] = {}
@@ -698,8 +685,8 @@ def _resolve_models(
             endpoint = cp.endpoint
             env_var = cp.api_key
         else:
-            endpoint = _BUILTIN_PROVIDER_ENDPOINTS.get(spec.provider)
-            env_var = _BUILTIN_PROVIDER_API_KEY_ENV.get(spec.provider)
+            endpoint = BUILTIN_PROVIDER_ENDPOINTS.get(spec.provider)
+            env_var = BUILTIN_PROVIDER_API_KEY_ENV.get(spec.provider)
 
         out[spec.alias] = ModelIdentity(
             alias=spec.alias,
@@ -746,7 +733,7 @@ def build_run_manifest(
     """Assemble a :class:`RunManifest` from the inputs the simulator has
     at run-end.
 
-    ``models_config`` is the typed ``ModelsConfig`` from ``cli/_models.py``
+    ``models_config`` is the typed ``ModelsConfig`` from ``usersim.engine.models_file``
     (carries both ``models`` and ``providers``). ``sim_config`` is the
     ``ConversationSimulatorConfig`` for any locale (the snapshot is
     locale-independent — only the ``locale`` field varies and it does not
