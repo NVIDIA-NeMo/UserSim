@@ -56,7 +56,6 @@ from usersim.engine.templates.probe.prompts import DEMO_USER_AGENT_PROMPTS  # ty
 from usersim.extension import (
     BankBackedProbe,
     BankVerbatimMixin,
-    WarningKind,
     register_probe,
 )
 
@@ -93,7 +92,7 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     assets_root = Path(__file__).parent / "assets"  # holds demo_bank_verbatim/, beside this module
     output_columns = ("sovereign_facts_probed",)
     bank_loader = staticmethod(_demo_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
+    placeholder_warning_kind = "used_placeholder_fact"
     bank_version_key: str | None = None  # locale-keyed (inclusion convention)
 
     @classmethod

@@ -65,7 +65,6 @@ from typing import Any
 from usersim.extension import (
     BankBackedProbe,
     BankReframingMixin,
-    WarningKind,
     register_probe,
 )
 
@@ -116,7 +115,7 @@ class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
     assets_root = Path(__file__).parent / "assets"  # holds demo_bank_reframing/, beside this module
     output_columns = ("target_request_id", "strategy_id", "reframings_used")
     bank_loader = staticmethod(_demo_pressure_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
+    placeholder_warning_kind = "used_placeholder_target"
     bank_version_key = "safety"  # non-locale (this probe is locale-independent)
 
     def __init__(self, **kwargs: Any) -> None:

@@ -43,7 +43,7 @@ Side channels emitted on the trajectory:
   taxonomy version (locale-keyed; ``BankBackedProbe`` substrate
   handles via ``bank_version_key=None``).
 - ``SimulationOutcome.warnings`` —
-  ``WarningKind.USED_PLACEHOLDER_TAXONOMY`` appended whenever the
+  the ``used_placeholder_taxonomy`` warning appended whenever the
   taxonomy carried ``placeholder: true`` (substrate-driven).
 """
 
@@ -72,7 +72,6 @@ from usersim.extension import (
     Category,
     ConversationState,
     PreviewField,
-    WarningKind,
     format_persona_for_prompt,
     get_conversation_language,
     language_instruction,
@@ -180,7 +179,9 @@ class SovAiDynamicProbe(BankBackedProbe):
     )
     output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
+    # Flagged per taxonomy rather than per category: the invitations and
+    # sub-topic hints share one reviewer audit.
+    placeholder_warning_kind = "used_placeholder_taxonomy"
     bank_version_key = None  # locale-keyed (the inclusion convention)
 
     @classmethod

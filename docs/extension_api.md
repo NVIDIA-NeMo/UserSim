@@ -61,7 +61,7 @@ does not load the conversation loop.
 | `FailureClass` | How a row failed |
 | `FailureAttribution` | What caused a failure: one of the models, the probe's own logic, or infrastructure |
 | `Provenance` | What a row was built from: persona dataset, prompt and bank versions, code |
-| `WarningKind` | The built-in warning kinds a row can record |
+| `WarningKind` | The warning kinds the engine itself records; a probe records its own, such as its `placeholder_warning_kind`, as a string |
 | `SimulationTrace` | One check or model call during the conversation: its kind, turn, alias, tokens and latency |
 | `TraceKind` | Which check or call a `SimulationTrace` records |
 

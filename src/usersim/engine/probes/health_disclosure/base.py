@@ -35,7 +35,6 @@ from usersim.engine.probes.health_disclosure.mixin import (
 )
 from usersim.extension import (
     BankBackedProbe,
-    WarningKind,
     format_behavioral_profile_for_prompt,
     format_disclosure_instructions,
     format_interaction_style_instructions,
@@ -72,7 +71,7 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
     #: Local-dev override honoured by ``GuardedMoveMixin.guarded_moves_enabled``.
     GUARDED_MOVE_ENV = _MOVES_ENV
     #: Emitted (by BankBackedProbe) whenever the derived profile is a placeholder.
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE
+    placeholder_warning_kind = "used_placeholder_clinical_profile"
     #: The concealment scorer, which scores each client's ``guarded`` rows and skips the rest.
     default_scorers = ("health_disclosure_concealment",)
 

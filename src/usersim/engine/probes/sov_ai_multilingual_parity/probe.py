@@ -30,7 +30,7 @@ Side channels emitted on the trajectory:
 - ``SimulationOutcome.provenance.bank_version["<locale>"]`` — bank
   version used (locale-keyed; ``BankBackedProbe`` substrate handles
   this via ``bank_version_key=None``).
-- ``SimulationOutcome.warnings`` — ``WarningKind.USED_PLACEHOLDER_QUERY``
+- ``SimulationOutcome.warnings`` — the ``used_placeholder_query`` warning
   appended whenever the picked query had ``placeholder: true``
   (substrate handles this).
 """
@@ -60,7 +60,6 @@ from usersim.extension import (
     BankVerbatimMixin,
     ConversationState,
     PreviewField,
-    WarningKind,
     format_persona_for_prompt,
     register_probe,
 )
@@ -155,7 +154,9 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     # Routes through the module-level ``_load_bank`` alias so tests
     # that monkeypatch ``_load_bank`` propagate correctly.
     bank_loader = staticmethod(_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_QUERY
+    # Flagged per query: an entry's renderings in every locale share one
+    # reviewer audit.
+    placeholder_warning_kind = "used_placeholder_query"
     bank_version_key = None  # locale-keyed (the inclusion convention)
 
     @classmethod

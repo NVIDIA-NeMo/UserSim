@@ -149,10 +149,15 @@ class TestEnumExhaustiveness:
 
 
 class TestWarningKinds:
-    """A probe outside this package may emit a prefixed string kind of its own."""
+    """The engine records its own kinds as members; a probe records its own as a lowercase string."""
 
-    def test_a_built_in_value_becomes_its_member(self) -> None:
-        assert SimulationWarning(kind="used_placeholder_fact").kind is WarningKind.USED_PLACEHOLDER_FACT
+    def test_an_engine_value_becomes_its_member(self) -> None:
+        assert SimulationWarning(kind="poor_assistant_response").kind is WarningKind.POOR_ASSISTANT_RESPONSE
+
+    @pytest.mark.parametrize("kind", ["used_placeholder_fact", "id_fabrication"])
+    def test_a_kind_that_names_no_member_reads_back_as_its_string(self, kind: str) -> None:
+        """A stored row's kind loads whether or not the engine has a member for it."""
+        assert SimulationWarning(kind=kind).kind == kind
 
     def test_a_prefixed_string_kind_is_stored_as_given(self) -> None:
         builder = OutcomeBuilder()
@@ -164,32 +169,32 @@ class TestWarningKinds:
 
     @pytest.mark.parametrize("kind", ["slowtool", "My_slow_tool", "my slow tool", "my_", 5])
     def test_an_unusable_kind_is_refused(self, kind) -> None:
-        with pytest.raises(ValueError, match="prefixed lowercase name"):
+        with pytest.raises(ValueError, match="lowercase name such as"):
             SimulationWarning(kind=kind)
 
     @pytest.mark.parametrize(
         ("kind", "placeholder"),
         [
-            *[(member, member.name.startswith("USED_PLACEHOLDER_")) for member in WarningKind],
+            *[(member, False) for member in WarningKind],
+            ("used_placeholder_fact", True),
             ("my_used_placeholder_booking", True),
             ("my_slow_tool", False),
-            ("used_placeholder_recipe", False),
             (None, False),
         ],
         ids=str,
     )
     def test_placeholder_kinds_are_recognised(self, kind, placeholder: bool) -> None:
-        """Built-in ``used_placeholder_*`` kinds and ``<prefix>_used_placeholder_<thing>``; unprefixed names are the built-ins'."""
+        """A built-in probe's ``used_placeholder_<thing>`` and ``<prefix>_used_placeholder_<thing>``; no engine kind."""
         assert is_placeholder_warning_kind(kind) is placeholder
         if isinstance(kind, WarningKind):
             assert is_placeholder_warning_kind(kind.value) is placeholder
 
     def test_a_placeholder_warning_kind_must_mark_placeholder_content(self) -> None:
-        assert placeholder_warning_kind_problem(WarningKind.USED_PLACEHOLDER_FACT) is None
+        assert placeholder_warning_kind_problem("used_placeholder_fact") is None
         assert placeholder_warning_kind_problem("my_used_placeholder_booking") is None
-        assert "must mark placeholder content" in placeholder_warning_kind_problem(WarningKind.ID_FABRICATION)
+        assert "must mark placeholder content" in placeholder_warning_kind_problem(WarningKind.POOR_ASSISTANT_RESPONSE)
         assert "must mark placeholder content" in placeholder_warning_kind_problem("my_slow_tool")
-        assert "prefixed lowercase name" in placeholder_warning_kind_problem("My")
+        assert "lowercase name such as" in placeholder_warning_kind_problem("My")
 
 
 class TestBuilderCounters:
@@ -249,14 +254,14 @@ class TestStatusPromotion:
     def test_ok_with_warning_promotes_to_completed_with_warnings(self) -> None:
         b = OutcomeBuilder()
         b.add_warning(
-            kind=WarningKind.ID_FABRICATION,
+            kind=WarningKind.POOR_ASSISTANT_RESPONSE,
             turn_idx=1,
-            detail="CPF not in persona snapshot",
+            detail="empty reply",
         )
         out = b.finalize(OutcomeStatus.OK)
         assert out.status == OutcomeStatus.COMPLETED_WITH_WARNINGS
         assert len(out.warnings) == 1
-        assert out.warnings[0].kind == WarningKind.ID_FABRICATION
+        assert out.warnings[0].kind == WarningKind.POOR_ASSISTANT_RESPONSE
         assert out.warnings[0].turn_idx == 1
 
     def test_ok_with_user_role_violations_promotes(self) -> None:

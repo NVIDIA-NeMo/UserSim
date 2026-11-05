@@ -41,7 +41,7 @@ Side channels emitted on the trajectory:
   version used (locale-keyed; ``BankBackedProbe`` substrate handles
   this via ``bank_version_key=None``).
 - ``SimulationOutcome.warnings`` —
-  ``WarningKind.USED_PLACEHOLDER_FACT`` appended whenever the picked
+  the ``used_placeholder_fact`` warning appended whenever the picked
   fact had ``placeholder: true`` (substrate-driven).
 """
 
@@ -72,7 +72,6 @@ from usersim.extension import (
     BankVerbatimMixin,
     ConversationState,
     PreviewField,
-    WarningKind,
     format_persona_for_prompt,
     register_probe,
 )
@@ -161,7 +160,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     )
     output_columns = ("sovereign_facts_probed",)
     bank_loader = staticmethod(_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
+    placeholder_warning_kind = "used_placeholder_fact"
     bank_version_key = None  # locale-keyed (the inclusion convention)
 
     @classmethod

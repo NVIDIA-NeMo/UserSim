@@ -45,7 +45,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from usersim.extension import BankBackedProbe, WarningKind, register_probe
+from usersim.extension import BankBackedProbe, register_probe
 
 
 @dataclass
@@ -68,7 +68,7 @@ class DemoCustomTurn1Probe(BankBackedProbe):
     assets_root = Path(__file__).parent / "assets"  # holds demo_custom_turn1/, beside this module
     output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_demo_taxonomy_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
+    placeholder_warning_kind = "used_placeholder_taxonomy"
     bank_version_key: str | None = None  # locale-keyed
 
     def __init__(self, **kwargs: Any) -> None:

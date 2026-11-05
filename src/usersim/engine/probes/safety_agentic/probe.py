@@ -74,7 +74,7 @@ Side channels emitted on the trajectory:
   locale-stratified; same convention `safety_chat_pressure` uses
   with the ``"safety"`` key).
 - ``SimulationOutcome.warnings`` —
-  ``WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION`` appended when the
+  the ``used_placeholder_agentic_action`` warning appended when the
   picked action_request had ``placeholder: true`` (substrate-driven).
 """
 
@@ -109,7 +109,6 @@ from usersim.extension import (
     PreviewField,
     SimulationTrace,
     TraceKind,
-    WarningKind,
     acall_llm,
     assistant_message,
     finalize_completed,
@@ -215,7 +214,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     )
     output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
+    placeholder_warning_kind = "used_placeholder_agentic_action"
     bank_version_key = _BANK_VERSION_KEY  # "agentic" — non-locale
 
     @classmethod

@@ -823,11 +823,10 @@ class BankBackedProbe(BaseProbe):
       a locale and returns the bank. ``Bank`` is duck-typed: the
       substrate only requires ``bank.bank_id``, ``bank.bank_version``,
       and whatever ``derive_task`` consumes.
-    - ``placeholder_warning_kind: WarningKind | str`` — emitted when the
-      derived task has ``placeholder=True``: a
-      ``WarningKind.USED_PLACEHOLDER_*`` member, or, for a probe shipped
-      in its own package, a name of the form
-      ``<prefix>_used_placeholder_<thing>``.
+    - ``placeholder_warning_kind: str`` — emitted when the derived task
+      has ``placeholder=True``: ``used_placeholder_<thing>`` for a probe
+      in this package, or ``<prefix>_used_placeholder_<thing>`` for a
+      probe shipped in its own package.
     - ``bank_version_key: str | None`` — key under which to record
       ``provenance.bank_version[KEY] = bank.bank_version``. ``None``
       (the default) means locale-keyed (the inclusion convention);

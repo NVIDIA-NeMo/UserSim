@@ -35,7 +35,6 @@ from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import (
     FailureClass,
     Provenance,
-    WarningKind,
 )
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.core.probing_taxonomy import (
@@ -461,8 +460,9 @@ class TestSimulateSovAiDynamic:
         assert outcome["status"] in {"ok", "completed_with_warnings"}
         # The shipped pt_BR taxonomy is not marked placeholder, so no
         # placeholder warning should be attached.
-        assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_TAXONOMY.value for w in outcome["warnings"]), (
-            f"unexpected USED_PLACEHOLDER_TAXONOMY warning: {outcome['warnings']}"
+        kind = probe_gen.SovAiDynamicProbe.placeholder_warning_kind
+        assert not any(w["kind"] == kind for w in outcome["warnings"]), (
+            f"unexpected placeholder warning: {outcome['warnings']}"
         )
         # taxonomy_version must be pinned on provenance.
         assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.5.1"
@@ -710,17 +710,14 @@ class TestShouldSucceed:
 
 
 # ---------------------------------------------------------------------------
-# WarningKind.USED_PLACEHOLDER_TAXONOMY enum value
+# The placeholder warning
 # ---------------------------------------------------------------------------
 
 
 class TestPlaceholderTaxonomyWarning:
-    def test_enum_value_stable(self) -> None:
-        assert WarningKind.USED_PLACEHOLDER_TAXONOMY.value == "used_placeholder_taxonomy"
-
-    def test_distinct_from_used_placeholder_fact(self) -> None:
-        assert WarningKind.USED_PLACEHOLDER_TAXONOMY is not WarningKind.USED_PLACEHOLDER_FACT
-        assert WarningKind.USED_PLACEHOLDER_TAXONOMY.value != WarningKind.USED_PLACEHOLDER_FACT.value
+    def test_the_stored_kind_is_stable(self) -> None:
+        """Stored rows carry this value, and the capability report counts them by it."""
+        assert probe_gen.SovAiDynamicProbe.placeholder_warning_kind == "used_placeholder_taxonomy"
 
     async def test_the_warning_names_the_taxonomy_and_its_version(
         self,
@@ -757,7 +754,11 @@ class TestPlaceholderTaxonomyWarning:
             )
 
         outcome = json.loads(result["simulation_outcome"])
-        details = [w["detail"] for w in outcome["warnings"] if w["kind"] == WarningKind.USED_PLACEHOLDER_TAXONOMY.value]
+        details = [
+            w["detail"]
+            for w in outcome["warnings"]
+            if w["kind"] == probe_gen.SovAiDynamicProbe.placeholder_warning_kind
+        ]
         assert details == [
             "task brazil-tiny from tiny_pt_br_taxonomy v0.0.1 is placeholder content; "
             "SME verification recommended before relying on this result"

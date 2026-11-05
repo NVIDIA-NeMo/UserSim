@@ -179,7 +179,7 @@ hole), placeholder-entry discipline, and asset-audit test coverage.
 - **Per client, locale-independent.** One bank per registered probe:
   `assets/{health_therapy_disclosure,health_triage_disclosure,health_decision_support_disclosure,health_general_disclosure}/sample.yaml`.
 - **Bundled banks are SYNTHETIC placeholders** (`placeholder: true`). Any guarded
-  trajectory that uses one records `WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE`,
+  trajectory that uses one records the `used_placeholder_clinical_profile` warning,
   so its concealment scores rest on synthetic ground truth.
 - **Supplying your own bank.** Point `USERSIM_<CLIENT>_PROFILES` at a bank file of the
   same shape (`schema_version` / `client` / `bank_id` / `bank_version` / `entries`,

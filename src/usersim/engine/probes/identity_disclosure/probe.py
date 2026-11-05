@@ -102,7 +102,6 @@ from usersim.extension import (
     BankVerbatimMixin,
     ConversationState,
     UserTurnPolicy,
-    WarningKind,
     format_behavioral_profile_for_prompt,
     format_interaction_style_instructions,
     format_persona_for_prompt,
@@ -156,7 +155,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         "strategy_id",
         "reframings_used",
     )
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_IDENTITY
+    placeholder_warning_kind = "used_placeholder_identity"
     bank_version_key = PROBE_LABEL
     #: Set once the loop asks for the first follow-up, so the opening gate judges only turn 1.
     _opening_written = False

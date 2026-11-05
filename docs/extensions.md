@@ -423,7 +423,7 @@ from usersim.testing import (
 )
 
 import my_bookings.probe  # noqa: F401  registers the probe; discovery is off under test
-from my_bookings.probe import Appointment, draw_booking
+from my_bookings.probe import Appointment, BookingProbe, draw_booking
 from my_bookings.scorer import score
 
 PERSONA = {"first_name": "Ana", "last_name": "Souza", "age": 35, "city": "Recife"}
@@ -450,7 +450,7 @@ async def test_the_user_asks_for_the_drawn_booking_in_their_own_words():
     assert opening == {"role": "user", "content": ScriptedModel.CONTENT["user"]}  # the user model's own words
     assert booking["made"]["after_user_turns"] == 1  # the scripted assistant books on its first reply
     warnings = json.loads(run.row["simulation_outcome"])["warnings"]
-    assert [w["kind"] for w in warnings] == ["my_used_placeholder_booking"]
+    assert [w["kind"] for w in warnings] == [BookingProbe.placeholder_warning_kind]
 
 
 def test_every_drawn_date_reads_two_ways():

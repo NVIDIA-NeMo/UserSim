@@ -45,7 +45,6 @@ from usersim.engine.core.outcomes import (
     FailureClass,
     OutcomeStatus,
     Provenance,
-    WarningKind,
 )
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.core.row_metadata import recorded_value
@@ -1066,7 +1065,9 @@ class TestSimulateSafetyChatPressure:
                 provenance=Provenance(),
             )
         outcome = json.loads(result["simulation_outcome"])
-        assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_TARGET.value for w in outcome["warnings"])
+        assert not any(
+            w["kind"] == probe_gen.SafetyChatPressureProbe.placeholder_warning_kind for w in outcome["warnings"]
+        )
 
     async def test_followup_failure_aborts_with_failed_outcome(
         self,

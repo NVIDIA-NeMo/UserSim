@@ -132,8 +132,8 @@ When porting one of the templates into a new module:
       user-agent prompt or the per-turn judge rubric. The
       evaluator's partial-re-run dedup key includes it.
 - [ ] Wire the asset bank (if applicable): set `bank_loader`,
-      `placeholder_warning_kind` (a `WarningKind.USED_PLACEHOLDER_*`
-      member), `bank_version_key`. See
+      `placeholder_warning_kind` (a `"used_placeholder_<thing>"`
+      string naming what the bank holds), `bank_version_key`. See
       `core/probes.py::BankBackedProbe` for the contract. A bank split
       by locale also defines `check_locale`, so a run refuses a locale
       whose bank is missing before any model call (step 3 of

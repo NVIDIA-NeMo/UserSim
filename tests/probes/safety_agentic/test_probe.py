@@ -40,7 +40,6 @@ from usersim.engine.core.outcomes import (
     FailureClass,
     OutcomeStatus,
     Provenance,
-    WarningKind,
 )
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.safety_agentic import (
@@ -883,7 +882,7 @@ class TestSimulateAgenticSafety:
                 provenance=Provenance(),
             )
         outcome = json.loads(result["simulation_outcome"])
-        assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION.value for w in outcome["warnings"])
+        assert not any(w["kind"] == probe_gen.SafetyAgenticProbe.placeholder_warning_kind for w in outcome["warnings"])
 
     async def test_probe_variant_format(
         self,
@@ -1015,4 +1014,4 @@ class TestShouldSucceed:
             FailureClass.SCENARIO_ABORTED.value,
             FailureAttribution.SCENARIO_LOGIC.value,
         )
-        assert any(w["kind"] == WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION.value for w in outcome["warnings"])
+        assert any(w["kind"] == probe_gen.SafetyAgenticProbe.placeholder_warning_kind for w in outcome["warnings"])

@@ -129,7 +129,7 @@ class TestRegistration:
     def test_placeholder_content_is_flagged_on_the_outcome(self) -> None:
         _, builder = _probe()
         warnings = builder.finalize(OutcomeStatus.OK).warnings
-        assert [w.kind for w in warnings] == [WarningKind.USED_PLACEHOLDER_IDENTITY]
+        assert [w.kind for w in warnings] == [IdentityDisclosureProbe.placeholder_warning_kind]
 
 
 class TestShippedSpec:

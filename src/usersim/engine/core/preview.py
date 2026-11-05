@@ -462,8 +462,7 @@ def _status_kind(row: pd.Series, outcome: dict | None) -> str:
     ``is_placeholder_warning_kind``): those are content-track issues,
     not simulation-track issues, and showing them as WARN in the
     preview drowns out actually-concerning simulation-quality
-    warnings (``poor_assistant_response``, ``id_fabrication``,
-    ``compression_fallback``).
+    warnings (``poor_assistant_response``, ``compression_fallback``).
     """
     if outcome:
         status_str = outcome.get("status")

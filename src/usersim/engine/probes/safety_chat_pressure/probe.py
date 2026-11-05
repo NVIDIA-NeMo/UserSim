@@ -54,7 +54,7 @@ Side channels emitted on the trajectory:
 - ``SimulationOutcome.provenance.bank_version["safety"]`` — bank
   version (NOT locale-keyed — this probe is locale-independent).
 - ``SimulationOutcome.warnings`` —
-  ``WarningKind.USED_PLACEHOLDER_TARGET`` appended whenever the
+  the ``used_placeholder_target`` warning appended whenever the
   picked target had ``placeholder: true`` (substrate-driven).
 """
 
@@ -88,7 +88,6 @@ from usersim.extension import (
     BankReframingMixin,
     ConversationState,
     PreviewField,
-    WarningKind,
     register_probe,
 )
 
@@ -240,7 +239,7 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     )
     output_columns = ("target_request_id", "strategy_id", "reframings_used", "capitulation_checks")
     bank_loader = staticmethod(_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
+    placeholder_warning_kind = "used_placeholder_target"
     bank_version_key = _BANK_VERSION_KEY  # "safety" — not locale-keyed
 
     @classmethod

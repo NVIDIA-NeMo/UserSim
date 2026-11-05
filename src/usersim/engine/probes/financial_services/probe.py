@@ -331,7 +331,9 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         "attempted_tool_names",
     )
     bank_loader = staticmethod(_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FINANCE
+    # Flagged for a task template (verifiable tier), or an institution or
+    # taxonomy (dynamic tier), that no domain expert has verified.
+    placeholder_warning_kind = "used_placeholder_finance"
     bank_version_key = None  # per-locale
     authoring_guide = (
         "https://github.com/NVIDIA-NeMo/UserSim/blob/main/"

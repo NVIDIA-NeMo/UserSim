@@ -21,7 +21,7 @@ discovers institutions by finding each `institution_meta.yaml` (layout-agnostic)
 All files share `schema_version: v0.1`. All AI-authored content carries
 `placeholder: true`. A trajectory built on a placeholder task template (verifiable
 tier), or on a placeholder institution or taxonomy (dynamic tier), records
-`WarningKind.USED_PLACEHOLDER_FINANCE`, and subject-matter expert (SME)
+the `used_placeholder_finance` warning, and subject-matter expert (SME)
 verification is recommended before relying on its results.
 
 Every document / tool / template is scoped to its institution (`institution_id`

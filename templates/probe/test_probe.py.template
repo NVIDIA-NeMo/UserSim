@@ -25,7 +25,7 @@ from usersim.extension import ConversationSimulatorConfig
 from usersim.testing import ScriptedModel, assert_hosted_parity, assert_probe_conforms, run_episode
 
 # Replace with your probe's module. Importing it registers the probe.
-from usersim.engine.probes.YOUR_PROBE import probe  # noqa: F401
+from usersim.engine.probes.YOUR_PROBE import probe
 
 PROBE_LABEL = "YOUR_PROBE"
 
@@ -100,7 +100,7 @@ class TestYourProbe:
         run = await run_episode(PROBE_LABEL, config=CONFIG, persona=PERSONA, data=DATA, language="Portuguese")
 
         kinds = [warning["kind"] for warning in json.loads(run.row["simulation_outcome"])["warnings"]]
-        assert "YOUR_PREFIX_used_placeholder_YOUR_THING" in kinds  # or drop the test for a probe without one
+        assert probe.YourProbe.placeholder_warning_kind in kinds  # rename to your class; drop for a probe without one
 
     async def test_a_host_reproduces_a_standalone_run(self) -> None:
         await assert_hosted_parity(PROBE_LABEL, config=CONFIG, persona=PERSONA, data=DATA, language="Portuguese")

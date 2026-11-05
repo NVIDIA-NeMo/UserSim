@@ -42,7 +42,6 @@ from usersim.engine.core.outcomes import (
     FailureClass,
     OutcomeStatus,
     Provenance,
-    WarningKind,
 )
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.sov_ai_multilingual_parity import (
@@ -858,7 +857,9 @@ class TestSimulateSovAiMultilingualParity:
                 provenance=Provenance(),
             )
         outcome = json.loads(result["simulation_outcome"])
-        assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_QUERY.value for w in outcome["warnings"])
+        assert not any(
+            w["kind"] == probe_gen.SovAiMultilingualParityProbe.placeholder_warning_kind for w in outcome["warnings"]
+        )
 
 
 # ---------------------------------------------------------------------------

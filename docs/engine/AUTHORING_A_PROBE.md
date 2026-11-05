@@ -187,7 +187,7 @@ For `BankBackedProbe` subclasses:
 class MyProbe(BankBackedProbe):
     label = "my_probe"                                          # required
     bank_loader = staticmethod(_my_bank_loader)                 # required
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT  # required
+    placeholder_warning_kind = "used_placeholder_fact"          # required
     bank_version_key: Optional[str] = None                      # default None = locale-keyed
 ```
 
@@ -205,11 +205,12 @@ Get this wrong and the matching scorecard reads from the wrong key
 and silently produces empty rollups.
 
 `placeholder_warning_kind` is the warning a row records when its task rests on
-placeholder content, and the capability report counts those rows per cell. A
-probe in this repository uses a `WarningKind.USED_PLACEHOLDER_*` member. A
-probe shipped in its own package names a kind of its own, as a string of the
-form `<prefix>_used_placeholder_<thing>`, such as
-`"my_used_placeholder_booking"`; the report counts it like the built-in kinds.
+placeholder content, and the capability report counts those rows per cell. It
+is a string the probe declares once: a probe in this repository names its own
+`used_placeholder_<thing>`, such as `"used_placeholder_fact"`, and a probe
+shipped in its own package writes its prefix first, as in
+`"my_used_placeholder_booking"`; the report counts both alike. Tests compare a
+row's warning with the class's `placeholder_warning_kind`, not a literal.
 `@register_probe` refuses a kind that does not mark placeholder content. Other
 warnings a probe adds with `add_warning` take the same prefixed form, such as
 `"my_slow_tool"`.
@@ -833,7 +834,6 @@ from usersim.engine.probes.bookings.prompts import BOOKINGS_USER_PROMPTS
 from usersim.extension import (
     BankBackedProbe,
     ToolExecutionMixin,
-    WarningKind,
     format_persona_for_prompt,
     persona_uuid,
     register_probe,
@@ -869,7 +869,7 @@ class BookingsProbe(ToolExecutionMixin, BankBackedProbe):
         "written the way people write them in the user's language."
     )
     bank_loader = staticmethod(_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_BOOKING
+    placeholder_warning_kind = "used_placeholder_booking"
     output_columns = ("booking_id", "booking")
 
     @classmethod
@@ -937,19 +937,7 @@ class BookingsProbe(ToolExecutionMixin, BankBackedProbe):
 - The user model writes every user turn, the first included, and the probe
   keeps `BaseProbe`'s gate prompt (Step 5) to check each one.
 
-### File 6: the placeholder warning
-
-In [`src/usersim/engine/core/outcomes.py`](../../src/usersim/engine/core/outcomes.py),
-add the probe's kind to `WarningKind`, beside the other `USED_PLACEHOLDER_*`
-members:
-
-```python
-    # Flagged when a bookings trajectory ran against a booking marked
-    # ``placeholder: true`` in its bank.
-    USED_PLACEHOLDER_BOOKING = "used_placeholder_booking"
-```
-
-### File 7: built-in package roster
+### File 6: built-in package roster
 
 In [`src/usersim/engine/core/builtin_packages.py`](../../src/usersim/engine/core/builtin_packages.py),
 add the package to `BUILTIN_PACKAGES`, at the place its capability rows
@@ -979,7 +967,7 @@ names and arguments; `ProbeEpisodeRuntime` assigns the indices. Author probe
 logic against those supplied indices rather than reconstructing host
 transcript positions.
 
-### File 8: tests at `tests/probes/bookings/test_probe.py`
+### File 7: tests at `tests/probes/bookings/test_probe.py`
 
 Copy [`templates/probe/test_probe.py.template`](../../templates/probe/test_probe.py.template)
 there, beside an `__init__.py`, substitute `bookings` for `YOUR_PROBE`, and fill in the

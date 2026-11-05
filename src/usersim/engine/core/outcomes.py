@@ -113,51 +113,14 @@ class TraceKind(str, Enum):
 
 
 class WarningKind(str, Enum):
-    """Structured warning kinds for ``SimulationOutcome.warnings``.
+    """The warning kinds the engine itself records in ``SimulationOutcome.warnings``.
 
-    The kinds this package emits. A probe shipped in its own package may emit
-    a kind of its own as a string instead (see ``warning_kind_problem``).
+    A probe records a kind of its own as a string (see ``warning_kind_problem``),
+    such as the ``placeholder_warning_kind`` it declares.
     """
 
-    ID_FABRICATION = "id_fabrication"
     COMPRESSION_FALLBACK = "compression_fallback"
     POOR_ASSISTANT_RESPONSE = "poor_assistant_response"
-    # Flagged when a trajectory probed a fact that was marked
-    # ``placeholder: true`` in its bank. Like every ``USED_PLACEHOLDER_*``
-    # kind below, it is recorded on the outcome so a reader can tell which
-    # findings rest on placeholder content.
-    USED_PLACEHOLDER_FACT = "used_placeholder_fact"
-    # Flagged when a trajectory probed against a sov_ai_dynamic
-    # taxonomy that was marked ``placeholder: true`` at the file level.
-    # The flag is per taxonomy rather than per category, because the
-    # invitations and sub-topic hints share one reviewer audit.
-    USED_PLACEHOLDER_TAXONOMY = "used_placeholder_taxonomy"
-    # Flagged when a trajectory probed against a query that was marked
-    # ``placeholder: true`` in its query bank, for the cross-locale
-    # ``sov_ai_multilingual_parity`` probe. The flag is per query, because
-    # an entry's N locale renderings share one reviewer audit.
-    USED_PLACEHOLDER_QUERY = "used_placeholder_query"
-    # Flagged when a safety_chat_pressure trajectory probed against a
-    # target_request marked ``placeholder: true`` in its
-    # pressure-strategy bank.
-    USED_PLACEHOLDER_TARGET = "used_placeholder_target"
-    # Flagged when a safety_agentic trajectory probed against an
-    # action_request marked ``placeholder: true`` in its agentic-action
-    # bank.
-    USED_PLACEHOLDER_AGENTIC_ACTION = "used_placeholder_agentic_action"
-    # Flagged when a financial_services trajectory ran against a task
-    # template (verifiable tier), or an institution or taxonomy (dynamic
-    # tier), marked ``placeholder: true`` (no domain expert has verified it).
-    USED_PLACEHOLDER_FINANCE = "used_placeholder_finance"
-    # Flagged when a health_disclosure trajectory used a clinical profile
-    # marked ``placeholder: true`` in its clinical-profile bank (the bundled
-    # synthetic banks are all placeholders until a customer ships real ground
-    # truth).
-    USED_PLACEHOLDER_CLINICAL_PROFILE = "used_placeholder_clinical_profile"
-    # Flagged when an identity_disclosure trajectory drew on a spec, tactic
-    # or strategy marked ``placeholder: true`` (phrasings, vocabulary and
-    # expected identities no domain expert has verified).
-    USED_PLACEHOLDER_IDENTITY = "used_placeholder_identity"
     # Flagged when a trajectory's verbatim turn-1 was machine-translated
     # from an India base-locale (en_IN) bank into the conversation
     # language, because that language has no native bank of its own;
@@ -169,9 +132,10 @@ class WarningKind(str, Enum):
     USED_MACHINE_TRANSLATION = "used_machine_translation"
 
 
-PLACEHOLDER_WARNING_KINDS: frozenset[str] = frozenset(
-    kind.value for kind in WarningKind if kind.name.startswith("USED_PLACEHOLDER_")
-)
+#: The start of a built-in probe's placeholder warning kind, such as
+#: ``used_placeholder_fact``; a probe outside this package writes it after its
+#: prefix, as in ``my_used_placeholder_booking``.
+PLACEHOLDER_KIND_MARKER = "used_placeholder_"
 
 #: A warning kind a probe outside this package defines: lowercase words joined
 #: by underscores, led by the package's own prefix, such as ``my_slow_tool``.
@@ -181,25 +145,28 @@ _EXTENSION_WARNING_KIND = re.compile(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)+")
 def warning_kind_problem(kind: object) -> str | None:
     """Why ``kind`` cannot be a warning kind, or ``None`` when it can.
 
-    A ``WarningKind`` member, or a string: either a built-in kind's value or a
-    prefixed lowercase name such as ``my_slow_tool``.
+    A ``WarningKind`` member, or a lowercase name of words joined by
+    underscores: a built-in probe's kind such as ``used_placeholder_fact``, or
+    a prefixed one such as ``my_slow_tool``.
     """
     if isinstance(kind, WarningKind):
         return None
     if isinstance(kind, str) and _EXTENSION_WARNING_KIND.fullmatch(kind):
         return None
-    return f"must be a WarningKind or a prefixed lowercase name such as 'my_slow_tool', got {kind!r}"
+    return f"must be a WarningKind or a lowercase name such as 'my_slow_tool', got {kind!r}"
 
 
 def is_placeholder_warning_kind(kind: object) -> bool:
     """Whether a warning kind marks placeholder content.
 
-    A built-in ``used_placeholder_*`` kind, or a kind of the form
-    ``<prefix>_used_placeholder_<thing>`` from a probe outside this package.
-    Stored rows hold the kind as a string; either form is read.
+    A built-in probe's ``used_placeholder_<thing>`` kind, or a kind of the
+    form ``<prefix>_used_placeholder_<thing>`` from a probe outside this
+    package. Stored rows hold the kind as a string; either form is read.
     """
     value = kind.value if isinstance(kind, WarningKind) else kind
-    return isinstance(value, str) and (value in PLACEHOLDER_WARNING_KINDS or "_used_placeholder_" in value)
+    return isinstance(value, str) and (
+        value.startswith(PLACEHOLDER_KIND_MARKER) or f"_{PLACEHOLDER_KIND_MARKER}" in value
+    )
 
 
 def placeholder_warning_kind_problem(kind: object) -> str | None:
@@ -213,8 +180,8 @@ def placeholder_warning_kind_problem(kind: object) -> str | None:
         return problem
     if not is_placeholder_warning_kind(kind):
         return (
-            "must mark placeholder content: a WarningKind.USED_PLACEHOLDER_* member, or a name of "
-            f"the form '<prefix>_used_placeholder_<thing>', got {kind!r}"
+            "must mark placeholder content: a name of the form 'used_placeholder_<thing>', or "
+            f"'<prefix>_used_placeholder_<thing>' for a probe outside this package, got {kind!r}"
         )
     return None
 

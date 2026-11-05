@@ -55,7 +55,6 @@ from usersim.extension import (
     BankBackedProbe,
     ConversationState,
     OutcomeBuilder,
-    WarningKind,
     finalize_completed,
     make_result,
     outcome_builder_scope,
@@ -85,7 +84,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     assets_root = Path(__file__).parent / "assets"  # holds demo_agentic/, beside this module
     output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_demo_agentic_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
+    placeholder_warning_kind = "used_placeholder_agentic_action"
     bank_version_key = "agentic"  # non-locale
 
     def __init__(self, **kwargs: Any) -> None:

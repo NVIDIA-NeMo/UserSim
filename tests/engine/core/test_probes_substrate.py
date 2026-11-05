@@ -32,7 +32,6 @@ from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     OutcomeStatus,
     Provenance,
-    WarningKind,
 )
 from usersim.engine.core.probes import (
     BankBackedProbe,
@@ -219,7 +218,7 @@ def _stub_bank_loader_locale_independent() -> _StubBank:
 class _SubclassedBankProbe(BankBackedProbe):
     label = "bank_test"
     bank_loader = staticmethod(_stub_bank_loader_locale_aware)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
+    placeholder_warning_kind = "used_placeholder_fact"
     bank_version_key = None  # locale-keyed
 
     def get_user_system_prompt(self) -> str:
@@ -242,7 +241,7 @@ class _PlaceholderBankProbe(_SubclassedBankProbe):
 class _LocaleIndependentBankProbe(BankBackedProbe):
     label = "bank_test_locale_independent"
     bank_loader = staticmethod(_stub_bank_loader_locale_independent)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
+    placeholder_warning_kind = "used_placeholder_target"
     bank_version_key = "safety"
 
     def get_user_system_prompt(self) -> str:
@@ -316,7 +315,7 @@ class TestBankBackedProbe:
             ).OutcomeStatus.OK
         )
         kinds = [w.kind for w in outcome.warnings]
-        assert WarningKind.USED_PLACEHOLDER_FACT in kinds
+        assert _PlaceholderBankProbe.placeholder_warning_kind in kinds
 
     def test_placeholder_warning_names_the_recorded_bank_version(self) -> None:
         builder, prov = self._build_outcome()
@@ -329,7 +328,7 @@ class TestBankBackedProbe:
             provenance=prov,
         )
         outcome = builder.finalize(OutcomeStatus.OK)
-        [detail] = [w.detail for w in outcome.warnings if w.kind == WarningKind.USED_PLACEHOLDER_FACT]
+        [detail] = [w.detail for w in outcome.warnings if w.kind == _PlaceholderBankProbe.placeholder_warning_kind]
         assert detail == (
             f"task placeholder_task from bank_en_US {prov.bank_version['en_US']} is placeholder content; "
             "SME verification recommended before relying on this result"
