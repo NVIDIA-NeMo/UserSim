@@ -101,9 +101,9 @@ rather than from trajectories. The rows exist; nothing asks about them.
 
 `usersim.capabilities` closes that. If you contribute a probe, contribute the
 capability it provides evidence for. A built-in probe declares its capabilities
-in its package's `capabilities.py`, which `BUILTIN_CAPABILITY_MODULES` in
-`taxonomy/capabilities.py` lists in report order, after the capabilities every
-probe feeds.
+in its package's `capabilities.py`, which the report reads in the order of
+`BUILTIN_PACKAGES` (`engine/core/builtin_packages.py`), after the capabilities
+every probe feeds.
 
 ## Validating an extension
 

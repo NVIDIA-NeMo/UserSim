@@ -411,9 +411,11 @@ Quick orientation:
    class to the registry and set the class's `family` /
    `prompt_version` / `variants`, which the dispatcher and the smoke
    check read.
-5. Add your module's import path to `BUILTIN_PROBE_MODULES` in
-   [`core/probes.py`](../../src/usersim/engine/core/probes.py), so the
-   registry imports it and runs your probe's `@register_probe`.
+5. Add your package's name to `BUILTIN_PACKAGES` in
+   [`core/builtin_packages.py`](../../src/usersim/engine/core/builtin_packages.py),
+   so the registry imports its `probe` module, which runs your probe's
+   `@register_probe`, and its `scorer`, `capabilities` and `asset_domain`
+   modules when it has them.
 6. Declare every column `build_result_extras` writes beyond the core
    ones in the class's `output_columns`. An undeclared column is
    discarded on the way to storage (with a warning in the log), and the
@@ -432,8 +434,8 @@ hook), see the source-of-truth docstrings in
 `TrajectoryEvaluatorConfig` (see Trajectory Evaluator section). Add
 new axes to `evaluator/axes.py::PROBE_SCORES` if needed; add a
 scorer as `scorer.py` in the probe's package
-(`engine/probes/your_probe/scorer.py`) and include its module path in
-`DEFAULT_SCORER_MODULES` to register it on import; name it in `--scorers` to
+(`engine/probes/your_probe/scorer.py`), which registers on import once the
+package is in `BUILTIN_PACKAGES`; name it in `--scorers` to
 run it, or list it in the probe's `default_scorers` so `--scorers auto` runs
 it.
 

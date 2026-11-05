@@ -25,9 +25,12 @@ The class *is* the registration; there is no separate label table to edit. A
 second class registered under a taken label raises `ProbeRegistrationError`,
 naming both classes, so give each probe a label of its own.
 
-Shipped probes are listed by module in `BUILTIN_PROBE_MODULES`
-(`core/probes.py`); the registry imports them the first time a probe is
-looked up, which is when their decorators run. Out-of-tree probes are
+Shipped probes are listed by package in `BUILTIN_PACKAGES`
+(`core/builtin_packages.py`); the registry imports each package's `probe`
+module the first time a probe is looked up, which is when their decorators
+run, and the scorer registry, the capability report and the asset commands
+read the package's `scorer`, `capabilities` and `asset_domain` modules from
+the same list. Out-of-tree probes are
 imported through the `usersim.probes` entry-point group instead.
 
 ## Hooks

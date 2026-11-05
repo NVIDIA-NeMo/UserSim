@@ -41,9 +41,10 @@ from usersim.cli._persona_language import (
     persona_sampler_params,
 )
 from usersim.engine.core._assets import probe_assets_dir, reset_runtime_assets_dir, set_runtime_assets_dir
+from usersim.engine.core.builtin_packages import builtin_modules
 from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES, persona_dataset_locale
 from usersim.engine.core.persona import persona_name_template
-from usersim.engine.core.probes import BUILTIN_PROBE_MODULES, NO_THEME, SEED_DATASET_SUFFIXES, resolve_probe
+from usersim.engine.core.probes import NO_THEME, SEED_DATASET_SUFFIXES, resolve_probe
 from usersim.engine.core.probes import known_probes as _known_probes
 from usersim.engine.errors import ConfigError
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
@@ -197,7 +198,7 @@ def _remedies(probes_missing_a_locale: Sequence[type[BaseProbe]]) -> list[str]:
     remedies = [
         "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them."
     ]
-    if any(cls.__module__ in BUILTIN_PROBE_MODULES for cls in probes_missing_a_locale):
+    if any(cls.__module__ in builtin_modules("probe") for cls in probes_missing_a_locale):
         remedies.append(f"To ask for a locale, open a feature request: {_FEATURE_REQUEST_URL}")
     remedies.extend(
         f"To build a {cls.label} bank yourself, see {cls.authoring_guide}"

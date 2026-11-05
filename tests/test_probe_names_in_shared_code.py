@@ -20,7 +20,8 @@ import ast
 from collections import Counter
 from pathlib import Path
 
-from usersim.engine.core.probes import BUILTIN_PROBE_MODULES, known_probes, resolve_probe
+from usersim.engine.core.builtin_packages import builtin_modules
+from usersim.engine.core.probes import known_probes, resolve_probe
 
 _SRC = Path(__file__).resolve().parents[1] / "src" / "usersim"
 _PROBE_PACKAGES = _SRC / "engine" / "probes"
@@ -30,6 +31,7 @@ _PROBE_PACKAGES = _SRC / "engine" / "probes"
 _ALLOWED: dict[str, int] = {
     "cli/_pipeline.py": 4,
     "cli/smoke.py": 2,
+    "engine/core/builtin_packages.py": 10,  # the roster names every built-in package
     "engine/core/preview.py": 3,
     "engine/evaluator/axes.py": 6,
     "reporting/capability_report.py": 1,
@@ -38,7 +40,7 @@ _ALLOWED: dict[str, int] = {
 
 
 def _builtin_labels() -> set[str]:
-    return {label for label in known_probes() if resolve_probe(label).__module__ in BUILTIN_PROBE_MODULES}
+    return {label for label in known_probes() if resolve_probe(label).__module__ in builtin_modules("probe")}
 
 
 def _docstring_nodes(tree: ast.Module) -> set[int]:

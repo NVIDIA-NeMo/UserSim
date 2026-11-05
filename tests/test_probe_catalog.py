@@ -8,7 +8,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from usersim.engine.core.probes import BUILTIN_PROBE_MODULES, known_probes, resolve_probe
+from usersim.engine.core.builtin_packages import builtin_modules
+from usersim.engine.core.probes import known_probes, resolve_probe
 
 _CATALOG = Path(__file__).resolve().parents[1] / "docs" / "probes.md"
 _HEADER = "| Family | Probe | Catches |"
@@ -30,5 +31,5 @@ def _catalog_probes() -> list[str]:
 
 
 def test_the_catalog_lists_each_built_in_probe_once():
-    built_in = sorted(label for label in known_probes() if resolve_probe(label).__module__ in BUILTIN_PROBE_MODULES)
+    built_in = sorted(label for label in known_probes() if resolve_probe(label).__module__ in builtin_modules("probe"))
     assert sorted(_catalog_probes()) == built_in

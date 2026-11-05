@@ -544,8 +544,8 @@ def _pinned_bank_version(trajectory: dict[str, Any], locale: str) -> str | None:
     return None
 
 
-# Auto-register on import so the evaluator picks this up once the module
-# is listed in DEFAULT_SCORER_MODULES.
+# Registers on import; the scorer registry imports this module because the
+# package is in BUILTIN_PACKAGES.
 register_scorer(
     "sov_ai_multilingual_parity",
     score_sov_ai_multilingual_parity_trajectory,

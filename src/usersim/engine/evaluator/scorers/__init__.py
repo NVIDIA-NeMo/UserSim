@@ -180,6 +180,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Awaitable, Callable, Iterable
 
+from usersim.engine.core.builtin_packages import builtin_modules
+
 logger = logging.getLogger("usersim.engine")
 
 # trajectory-row-dict + models -> structured-result-dict
@@ -310,27 +312,20 @@ def reload_scorers(scorer_module_paths: Iterable[str]) -> None:
 # ── Bundled scorers shipped with this plugin ──────────────────────
 # Auto-imported here so they are present in the registry as soon as
 # ``usersim.engine.evaluator.scorers`` is imported (which the
-# evaluator generator does indirectly via ``get_scorer``). Future
-# probes add their scorer modules to this list.
+# evaluator generator does indirectly via ``get_scorer``).
+#: The scorers in this package, which serve more than one probe. A built-in
+#: probe package's own scorer is its ``scorer.py``, found through ``BUILTIN_PACKAGES``.
 DEFAULT_SCORER_MODULES: tuple[str, ...] = (
     "usersim.engine.evaluator.scorers.tool_use",
-    "usersim.engine.probes.sov_ai_facts.scorer",
-    "usersim.engine.probes.sov_ai_dynamic.scorer",
-    "usersim.engine.probes.sov_ai_multilingual_parity.scorer",
-    "usersim.engine.probes.safety_chat_pressure.scorer",
-    "usersim.engine.probes.safety_agentic.scorer",
-    "usersim.engine.probes.financial_services.scorer",
     "usersim.engine.evaluator.scorers.language_compliance",
     "usersim.engine.evaluator.scorers.response_shape",
     "usersim.engine.evaluator.scorers.refusal_basics",
-    "usersim.engine.probes.health_disclosure.scorer",
-    "usersim.engine.probes.identity_disclosure.scorer",
 )
 
 
 def load_default_scorers() -> None:
-    """Ensure all bundled scorers are registered. Idempotent."""
-    reload_scorers(DEFAULT_SCORER_MODULES)
+    """Ensure all bundled scorers are registered: this package's and each built-in package's. Idempotent."""
+    reload_scorers((*DEFAULT_SCORER_MODULES, *builtin_modules("scorer")))
 
 
 # Eagerly load on package import so users do not have to call

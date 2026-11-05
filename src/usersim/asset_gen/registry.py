@@ -10,8 +10,8 @@ region_spec directory + an ``add_gen_args`` hook that injects domain-specific CL
 flags. The heavy domain modules are imported lazily inside the callables so
 ``usersim --help`` stays fast; ``add_gen_args`` is pure argparse (no import).
 
-A built-in domain lives beside the probe whose banks it builds and is named in
-``BUILTIN_DOMAINS``; an extension's domain registers under ``usersim.asset_domains``.
+A built-in domain lives beside the probe whose banks it builds, in its package's
+``asset_domain.py``; an extension's domain registers under ``usersim.asset_domains``.
 Neither adds a CLI subcommand. There is deliberately NO generic
 ``asset_gen/core/`` engine -- generation internals are domain-specific; only this
 thin dispatch is shared.
@@ -24,6 +24,8 @@ import importlib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
+
+from usersim.engine.core.builtin_packages import builtin_modules
 
 
 @dataclass(frozen=True)
@@ -47,17 +49,15 @@ class AssetDomain:
 
 # ── built-in domains ─────────────────────────────────────────────────────
 
-#: The built-in domains, each a ``module:function`` naming a zero-argument factory
-#: that returns the domain. A built-in domain lives beside the probe whose banks
-#: it builds, in a module that imports none of its generator.
-BUILTIN_DOMAINS: tuple[str, ...] = ("usersim.engine.probes.financial_services.asset_domain:asset_domain",)
-
 
 def _builtin_domains() -> dict[str, AssetDomain]:
+    """The domain each built-in package's ``asset_domain.py`` returns from its ``asset_domain()`` factory.
+
+    The module lives beside the probe whose banks it builds and imports none of its generator.
+    """
     domains = {}
-    for target in BUILTIN_DOMAINS:
-        module, _, factory = target.partition(":")
-        domain = getattr(importlib.import_module(module), factory)()
+    for module in builtin_modules("asset_domain"):
+        domain = importlib.import_module(module).asset_domain()
         domains[domain.name] = domain
     return domains
 

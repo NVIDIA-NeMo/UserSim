@@ -15,7 +15,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-from usersim.engine.core.probes import BUILTIN_PROBE_MODULES
+from usersim.engine.core.builtin_packages import builtin_modules
 
 _PROBE_PACKAGES = Path(__file__).resolve().parents[1] / "src" / "usersim" / "engine" / "probes"
 _PUBLIC = frozenset({"usersim.extension", "usersim.testing"})
@@ -46,7 +46,7 @@ def _internal_imports(package: Path) -> set[str]:
 
 def test_the_scan_covers_every_built_in_probe():
     scanned = {package.name for package in _packages()}
-    unscanned = sorted(module for module in BUILTIN_PROBE_MODULES if module.split(".")[3] not in scanned)
+    unscanned = sorted(module for module in builtin_modules("probe") if module.split(".")[3] not in scanned)
     assert not unscanned, f"built-in probe modules outside the scanned packages: {unscanned}"
 
 

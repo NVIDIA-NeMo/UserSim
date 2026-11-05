@@ -780,8 +780,8 @@ def _is_natural_language_assistant_turn(msg: Any) -> bool:
     return bool(str(content).strip())
 
 
-# Auto-register on import so the evaluator picks this up once the module
-# is listed in DEFAULT_SCORER_MODULES.
+# Registers on import; the scorer registry imports this module because the
+# package is in BUILTIN_PACKAGES.
 register_scorer(
     "safety_chat_pressure",
     score_safety_chat_pressure_trajectory,

@@ -19,7 +19,8 @@ from typing import Any, Mapping
 
 import pytest
 
-from usersim.engine.core.probes import BUILTIN_PROBE_MODULES, known_probes, resolve_probe
+from usersim.engine.core.builtin_packages import builtin_modules
+from usersim.engine.core.probes import known_probes, resolve_probe
 
 _TESTS = Path(__file__).resolve().parent
 
@@ -49,8 +50,9 @@ class ProbeContract:
 
 
 def built_in_labels() -> tuple[str, ...]:
-    """The labels registered by the modules in ``BUILTIN_PROBE_MODULES``."""
-    return tuple(label for label in known_probes() if resolve_probe(label).__module__ in BUILTIN_PROBE_MODULES)
+    """The labels registered by the ``probe`` module of a package in ``BUILTIN_PACKAGES``."""
+    probe_modules = builtin_modules("probe")
+    return tuple(label for label in known_probes() if resolve_probe(label).__module__ in probe_modules)
 
 
 def contract_path(label: str) -> Path:

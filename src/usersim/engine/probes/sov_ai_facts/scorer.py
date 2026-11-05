@@ -641,6 +641,6 @@ def _error_result(
     }
 
 
-# Auto-register on import so the evaluator picks this up once the
-# module is listed in DEFAULT_SCORER_MODULES.
+# Registers on import; the scorer registry imports this module because the
+# package is in BUILTIN_PACKAGES.
 register_scorer("sov_ai_facts", score_sov_ai_facts_trajectory)

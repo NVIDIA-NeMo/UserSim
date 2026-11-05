@@ -4,9 +4,9 @@
 """The built-in probes, one package each.
 
 Every probe here is a ``BaseProbe`` subclass that ``@register_probe`` adds to
-the registry when its module is imported. The registry imports every module
-listed in ``usersim.engine.core.probes.BUILTIN_PROBE_MODULES`` the first time a
-probe is looked up, which runs the decorators. ``docs/probes.md`` is the
+the registry when its module is imported. The registry imports the ``probe``
+module of each package in ``usersim.engine.core.builtin_packages.BUILTIN_PACKAGES``
+the first time a probe is looked up, which runs the decorators. ``docs/probes.md`` is the
 catalog: which probe catches which failure mode.
 
 See ``usersim.engine.core.probes`` for the substrate

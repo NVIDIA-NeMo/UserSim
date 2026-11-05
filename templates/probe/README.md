@@ -109,10 +109,9 @@ See the per-shape generator file in this directory for a copy-pasteable starter.
 - **Out-of-sim judges** (live in the probe's own package, as
   `engine/probes/<your_probe>/scorer.py`): any LLM- or rule-based
   scoring that judges the *assistant under test*. The simulator never
-  runs these. Add the module path,
-  `usersim.engine.probes.<your_probe>.scorer`, to
-  `evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES` so the
-  auto-load path picks it up.
+  runs these. The scorer registry imports the `scorer.py` of every
+  package in `BUILTIN_PACKAGES`, so it registers once your package is
+  listed there.
 
 See [Wiring the out-of-sim scorer](../../docs/engine/AUTHORING_A_PROBE.md#wiring-the-out-of-sim-scorer)
 for the rationale.
@@ -166,16 +165,16 @@ When porting one of the templates into a new module:
       absent by your scorer, which reports the trajectory as having
       nothing to score while the run looks fine. See step 6 of
       `docs/engine/AUTHORING_A_PROBE.md`.
-- [ ] Add a scorer as `scorer.py` in the probe's package and include
-      its module path, `usersim.engine.probes.<your_probe>.scorer`, in
-      `DEFAULT_SCORER_MODULES`. Register it with
+- [ ] Add your package's name to `BUILTIN_PACKAGES` in
+      `engine/core/builtin_packages.py`, at the place its capability rows
+      belong in the report.
+- [ ] Add a scorer as `scorer.py` in the probe's package. Register it with
       `deterministic=True` when it never calls a model, and list it in
       the class's `default_scorers` so `usersim eval --scorers auto`
       runs it.
 - [ ] Declare the capability rows your probe's evidence feeds in
-      `capabilities.py` in its package, and add the module to
-      `BUILTIN_CAPABILITY_MODULES` in `taxonomy/capabilities.py`; without
-      them the probe's rows are absent from the capability report. See
+      `capabilities.py` in its package; without them the probe's rows are
+      absent from the capability report. See
       "Adding the capabilities your probe provides evidence for" in
       `docs/engine/AUTHORING_A_PROBE.md`.
 - [ ] Write tests from `test_probe.py.template`. Each runs the probe

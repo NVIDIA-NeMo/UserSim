@@ -538,10 +538,12 @@ The decorator does TWO things in one call:
 
 Both surfaces are what the dispatcher reads.
 
-After this, add your module's import path to `BUILTIN_PROBE_MODULES` in
-[`usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py).
-The registry imports every listed module the first time a probe is looked
-up, and that import is what runs the `@register_probe` decorator.
+After this, add your package's name to `BUILTIN_PACKAGES` in
+[`usersim/engine/core/builtin_packages.py`](../../src/usersim/engine/core/builtin_packages.py).
+The registry imports each listed package's `probe` module the first time a
+probe is looked up, and that import is what runs the `@register_probe`
+decorator. The same line registers the package's `scorer.py`,
+`capabilities.py` and `asset_domain.py`, when it has them.
 
 Add your probe's row to the catalog in [`docs/probes.md`](../probes.md) and
 raise the probe counts: the `N probes` entry in the headline of the root
@@ -633,7 +635,7 @@ Every check should report `[OK]`. Confirm your probe appears in the
 [OK]   probe registry        15 probe(s) registered: [..., 'my_probe', ...]
 ```
 
-If your probe doesn't show up, a missing `BUILTIN_PROBE_MODULES` entry
+If your probe doesn't show up, a package missing from `BUILTIN_PACKAGES`
 is the most likely cause. If it shows up but `family missing` fires, the
 `@register_probe` decorator didn't run (check for an import-time
 exception in your module).
@@ -962,20 +964,21 @@ members:
     USED_PLACEHOLDER_BOOKING = "used_placeholder_booking"
 ```
 
-### File 7: built-in probe list
+### File 7: built-in package roster
 
-In [`src/usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py),
-add the module to `BUILTIN_PROBE_MODULES`:
+In [`src/usersim/engine/core/builtin_packages.py`](../../src/usersim/engine/core/builtin_packages.py),
+add the package to `BUILTIN_PACKAGES`, at the place its capability rows
+belong in the report:
 
 ```python
-BUILTIN_PROBE_MODULES: tuple[str, ...] = (
+BUILTIN_PACKAGES: tuple[str, ...] = (
     ...
-    "usersim.engine.probes.bookings.probe",
+    "bookings",
 )
 ```
 
-Importing the module runs the `@register_probe` decorator, which
-self-registers the probe class into `_PROBE_REGISTRY`. No factory
+The registry imports `usersim.engine.probes.bookings.probe`, which runs the
+`@register_probe` decorator and registers the probe class. No factory
 wrapping: the substrate handles it.
 
 Every registered probe is also constructible through
@@ -1236,10 +1239,9 @@ column that is empty on a row arrives present and `None`, so handle `None`
 wherever you read one; `usersim.testing.assert_scorer_conforms` checks that
 when you pass it a `sample_row`.
 
-Add the module path, `usersim.engine.probes.<your_probe>.scorer`, to
-[`evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES`](../../src/usersim/engine/evaluator/scorers/__init__.py)
-so the auto-load path picks it up, and list it in the probe's
-`default_scorers`:
+The scorer registry imports the `scorer.py` of every package in
+`BUILTIN_PACKAGES`, so the scorer registers once your package is listed there.
+List it in the probe's `default_scorers`:
 
 ```python
 class MyProbe(BaseProbe):
@@ -1305,10 +1307,10 @@ AXIS_DESCRIPTIONS: dict[str, str] = {
 }
 ```
 
-Then add the module, `usersim.engine.probes.<your_probe>.capabilities`, to
-`BUILTIN_CAPABILITY_MODULES` in
-[`taxonomy/capabilities.py`](../../src/usersim/taxonomy/capabilities.py), at
-the place its rows belong in the report. The module holds definitions only and
+The report reads the `capabilities.py` of every package in
+`BUILTIN_PACKAGES`, in that roster's order, after the capabilities every probe
+feeds; your package's place in the roster is its rows' place in the report.
+The module holds definitions only and
 imports nothing from the probe, so the report reads it without importing your
 probe. `AXIS_DESCRIPTIONS` is optional: it explains a rate axis in an evidence
 card, where a judge axis carries its own reasoning. A probe shipped as an

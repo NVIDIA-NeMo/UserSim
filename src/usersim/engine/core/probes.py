@@ -60,6 +60,7 @@ from typing import (
 
 from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core._probe_registry import PROBE_REGISTRY as _PROBE_REGISTRY
+from usersim.engine.core.builtin_packages import builtin_modules
 from usersim.engine.core.columns import output_columns_problem
 from usersim.engine.core.locale import asset_locale, india_variant
 from usersim.engine.core.messages import _parse_theme
@@ -1555,27 +1556,13 @@ def register_probe(
     return decorator
 
 
-#: Modules defining the shipped probes; importing one runs its
-#: ``@register_probe``. Listed by path because every probe module imports
-#: this one, so this module cannot import them at load time.
-BUILTIN_PROBE_MODULES: tuple[str, ...] = (
-    "usersim.engine.probes.financial_services.probe",
-    "usersim.engine.probes.general_educational.probe",
-    "usersim.engine.probes.general_open_ended.probe",
-    "usersim.engine.probes.health_disclosure.probe",
-    "usersim.engine.probes.identity_disclosure.probe",
-    "usersim.engine.probes.safety_agentic.probe",
-    "usersim.engine.probes.safety_chat_pressure.probe",
-    "usersim.engine.probes.sov_ai_dynamic.probe",
-    "usersim.engine.probes.sov_ai_facts.probe",
-    "usersim.engine.probes.sov_ai_multilingual_parity.probe",
-    "usersim.engine.probes.tool_calling.probe",
-)
-
-
 def load_builtin_probes() -> None:
-    """Import every shipped probe module so its probes are registered. Idempotent."""
-    for module in BUILTIN_PROBE_MODULES:
+    """Import the ``probe`` module of every built-in package so its probes are registered. Idempotent.
+
+    The packages are named in ``BUILTIN_PACKAGES`` (``core/builtin_packages.py``)
+    and imported here, on first lookup, because every probe module imports this one.
+    """
+    for module in builtin_modules("probe"):
         importlib.import_module(module)
 
 

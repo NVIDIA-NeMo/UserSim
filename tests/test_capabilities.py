@@ -9,9 +9,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from usersim.engine.core.builtin_packages import builtin_modules
 from usersim.taxonomy.capabilities import (
     ALL_PROBES,
-    BUILTIN_CAPABILITY_MODULES,
     _probe_ref,
     _scorer_ref,
     capabilities_missing_scorer,
@@ -297,18 +297,6 @@ def test_missing_scorer_map_names_the_capabilities_that_go_untested() -> None:
     )
 
 
-def test_every_built_in_package_s_capabilities_module_is_listed() -> None:
-    """A built-in package's capability rows reach the report only through ``BUILTIN_CAPABILITY_MODULES``."""
-    probes = Path(__file__).resolve().parents[1] / "src" / "usersim" / "engine" / "probes"
-    on_disk = {f"usersim.engine.probes.{path.parent.name}.capabilities" for path in probes.glob("*/capabilities.py")}
-    assert on_disk, "no built-in probe package declares capabilities"
-    assert len(BUILTIN_CAPABILITY_MODULES) == len(set(BUILTIN_CAPABILITY_MODULES)), "a module is listed twice"
-    assert set(BUILTIN_CAPABILITY_MODULES) == on_disk, (
-        f"listed without a file: {sorted(set(BUILTIN_CAPABILITY_MODULES) - on_disk)}; "
-        f"not listed: {sorted(on_disk - set(BUILTIN_CAPABILITY_MODULES))}"
-    )
-
-
 def test_reading_the_capabilities_loads_no_probe() -> None:
     """The report reads every capability without importing a probe, so a probe that fails
     to import still leaves its capability rows, and every other, in the report."""
@@ -321,4 +309,4 @@ def test_reading_the_capabilities_loads_no_probe() -> None:
     )
     result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == f"[] {len(BUILTIN_CAPABILITY_MODULES)}", result.stdout
+    assert result.stdout.strip() == f"[] {len(builtin_modules('capabilities'))}", result.stdout

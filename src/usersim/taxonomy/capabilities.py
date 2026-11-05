@@ -8,9 +8,9 @@ thresholds, and aggregation policy that support them. Probes are measurement
 instruments; capabilities are behavioral claims.
 
 The capabilities every probe's rows feed are defined here. A built-in probe
-package declares its own in its ``capabilities.py``, listed in
-``BUILTIN_CAPABILITY_MODULES``, and an installed package contributes its own
-through the ``usersim.capabilities`` entry point.
+package declares its own in its ``capabilities.py``, read in the order of
+``BUILTIN_PACKAGES``, and an installed package contributes its own through the
+``usersim.capabilities`` entry point.
 """
 
 from __future__ import annotations
@@ -21,6 +21,8 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Literal, Mapping
+
+from usersim.engine.core.builtin_packages import builtin_modules
 
 ALL_PROBES = "*"
 
@@ -429,21 +431,6 @@ _SHARED_CAPABILITIES: tuple[CapabilityDefinition, ...] = (
     ),
 )
 
-#: The ``capabilities`` module of each built-in probe package that declares
-#: capability rows, in the order the report lists them after the shared ones.
-#: Each holds ``CAPABILITIES``, a tuple of definitions, and may hold
-#: ``AXIS_DESCRIPTIONS`` for the rate axes its scorer computes. A built-in whose
-#: rows provide evidence for capabilities of their own adds its module here.
-BUILTIN_CAPABILITY_MODULES: tuple[str, ...] = (
-    "usersim.engine.probes.sov_ai_facts.capabilities",
-    "usersim.engine.probes.sov_ai_multilingual_parity.capabilities",
-    "usersim.engine.probes.tool_calling.capabilities",
-    "usersim.engine.probes.safety_chat_pressure.capabilities",
-    "usersim.engine.probes.safety_agentic.capabilities",
-    "usersim.engine.probes.identity_disclosure.capabilities",
-    "usersim.engine.probes.financial_services.capabilities",
-)
-
 
 @functools.cache
 def _builtin_capabilities() -> tuple[CapabilityDefinition, ...]:
@@ -453,7 +440,7 @@ def _builtin_capabilities() -> tuple[CapabilityDefinition, ...]:
     probe package; they hold definitions only and import no probe.
     """
     found = list(_SHARED_CAPABILITIES)
-    for module in BUILTIN_CAPABILITY_MODULES:
+    for module in builtin_modules("capabilities"):
         found.extend(importlib.import_module(module).CAPABILITIES)
     return tuple(found)
 
@@ -508,7 +495,7 @@ _AXIS_DESCRIPTIONS: dict[str, str] = {
 def _axis_descriptions() -> dict[str, str]:
     """The shared axis descriptions, with each built-in package's added."""
     descriptions = dict(_AXIS_DESCRIPTIONS)
-    for module in BUILTIN_CAPABILITY_MODULES:
+    for module in builtin_modules("capabilities"):
         descriptions.update(getattr(importlib.import_module(module), "AXIS_DESCRIPTIONS", {}))
     return descriptions
 
