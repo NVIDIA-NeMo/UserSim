@@ -300,7 +300,7 @@ async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
         compute_behavioral_profile,
         get_conversation_language,
     )
-    from usersim.engine.core.llm import set_current_outcome_builder
+    from usersim.engine.core.llm import outcome_builder_scope
 
     cfg = _cli_built_simulator_config(probe_type, locale)
     data = _synthetic_row_data(probe_type, locale, cfg)
@@ -329,8 +329,7 @@ async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
         )
     }
 
-    set_current_outcome_builder(outcome_builder)
-    try:
+    with outcome_builder_scope(outcome_builder):
         with _patched_call_llm():
             probe = probe_cls(
                 persona=persona,
@@ -348,8 +347,6 @@ async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
                 data=data,
                 cfg=cfg,
             )
-    finally:
-        set_current_outcome_builder(None)
     return result
 
 

@@ -171,32 +171,11 @@ _MODEL_STATS: dict[str, dict[str, float]] = {}
 
 
 # ── Per-trajectory outcome hook (context-scoped) ───────────────────────
-# generator.py sets this to the current ConversationState.outcome builder
-# at the start of generate() and clears it at the end. Every successful
-# acall_llm invocation feeds its per-call tokens/calls/latency into the
-# builder as well as the cross-trajectory MODEL_STATS aggregate. Exposed
-# via set_current_outcome_builder() so the simulator's per-row resource
-# profile is populated without threading state through every caller.
-
-
-def set_current_outcome_builder(builder) -> None:  # type: ignore[no-untyped-def]
-    """Set (or clear) the OutcomeBuilder receiving per-call stats.
-
-    Pass ``None`` to clear. Safe to call with any object exposing
-    ``record_call(alias, input_tokens, output_tokens, elapsed_s)`` —
-    typed loosely to avoid a circular import from core.outcomes.
-    """
-    _OUTCOME_BUILDER.set(builder)
-
-
-def get_current_outcome_builder():  # type: ignore[no-untyped-def]
-    """Return the OutcomeBuilder currently receiving per-call stats, if any.
-
-    A scope that installs its own builder saves this first and puts it back
-    on the way out, so an inner scope cannot detach the row's builder and
-    leave the calls after it unattributed.
-    """
-    return _OUTCOME_BUILDER.get()
+# The generator runs each row inside outcome_builder_scope with the row's
+# ConversationState.outcome builder. Every successful acall_llm invocation
+# feeds its per-call tokens/calls/latency into that builder as well as the
+# cross-trajectory MODEL_STATS aggregate, so the row's resource profile is
+# populated without threading state through every caller.
 
 
 @contextmanager

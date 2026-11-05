@@ -52,7 +52,7 @@ class TestRuntimeAssetsRoot:
         """
         import types
 
-        from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
+        from usersim.engine.core import llm
         from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
         from usersim.engine.probes.safety_agentic import probe as safety_agentic
 
@@ -74,18 +74,15 @@ class TestRuntimeAssetsRoot:
         def _explode(*_args: object, **_kwargs: object) -> None:
             raise RuntimeError("stop once the nested builder is installed")
 
-        set_current_outcome_builder(row_builder)
-        try:
+        with llm.outcome_builder_scope(row_builder):
             with pytest.raises(RuntimeError):
                 with pytest.MonkeyPatch.context() as mp:
                     mp.setattr(safety_agentic, "ConversationState", _explode)
                     await probe.run_dispatch(models={}, data={}, cfg=types.SimpleNamespace())
-            assert get_current_outcome_builder() is row_builder, (
+            assert llm._OUTCOME_BUILDER.get() is row_builder, (
                 "the nested scope cleared the row's outcome builder instead of "
                 "restoring it, so later calls in this row record nowhere"
             )
-        finally:
-            set_current_outcome_builder(None)
 
     async def test_a_row_does_not_change_the_process_log_level(self) -> None:
         """Verbosity belongs to the run, so a row must not raise it globally."""

@@ -36,9 +36,9 @@ from usersim.engine.core.llm import (
     flush_debug_log,
     get_call_stats,
     get_record_stats,
+    outcome_builder_scope,
     record_finished,
     set_conversation_id,
-    set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import Provenance
 from usersim.engine.core.persona import persona_full_name
@@ -196,15 +196,13 @@ class ConversationSimulatorGenerator(
         # specific replayed row.
         set_conversation_id(f"{traj_id} | {persona_name} | {probe_type}")
 
-        # Install the per-conversation outcome-builder hook so await acall_llm()
-        # invocations inside this trajectory feed per-model tokens /
-        # calls / latencies into simulation_outcome. Cleared in the
-        # finally block so we never leak the builder across rows.
+        # Every acall_llm call inside this trajectory feeds its per-model
+        # tokens, calls and latency into the row's simulation_outcome; the
+        # scope ends with the row, so no builder carries over to the next.
         row_outcome_builder = constructed.outcome if constructed is not None else None
-        set_current_outcome_builder(row_outcome_builder)
 
         t_sim_start = time.monotonic()
-        try:
+        with outcome_builder_scope(row_outcome_builder):
             try:
                 if construction_error is not None:
                     raise construction_error.cause
@@ -234,8 +232,6 @@ class ConversationSimulatorGenerator(
                 # than crashing the row.
                 logger.warning(f"  |-- Simulation failed for {persona_name}: {e}")
                 result = _make_aborted_result(str(e), provenance=provenance)
-        finally:
-            set_current_outcome_builder(None)
         t_sim_elapsed = time.monotonic() - t_sim_start
 
         data.update(result)
