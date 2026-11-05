@@ -270,3 +270,5 @@ virtualenv and asks the installed CLI what it can see: all six live seams,
 against real packaging metadata rather than a mock. The fixture also ships a
 probe built on `identity_disclosure`, whose spec layer must extend the spec
 inside the installed wheel and resolve both its own model and an inherited one.
+It then installs the package template and the extensions guide's example,
+`docs/examples/my-bookings/`, and runs the tests each ships.

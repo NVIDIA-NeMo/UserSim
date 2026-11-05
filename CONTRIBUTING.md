@@ -252,7 +252,7 @@ packaging or the extension seams:
 
 ```bash
 make check-dist         # builds and checks the sdist and wheel, installs the wheel clean, runs it from an empty dir
-make check-extensions   # installs an out-of-tree package, asserts all six seams work
+make check-extensions   # installs an out-of-tree package, asserts all six seams work, tests the template and the guide's example
 ```
 
 `make update-license-headers` adds the SPDX header to new files.

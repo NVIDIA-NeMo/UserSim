@@ -38,9 +38,13 @@ my-bookings/
 The banks sit under `assets/<label>/<locale>/`, the layout the asset search path
 reads.
 
+The package is in the repository, in
+[`docs/examples/my-bookings/`](examples/my-bookings/), and every file this guide
+shows is that file as it is, apart from its license header.
 [`templates/extension_package/`](../templates/extension_package/) holds a
-package with the same layout to copy, every name in it a placeholder, and
-`make check-extensions` runs its tests against an installed User Sim.
+package with the same layout to copy, every name in it a placeholder.
+`make check-extensions` installs both and runs their tests against an installed
+User Sim.
 
 ## Names
 
@@ -62,6 +66,7 @@ never writes them.
 
 ## `pyproject.toml`
 
+<!-- example: pyproject.toml -->
 ```toml
 [build-system]
 requires = ["setuptools>=68"]
@@ -71,7 +76,9 @@ build-backend = "setuptools.build_meta"
 name = "my-bookings"
 version = "0.1.0"
 requires-python = ">=3.10"
-dependencies = ["usersim>=X.Y,<X.Z", "pyyaml"]
+# Name the User Sim releases the package works with, such as "usersim>=0.3,<0.4":
+# the first release with every hook it uses, up to the next minor release.
+dependencies = ["usersim", "pyyaml"]
 
 [project.entry-points."usersim.probes"]
 my_bookings = "my_bookings.probe:BookingProbe"
@@ -91,9 +98,11 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 ```
 
-- **`dependencies`** names a range of User Sim releases: `X.Y` is the first
-  release with every hook and attribute the package uses, and `X.Z` the next
-  minor release. A lock file pins the exact build an environment runs.
+- **`dependencies`** should name a range of User Sim releases, as the comment
+  says: the first release with every hook and attribute the package uses, up
+  to the next minor release. A lock file pins the exact build an environment
+  runs. The copy of this package in the repository names no range, so its
+  checks install it beside the User Sim they build.
 - **The entry points** name the probe class and the scorer's module.
 - **`package-data`** ships the banks in the wheel; without it, an installed
   package has no assets.
@@ -112,6 +121,7 @@ the same appointment still open differently. A bank's text goes to the
 assistant verbatim only when its exact wording is what a probe tests, such as
 a false premise.
 
+<!-- example: src/my_bookings/probe.py -->
 ```python
 import json
 import random
@@ -120,6 +130,7 @@ from functools import cache
 from pathlib import Path
 
 import yaml
+
 from usersim.extension import (
     BankBackedProbe,
     PreviewField,
@@ -326,6 +337,7 @@ class BookingProbe(ToolExecutionMixin, BankBackedProbe):
 
 The instruction, `assets/my_bookings/prompts.yaml`:
 
+<!-- example: src/my_bookings/assets/my_bookings/prompts.yaml -->
 ```yaml
 user_system_prompt: |
   {persona}
@@ -338,6 +350,7 @@ user_system_prompt: |
 
 The banks, `assets/my_bookings/en_US/bookings.yaml`:
 
+<!-- example: src/my_bookings/assets/my_bookings/en_US/bookings.yaml -->
 ```yaml
 bank_id: my_bookings_en_US
 bank_version: "1.0.0"
@@ -355,6 +368,7 @@ appointments:
 
 and `assets/my_bookings/pt_BR/bookings.yaml`:
 
+<!-- example: src/my_bookings/assets/my_bookings/pt_BR/bookings.yaml -->
 ```yaml
 bank_id: my_bookings_pt_BR
 bank_version: "1.0.0"
@@ -387,6 +401,7 @@ for these banks means a native speaker of the bank's language; see
 
 ## The scorer
 
+<!-- example: src/my_bookings/scorer.py -->
 ```python
 import json
 
@@ -429,6 +444,7 @@ can recompute it on a stored evaluation.
 
 `tests/conftest.py` loads the hermetic harness the built-in tests run under:
 
+<!-- example: tests/conftest.py -->
 ```python
 pytest_plugins = ["usersim.testing.pytest_plugin"]
 ```
@@ -437,9 +453,14 @@ It fails any outbound connection, stubs the tokenizer and the persona dataset,
 and stops the run unless extension discovery is off and `pytest-asyncio` is
 installed. With discovery off, the tests import the package to register it:
 
+<!-- example: tests/test_my_bookings.py -->
 ```python
 import json
 import random
+
+import my_bookings.probe  # noqa: F401  registers the probe; discovery is off under test
+from my_bookings.probe import Appointment, BookingProbe, draw_booking
+from my_bookings.scorer import score
 
 from usersim.extension import ConversationSimulatorConfig
 from usersim.testing import (
@@ -449,10 +470,6 @@ from usersim.testing import (
     assert_scorer_conforms,
     run_episode,
 )
-
-import my_bookings.probe  # noqa: F401  registers the probe; discovery is off under test
-from my_bookings.probe import Appointment, BookingProbe, draw_booking
-from my_bookings.scorer import score
 
 PERSONA = {"first_name": "Ana", "last_name": "Souza", "age": 35, "city": "Recife"}
 CONFIG = ConversationSimulatorConfig(name="conversation_messages", max_turns=3, random_seed=7, locale="pt_BR")

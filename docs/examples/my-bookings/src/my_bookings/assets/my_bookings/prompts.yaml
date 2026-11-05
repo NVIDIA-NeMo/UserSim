@@ -1,0 +1,7 @@
+user_system_prompt: |
+  {persona}
+
+  You want an assistant to book {what} on {date} at {time}. Ask for it in your
+  own words, and write the date and time the way you would write them yourself,
+  not in the form they are given here. Say how many people are coming only if it
+  asks; the answer is {people}. Once it confirms the booking, thank it.

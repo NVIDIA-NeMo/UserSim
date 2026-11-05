@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "my-bookings"
+version = "0.1.0"
+requires-python = ">=3.10"
+# Name the User Sim releases the package works with, such as "usersim>=0.3,<0.4":
+# the first release with every hook it uses, up to the next minor release.
+dependencies = ["usersim", "pyyaml"]
+
+[project.entry-points."usersim.probes"]
+my_bookings = "my_bookings.probe:BookingProbe"
+
+[project.entry-points."usersim.scorers"]
+my_bookings = "my_bookings.scorer"
+
+[tool.setuptools.package-data]
+my_bookings = ["assets/**/*.yaml"]
+
+[dependency-groups]
+dev = ["pytest", "pytest-asyncio", "pytest-env"]
+
+[tool.pytest.ini_options]
+env = ["USERSIM_DISABLE_EXTENSIONS=1"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
