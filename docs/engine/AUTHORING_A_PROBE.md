@@ -1241,7 +1241,7 @@ checks that every scorer but the generic ones skips another probe's row.
 
 A scorer in your probe's package may write its label;
 [`tests/test_probe_names_in_shared_code.py`](../../tests/test_probe_names_in_shared_code.py)
-counts labels only in shared code outside `engine/probes/`. Anything else the
+looks for labels only in shared code outside `engine/probes/`. Anything else the
 core needs from your probe goes on the class: see
 [What a probe declares](../../architecture/probes.md#what-a-probe-declares).
 

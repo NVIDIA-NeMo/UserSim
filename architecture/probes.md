@@ -110,10 +110,12 @@ which would otherwise raise partway through a conversation.
 
 Everything else the core needs from a probe it reads from the class: an
 attribute, or a classmethod where the answer depends on the locale or the run's
-settings. Code outside `engine/probes/` writes a probe's label only as often as
+settings. Code outside `engine/probes/` writes a probe's label only in the
+files
 [`tests/test_probe_names_in_shared_code.py`](../tests/test_probe_names_in_shared_code.py)
-allows, file by file, so what a new probe needs from the core goes here rather
-than into a branch on its label.
+pins it to, in a string, an identifier or a `.md` or `.yaml` file alike, so
+what a new probe needs from the core goes here rather than into a branch on
+its label.
 
 | Declaration | Default | Read by |
 |---|---|---|
