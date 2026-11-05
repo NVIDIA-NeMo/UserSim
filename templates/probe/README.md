@@ -152,8 +152,8 @@ When porting one of the templates into a new module:
       `docs/engine/AUTHORING_A_PROBE.md`), and give the tests a model for
       it with `run_episode(..., models={alias: model})`.
 - [ ] Keep the probe's own per-row data under metadata keys of its own.
-      The loop writes the keys in `RESERVED_METADATA_KEYS`
-      (`core/simulation.py`); a probe reads them, and
+      The loop writes the keys in `RESERVED_METADATA_KEYS` (in
+      `usersim.extension`); a probe reads them, and
       `assert_probe_conforms` reports a probe class that writes one.
 - [ ] Author the user-agent system prompt + the per-turn judge
       rubric in `prompts.py`. Use `LocalePromptPack` for any prompt

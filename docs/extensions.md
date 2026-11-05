@@ -56,8 +56,8 @@ names belong to the built-ins:
 | Entry point names | the names they register |
 
 The conversation loop keeps its own record in `state.metadata` under the keys
-in `RESERVED_METADATA_KEYS` (`usersim/engine/core/simulation.py`); a probe
-reads them and never writes them.
+in `RESERVED_METADATA_KEYS` (in `usersim.extension`); a probe reads them and
+never writes them.
 
 ## `pyproject.toml`
 

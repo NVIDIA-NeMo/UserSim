@@ -49,6 +49,7 @@ does not load the conversation loop.
 | Name | What it is |
 |---|---|
 | `ConversationState` | The conversation so far, as the hooks receive it, with its messages, metadata and `OutcomeBuilder` |
+| `RESERVED_METADATA_KEYS` | The `ConversationState.metadata` keys the conversation loop writes, with what each holds; a probe reads them and writes keys of its own |
 | `dispatch_episode` | Runs one episode through a probe's `run_dispatch` with the run's per-episode settings installed, as `usersim simulate` runs it |
 | `make_result` | Builds the row a conversation produces, for a probe that writes its own `run_dispatch` |
 | `make_failed` | Builds the row for a conversation that failed |

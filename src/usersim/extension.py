@@ -92,6 +92,7 @@ if TYPE_CHECKING:
     from usersim.engine.core.row_metadata import recorded_value
     from usersim.engine.core.seeds import load_seeds
     from usersim.engine.core.simulation import (
+        RESERVED_METADATA_KEYS,
         ConversationState,
         finalize_completed,
         language_instruction,
@@ -122,6 +123,7 @@ __all__ = [
     "register_probe",
     # Conversations and outcomes
     "ConversationState",
+    "RESERVED_METADATA_KEYS",
     "assistant_message",
     "dispatch_episode",
     "FailureAttribution",
@@ -281,6 +283,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "usersim.engine.core.row_metadata": ("recorded_value",),
     "usersim.engine.core.seeds": ("load_seeds",),
     "usersim.engine.core.simulation": (
+        "RESERVED_METADATA_KEYS",
         "ConversationState",
         "finalize_completed",
         "language_instruction",
