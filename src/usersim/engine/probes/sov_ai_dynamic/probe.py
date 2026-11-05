@@ -147,8 +147,8 @@ class _PickedProbe:
       lives on the whole taxonomy, not per-category, so the
       substrate's ``_emit_placeholder_warning`` reads it from here).
     - ``category`` / ``subtopic_hint`` — the actual probe content.
-    - ``bank_id`` / ``bank_version`` — pinned for the placeholder
-      warning detail string.
+    - ``bank_id`` / ``bank_version`` — the taxonomy's id and version,
+      recorded on the conversation's metadata.
     """
 
     id: str
@@ -327,22 +327,3 @@ class SovAiDynamicProbe(BankBackedProbe):
             extras["probing_categories_explored"] = list(state.metadata.get("probing_categories_explored") or [])
             extras["probing_subtopic_hints_used"] = list(state.metadata.get("probing_subtopic_hints_used") or [])
         return extras
-
-
-# ---------------------------------------------------------------------------
-# Override BankBackedProbe._pin_bank_version for taxonomy attribute name
-# ---------------------------------------------------------------------------
-# The substrate's default ``_pin_bank_version`` reads ``bank.bank_version``
-# but the ProbingTaxonomy uses ``taxonomy_version``. Override.
-
-
-def _pin_bank_version_override(self, locale: str) -> None:
-    """Pin ``provenance.bank_version[locale]`` from the taxonomy."""
-    bank_version = getattr(self._bank, "taxonomy_version", None)
-    if bank_version is None:
-        return
-    key = type(self).bank_version_key or locale
-    self._provenance.bank_version[key] = bank_version
-
-
-SovAiDynamicProbe._pin_bank_version = _pin_bank_version_override  # type: ignore[method-assign]

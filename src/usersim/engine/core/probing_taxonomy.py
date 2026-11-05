@@ -92,6 +92,16 @@ class ProbingTaxonomy:
     categories: tuple[Category, ...] = field(default_factory=tuple)
     source_path: str | None = None
 
+    @property
+    def bank_id(self) -> str:
+        """``taxonomy_id``, under the name ``BankBackedProbe`` reads from every bank."""
+        return self.taxonomy_id
+
+    @property
+    def bank_version(self) -> str:
+        """``taxonomy_version``, under the name ``BankBackedProbe`` reads from every bank."""
+        return self.taxonomy_version
+
     # ── Lookups ─────────────────────────────────────────────────────
 
     def by_id(self, category_id: str) -> Category | None:

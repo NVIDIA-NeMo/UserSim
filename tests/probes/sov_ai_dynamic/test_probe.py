@@ -722,6 +722,48 @@ class TestPlaceholderTaxonomyWarning:
         assert WarningKind.USED_PLACEHOLDER_TAXONOMY is not WarningKind.USED_PLACEHOLDER_FACT
         assert WarningKind.USED_PLACEHOLDER_TAXONOMY.value != WarningKind.USED_PLACEHOLDER_FACT.value
 
+    async def test_the_warning_names_the_taxonomy_and_its_version(
+        self,
+        tmp_path: Path,
+        pt_br_persona_southeast_teacher: dict[str, Any],
+        simulator_cfg: Any,
+    ) -> None:
+        """A row probed from a placeholder taxonomy names that taxonomy and its version."""
+        path = _write_tiny_pt_br_taxonomy(tmp_path)
+        with (
+            patch.dict(os.environ, {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(path)}),
+            _patched_call_llm(
+                _mock_call_llm(
+                    assistant_responses=[{"role": "assistant", "content": "Resposta do assistente."}],
+                    user_responses=[{"role": "assistant", "content": "Queria saber uma coisa."}],
+                )
+            ),
+        ):
+            result = await run_probe(
+                probe_gen.SovAiDynamicProbe,
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
+                data={},
+                persona=pt_br_persona_southeast_teacher,
+                profile={},
+                locale="pt_BR",
+                language="Portuguese",
+                cfg=simulator_cfg,
+            )
+
+        outcome = json.loads(result["simulation_outcome"])
+        details = [w["detail"] for w in outcome["warnings"] if w["kind"] == WarningKind.USED_PLACEHOLDER_TAXONOMY.value]
+        assert details == [
+            "task brazil-tiny from tiny_pt_br_taxonomy v0.0.1 is placeholder content; "
+            "SME verification recommended before relying on this result"
+        ]
+        assert outcome["provenance"]["bank_version"] == {"pt_BR": "v0.0.1"}
+
 
 # ---------------------------------------------------------------------------
 # Helpers
