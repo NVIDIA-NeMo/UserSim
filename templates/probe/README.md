@@ -185,8 +185,10 @@ When porting one of the templates into a new module:
       which runs every built-in this way. The tests run under
       `usersim.testing.pytest_plugin`, so a model call nothing scripted
       fails with `BlockedNetworkCall`.
-- [ ] Update `docs/engine/README.md`'s probe table and the catalog in
-      `docs/probes.md`; `tests/test_security_defaults.py` checks the probe
-      count there.
+- [ ] Update `docs/engine/README.md`'s probe table, add a row to the
+      catalog in `docs/probes.md`, and raise the probe counts in the
+      README headline and in `docs/probes.md` (for a `BankBackedProbe`,
+      its curated-bank count too). `tests/test_probe_catalog.py` and
+      `tests/test_security_defaults.py` check them against the registry.
 - [ ] Record the design choices in the probe module docstring
       (variant set, prompt version, what the scorer measures).

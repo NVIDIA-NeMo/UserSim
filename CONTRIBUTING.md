@@ -410,7 +410,10 @@ it does.
 
 If you are adding a probe *in tree*, `templates/probe/` has a copy-and-edit
 gallery and [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md)
-is the end-to-end walkthrough.
+is the end-to-end walkthrough. Besides its own folder, an in-tree probe adds
+its row to the catalog in [`docs/probes.md`](docs/probes.md) and raises the
+probe counts in `README.md` and that page; the tests check both against the
+registry, and the walkthrough lists where else a built-in is registered.
 
 ### Where should a probe live?
 

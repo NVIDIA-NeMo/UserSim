@@ -557,6 +557,15 @@ After this, add your module's import path to `BUILTIN_PROBE_MODULES` in
 The registry imports every listed module the first time a probe is looked
 up, and that import is what runs the `@register_probe` decorator.
 
+Add your probe's row to the catalog in [`docs/probes.md`](../probes.md) and
+raise the probe counts: the `N probes` entry in the headline of the root
+`README.md`, the "N probes ship today" sentence in `docs/probes.md` and, for
+a `BankBackedProbe`, the count of probes that draw on curated banks in that
+page's review-flag paragraph. When you add a scorer, raise the scorer counts
+in the README headline and `docs/outputs.md` the same way.
+`tests/test_probe_catalog.py` checks the row, and
+`tests/test_security_defaults.py` each count, against the registries.
+
 A built-in imports `usersim` only through `usersim.extension` and
 `usersim.testing`, as an extension does, apart from its own package's modules,
 so moving it out of this repository changes none of its imports.
