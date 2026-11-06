@@ -245,6 +245,12 @@ usersim simulate --locale en_US --num-rows 20 \
 usersim simulate --locale en_US --num-rows 5 \
   --probe-mix 'safety_agentic=1.0' \
   --out output/agentic_only
+
+# A probe's settings (financial_services, its dynamic tier on about 30% of rows):
+usersim simulate --locale en_US --num-rows 20 \
+  --probe-mix 'financial_services=1.0' \
+  --probe-option financial_services.tier_mix=0.3 \
+  --out output/finance_trajectories
 ```
 
 Each probe resolves its curated asset at simulator-call time under `assets/<probe-name>/`: `assets/sov_ai_facts/<locale>/sample.yaml`, `assets/sov_ai_dynamic/<locale>/categories.yaml`, `assets/sov_ai_multilingual_parity/sample.yaml`, `assets/safety_chat_pressure/sample.yaml`, `assets/safety_agentic/{sample.yaml,action_taxonomy.yaml}`, and `assets/identity_disclosure/spec.yaml`. Override paths via `USERSIM_SOV_AI_FACTS_BANK_<LOCALE>` / `USERSIM_SOV_AI_DYNAMIC_TAXONOMY_<LOCALE>` / `USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK` / `USERSIM_SAFETY_CHAT_PRESSURE_BANK` / `USERSIM_SAFETY_AGENTIC_BANK` / `USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY` / `USERSIM_IDENTITY_DISCLOSURE_SPEC` env vars, and the health probes' clinical-profile banks via `USERSIM_THERAPY_PROFILES` / `USERSIM_TRIAGE_PROFILES` / `USERSIM_CDS_PROFILES` / `USERSIM_GENERIC_HEALTH_PROFILES`, when running against private banks; an identity spec named by its override can extend the shipped one rather than replace it.

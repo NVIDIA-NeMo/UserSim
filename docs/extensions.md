@@ -654,6 +654,13 @@ it. A new locale is a folder holding a `bookings.yaml` written in its language.
 folder it names, this one included, so a run that passes it needs
 `my_bookings/` there too.
 
+A probe that a run can tune declares its settings in an `Options` class, and
+a run gives them as `--probe-option my_bookings.<setting>=<value>`; see
+[Settings a run can give the probe](engine/AUTHORING_A_PROBE.md#settings-a-run-can-give-the-probe).
+When stored rows run again (`usersim simulate --inputs`), the probe's assets,
+prompt version, settings and the package's release are its own part of the
+setup: a release of the package gives new ids to its rows only.
+
 ## When the package needs a change in User Sim
 
 Ask for the hook, attribute or fix in general terms first, through the
