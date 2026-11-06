@@ -192,9 +192,9 @@ These steps make live model calls, using the keys and personas above.
 usersim simulate --locale en_US --num-rows 30 --out output/trajectories
 
 # 2. Score the assistant under test: the evaluator model's judgments, plus
-#    the scorers that match the default probe mix.
+#    each probe's own scorers and the three that apply to every probe.
 usersim eval     --trajectories output/trajectories --out output/evaluations \
-                 --scorers tool_use,language_compliance,response_shape,refusal_basics
+                 --scorers auto
 
 # 3. Render the capability dashboard.
 usersim report   --trajectories output/trajectories \
@@ -212,9 +212,13 @@ usersim simulate --locale ja_JP --num-rows 30 \
   --out output/trajectories
 ```
 
-Score a run with the scorers for its probes. For this one, step 2 takes
-`--scorers sov_ai_facts,sov_ai_dynamic,sov_ai_multilingual_parity,language_compliance`;
-[`docs/outputs.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/outputs.md) lists every scorer.
+With `--scorers auto`, step 2 scores this run with the three `sov_ai` scorers
+as well; [`docs/outputs.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/outputs.md)
+lists every scorer. A probe that takes settings gets them with
+`--probe-option LABEL.SETTING=VALUE`, such as
+`--probe-option financial_services.tier_mix=0.3`;
+[`docs/probes.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/probes.md#a-probes-settings)
+lists each probe's settings.
 
 ### Curate training data
 
