@@ -18,8 +18,10 @@ the other probes.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
   gets a response the `api_response_model` writes for that tool.
-- Each turn allows one round of tool calls, then a reply without tools. The
-  conversation does not end early before the assistant has called a tool.
+- Within a turn, the tools stay on offer after each round of calls, so the
+  assistant can chain calls, until it replies without calling one or the turn
+  has made 8 calls; a call past that is not run. The conversation does not end
+  early before the assistant has called a tool.
 - Each row records `tool_subset`, the tools it offered, and `num_tool_calls`.
 
 Two settings, each set with `--probe-option tool_calling.<name>=<value>`:

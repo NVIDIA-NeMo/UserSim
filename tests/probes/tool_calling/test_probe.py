@@ -165,7 +165,15 @@ async def _run_concrete_tool_probe(
     *,
     api_context_error=False,
     arguments: Callable[[ToolCallingProbe], str] = lambda probe: '{"location":"Tokyo"}',
+    second_call_arguments: str | None = None,
+    offered_tools: list[bool] | None = None,
 ):
+    """Run one conversation; the assistant calls ``get_weather``, then answers.
+
+    With ``second_call_arguments`` it calls ``get_weather`` again after the
+    first result, before answering. ``offered_tools`` collects, per assistant
+    call, whether the request offered tools.
+    """
     from usersim.engine.core.behavioral import compute_behavioral_profile
 
     persona = {"first_name": "A", "last_name": "User", "age": 35}
@@ -216,17 +224,23 @@ async def _run_concrete_tool_probe(
             }
         if alias == "assistant_model":
             assistant_inputs.append(messages)
+            if offered_tools is not None:
+                offered_tools.append(bool(kwargs.get("tools")))
             assistant_call += 1
-            if assistant_call == 1:
+            calls = [("weather-call", arguments(probe))]
+            if second_call_arguments is not None:
+                calls.append(("weather-call-2", second_call_arguments))
+            if assistant_call <= len(calls):
+                call_id, call_arguments = calls[assistant_call - 1]
                 return {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "weather-call",
+                            "id": call_id,
                             "function": {
                                 "name": weather_tool["function"]["name"],
-                                "arguments": arguments(probe),
+                                "arguments": call_arguments,
                             },
                         }
                     ],
@@ -289,6 +303,25 @@ async def test_concrete_tool_probe_keeps_private_and_public_views_separate(sampl
     assert all("raw_secret" not in message.get("content", "") for call in judge_inputs for message in call)
     exported = json.loads(result["conversation_messages"])
     assert any(message.get("role") == "tool" and "raw_secret" in message.get("content", "") for message in exported)
+
+
+async def test_assistant_chains_a_second_call_within_a_turn(sample_tools):
+    offered: list[bool] = []
+    result, _assistant, _user, _judge, api_inputs = await _run_concrete_tool_probe(
+        sample_tools,
+        second_call_arguments='{"location":"Osaka"}',
+        offered_tools=offered,
+    )
+
+    messages = json.loads(result["conversation_messages"])
+    first_turn = messages[: next(i for i, m in enumerate(messages) if i and m["role"] == "user")]
+    assert [m["role"] for m in first_turn] == ["user", "assistant", "tool", "assistant", "tool", "assistant"]
+    assert [m["tool_calls"][0]["id"] for m in first_turn if m.get("tool_calls")] == ["weather-call", "weather-call-2"]
+    assert first_turn[-1]["content"] == "Tokyo is 22 degrees."
+    assert offered[:3] == [True, True, True]  # the tools stay on offer after each round
+    assert len(api_inputs) == 2
+    metadata = json.loads(result["conversation_metadata"])
+    assert metadata["tool_call_count_per_turn"][0] == 2  # both rounds count toward the turn
 
 
 async def test_concrete_tool_probe_attributes_api_context_failure(sample_tools):

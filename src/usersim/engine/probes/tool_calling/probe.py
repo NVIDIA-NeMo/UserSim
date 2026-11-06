@@ -255,9 +255,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     every turn; it stays scoreable, because not calling a tool is the
     assistant's behaviour, not a failure of the probe's protocol.
 
-    ``ToolExecutionMixin`` (``tool_loop_mode="single"``, the default)
-    supplies ``after_assistant_turn``: one round of tool calls then a single
-    synthesis pass with no tools (single-shot capability, no correction loop).
+    ``ToolExecutionMixin`` (``tool_loop_mode="multi"``) supplies
+    ``after_assistant_turn``: after each round of tool calls the assistant is
+    offered the tools again, so it can chain calls within a turn, until it
+    replies without calling one or the turn reaches the mixin's call cap.
     This probe supplies only the per-call behaviour (verify + simulate) via
     ``execute_tool_call`` and records ``tool_call_count_per_turn`` in
     ``on_tool_round_complete``.
@@ -278,6 +279,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         "tool-call failures."
     )
     default_scorers = ("tool_use",)
+    tool_loop_mode = "multi"
     preview_fields = (
         PreviewField("toolset_name", "Toolset"),
         PreviewField("toolset_category", "Toolset category"),
@@ -398,8 +400,8 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         Owns the tool_calling-specific bookkeeping (verifier_results,
         TOOL_CALL_VERIFIER trace, api-response rerolls, tools_called). The
-        ``ToolExecutionMixin`` drives the message plumbing + the single
-        synthesis pass. ``name`` is the parsed function name; ``tc`` is the
+        ``ToolExecutionMixin`` drives the message plumbing and the
+        assistant's re-calls. ``name`` is the parsed function name; ``tc`` is the
         raw tool-call dict the verifier + simulator need.
 
         A call that fails the schema check gets a 400 response. One that
@@ -475,7 +477,13 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         return simulated_response
 
     def on_tool_round_complete(self, state: ConversationState, n_calls: int) -> None:
-        state.metadata.setdefault("tool_call_count_per_turn", []).append(n_calls)
+        # A turn can hold several rounds, so each round adds to the total of
+        # the turn it belongs to: the turn of the latest user message.
+        counts = state.metadata.setdefault("tool_call_count_per_turn", [])
+        turn = sum(1 for message in state.messages if message.get("role") == "user") - 1
+        while len(counts) <= turn:
+            counts.append(0)
+        counts[turn] += n_calls
 
     def build_result_extras(self, state: ConversationState) -> dict:
         return {
