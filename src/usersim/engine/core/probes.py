@@ -45,6 +45,7 @@ end-to-end tutorial.
 from __future__ import annotations
 
 import importlib
+import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -1234,10 +1235,14 @@ class ToolExecutionMixin:
       then a single synthesis pass WITHOUT tools. This is the ``tool_calling``
       shape — single-shot capability, no correction/continuation loop.
     - ``"multi"``: re-offer the tools and re-call the assistant after each
-      round until it stops calling tools or the per-turn cap
-      (``tool_max_calls_per_turn``) is reached, then force a no-tools
-      synthesis. This is the ``financial_services`` agentic shape (search →
-      read → act → confirm across several assistant<->tool round-trips).
+      round until it stops calling tools or the turn has made
+      ``tool_max_calls_per_turn`` calls, then force a no-tools synthesis.
+      This is the ``financial_services`` agentic shape (search → read → act →
+      confirm across several assistant<->tool round-trips).
+
+    In either shape, a call beyond the turn's cap is not run: it gets a
+    ``role:"tool"`` reply saying so, so every call an assistant message makes
+    has a reply.
 
     Hooks a probe implements:
 
@@ -1333,13 +1338,26 @@ class ToolExecutionMixin:
 
             trace_turn_idx = sum(1 for m in state.messages if m.get("role") == "assistant")
             n_this_round = 0
-            capped = False
             for call_idx, tc in enumerate(tool_calls):
-                if calls_made >= self.tool_max_calls_per_turn:
-                    capped = True
-                    break
                 name, args = self.parse_tool_call(tc)
                 tc_id = (tc.get("id") if isinstance(tc, dict) else None) or f"call_{trace_turn_idx}_{call_idx}"
+                if calls_made >= self.tool_max_calls_per_turn:
+                    state.messages.append(
+                        {
+                            "role": "tool",
+                            "content": json.dumps(
+                                {
+                                    "error": (
+                                        "Not run: this turn reached its limit of "
+                                        f"{self.tool_max_calls_per_turn} tool calls."
+                                    ),
+                                    "status": 429,
+                                }
+                            ),
+                            "tool_call_id": tc_id,
+                        }
+                    )
+                    continue
                 payload = await self.execute_tool_call(
                     name,
                     args,
@@ -1368,7 +1386,7 @@ class ToolExecutionMixin:
                 n_this_round += 1
             self.on_tool_round_complete(state, n_this_round)
 
-            if self.tool_loop_mode == "single" or capped:
+            if self.tool_loop_mode == "single" or calls_made >= self.tool_max_calls_per_turn:
                 return await self._synthesize_reply(models, state, cfg)
             resp = await self._recall_assistant(models, state, cfg, with_tools=True)
 
