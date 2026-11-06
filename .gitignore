@@ -66,3 +66,8 @@ Thumbs.db
 
 # Cursor
 .cursor/
+
+# Top-level directories whose names start with `_` hold material outside the
+# distribution, such as notes, drafts or the make targets the Makefile loads
+# from `_*/targets.mk`.
+/_*/
