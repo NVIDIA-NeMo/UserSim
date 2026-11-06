@@ -22,7 +22,9 @@ the other probes.
   assistant can chain calls, until it replies without calling one or the turn
   has made 8 calls; a call past that is not run. The conversation does not end
   early before the assistant has called a tool.
-- Each row records `tool_subset`, the tools it offered, and `num_tool_calls`.
+- Each row records `tool_subset`, the tools it offered, and `num_tool_calls`,
+  the calls that passed the schema and credential checks. `verifier_results` in
+  `conversation_metadata` lists every call and whether it passed.
 
 Two settings, each set with `--probe-option tool_calling.<name>=<value>`:
 `max_tools`, the most tools a conversation offers (default `5`), and

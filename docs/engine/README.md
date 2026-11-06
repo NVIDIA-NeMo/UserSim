@@ -508,7 +508,7 @@ what each one carries:
 | `conversation_language` | str | Language used |
 | `user_query` | str | Initial user query |
 | `num_turns` | int | Actual turn count |
-| `num_tool_calls` | int | Total tool calls (0 for non-tool) |
+| `num_tool_calls` | int | Tool calls as the row's probe counts them (0 for a probe without tools): `tool_calling` counts the calls that passed its schema and credential checks (`conversation_metadata.verifier_results` lists every call and whether it passed), `financial_services` the domain actions attempted, and `safety_agentic` every action attempted |
 | `tool_subset` | str? (JSON) | Sampled tools (tool_calling only, None otherwise) |
 | `disclosure_style` | str | `"incremental"` or `"upfront"` (Sim2Real) |
 | `user_interaction_style` | str | OCEAN-derived style: cooperative/neutral/impatient/frustrated/confrontational |
