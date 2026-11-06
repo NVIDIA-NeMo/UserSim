@@ -65,12 +65,47 @@ def test_the_pre_flight_refuses_settings_a_probe_does_not_take(options_probe) ->
         verify_probe_options({"ext_options": {"colour": "red"}})
 
 
-def test_a_run_with_a_bad_setting_stops_before_any_model_call(tmp_path, caplog, monkeypatch) -> None:
+def _never(*args, **kwargs):
+    raise AssertionError("the run got past its pre-flight")
+
+
+@pytest.mark.parametrize(
+    ("mode", "out"),
+    [([], "out"), (["--dry-run"], "out"), (["--materialize-inputs"], "rows.jsonl")],
+    ids=["run", "dry_run", "materialize"],
+)
+@pytest.mark.parametrize(
+    ("option", "message"),
+    [
+        ("general_open_ended.tone=warm", "general_open_ended has no setting 'tone'; its settings: none"),
+        ("financial_services.tier_mix=1.5", "financial_services.tier_mix: Input should be less than or equal to 1"),
+        ("tool_calling.max_tools=0", "tool_calling.max_tools: Input should be greater than or equal to 1"),
+    ],
+    ids=["unknown_setting", "finance_out_of_range", "tools_out_of_range"],
+)
+def test_a_run_with_a_bad_setting_stops_before_any_model_call(
+    tmp_path, caplog, monkeypatch, mode, out, option, message
+) -> None:
     monkeypatch.setenv("NVIDIA_API_KEY", "not-used")
-    argv = ["simulate", "--locale", "en_US", "--num-rows", "1", "--dry-run", "--out", str(tmp_path / "out")]
+    monkeypatch.setattr("usersim.cli._pipeline.build_simulator_config_builder", _never)
+    monkeypatch.setattr("usersim.cli._pipeline.materialize_episode_inputs", _never)
+    argv = ["simulate", "--locale", "en_US", "--num-rows", "1", *mode, "--out", str(tmp_path / out)]
     with caplog.at_level(logging.ERROR):
-        assert cli.main([*argv, "--probe-option", "general_open_ended.tone=warm"]) == 2
-    assert "general_open_ended has no setting 'tone'; its settings: none" in caplog.text
+        assert cli.main([*argv, "--probe-option", option]) == 2
+    assert message in caplog.text
+
+
+def test_the_library_refuses_bad_settings_before_materializing(monkeypatch) -> None:
+    from usersim.engine.external import materialize_episode_inputs
+
+    monkeypatch.setattr("usersim.cli._pipeline.materialize_episode_inputs", _never)
+    with pytest.raises(ValueError, match="financial_services.tier: Input should be 'verifiable' or 'dynamic'"):
+        materialize_episode_inputs(
+            locale="en_US",
+            num_rows=1,
+            probe_mix={"financial_services": 1.0},
+            probe_options={"financial_services": {"tier": "both"}},
+        )
 
 
 @pytest.mark.parametrize(

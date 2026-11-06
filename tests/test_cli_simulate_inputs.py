@@ -963,6 +963,19 @@ def test_the_library_refuses_stored_rows_whose_banks_are_missing_before_any_mode
     assert not (tmp_path / "out").exists()
 
 
+def test_the_library_refuses_stored_rows_whose_settings_a_probe_rejects_before_any_model_call(rows, tmp_path):
+    """``simulate_episode_inputs`` checks the stored rows' probe settings as the CLI does."""
+    from usersim.engine.external import simulate_episode_inputs
+    from usersim.engine.models_file import bundled_models_path
+
+    bad = _edited(
+        rows, lambda r: [row["usersim_config"].update(probe_options={"tool_calling": {"max_tools": 0}}) for row in r]
+    )
+    with pytest.raises(ValueError, match="tool_calling.max_tools: Input should be greater than or equal to 1"):
+        simulate_episode_inputs(bad, out=tmp_path / "out", models_path=bundled_models_path())
+    assert not (tmp_path / "out").exists()
+
+
 def test_the_library_refuses_a_mix_whose_banks_are_missing_before_materializing(tmp_path):
     """``materialize_episode_inputs`` runs the CLI's pre-flight for its locale."""
     from usersim.engine.external import materialize_episode_inputs as materialize

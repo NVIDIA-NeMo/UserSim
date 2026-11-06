@@ -314,7 +314,7 @@ class TestJsonlSeedContract:
         assert tools[0]["function"]["name"] == "get_weather"
 
 
-class TestToolsetSeedFlag:
+class TestSeedDatasetFlag:
     def _parse(self, *extra):
         return cli._build_parser().parse_args(
             ["simulate", "--locale", "en_US", "--num-rows", "1", "--out", "/tmp/x", *extra]
