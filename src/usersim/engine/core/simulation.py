@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Any
@@ -609,25 +610,31 @@ _EARLY_STOP_PROMPT = (
 )
 
 
-def _is_poor_assistant_response(content: str) -> bool:
-    """Lightweight heuristic check for assistant response quality issues.
+# Tool-call syntax that reached the reply as text instead of as a tool call.
+_TOOL_CALL_MARKUP = re.compile(r"<tool_call>|<function=[\w.\-]+>|\[TOOL_CALLS\]")
 
-    Detects excessively verbose, empty, or structurally over-formatted responses
-    that would frustrate a real user. This supplements the existing judge-based
-    failure tracking so frustration reacts to actual assistant behavior.
+
+def _poor_assistant_response_reason(content: str) -> str | None:
+    """Why a reply would frustrate a real user, or None when nothing stands out.
+
+    Flags a reply that is empty, that is tool-call markup rather than an
+    answer, that runs past 800 words, or that has four or more headings.
+    This supplements the judge-based failure tracking so frustration reacts
+    to actual assistant behavior.
 
     Uses CJK-aware word counting so the threshold works correctly for
     non-Latin scripts (Japanese, Chinese, Korean) where len(str.split())
     would collapse entire sentences into a single "word".
     """
     if not content or not content.strip():
-        return True
+        return "empty response"
+    if _TOOL_CALL_MARKUP.search(content):
+        return "tool-call markup instead of a reply"
     if _word_count(content) > 800:
-        return True
-    header_count = content.count("\n#")
-    if header_count >= 4:
-        return True
-    return False
+        return "longer than 800 words"
+    if content.count("\n#") >= 4:
+        return "four or more headings"
+    return None
 
 
 async def _check_conversation_complete(models: dict, follow_up: str) -> bool:
@@ -1406,15 +1413,18 @@ class ConversationLoop:
                 summary = ""
 
             # 3e. Check assistant response quality (heuristic: format/length)
-            if _is_poor_assistant_response(synthesis_content):
+            poor_reason = _poor_assistant_response_reason(synthesis_content)
+            if poor_reason is not None:
                 state.assistant_failures += 1
                 state.outcome.inc_assistant_inline_failures()
                 state.outcome.add_warning(
                     kind=WarningKind.POOR_ASSISTANT_RESPONSE,
                     turn_idx=turn_idx,
-                    detail="heuristic flag: empty, verbose, or heavily-formatted response",
+                    detail=f"heuristic flag: {poor_reason}",
                 )
-                logger.debug(f"  |-- {probe.label}: assistant quality flag (failures={state.assistant_failures})")
+                logger.debug(
+                    f"  |-- {probe.label}: assistant quality flag, {poor_reason} (failures={state.assistant_failures})"
+                )
 
             # 3e2. Bookkeeping for the per-turn assistant judge verdict
             # (the judge itself ran inside

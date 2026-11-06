@@ -15,12 +15,14 @@ from dataclasses import dataclass
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from usersim.engine.core.outcomes import FailureAttribution, FailureClass, OutcomeStatus
 from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.simulation import (
     ConversationLoop,
     _check_conversation_complete,
-    _is_poor_assistant_response,
+    _poor_assistant_response_reason,
     make_failed,
     make_result,
 )
@@ -161,18 +163,36 @@ class TestEarlyStopping:
 
 class TestAssistantQualityCheck:
     def test_empty_response_flagged(self):
-        assert _is_poor_assistant_response("")
-        assert _is_poor_assistant_response("   ")
+        assert _poor_assistant_response_reason("") == "empty response"
+        assert _poor_assistant_response_reason("   ") == "empty response"
 
     def test_very_long_response_flagged(self):
-        assert _is_poor_assistant_response("word " * 801)
+        assert _poor_assistant_response_reason("word " * 801) == "longer than 800 words"
 
     def test_over_formatted_response_flagged(self):
         content = "\n# Section 1\ntext\n# Section 2\ntext\n# Section 3\ntext\n# Section 4\ntext"
-        assert _is_poor_assistant_response(content)
+        assert _poor_assistant_response_reason(content) == "four or more headings"
 
-    def test_normal_response_passes(self):
-        assert not _is_poor_assistant_response("Here is your weather forecast for today.")
+    @pytest.mark.parametrize(
+        "content",
+        [
+            "\n<tool_call>\n<function=get_price>\n<parameter=item>\nDVD\n</parameter>\n</function>\n</tool_call>\n",
+            '[TOOL_CALLS][{"name": "get_price", "arguments": {"item": "DVD"}}]',
+        ],
+        ids=["xml-style", "bracket-style"],
+    )
+    def test_tool_call_markup_flagged(self, content):
+        assert _poor_assistant_response_reason(content) == "tool-call markup instead of a reply"
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            "Here is your weather forecast for today.",
+            "I used the get_price function to check: the DVD costs $12.99.",
+        ],
+    )
+    def test_normal_response_passes(self, content):
+        assert _poor_assistant_response_reason(content) is None
 
 
 # ---------------------------------------------------------------------------
