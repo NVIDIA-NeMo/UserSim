@@ -242,6 +242,26 @@ class TestConversationLoopSimple:
         assert result["conversation_status"] is False
         assert result["num_turns"] == 0
 
+    @pytest.mark.parametrize(
+        ("followup_gate", "expected_retries"),
+        [([_judge_success()], 0), ([_judge_failure(), _judge_success()], 1)],
+        ids=["accepted-first-time", "rejected-once"],
+    )
+    async def test_followup_retries_count_only_rejected_attempts(self, followup_gate, expected_retries):
+        models = _build_models(
+            user_responses=["What is Python?", "Tell me more about types.", "Tell me more about types."],
+            assistant_responses=["Python is a language.", "Python has dynamic types."],
+            # Turn 1's gate and the assistant judge, then the follow-up's gate.
+            judge_responses=[_judge_success(), _judge_success(), *followup_gate, _judge_success()],
+        )
+        cfg = StubConfig(max_turns=2, max_query_attempts=2)
+
+        result = await ConversationLoop().run(models, {}, cfg, _StubProbe())
+
+        assert result["num_turns"] == 2
+        outcome = json.loads(result["simulation_outcome"])
+        assert outcome["n_user_followup_retries"] == expected_retries
+
     async def test_warn_rating_continues_conversation(self):
         models = _build_models(
             user_responses=["What is Python?", "Tell me more."],

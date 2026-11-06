@@ -1562,8 +1562,9 @@ class ConversationLoop:
             max_user_retries = getattr(cfg, "max_query_attempts", 3) - 1
             follow_up = ""
             ok = False
+            attempts = 0
             for user_attempt in range(max_user_retries + 1):
-                state.outcome.inc_user_followup_retries()
+                attempts += 1
                 try:
                     user_resp = await acall_llm(models, MODEL_USER, compressed_uh)
                 except ContextWindowError:
@@ -1769,6 +1770,9 @@ class ConversationLoop:
                     f"failed, retrying ({user_attempt + 1}"
                     f"/{max_user_retries})"
                 )
+
+            # Every attempt but an accepted last one was rejected.
+            state.outcome.inc_user_followup_retries(attempts - 1 if ok else attempts)
 
             if not ok:
                 state.metadata.setdefault("user_followup_retries", 0)
