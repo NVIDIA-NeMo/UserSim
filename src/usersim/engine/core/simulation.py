@@ -603,8 +603,11 @@ def _is_assistant_refusal_echo(text: str, allowed: frozenset[str] = frozenset())
 MODEL_SUMMARY = "summary_model"
 
 _EARLY_STOP_PROMPT = (
-    "Does this user message signal that the conversation is naturally complete "
-    "and the user is satisfied? Consider the language and cultural context.\n"
+    "Does this user message end the conversation: the user is finished, satisfied "
+    "or not, and the message asks the assistant to do nothing further? A message "
+    "that also makes a request, gives an instruction or asks a question, such as "
+    "asking it to book, change or check something, does not end it. Consider the "
+    "language and cultural context.\n"
     "Reply with ONLY 'yes' or 'no'.\n\n"
     "User message: {follow_up}"
 )
