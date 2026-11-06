@@ -12,7 +12,8 @@ persona-grounded, realistic user requests. Key design choices:
   realistic error messages instead of triggering retries
 - Credentials a tool declares are held by the simulated user, one random
   value per credential and conversation (``credentials.py``); a call that
-  passes any other value gets a 401 response
+  passes any other value gets a 401 response, and an accepted call that sets
+  a new value, such as a password change, leaves the user holding it
 
 The 8-axis trajectory judge lives in ``evaluator/scorers/tool_use.py``
 and is invoked by the ``trajectory-evaluator`` plugin. This module only
@@ -32,6 +33,7 @@ from typing import Any
 from pydantic import Field
 
 from usersim.engine.probes.tool_calling.credentials import (
+    credentials_set_by,
     declared_credentials,
     draw_credentials,
     format_held_credentials,
@@ -152,8 +154,8 @@ def _normalize_tool_list(tools_raw: Any) -> list[dict]:
 def _format_tools_for_api(tools: list) -> list:
     """The tools as the assistant's API receives them: each function spec unchanged.
 
-    A tool's ``credentials`` declaration is for the simulation, so it stays out
-    of the request.
+    A tool's ``credentials`` and ``sets_credentials`` declarations are for the
+    simulation, so they stay out of the request.
     """
     openai_tools = []
     for tool_data in tools:
@@ -162,7 +164,9 @@ def _format_tools_for_api(tools: list) -> list:
         elif "function" in tool_data and "type" not in tool_data:
             openai_tools.append({"type": "function", "function": tool_data["function"]})
         else:
-            openai_tools.append({key: value for key, value in tool_data.items() if key != "credentials"})
+            openai_tools.append(
+                {key: value for key, value in tool_data.items() if key not in ("credentials", "sets_credentials")}
+            )
     return openai_tools
 
 
@@ -339,6 +343,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             if (declared := declared_credentials(entry))
         }
         self.held_credentials = draw_credentials(self.tool_subset, _row_identity(self._data))
+        # The credentials each offered tool sets a new value for, by tool name.
+        self.credentials_set = {
+            _function_spec(entry).get("name"): sets for entry in self.tool_subset if (sets := credentials_set_by(entry))
+        }
 
         self.openai_tools = _format_tools_for_api(self.tool_subset)
         self.tools_for_judge = format_tools_for_prompt(self.tool_subset)
@@ -482,6 +490,12 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 )
         else:
             simulated_response = json.dumps({"error": f"Unknown tool: {name}"})
+
+        # An accepted call that sets a credential, such as a password change,
+        # leaves the user holding the value it passed.
+        for parameter, credential in self.credentials_set.get(name, {}).items():
+            if isinstance(args.get(parameter), str) and args[parameter]:
+                self.held_credentials[credential] = args[parameter]
 
         state.metadata.setdefault("tools_called", []).append(name)
         return simulated_response

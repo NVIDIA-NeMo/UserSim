@@ -15,6 +15,14 @@ share one. The simulated user holds those values and gives one when the
 assistant asks for it. A call whose argument is not the value the user holds,
 because it is missing, empty or made up, is rejected before any response is
 simulated, as the service would reject it.
+
+A tool that sets a new value for one of those credentials, such as a password
+change, declares ``sets_credentials`` the same way::
+
+    {"type": "function", "function": {...}, "sets_credentials": {"new_password": "account password"}}
+
+Once such a call is accepted, the value it passed is the one the user holds,
+so later calls must carry the new value and the old one is rejected.
 """
 
 from __future__ import annotations
@@ -36,7 +44,20 @@ def declared_credentials(tool_entry: Mapping[str, Any]) -> dict[str, str]:
     names to non-empty credential names, or names a parameter the function
     does not define, since no call could then pass the credential.
     """
-    declared = tool_entry.get("credentials")
+    return _parameter_credentials(tool_entry, "credentials")
+
+
+def credentials_set_by(tool_entry: Mapping[str, Any]) -> dict[str, str]:
+    """The ``{parameter: credential}`` mapping whose new values the tool sets.
+
+    Read from the entry's ``sets_credentials`` and checked like
+    ``declared_credentials``.
+    """
+    return _parameter_credentials(tool_entry, "sets_credentials")
+
+
+def _parameter_credentials(tool_entry: Mapping[str, Any], key: str) -> dict[str, str]:
+    declared = tool_entry.get(key)
     if declared is None:
         return {}
     spec = tool_entry["tool"]["function"] if "tool" in tool_entry else tool_entry.get("function", tool_entry)
@@ -45,11 +66,11 @@ def declared_credentials(tool_entry: Mapping[str, Any]) -> dict[str, str]:
         isinstance(parameter, str) and isinstance(credential, str) and credential.strip()
         for parameter, credential in declared.items()
     ):
-        raise ValueError(f"tool_calling: `{name}` credentials must map parameter names to credential names")
+        raise ValueError(f"tool_calling: `{name}` {key} must map parameter names to credential names")
     properties = (spec.get("parameters") or {}).get("properties") or {}
     undefined = sorted(set(declared) - set(properties))
     if undefined:
-        raise ValueError(f"tool_calling: `{name}` declares credentials for parameters it does not define: {undefined}")
+        raise ValueError(f"tool_calling: `{name}` declares {key} for parameters it does not define: {undefined}")
     return dict(declared)
 
 

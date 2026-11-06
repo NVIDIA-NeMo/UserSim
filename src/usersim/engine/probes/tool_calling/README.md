@@ -14,10 +14,11 @@ the other probes.
   up to `max_tools` of its tools, drawn the same way for the same row every
   run. The toolset is the row's theme.
 - The simulated user writes requests the tools can serve, in the row's
-  language, and holds any credential a tool declares.
+  language, and holds any credential a tool declares, API key or password.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
-  gets a response the `api_response_model` writes for that tool.
+  gets a response the `api_response_model` writes for that tool. A call that
+  sets a new password leaves the user holding it.
 - Within a turn, the tools stay on offer after each round of calls, so the
   assistant can chain calls, until it replies without calling one or the turn
   has made 8 calls; a call past that is not run. The conversation does not end

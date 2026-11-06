@@ -21,7 +21,7 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError
 
 from usersim.engine.core.missing import is_missing
-from usersim.engine.probes.tool_calling.credentials import declared_credentials
+from usersim.engine.probes.tool_calling.credentials import credentials_set_by, declared_credentials
 from usersim.engine.probes.tool_calling.probe import ToolCallingProbe
 
 JSON_SCHEMA_TYPES = frozenset({"string", "number", "integer", "boolean", "array", "object", "null"})
@@ -31,6 +31,23 @@ _PARAMETER_NAME = re.compile(r"^[a-zA-Z0-9_.-]{1,64}$")
 _ENDPOINT = re.compile(r" HTTP [A-Z]+ (\S+)$")
 #: Parameter names that take nothing but the caller's credential for a service.
 _KEY_NAME = re.compile(r"(?i)api_?key|secret|access_token|public_key|appid")
+_PASSWORD_NAME = re.compile(r"(?i)pass(word|wd)")
+#: Password parameters that take no password the user already holds, by
+#: (toolset, tool, parameter): each sets a password on something new, stores
+#: one, or is no secret.
+_PASSWORDS_NOT_HELD = {
+    ("ToolEyes/File/Pdf", "add_password", "password"),  # set on the PDF
+    ("UltraTools/Agenda", "file_compression", "password"),  # set on the archive
+    ("UltraTools/Document", "file_compression", "password"),  # set on the archive
+    ("UltraTools/Finance", "activate_credit_card", "withdrawal_password"),  # set on the card
+    ("UltraTools/Health", "password_management_tool", "password"),  # stored in a password manager
+    ("UltraTools/Health", "password_management_tool", "password_hint"),  # a hint
+    ("UltraTools/Health", "update_password", "new_password"),  # no tool in the toolset logs in with it
+    ("UltraTools/Meeting", "video_conference_tool", "needPassword"),  # a yes/no flag
+    ("UltraTools/Meeting", "video_conference_tool", "password"),  # set on the new meeting
+    ("UltraTools/Travel", "password_management_tool", "password"),  # stored in a password manager
+    ("UltraTools/Travel", "password_management_tool", "password_hint"),  # a hint
+}
 
 
 @pytest.fixture(scope="module")
@@ -256,11 +273,12 @@ def test_every_tool_and_parameter_is_described(toolsets):
 
 
 def test_each_entry_holds_its_function_spec_and_at_most_its_credentials(toolsets):
+    allowed = {"type", "function", "credentials", "sets_credentials"}
     extra = [
-        f"{label}:{spec['function']['name']}: {sorted(set(spec) - {'type', 'function', 'credentials'})}"
+        f"{label}:{spec['function']['name']}: {sorted(set(spec) - allowed)}"
         for label, _, specs in toolsets
         for spec in specs
-        if set(spec) - {"type", "function", "credentials"}
+        if set(spec) - allowed
     ]
     assert not extra, f"entries with keys beside the spec and its credentials: {extra[:10]}"
 
@@ -293,3 +311,33 @@ def test_every_key_parameter_is_declared_as_a_credential(toolsets):
         if _KEY_NAME.search(parameter) and parameter not in (spec.get("credentials") or {})
     ]
     assert not undeclared, f"key parameters whose credential the user would not hold: {undeclared[:10]}"
+
+
+def test_every_password_is_held_set_or_listed_as_neither(toolsets):
+    unclassified = [
+        f"{label}:{spec['function']['name']}.{parameter}"
+        for label, _, specs in toolsets
+        for spec in specs
+        for parameter in spec["function"]["parameters"].get("properties") or {}
+        if _PASSWORD_NAME.search(parameter)
+        and parameter not in declared_credentials(spec)
+        and parameter not in credentials_set_by(spec)
+        and (label, spec["function"]["name"], parameter) not in _PASSWORDS_NOT_HELD
+    ]
+    assert not unclassified, f"password parameters neither held, set nor listed: {unclassified[:10]}"
+
+
+def test_each_set_credential_replaces_one_its_toolset_holds(toolsets):
+    """A tool that sets a credential takes a string, and some tool of its toolset logs in with it."""
+    wrong = []
+    n_set = 0
+    for label, _, specs in toolsets:
+        held = {credential for spec in specs for credential in declared_credentials(spec).values()}
+        for spec in specs:
+            for parameter, credential in credentials_set_by(spec).items():
+                n_set += 1
+                schema = spec["function"]["parameters"]["properties"][parameter]
+                if schema.get("type") != "string" or credential not in held:
+                    wrong.append(f"{label}:{spec['function']['name']}.{parameter} ({credential})")
+    assert n_set, "the shipped catalog sets no credentials"
+    assert not wrong, f"set credentials that are not strings or that no tool of the toolset holds: {wrong[:10]}"

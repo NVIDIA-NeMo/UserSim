@@ -20,7 +20,7 @@ from pydantic import ValidationError
 
 from usersim.engine.core.llm import ContextWindowError
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
-from usersim.engine.core.simulation import ConversationLoop
+from usersim.engine.core.simulation import ConversationLoop, ConversationState
 from usersim.engine.probes.tool_calling.probe import (
     ToolCallingProbe,
     _build_tool_context,
@@ -193,25 +193,13 @@ def _with_weather_key(sample_tools):
     return tools
 
 
-async def _run_concrete_tool_probe(
-    sample_tools,
-    *,
-    api_context_error=False,
-    arguments: Callable[[ToolCallingProbe], str] = lambda probe: '{"location":"Tokyo"}',
-    second_call_arguments: str | None = None,
-    offered_tools: list[bool] | None = None,
-):
-    """Run one conversation; the assistant calls ``get_weather``, then answers.
-
-    With ``second_call_arguments`` it calls ``get_weather`` again after the
-    first result, before answering. ``offered_tools`` collects, per assistant
-    call, whether the request offered tools.
-    """
+def _concrete_tool_probe(tools) -> tuple[ToolCallingProbe, dict, types.SimpleNamespace]:
+    """A tool_calling probe offered both of ``tools``, with its row and run config."""
     from usersim.engine.core.behavioral import compute_behavioral_profile
 
     persona = {"first_name": "A", "last_name": "User", "age": 35}
     data = {
-        "tools": sample_tools,
+        "tools": tools,
         "theme": "__not_used__",
         "persona_uuid": "persona-1",
         "disclosure_style": "upfront",
@@ -226,7 +214,6 @@ async def _run_concrete_tool_probe(
         compression_window=1,
         enforce_user_language=False,
     )
-    outcome = OutcomeBuilder(provenance=Provenance())
     probe = ToolCallingProbe(
         persona=persona,
         locale="en_US",
@@ -236,8 +223,26 @@ async def _run_concrete_tool_probe(
         provenance=Provenance(),
         profile=compute_behavioral_profile(persona),
         data=data,
-        outcome_builder=outcome,
+        outcome_builder=OutcomeBuilder(provenance=Provenance()),
     )
+    return probe, data, cfg
+
+
+async def _run_concrete_tool_probe(
+    sample_tools,
+    *,
+    api_context_error=False,
+    arguments: Callable[[ToolCallingProbe], str] = lambda probe: '{"location":"Tokyo"}',
+    second_call_arguments: str | None = None,
+    offered_tools: list[bool] | None = None,
+):
+    """Run one conversation; the assistant calls ``get_weather``, then answers.
+
+    With ``second_call_arguments`` it calls ``get_weather`` again after the
+    first result, before answering. ``offered_tools`` collects, per assistant
+    call, whether the request offered tools.
+    """
+    probe, data, cfg = _concrete_tool_probe(sample_tools)
     assistant_inputs = []
     user_inputs = []
     judge_inputs = []
@@ -579,3 +584,49 @@ class TestCredentials:
 
         assert "<CREDENTIALS>" not in user_inputs[0][0]["content"]
         assert "are valid" not in api_inputs[0][0]["content"]
+
+    @staticmethod
+    def _account_tools() -> list[dict]:
+        """A login and a password change, both on the user's account password."""
+
+        def entry(name: str, properties: tuple[str, ...], **declarations: dict) -> dict:
+            schema = {p: {"type": "string", "description": p} for p in properties}
+            parameters = {"type": "object", "properties": schema, "required": list(properties)}
+            function = {"name": name, "description": f"{name} tool", "parameters": parameters}
+            return {"type": "function", "function": function, **declarations}
+
+        return [
+            entry("account_login", ("username", "password"), credentials={"password": "account password"}),
+            entry(
+                "change_password",
+                ("old_password", "new_password"),
+                credentials={"old_password": "account password"},
+                sets_credentials={"new_password": "account password"},
+            ),
+        ]
+
+    async def test_a_password_the_user_sets_replaces_the_one_they_held(self):
+        probe, _data, _cfg = _concrete_tool_probe(self._account_tools())
+        state = ConversationState()
+        held = probe.held_credentials["account password"]
+
+        async def call(name: str, **arguments: str) -> dict:
+            tool_call = {"id": f"call-{name}", "function": {"name": name, "arguments": json.dumps(arguments)}}
+            return json.loads(
+                await probe.execute_tool_call(name, arguments, tool_call, state, {}, turn_idx=1, call_idx=0)
+            )
+
+        with patch("usersim.engine.probes.tool_calling.probe.acall_llm", return_value={"content": '{"ok": true}'}):
+            # A change that does not carry the held password sets nothing.
+            assert (await call("change_password", old_password="wrong", new_password="N3w-pass"))["status"] == 401
+            assert (await call("account_login", username="a", password="N3w-pass"))["status"] == 401
+            assert await call("change_password", old_password=held, new_password="N3w-pass") == {"ok": True}
+            assert await call("account_login", username="a", password="N3w-pass") == {"ok": True}
+            assert (await call("account_login", username="a", password=held))["status"] == 401
+
+        assert "- account password: N3w-pass" in probe.get_user_system_prompt()
+
+    def test_the_set_declaration_stays_out_of_the_assistants_tools(self):
+        probe, _data, _cfg = _concrete_tool_probe(self._account_tools())
+
+        assert all(set(tool) == {"type", "function"} for tool in probe.openai_tools)

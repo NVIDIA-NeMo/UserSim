@@ -171,6 +171,18 @@ request the assistant's API receives, and the tool list each judge reads names
 the credentials a tool needs, so asking the user for one counts as part of the
 call.
 
+A tool that sets a new value for a credential, such as a password change or a
+registration, declares `sets_credentials` the same way:
+
+```json
+{"type": "function", "function": {"name": "modifypassword", "...": "..."}, "credentials": {"old_password": "account password"}, "sets_credentials": {"new_password": "account password"}}
+```
+
+Once such a call gets past the schema and credential checks, the value it
+passed is the one the user holds: later calls must carry it, the old value
+gets a `401`, and the user's list of credentials shows the new one. This
+declaration stays out of the request too.
+
 ### Using your own catalog
 
 The probe declares the catalog as its seed table (`seed_dataset =
@@ -297,6 +309,13 @@ other changes are listed per source:
   - Every nested field has a description (29 added), and 72 descriptions that
     contradict their tool, or that leave a list's layout unstated, are
     rewritten.
+  - The 40 parameters that take a password the user already holds, such as
+    `password` in `account_login` and `old_password` in `change_password`, are
+    required, described by the account they open, such as `Your online banking
+    password.`, and declared under their tool's `credentials`. The 9
+    `new_password` parameters of the change, reset and update tools in
+    `Account`, `Finance` and `Meeting` are declared under `sets_credentials`
+    (see [Credentials](#credentials)).
 - **ToolEyes** ([Ye et al., 2025](https://aclanthology.org/2025.coling-main.12/)):
   all 95 toolsets in
   [`Tool_Library`](https://github.com/Junjie-Ye/ToolEyes/tree/c818fcebe017951570a25e552a7984e40093fd52/Tool_Library)
@@ -331,6 +350,10 @@ other changes are listed per source:
     host or client library the function calls, and declared under its tool's
     `credentials` (see [Credentials](#credentials)). `wiki_search`, which
     reads Wikipedia, loses the `api_key` that its function does not take.
+  - The 6 parameters that take the user's mail or database password,
+    `login_password` in the five `Mail` tools and `password` in
+    `execute_mysql_query`, are required, described `Your email password.` and
+    `Your MySQL password.`, and declared under `credentials`.
 - **API-Bank** ([Li et al., 2023](https://aclanthology.org/2023.emnlp-main.187/)):
   100 of the 101 APIs listed in
   [`api-bank/data/all_apis.csv`](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/faf754671f5b850e1b4d1ff870db37a6a2480df6/api-bank/data/all_apis.csv)
@@ -345,7 +368,12 @@ other changes are listed per source:
   omits. Descriptions and parameter descriptions are upstream's, apart from 15
   corrected against the class's code and the CSV, such as `gettoday`, which
   gets the current date. The `All` toolset holds every API, and nine topical
-  toolsets repeat subsets of them.
+  toolsets repeat subsets of them. The 14 parameters that take the password of
+  an existing account, `password` in `getusertoken` and `modifybankaccount` and
+  `old_password` in `modifypassword`, are described `Your account password.` or
+  `Your bank account password.` and declared under `credentials`; the 14 that
+  set one, `new_password` in `modifypassword` and `password` in `registeruser`
+  and `openbankaccount`, are declared under `sets_credentials`.
 - **RestGPT** ([Song et al., 2023](https://arxiv.org/abs/2306.06624)):
   all 40 Spotify and 54 TMDB operations in RestBench's OpenAPI specs under
   [`specs`](https://github.com/Yifan-Song793/RestGPT/tree/d99012860cb45323975bf5780152d7aa44f390f5/specs)
