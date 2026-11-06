@@ -59,10 +59,10 @@ format, panel-driven overrides for both strategy and target,
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.probes import (
+from usersim.extension import (
     BankBackedProbe,
     BankReframingMixin,
     register_probe,
@@ -107,18 +107,15 @@ def _demo_pressure_loader():
     raise NotImplementedError("replace with your real pressure-bank loader")
 
 
-@register_probe(
-    family="demo_bank_reframing",
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
     """Multi-turn reframing-rotation probe."""
 
     label = "demo_bank_reframing"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_bank_reframing/, beside this module
     output_columns = ("target_request_id", "strategy_id", "reframings_used")
     bank_loader = staticmethod(_demo_pressure_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
+    placeholder_warning_kind = "used_placeholder_target"
     bank_version_key = "safety"  # non-locale (this probe is locale-independent)
 
     def __init__(self, **kwargs: Any) -> None:

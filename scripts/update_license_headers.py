@@ -415,7 +415,7 @@ if __name__ == "__main__":
     total_processed = total_updated = total_skipped = 0
 
     # This project is one distribution under src/, so the roots are flat.
-    for folder in ["src", "tests", "scripts", "templates"]:
+    for folder in ["src", "tests", "scripts", "templates", "docs/examples"]:
         folder_path = repo_path / folder
         if not folder_path.exists():
             continue

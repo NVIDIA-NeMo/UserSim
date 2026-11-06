@@ -25,8 +25,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from usersim.engine.core._assets import packaged_assets_dir, set_runtime_assets_dir
-from usersim.engine.core.prompt_loader import render_prompt
+from usersim.engine.core._assets import probe_assets_dir, set_runtime_assets_dir
+from usersim.engine.core.prompt_loader import get_prompt, load_prompt_file, render_prompt
 
 #: The theme-driven probes, mapped to the name each one gives the
 #: import-time constant behind ``user_agent_system_prompt()``. Spelled out
@@ -109,7 +109,7 @@ class TestRenderPrompt:
 class TestAccessorsResolveAtCallTime:
     """Constants bind at import; probes import at plugin bootstrap, before a
     run's ``assets_dir`` is known. Only re-resolving per call lets
-    ``--assets-dir`` / ``USERSIM_ASSETS_DIR`` govern prompts.
+    ``--assets-dir`` / ``USERSIM_ASSET_PATH`` govern prompts.
     """
 
     @pytest.mark.parametrize("probe", THEME_PROBES)
@@ -150,9 +150,27 @@ class TestAccessorsResolveAtCallTime:
         """A prompts.yaml that omits a key must not blank the prompt."""
         from usersim.engine.probes.general_open_ended import prompts as oe
 
-        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="R"))
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", user_judge_rubric="R"))
         assert oe.user_agent_system_prompt().strip()
-        assert oe.trajectory_rubric() == "R"
+        assert oe.user_judge_rubric() == "R"
+
+
+class TestPromptFileIsReadWhereTheBanksAre:
+    """A probe's ``prompts.yaml`` comes from the folder its banks resolve to."""
+
+    def test_a_root_holding_other_probes_does_not_hide_the_shipped_prompts(self, tmp_path):
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "tool_calling", user_agent_system_prompt="OTHER"))
+
+        shipped = yaml.safe_load((probe_assets_dir("general_open_ended") / "prompts.yaml").read_text())
+        assert shipped
+        assert load_prompt_file("general_open_ended") == shipped
+
+    def test_a_declared_root_supplies_its_probes_prompts(self, register_test_probe, tmp_path):
+        register_test_probe(
+            "ext_probe", assets_root=_assets_with_prompt(tmp_path, "ext_probe", user_agent_system_prompt="EXT")
+        )
+
+        assert get_prompt("ext_probe", "user_agent_system_prompt") == "EXT"
 
 
 # ---------------------------------------------------------------------------
@@ -168,8 +186,6 @@ class _Cfg:
     max_query_attempts = 2
     context_compression = False
     compression_window = 1
-    tools_column = None
-    max_tools = 5
     max_steps = 10
     incremental_disclosure_ratio = 0.6
     persona_grounding_ratio = 1.0
@@ -180,7 +196,7 @@ class _Cfg:
 def _open_ended_probe(data: dict):
     """A real ``OpenEndedProbe`` for ``data``, with no LLM anywhere near it."""
     from usersim.engine.core.behavioral import compute_behavioral_profile
-    from usersim.engine.probes.general_open_ended.generator import OpenEndedProbe
+    from usersim.engine.probes.general_open_ended.probe import OpenEndedProbe
 
     persona = {"first_name": "A", "last_name": "B", "age": 30, "sex": "female"}
     return OpenEndedProbe(
@@ -263,7 +279,7 @@ class TestPromptIsRebuiltPerRow:
         """The dispatcher constructs a probe per row, so a row column
         referenced from prompts.yaml must reflect THAT row."""
         from usersim.engine.core.behavioral import compute_behavioral_profile
-        from usersim.engine.probes.general_open_ended.generator import (
+        from usersim.engine.probes.general_open_ended.probe import (
             OpenEndedProbe,
         )
 
@@ -339,7 +355,7 @@ class TestAssistantJudgePrompt:
         """No asset key present -> the compiled default, interpolated."""
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
 
-        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="x"))
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", user_judge_rubric="x"))
         probe = _open_ended_probe({"uuid": "u", "theme": "{}"})
         assert probe.format_assistant_judge_prompt("R", "H") == (
             ASSISTANT_JUDGE_PROMPT.format(assistant_response="R", conversation_history="H")
@@ -363,7 +379,7 @@ class TestAssistantJudgePrompt:
         every other probe on the default."""
         from usersim.engine.core.behavioral import compute_behavioral_profile
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
-        from usersim.engine.probes.general_educational.generator import (
+        from usersim.engine.probes.general_educational.probe import (
             EducationalProbe,
         )
 
@@ -426,5 +442,5 @@ class TestAssistantJudgePrompt:
 
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
 
-        shipped = yaml.safe_load((packaged_assets_dir() / probe / "prompts.yaml").read_text())
+        shipped = yaml.safe_load((probe_assets_dir(probe) / "prompts.yaml").read_text())
         assert shipped["assistant_judge_prompt"] == ASSISTANT_JUDGE_PROMPT

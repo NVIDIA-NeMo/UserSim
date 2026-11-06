@@ -14,12 +14,10 @@ class TestConversationSimulatorConfig:
     def test_default_values(self):
         cfg = ConversationSimulatorConfig(name="test")
         assert cfg.locale == "en_US"
-        assert cfg.tools_column is None
-        assert cfg.toolset_name_column is None
         assert cfg.max_turns == 5
-        assert cfg.max_tools == 5
         assert cfg.max_steps == 10
         assert cfg.random_seed is None
+        assert cfg.probe_options == {}
 
     def test_custom_locale(self):
         cfg = ConversationSimulatorConfig(name="test", locale="pt_BR")
@@ -47,7 +45,7 @@ class TestConversationSimulatorConfig:
         cfg = ConversationSimulatorConfig(name="test")
         declared = cfg.get_model_aliases()
         assert "summary_model" not in declared
-        assert cfg.finance_embedding_model_alias not in declared
+        assert "embedding_model" not in declared
 
     def test_every_probe_specific_column_is_declared(self):
         """A column the config does not declare is written by the probe and
@@ -57,6 +55,16 @@ class TestConversationSimulatorConfig:
         declared = set(cfg.side_effect_columns)
         for column in ("query_id", "sovereign_facts_probed", "probing_categories_explored", "finance_task_id"):
             assert column in declared, f"{column} would be dropped before any scorer could read it"
+
+    def test_a_run_declares_the_output_columns_of_the_probes_in_its_mix(self, register_test_probe):
+        """A probe installed but not in the mix adds no empty columns to the run's rows."""
+        register_test_probe("ext_a", output_columns=("ext_a_score",))
+        with_it = ConversationSimulatorConfig(name="test", probes=["general_open_ended", "ext_a"]).side_effect_columns
+        without = ConversationSimulatorConfig(name="test", probes=["general_open_ended"]).side_effect_columns
+
+        assert "ext_a_score" in with_it
+        assert "ext_a_score" not in without and "finance_task_id" not in without
+        assert without[: len(CORE_RESULT_COLUMNS)] == list(CORE_RESULT_COLUMNS)
 
     def test_registered_probes_output_columns_follow_the_core_columns(self, register_test_probe):
         """A run keeps every registered probe's columns; a name two probes declare appears once."""
@@ -109,7 +117,3 @@ class TestConversationSimulatorConfig:
         assert "persona" in required
         assert "probe_type" in required
         assert "theme" in required
-
-    def test_tools_column_optional(self):
-        cfg = ConversationSimulatorConfig(name="test", tools_column="tools")
-        assert cfg.tools_column == "tools"

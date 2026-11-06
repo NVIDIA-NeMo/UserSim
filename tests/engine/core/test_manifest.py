@@ -57,7 +57,7 @@ from usersim.engine.core.manifest import (
 
 @dataclass(frozen=True)
 class _StubModelSpec:
-    """Mirror of ``cli._models.ModelSpec`` with the fields the manifest reads."""
+    """Mirror of ``usersim.engine.models_file.ModelSpec`` with the fields the manifest reads."""
 
     alias: str
     model: str
@@ -72,7 +72,7 @@ class _StubModelSpec:
 
 @dataclass(frozen=True)
 class _StubProviderSpec:
-    """Mirror of ``cli._models.ProviderSpec``."""
+    """Mirror of ``usersim.engine.models_file.ProviderSpec``."""
 
     name: str
     endpoint: str
@@ -92,7 +92,6 @@ class _StubSimConfig:
 
     max_turns: int = 5
     max_steps: int = 10
-    max_tools: int = 5
     max_query_attempts: int = 3
     incremental_disclosure_ratio: float = 0.6
     persona_grounding_ratio: float = 1.0
@@ -144,7 +143,6 @@ class TestRoundTrip:
             simulation_config=SimulationConfigSnapshot(
                 max_turns=5,
                 max_steps=10,
-                max_tools=5,
                 max_query_attempts=3,
                 max_assistant_attempts=1,
                 incremental_disclosure_ratio=0.6,
@@ -158,7 +156,6 @@ class TestRoundTrip:
                 locales=["en_US", "ja_JP"],
                 probes=["tool_calling", "general_open_ended"],
                 probe_mix={"tool_calling": 0.5, "general_open_ended": 0.5},
-                tool_calling_themes=["weather", "calendar"],
                 trajectories_requested={"en_US": 2, "ja_JP": 2},
                 trajectories_completed={"en_US": 2, "ja_JP": 2},
             ),
@@ -204,6 +201,17 @@ class TestRoundTrip:
         assert m.simulation_config.max_turns == 5  # default
         assert m.simulation_config.store_reasoning is True
 
+    def test_a_manifest_naming_its_seed_table_after_toolsets_still_loads(self) -> None:
+        written = {
+            "manifest_schema_version": "v1",
+            "run_id": "1700000000",
+            "started_at_epoch": 1700000000,
+            "models": {},
+            "scope": {"toolset_seed_path": "/catalog.parquet", "toolset_content_hash": "abc123"},
+        }
+        scope = RunManifest.from_dict(written).scope
+        assert (scope.seed_dataset_path, scope.seed_dataset_content_hash) == ("/catalog.parquet", "abc123")
+
     def test_schema_version_is_v1(self) -> None:
         assert MANIFEST_SCHEMA_VERSION == "v1"
 
@@ -225,7 +233,6 @@ def _minimal_manifest(run_id: str = "1700000000") -> RunManifest:
         simulation_config=SimulationConfigSnapshot(
             max_turns=5,
             max_steps=10,
-            max_tools=5,
             max_query_attempts=3,
             max_assistant_attempts=1,
             incremental_disclosure_ratio=0.6,
@@ -283,6 +290,16 @@ class TestLoader:
         write_run_manifest(m, tmp_path)
         loaded = load_run_manifest("1700000000", tmp_path)
         assert loaded == m
+
+    def test_loads_a_manifest_with_a_scope_key_it_no_longer_reads(self, tmp_path: Path) -> None:
+        """A manifest whose scope holds a key the loader does not read, such as tool_calling_themes, still loads."""
+        m = _minimal_manifest("1700000000")
+        write_run_manifest(m, tmp_path)
+        path = manifest_path(tmp_path, "1700000000")
+        payload = json.loads(path.read_text())
+        payload["scope"]["tool_calling_themes"] = ['{"type": "Weather & Location Lookup"}']
+        path.write_text(json.dumps(payload))
+        assert load_run_manifest("1700000000", tmp_path) == m
 
     def test_returns_none_for_run_without_manifest(self, tmp_path: Path) -> None:
         # No manifest written. Old-run handling depends on this contract.
@@ -557,7 +574,6 @@ class TestBuildRunManifest:
             sim_config=_StubSimConfig(random_seed=42),
             locales_requested=["en_US"],
             probe_mix={"tool_calling": 1.0},
-            tool_calling_themes=("weather",),
             assets_dir=Path("/repo/assets"),
             trajectories_requested={"en_US": 1},
             trajectory_df=traj,
@@ -572,11 +588,47 @@ class TestBuildRunManifest:
         assert manifest.scope.trajectories_completed == {"en_US": 1}
         assert manifest.outcome_summary.status_counts == {"ok": 1}
         assert manifest.asset_versions.prompt_versions == {"tool_calling": "v1.0"}
+        # The run pinned /repo/assets, so the probe read its assets there.
+        assert manifest.asset_versions.probe_assets == {"tool_calling": str(Path("/repo/assets") / "tool_calling")}
         identity = manifest.models["assistant_model"]
         assert identity.model == "nvidia/nemotron-3-super-v3"
         assert identity.endpoint == "https://gateway.example/v1"
         assert identity.api_key_env_var == "GATEWAY_API_KEY"
         assert manifest.replay == ReplayInfo()  # reserved fields default null
+
+    def test_an_unpinned_run_records_each_probe_s_own_assets(self) -> None:
+        from usersim.engine.core._assets import probe_assets_dir
+
+        manifest = build_run_manifest(
+            run_id="1700000005",
+            started_at_epoch=1700000005,
+            finished_at_epoch=1700000006,
+            models_config=_StubModelsConfig(),
+            sim_config=_StubSimConfig(),
+            locales_requested=["en_US"],
+            probe_mix={"tool_calling": 0.5, "general_open_ended": 0.5},
+            trajectory_df=None,
+        )
+        assert manifest.asset_versions.assets_dir is None
+        assert manifest.asset_versions.probe_assets == {
+            probe: str(probe_assets_dir(probe)) for probe in ("general_open_ended", "tool_calling")
+        }
+
+    def test_records_the_installed_extensions(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        from usersim.engine.core import _extensions
+
+        monkeypatch.setattr(_extensions, "extension_distributions", lambda: {"my-bookings": "0.1.0"})
+        manifest = build_run_manifest(
+            run_id="1700000007",
+            started_at_epoch=1700000007,
+            finished_at_epoch=1700000008,
+            models_config=_StubModelsConfig(),
+            sim_config=_StubSimConfig(),
+            locales_requested=["en_US"],
+            probe_mix={},
+            trajectory_df=None,
+        )
+        assert manifest.code.extensions == {"my-bookings": "0.1.0"}
 
     def test_empty_trajectory_df_renders_zeros(self) -> None:
         manifest = build_run_manifest(

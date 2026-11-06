@@ -623,7 +623,7 @@ class TestSchema:
         # Schema-parity guard across the package boundary: the selection
         # `finance` group must match the probe's canonical column contract, so
         # a rename/add on either side can't silently drop export columns.
-        from usersim.engine.probes.financial_services.generator import (
+        from usersim.engine.probes.financial_services.probe import (
             FINANCE_TRAJECTORY_COLUMNS,
         )
         from usersim.selection.schemas import LOGICAL_GROUPS

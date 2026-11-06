@@ -177,8 +177,11 @@ JSON Schema to enforce anything against.
 
 from __future__ import annotations
 
+import importlib
 import logging
-from typing import Any, Awaitable, Callable, Iterable
+from typing import Any, Awaitable, Callable
+
+from usersim.engine.core.builtin_packages import builtin_modules
 
 logger = logging.getLogger("usersim.engine")
 
@@ -187,10 +190,20 @@ ScorerFn = Callable[[dict[str, Any], dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
 _REGISTRY: dict[str, ScorerFn] = {}
+#: The names registered with ``deterministic=True``.
+_DETERMINISTIC: set[str] = set()
+
+#: The ``usersim eval --scorers`` entry that stands for ``GENERIC_SCORERS``
+#: plus the ``default_scorers`` of every probe in the run. No scorer may be
+#: registered under it.
+AUTO_SCORERS = "auto"
+#: The rule-based scorers that apply to every probe's rows, which ``auto``
+#: runs beside the probes' own.
+GENERIC_SCORERS: tuple[str, ...] = ("language_compliance", "refusal_basics", "response_shape")
 
 
 class ScorerRegistrationError(ValueError):
-    """Raised when ``register_scorer`` is given a name another scorer holds."""
+    """Raised when ``register_scorer`` is given a name another scorer holds, or ``auto``."""
 
 
 def _definition(fn: Any) -> str:
@@ -198,7 +211,7 @@ def _definition(fn: Any) -> str:
     return f"{getattr(fn, '__module__', '?')}.{getattr(fn, '__qualname__', repr(fn))}"
 
 
-def register_scorer(name: str, fn: ScorerFn) -> None:
+def register_scorer(name: str, fn: ScorerFn, *, deterministic: bool = False) -> None:
     """Register a scorer under a stable name.
 
     A name belongs to one scorer. Registering the same function again, or
@@ -206,7 +219,20 @@ def register_scorer(name: str, fn: ScorerFn) -> None:
     different function under a taken name raises
     ``ScorerRegistrationError`` naming both, so an installed package
     cannot replace a scorer a run asks for by name.
+
+    ``deterministic`` marks a scorer that never calls or looks up a model, on
+    any row, so ``usersim rescore`` may rerun it on a stored evaluation. A
+    scorer that calls a model on some rows, or whenever one is wired, leaves
+    it unset.
+
+    ``auto`` (``AUTO_SCORERS``) is refused, since ``--scorers auto`` names
+    a set of scorers rather than one.
     """
+    if name == AUTO_SCORERS:
+        raise ScorerRegistrationError(
+            f"scorer name {name!r} is reserved: `usersim eval --scorers {name}` runs the generic scorers "
+            "and the default_scorers of the run's probes. Give the scorer another name."
+        )
     existing = _REGISTRY.get(name)
     if existing is not None and existing is not fn and _definition(existing) != _definition(fn):
         raise ScorerRegistrationError(
@@ -214,6 +240,10 @@ def register_scorer(name: str, fn: ScorerFn) -> None:
             f"so {_definition(fn)} cannot take it. Give the scorer a name no other scorer uses."
         )
     _REGISTRY[name] = fn
+    if deterministic:
+        _DETERMINISTIC.add(name)
+    else:
+        _DETERMINISTIC.discard(name)
 
 
 def load_extension_scorers() -> None:
@@ -242,6 +272,12 @@ def get_scorer(name: str) -> ScorerFn:
     return _REGISTRY[name]
 
 
+def deterministic_scorers() -> list[str]:
+    """The registered scorers marked ``deterministic``, in registration order."""
+    load_extension_scorers()
+    return [name for name in _REGISTRY if name in _DETERMINISTIC]
+
+
 def list_scorers() -> list[str]:
     """All registered scorer names. Order is insertion-stable (Python 3.7+)."""
     load_extension_scorers()
@@ -249,55 +285,41 @@ def list_scorers() -> list[str]:
 
 
 def clear_registry() -> None:
-    """Drop all registered scorers — primarily for test isolation."""
-    _REGISTRY.clear()
+    """Drop all registered scorers, for a test that starts from an empty registry.
 
-
-def reload_scorers(scorer_module_paths: Iterable[str]) -> None:
-    """Force re-execution of scorer modules so ``register_scorer`` fires.
-
-    Uses ``importlib.reload`` (not ``import_module``) so that previously-
-    imported modules re-trigger their top-level ``register_scorer(...)``
-    calls. This is what makes ``load_default_scorers()`` idempotently
-    correct even after a test's ``clear_registry()`` has wiped state.
-
-    Best-effort: a missing or import-error module is logged but not
-    fatal — other scorers still get a chance to register.
+    The bundled scorers register when their modules are first imported, so
+    they do not come back after this; ``usersim.testing.registry_snapshot``
+    puts them back when the test's block exits.
     """
-    import importlib
-
-    for path in scorer_module_paths:
-        try:
-            mod = importlib.import_module(path)
-            importlib.reload(mod)
-        except Exception as e:
-            logger.warning(f"  |-- evaluator.scorers: failed to (re)load {path!r}: {e}")
+    _REGISTRY.clear()
 
 
 # ── Bundled scorers shipped with this plugin ──────────────────────
 # Auto-imported here so they are present in the registry as soon as
 # ``usersim.engine.evaluator.scorers`` is imported (which the
-# evaluator generator does indirectly via ``get_scorer``). Future
-# probes add their scorer modules to this list.
+# evaluator generator does indirectly via ``get_scorer``).
+#: The scorers in this package, which serve more than one probe. A built-in
+#: probe package's own scorer is its ``scorer.py``, found through ``BUILTIN_PACKAGES``.
 DEFAULT_SCORER_MODULES: tuple[str, ...] = (
     "usersim.engine.evaluator.scorers.tool_use",
-    "usersim.engine.evaluator.scorers.sov_ai_facts",
-    "usersim.engine.evaluator.scorers.sov_ai_dynamic",
-    "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity",
-    "usersim.engine.evaluator.scorers.safety_chat_pressure",
-    "usersim.engine.evaluator.scorers.safety_agentic",
-    "usersim.engine.evaluator.scorers.financial_services",
     "usersim.engine.evaluator.scorers.language_compliance",
     "usersim.engine.evaluator.scorers.response_shape",
     "usersim.engine.evaluator.scorers.refusal_basics",
-    "usersim.engine.evaluator.scorers.health_disclosure",
-    "usersim.engine.evaluator.scorers.identity_disclosure",
 )
 
 
 def load_default_scorers() -> None:
-    """Ensure all bundled scorers are registered. Idempotent."""
-    reload_scorers(DEFAULT_SCORER_MODULES)
+    """Import every bundled scorer module, this package's and each built-in package's, so each registers.
+
+    Each module registers its scorer the first time it is imported, so calling
+    this again changes nothing. A module that fails to import is logged, and
+    the others still register.
+    """
+    for module in (*DEFAULT_SCORER_MODULES, *builtin_modules("scorer")):
+        try:
+            importlib.import_module(module)
+        except Exception as e:
+            logger.warning(f"  |-- evaluator.scorers: failed to load {module!r}: {e}")
 
 
 # Eagerly load on package import so users do not have to call

@@ -22,8 +22,8 @@ the simulate loop directly.
 
 What ``AgenticMixin`` does:
 - Inherits from ``BankVerbatimMixin``.
-- Sets ``should_inline_judge_user_turn = False`` for turn 0 (the
-  user's verbatim action request is auditable as-is — no judge call).
+- Turns assistant resampling off, since the tool loop's side effects
+  cannot be replayed.
 
 What you provide:
 - ``derive_task(persona, bank, *, cfg)`` — picks the action_request.
@@ -47,18 +47,19 @@ pattern; the extra LOC is bank-specific class-construction handling).
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.outcomes import (
-    OutcomeBuilder,
-    WarningKind,
-)
-from usersim.engine.core.probes import (
+from usersim.extension import (
     AgenticMixin,
     BankBackedProbe,
+    ConversationState,
+    OutcomeBuilder,
+    finalize_completed,
+    make_result,
+    outcome_builder_scope,
     register_probe,
 )
-from usersim.engine.core.simulation import ConversationState, finalize_completed, make_result
 
 
 @dataclass
@@ -75,18 +76,15 @@ def _demo_agentic_loader():
     raise NotImplementedError("replace with your real agentic-bank loader")
 
 
-@register_probe(
-    family="demo_agentic",
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     """Single-user-turn + multi-assistant-turn tool-interception probe."""
 
     label = "demo_agentic"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_agentic/, beside this module
     output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_demo_agentic_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
+    placeholder_warning_kind = "used_placeholder_agentic_action"
     bank_version_key = "agentic"  # non-locale
 
     def __init__(self, **kwargs: Any) -> None:
@@ -167,30 +165,32 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         builder = self._outcome_builder or OutcomeBuilder(
             provenance=self._provenance,
         )
-        state = state or ConversationState(outcome=builder)
-        # Seed metadata BEFORE turn-1 — survives even if turn-1 fails.
-        if seed_state:
-            state.metadata["action_request_id"] = self._task.id
-            state.metadata["sub_protocol"] = self._task.sub_protocol
-            state.metadata["attempted_actions"] = []
-        # Inject verbatim user turn-1.
-        state.messages.append(
-            {
-                "role": "user",
-                "content": self._task.initial_user_prompt,
-            }
-        )
-        # Multi-assistant-turn tool-interception loop.
-        # See safety_agentic.SafetyAgenticProbe.run_dispatch for the
-        # real implementation (acall_llm wrapping, tool-call extraction,
-        # mock-response injection, infrastructure-failure handling).
-        sim_success, outcome = finalize_completed(self, state)
-        result = make_result(
-            state.messages,
-            state.metadata,
-            sim_success,
-            outcome=outcome,
-            traces=builder.traces(),
-        )
-        result.update(self.build_result_extras(state))
-        return result
+        # Every acall_llm call inside the block is recorded on this row's builder.
+        with outcome_builder_scope(builder):
+            state = state or ConversationState(outcome=builder)
+            # Seed metadata BEFORE turn-1 — survives even if turn-1 fails.
+            if seed_state:
+                state.metadata["action_request_id"] = self._task.id
+                state.metadata["sub_protocol"] = self._task.sub_protocol
+                state.metadata["attempted_actions"] = []
+            # Inject verbatim user turn-1.
+            state.messages.append(
+                {
+                    "role": "user",
+                    "content": self._task.initial_user_prompt,
+                }
+            )
+            # Multi-assistant-turn tool-interception loop.
+            # See safety_agentic.SafetyAgenticProbe.run_dispatch for the
+            # real implementation (acall_llm wrapping, tool-call extraction,
+            # mock-response injection, infrastructure-failure handling).
+            sim_success, outcome = finalize_completed(self, state)
+            result = make_result(
+                state.messages,
+                state.metadata,
+                sim_success,
+                outcome=outcome,
+                traces=builder.traces(),
+            )
+            result.update(self.build_result_extras(state))
+            return result

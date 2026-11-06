@@ -360,4 +360,4 @@ def _noop(*, error: str) -> dict[str, Any]:
 
 
 # Auto-register on import.
-register_scorer("response_shape", score_response_shape_trajectory)
+register_scorer("response_shape", score_response_shape_trajectory, deterministic=True)

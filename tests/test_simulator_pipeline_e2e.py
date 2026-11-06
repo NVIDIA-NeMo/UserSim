@@ -4,21 +4,19 @@
 """End-to-end wiring test: every shipped probe survives construction +
 single-turn dispatch when driven through ``cli/_pipeline.build_simulator_config_builder``.
 
-This is the test that would have caught the
-``cfg.tools_column not configured`` regression where every
-``tool_calling`` trajectory failed at probe construction. The
-existing per-probe tests (``tests/probes/test_*.py``) all use
-synthetic ``ConversationSimulatorConfig`` fixtures that hard-code the
-correct ``tools_column`` / ``persona_column`` / etc. values; they
-therefore never exercise the wiring chain
+A probe whose construction needs a setting or a column the run's wiring
+does not provide fails here, at PR time, rather than on every row of a
+live run. The per-probe tests (``tests/probes/<label>/``) use synthetic
+``ConversationSimulatorConfig`` fixtures, so they do not exercise the
+wiring chain
 ``cli/simulate.py`` → ``cli/_pipeline.build_simulator_config_builder``
 → ``ConversationSimulatorConfig`` → probe construction.
 
 This test fills that gap. For every probe in the registry it:
 
-1. Computes the toolset-seed path the same way the CLI does
-   (``cli._pipeline.resolve_toolset_seed_for_mix``) — so a stale path
-   literal there fails this test.
+1. Resolves the seed table the same way the CLI does
+   (``cli._pipeline.resolve_seed_dataset_for_mix``), so a path that does
+   not resolve fails this test.
 2. Builds the simulator ``DataDesignerConfigBuilder`` via the same
    helper the CLI uses (``cli._pipeline.build_simulator_config_builder``).
 3. Extracts the ``ConversationSimulatorConfig`` the helper produced.
@@ -50,7 +48,6 @@ from __future__ import annotations
 
 import json
 from contextlib import contextmanager
-from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
@@ -60,7 +57,7 @@ import pytest
 # self-registers every probe class.
 import usersim.engine.generator  # noqa: F401
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
 from usersim.engine.core.probes import known_probes, resolve_probe
 
@@ -162,10 +159,10 @@ def _patched_call_llm():
       judge + early-stop checker.
     - ``core/context.py`` — context-compression rolling summary
       generation.
-    - ``probes/tool_calling/generator.py`` — probe-internal tool
+    - ``probes/tool_calling/probe.py`` — probe-internal tool
       arg-generation calls (it doesn't go through ``ConversationLoop``
       for the tool-call branch).
-    - ``probes/safety_agentic/generator.py`` — mock-environment
+    - ``probes/safety_agentic/probe.py`` — mock-environment
       tool-response synthesis.
 
     Evaluator-side scorer modules (``evaluator/scorers/*.py``) ALSO
@@ -177,8 +174,8 @@ def _patched_call_llm():
         "usersim.engine.core.simulation.acall_llm",
         "usersim.engine.core.judges.acall_llm",
         "usersim.engine.core.context.acall_llm",
-        "usersim.engine.probes.tool_calling.generator.acall_llm",
-        "usersim.engine.probes.safety_agentic.generator.acall_llm",
+        "usersim.engine.probes.tool_calling.probe.acall_llm",
+        "usersim.engine.probes.safety_agentic.probe.acall_llm",
     )
     patches = [patch(t, side_effect=_mock_call_llm_side_effect) for t in targets]
     for p in patches:
@@ -199,28 +196,26 @@ def _cli_built_simulator_config(probe_type: str, locale: str) -> ConversationSim
     """Build the ``ConversationSimulatorConfig`` for a single-probe
     mix the same way ``cli/simulate.py`` does.
 
-    Goes through ``resolve_toolset_seed_for_mix`` +
+    Goes through ``resolve_seed_dataset_for_mix`` +
     ``build_simulator_config_builder`` so a regression in either
     path-composition site fails this test.
     """
-    from usersim.cli._models import default_models_path, load_models_config
     from usersim.cli._pipeline import (
         build_simulator_config_builder,
-        resolve_toolset_seed_for_mix,
+        resolve_seed_dataset_for_mix,
     )
+    from usersim.engine.models_file import default_models_path, load_models_config
 
-    assets_dir = (packaged_assets_dir()).resolve()
     models = load_models_config(default_models_path())
 
     probe_mix = {probe_type: 1.0}
-    toolset_seed = resolve_toolset_seed_for_mix(probe_mix, assets_dir)
+    toolset_seed = resolve_seed_dataset_for_mix(probe_mix)
     _, builder = build_simulator_config_builder(
         locale=locale,
         models=models,
-        assets_dir=assets_dir,
         max_turns=1,
         probe_mix=probe_mix,
-        toolset_seed_path=toolset_seed,
+        seed_dataset_path=toolset_seed,
         random_seed=42,
     )
     cfg = builder.get_column_config("conversation_messages")
@@ -244,8 +239,10 @@ def _synthetic_row_data(
     ``ConversationSimulatorGenerator.generate(data)`` consumes.
 
     Includes the columns the simulator + the probes read:
-    ``persona``, ``probe_type``, ``theme`` (always), and
-    ``tools`` / ``toolset_name`` (when ``cfg.tools_column`` is set).
+    ``persona``, ``probe_type``, ``theme`` (always), and, for a probe that
+    reads a seed table, the columns a row of its table adds: for
+    ``tool_calling``, ``tools`` and ``toolset_name``, with a small toolset the
+    mocked models can call.
     """
     persona = _PERSONAS.get(locale) or _PERSONAS[_DEFAULT_LOCALE]
     data: dict[str, Any] = {
@@ -253,9 +250,9 @@ def _synthetic_row_data(
         cfg.probe_type_column: probe_type,
         cfg.theme_column: _theme_for(probe_type),
     }
-    if cfg.tools_column is not None:
-        data[cfg.tools_column] = _toolset_for_test(repo_root_assets())
-        data[cfg.toolset_name_column] = "weather_tools"
+    if resolve_probe(probe_type).seed_dataset is not None:
+        data["tools"] = _toolset_for_test()
+        data["toolset_name"] = "weather_tools"
     return data
 
 
@@ -265,8 +262,6 @@ def _theme_for(probe_type: str) -> str:
     For theme-driven probes the value is JSON; for others it is the
     sentinel placeholder ``__not_used__`` (matches the value
     ``cli/_pipeline.py`` uses for non-theme-driven probes)."""
-    if probe_type == "tool_calling":
-        return '{"type": "Weather & Location Lookup", "description": "Look up current weather", "tool_expected": true}'
     if probe_type == "general_open_ended":
         return '{"type": "general", "description": "casual chat about a topic"}'
     if probe_type == "general_educational":
@@ -274,11 +269,7 @@ def _theme_for(probe_type: str) -> str:
     return "__not_used__"
 
 
-def repo_root_assets() -> Path:
-    return packaged_assets_dir()
-
-
-def _toolset_for_test(assets_dir: Path) -> list[dict[str, Any]]:
+def _toolset_for_test() -> list[dict[str, Any]]:
     """Read one row from the shipped ``toolsets_seed.parquet`` to use
     as the synthetic ``tools`` column value. Reads only the first
     row's ``tools`` field — keeps the test small and avoids
@@ -286,7 +277,7 @@ def _toolset_for_test(assets_dir: Path) -> list[dict[str, Any]]:
     """
     import pyarrow.parquet as pq
 
-    toolset_path = assets_dir / "tool_calling" / "toolsets_seed.parquet"
+    toolset_path = probe_assets_dir("tool_calling") / "toolsets_seed.parquet"
     table = pq.read_table(toolset_path).slice(0, 1).to_pylist()
     raw = table[0]["tools"]
     if isinstance(raw, str):
@@ -309,7 +300,7 @@ async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
         compute_behavioral_profile,
         get_conversation_language,
     )
-    from usersim.engine.core.llm import set_current_outcome_builder
+    from usersim.engine.core.llm import outcome_builder_scope
 
     cfg = _cli_built_simulator_config(probe_type, locale)
     data = _synthetic_row_data(probe_type, locale, cfg)
@@ -338,8 +329,7 @@ async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
         )
     }
 
-    set_current_outcome_builder(outcome_builder)
-    try:
+    with outcome_builder_scope(outcome_builder):
         with _patched_call_llm():
             probe = probe_cls(
                 persona=persona,
@@ -357,8 +347,6 @@ async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
                 data=data,
                 cfg=cfg,
             )
-    finally:
-        set_current_outcome_builder(None)
     return result
 
 
@@ -398,9 +386,8 @@ async def test_probe_constructs_and_dispatches_through_cli_wiring(
     ``completed_with_warnings``) is not pinned — only the structural
     contract that the simulator successfully returned a trajectory
     with a sensible status that ISN'T ``failed/scenario_aborted``.
-    Catches the bug class where the CLI's wiring produces a cfg the
-    probe rejects at construction (the original ``cfg.tools_column
-    not configured`` regression).
+    Catches the CLI's wiring producing a cfg or a row the probe rejects
+    at construction.
     """
     locale = _PROBE_LOCALES.get(probe_type, _DEFAULT_LOCALE)
     result = await _drive_one_probe(probe_type, locale)

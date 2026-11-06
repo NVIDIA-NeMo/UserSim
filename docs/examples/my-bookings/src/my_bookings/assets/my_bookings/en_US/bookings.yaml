@@ -1,0 +1,12 @@
+bank_id: my_bookings_en_US
+bank_version: "1.0.0"
+appointments:
+  - id: museum_tour
+    what: the guided tour of the city museum
+    placeholder: true
+  - id: restaurant
+    what: a table at a restaurant
+    placeholder: true
+  - id: pottery_class
+    what: a pottery class
+    placeholder: true

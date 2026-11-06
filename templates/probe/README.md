@@ -23,6 +23,13 @@ do we need to surface?* Each probe owns:
   `target_request_id`, `action_request_id`, …) that the matching
   out-of-sim scorer reads.
 
+A probe sets the area a conversation explores, a topic or a task and the
+facts a scorer checks, and the simulated user explores it in the persona's own
+words. Hand the user model the area, not a message to send: a fixed opening
+starts every row in a locale the same way. Send a bank's text verbatim only
+when its exact wording is what the probe tests, such as a false premise;
+Step 0 of the authoring tutorial says which shape fits.
+
 If the new "probe" is just a different prompt for an existing probe,
 prefer a `probe_variant` over a new module.
 
@@ -38,27 +45,31 @@ templates/probe/
 ├── generator_bank_reframing.py     # BankReframingMixin: multi-turn pressure with reframings
 ├── generator_agentic.py            # AgenticMixin: single user turn + tool-interception
 ├── generator_tool_calling.py       # ToolCallingMixin: early-stop deferred until tool used
-├── prompts.py                      # LocalePromptPack demo
+├── prompts.yaml                    # the user model's instructions: one, in English
+├── prompts.py                      # LocalePromptPack demo (wording under test), gate prompt
 └── test_probe.py.template          # copy-and-edit per-probe test scaffold
 ```
 
 When you port the template, copy the `generator_<shape>.py` whose
 shape matches your probe into
-`src/usersim/engine/probes/<your_probe>/generator.py`,
-copy `prompts.py` into the same directory, and copy
+`src/usersim/engine/probes/<your_probe>/probe.py`,
+copy `prompts.py` into the same directory, put its banks and
+`prompts.yaml` in that directory's `assets/<your_probe>/`, and copy
 `test_probe.py.template` to
-`tests/engine/probes/test_<your_probe>.py`. Then follow the
+`tests/probes/<your_probe>/test_probe.py`, beside an `__init__.py`. Then
+follow the
 authoring tutorial.
 
 ## The contract a probe class must satisfy
 
 A probe class is a `BaseProbe` subclass (plus an optional mixin)
-decorated with `@register_probe(...)`. The decorator sets three
-class attributes (`family` / `prompt_version` / `variants`); the
-smoke check verifies they're present. A probe ported from this template
-keeps its banks under `src/usersim/engine/assets/<your_probe>/` and leaves
-`assets_root` unset; a probe shipped in its own package sets it, and its
-bank loader reads under `assets_dir()`, as
+decorated with `@register_probe`. The decorator checks its class
+attributes, `prompt_version` and `variants` among them, and refuses a
+malformed one. A probe ported from this template
+keeps its banks beside its code, under
+`src/usersim/engine/probes/<your_probe>/assets/<your_probe>/`, and sets
+`assets_root` to that `assets/` folder, as a probe shipped in its own
+package does. Its bank loader reads under `assets_dir()`, as
 `docs/engine/AUTHORING_A_PROBE.md` step 2 shows.
 
 The runtime `ProbeAdapter` contract has 8 required hooks: class-level
@@ -96,12 +107,12 @@ See the per-shape generator file in this directory for a copy-pasteable starter.
   rubric, the optional assistant-quality flag, the early-stop signal.
   Their job is to keep the conversation coherent so the trajectory is
   worth scoring at all.
-- **Out-of-sim judges** (live in
-  `evaluator/scorers/<your_probe>.py`): any LLM- or rule-based
+- **Out-of-sim judges** (live in the probe's own package, as
+  `engine/probes/<your_probe>/scorer.py`): any LLM- or rule-based
   scoring that judges the *assistant under test*. The simulator never
-  runs these. Register your probe's scorer in
-  `evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES` so the
-  auto-load path picks it up.
+  runs these. The scorer registry imports the `scorer.py` of every
+  package in `BUILTIN_PACKAGES`, so it registers once your package is
+  listed there.
 
 See [Wiring the out-of-sim scorer](../../docs/engine/AUTHORING_A_PROBE.md#wiring-the-out-of-sim-scorer)
 for the rationale.
@@ -111,46 +122,86 @@ for the rationale.
 When porting one of the templates into a new module:
 
 - [ ] Pick a `label` for `@register_probe` that no other probe uses,
-      used by `--probe-mix` and the `_PROBE_REGISTRY` lookup.
+      used by `--probe-mix` and the probe registry.
       Underscores, lowercase.
-- [ ] Pick a `family` (the class attribute the decorator sets).
-      The reporting layer stratifies on this.
+- [ ] Set `description`, a paragraph on what the probe tests; the
+      per-row preview and the capability report show it.
+- [ ] List in `preview_fields` the columns or metadata keys the per-row
+      preview's Probe Inputs panel shows, such as the id of the bank
+      entry each row drew.
 - [ ] Bump `prompt_version` on **any** semantic change to the
       user-agent prompt or the per-turn judge rubric. The
       evaluator's partial-re-run dedup key includes it.
 - [ ] Wire the asset bank (if applicable): set `bank_loader`,
-      `placeholder_warning_kind` (a `WarningKind.USED_PLACEHOLDER_*`
-      member), `bank_version_key`. See
-      `core/probes.py::BankBackedProbe` for the contract.
+      `placeholder_warning_kind` (a `"used_placeholder_<thing>"`
+      string naming what the bank holds), `bank_version_key`. See
+      `core/probes.py::BankBackedProbe` for the contract. A bank split
+      by locale also defines `check_locale`, so a run refuses a locale
+      whose bank is missing before any model call (step 3 of
+      `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe ships banks, check them in an `asset_problems`
+      classmethod, so `usersim smoke` reports an install that is missing
+      one (step 3 of `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe's conversations vary by topic, list the topics in a
+      `themes` classmethod and read the row's with `self.theme()` (step 3
+      of `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If a run can tune the probe, declare its settings in an `Options`
+      class, every field with a default, and read them as
+      `self.options` (step 2 of `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe reads another probe's assets, name that probe in an
+      `asset_labels` classmethod after its own label (step 2 of
+      `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe calls a model beyond the conversation's own, name its
+      alias in a `model_aliases` classmethod (step 2 of
+      `docs/engine/AUTHORING_A_PROBE.md`), and give the tests a model for
+      it with `run_episode(..., models={alias: model})`.
 - [ ] Keep the probe's own per-row data under metadata keys of its own.
-      The loop writes the keys in `RESERVED_METADATA_KEYS`
-      (`core/simulation.py`); a probe reads them, and
+      The loop writes the keys in `RESERVED_METADATA_KEYS` (in
+      `usersim.extension`); a probe reads them, and
       `assert_probe_conforms` reports a probe class that writes one.
-- [ ] Author the user-agent system prompt + the per-turn judge
-      rubric in `prompts.py`. Use `LocalePromptPack` for any prompt
-      that ships across multiple locales.
+- [ ] Write the user model's instructions once, in `prompts.yaml`, and
+      add `language_instruction` so the user writes in the row's language.
+      Give the area and its bounds, not lines to say: the persona writes
+      every turn. Use `LocalePromptPack` in `prompts.py` only when the
+      exact wording in each locale is under test (step 4 of
+      `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] Declare every key `build_result_extras` adds beyond the core
       columns in the class's `output_columns`, as each template does. The
-      engine keeps the core columns plus every registered probe's
-      `output_columns` and discards the rest (logging a warning), so an
+      engine keeps the core columns plus the `output_columns` of the
+      probes in the run's mix and discards the rest (logging a warning), so an
       undeclared join key is computed, dropped, and then read back as
       absent by your scorer, which reports the trajectory as having
       nothing to score while the run looks fine. See step 6 of
       `docs/engine/AUTHORING_A_PROBE.md`.
-- [ ] Add a scorer under
-      `evaluator/scorers/<your_probe>.py` and include the module
-      path in `DEFAULT_SCORER_MODULES`.
-- [ ] Write tests from `test_probe.py.template`. Its first test runs
-      the probe end to end with `usersim.testing.run_episode` and
-      scripted models. The standard tests after it control each reply:
-      `_patched_call_llm` patches BOTH `core.simulation.acall_llm` AND
-      `core.judges.acall_llm`, and the alias-dispatching mock returns
-      XML-shaped judge verdicts. See
-      [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
-      for a real reference. The tests run under `usersim.testing.pytest_plugin`,
-      so a model call nothing mocked fails with `BlockedNetworkCall`.
-- [ ] Update `docs/engine/README.md`'s probe table and the catalog in
-      `docs/probes.md`; `tests/test_security_defaults.py` checks the probe
-      count there.
+- [ ] Add your package's name to `BUILTIN_PACKAGES` in
+      `engine/core/builtin_packages.py`, at the place its capability rows
+      belong in the report.
+- [ ] Add a scorer as `scorer.py` in the probe's package. Register it with
+      `deterministic=True` when it never calls a model, and list it in
+      the class's `default_scorers` so `usersim eval --scorers auto`
+      runs it.
+- [ ] Declare the capability rows your probe's evidence feeds in
+      `capabilities.py` in its package; without them the probe's rows are
+      absent from the capability report. See
+      "Adding the capabilities your probe provides evidence for" in
+      `docs/engine/AUTHORING_A_PROBE.md`.
+- [ ] Write tests from `test_probe.py.template`. Each runs the probe
+      through `usersim.testing.run_episode` with scripted models, with
+      nothing patched; a `ScriptedModel` subclass scripts the replies a
+      test needs. See
+      [`tests/engine/test_hosted_parity_contract.py`](../../tests/engine/test_hosted_parity_contract.py),
+      which runs every built-in this way. The tests run under
+      `usersim.testing.pytest_plugin`, so a model call nothing scripted
+      fails with `BlockedNetworkCall`.
+- [ ] Add your probe's entry to `CONTRACTS` in
+      `tests/probes/<your_probe>/contract.py`: the `trajectory_id` of one
+      pinned episode, the metadata that makes `should_succeed` true, and
+      its parity episodes (`tests/_probe_contract.py` describes them).
+      The shared tests fail, naming the file, until it is there.
+- [ ] Update `docs/engine/README.md`'s probe table, add a row to the
+      catalog in `docs/probes.md`, and raise the probe counts in the
+      README headline and in `docs/probes.md` (for a `BankBackedProbe`,
+      its curated-bank count too). `tests/test_probe_catalog.py` and
+      `tests/test_security_defaults.py` check them against the registry.
 - [ ] Record the design choices in the probe module docstring
       (variant set, prompt version, what the scorer measures).

@@ -24,7 +24,7 @@ which system they are looking at.
 | `usersim.scorers` | a module calling `register_scorer` | the scorer registry |
 | `usersim.asset_domains` | an `AssetDomain` or a zero-arg factory | `gen-assets` domains |
 | `usersim.backends` | an `ExecutionBackend` implementation | `--backend` choices |
-| `usersim.capabilities` | a `CapabilityDefinition` or an iterable | the capability matrix |
+| `usersim.capabilities` | a `CapabilityDefinition`, an iterable of them, or a module with `CAPABILITIES` and optional `AXIS_DESCRIPTIONS` | the capability matrix, and the evidence cards' axis descriptions |
 | `usersim.commands` | a `register(subparsers)` callable | `usersim --help` |
 | `usersim.toolset_sources` | *(reserved)* | n/a |
 
@@ -36,13 +36,16 @@ my_probe = "my_package.probe:MyProbe"
 **Every name an extension adds carries its prefix.** Probe labels, scorer
 names, capability ids, asset domains, command names, output columns, warning
 kinds and metadata keys all start with the package's own prefix, such as
-`acme_recipes` or `acme_used_placeholder_recipe`. Unprefixed names belong to
+`my_bookings` or `my_used_placeholder_booking`. Unprefixed names belong to
 the built-ins. The registries refuse a name that is already taken, so the
 prefix is what keeps two packages, or a package and a later built-in, from
 claiming the same one.
 
 [`docs/extensions.md`](../docs/extensions.md) builds a whole extension
-package: a probe with its own bank, a scorer, their tests and a CI recipe.
+package: a probe with a bank in each of two languages, a scorer, their tests
+and a CI recipe.
+[`docs/extension_api.md`](../docs/extension_api.md) lists every name an
+extension imports, from `usersim.extension` and `usersim.testing`.
 
 An extension probe declares the columns it writes in its class's
 `output_columns`, and a run keeps them alongside the core columns. Other
@@ -52,7 +55,7 @@ per-row data goes in its metadata (`state.metadata`), stored with the row as
 An extension's warnings carry its prefix too: a bank-backed probe names its
 placeholder warning `<prefix>_used_placeholder_<thing>`, which the capability
 report counts as placeholder content, and any other warning it records is a
-prefixed name such as `acme_slow_tool`.
+prefixed name such as `my_slow_tool`.
 
 ## How discovery behaves
 
@@ -97,7 +100,25 @@ report**, because the capability matrix is built from capability definitions
 rather than from trajectories. The rows exist; nothing asks about them.
 
 `usersim.capabilities` closes that. If you contribute a probe, contribute the
-capability it provides evidence for.
+capability it provides evidence for. A built-in probe declares its capabilities
+in its package's `capabilities.py`, which the report reads in the order of
+`BUILTIN_PACKAGES` (`engine/core/builtin_packages.py`), after the capabilities
+every probe feeds. An extension can advertise a module of the same shape, so
+its `AXIS_DESCRIPTIONS` explain its rate axes in the evidence cards too:
+
+```toml
+[project.entry-points."usersim.capabilities"]
+my_bookings = "my_bookings.capabilities"
+```
+
+A description for an axis something else already describes is ignored, with a
+warning, as a capability id already taken is.
+
+What evaluation and reporting read from a built-in probe lives in a
+definitions-only module of its package, `capabilities.py` for the report and
+`axes.py` for the judges, which imports no probe code. `usersim eval` and the
+report load those modules and never a probe's `probe.py`, so a probe whose code
+fails to import still has its rows judged and reported.
 
 ## Validating an extension
 
@@ -119,7 +140,7 @@ The scorer check is awaitable because a scorer is. The evaluator awaits every
 scorer, so `register_scorer` expects an async function:
 
 ```python
-from usersim.engine.evaluator.scorers import register_scorer
+from usersim.extension import register_scorer
 
 async def score(row, models):
     return {"my_axis": 1.0}
@@ -133,7 +154,8 @@ failing later inside a run.
 The row a scorer receives holds every column of the trajectory, and an empty
 cell arrives as `None` whichever way pandas held it. The evaluator fills
 `conversation_messages` (a list), `persona` (a dict), `probe_family`, `locale`
-and `language` itself, so those are never `None`. A default passed to
+and `language` itself, so those are never `None`; `probe_family` is an empty
+string for a row that names no probe. A default passed to
 `row.get(key, default)` covers only an absent key, so pass a row shaped like
 your probe's trajectories to the check as well:
 `assert_scorer_conforms("my_scorer", sample_row=row)` also scores that row with
@@ -159,7 +181,7 @@ its package and names that `assets` directory on the probe class:
 ```python
 from pathlib import Path
 
-from usersim.engine.core.probes import BaseProbe
+from usersim.extension import BaseProbe
 
 class MyProbe(BaseProbe):
     label = "my_probe"
@@ -167,8 +189,8 @@ class MyProbe(BaseProbe):
 ```
 
 The probe then finds its banks wherever the package is installed. That root
-is searched after `$USERSIM_ASSET_PATH` and before the packaged banks, so a
-deployment can override it and the shipped banks remain reachable.
+is searched after `$USERSIM_ASSET_PATH`, so a deployment can override it, and
+an override without the probe's folder leaves its shipped banks in reach.
 `@register_probe` refuses a relative `assets_root`, which would resolve against
 the working directory. The probe's bank loader reads under `MyProbe.assets_dir()`,
 its folder on that search, so an override reaches the loader too.
@@ -211,6 +233,11 @@ It returns the row the generator produces and every prompt the models
 received, so a probe's tests need neither a provider nor a patch of the
 engine's internals.
 
+A test that registers a probe or scorer of its own runs it inside
+`with registry_snapshot():`. When the block exits, both registries are back
+as they were, so nothing the test registered reaches the next test in the
+same process.
+
 Installing `usersim` does not load the plugin. It has no `pytest11` entry
 point, because it blocks outbound connections, and a project that installs
 `usersim` for another reason keeps its tests as they are.
@@ -243,3 +270,5 @@ virtualenv and asks the installed CLI what it can see: all six live seams,
 against real packaging metadata rather than a mock. The fixture also ships a
 probe built on `identity_disclosure`, whose spec layer must extend the spec
 inside the installed wheel and resolve both its own model and an inherited one.
+It then installs the package template and the extensions guide's example,
+`docs/examples/my-bookings/`, and runs the tests each ships.

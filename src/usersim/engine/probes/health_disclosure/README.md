@@ -19,16 +19,15 @@ content once the assistant (the system under test) earns it.
 | `moves.py` | Generic **move-space + Guard** (deterministic, no LLM). Shared verbatim by all clients. |
 | `move_runtime.py` | Glue: profile → env, and the `commit_move` tool call + Guard veto loop. Client-agnostic. |
 | `mixin.py` | `GuardedMoveMixin`: the **reusable, domain-agnostic capability** that wires the move-space into `BaseProbe`'s hooks. Composed like the repo's other capability mixins; config supplied via `guarded_move_config()`. |
-| `prompts.py` | The four user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `core/realized_audit.py`, since the audit runs in the evaluator. |
+| `prompts.py` | The four user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `probes/health_disclosure/realized_audit.py`, since the audit runs in the evaluator. |
 | `clients.py` | **Per-client config** (topics, risk meaning, roles, proposal framing). Single source of truth for client *shape* (judge axes live in `evaluator/axes.py`). |
 | `base.py` | `HealthDisclosureProbe(GuardedMoveMixin, BaseProbe)`: binds the client config + prompts; the move-space behavior comes from the mixin. |
-| `therapy.py` / `triage.py` / `decision_support.py` / `general.py` | Thin modules: bind `label` + `CLIENT` and `@register_probe` (each its own `family`); declare the `default` / `guarded` variants. |
+| `probe.py` | The four probe classes, one per client: each binds `label` + `CLIENT` and registers with `@register_probe`; its rows are stored under its label, with the `default` / `guarded` variants. |
 
-Adding a client = one entry in `CLIENTS` + one thin module (copy `triage.py`)
-+ its judge axes in `evaluator/axes.py::PROBE_SCORES` + a bundled bank under
-`assets/<label>/sample.yaml` (with its label in
-`clinical_profile_bank.CLIENT_PROBE_LABELS`) + its module path in
-`core/probes.py::BUILTIN_PROBE_MODULES`.
+Adding a client = one entry in `CLIENTS` + one class in `probe.py` (copy
+`TriageDisclosureProbe`) + its judge axes in `axes.py::JUDGE_AXES` +
+a bundled bank under `assets/<label>/sample.yaml` (with its label in
+`bank.CLIENT_PROBE_LABELS`).
 
 > **Reusing the move-space elsewhere.** `GuardedMoveMixin` hardcodes nothing
 > domain-specific: a probe family in another domain can compose it and supply its own
@@ -56,9 +55,8 @@ Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
    while its hardest step happened upstream in a model. Running it at scoring time
    also lets a stored trajectory be re-audited without re-simulating.
 
-   The shared machinery lives in `core/realized_audit.py`: core, because the
-   evaluator and the probe family both need it and neither layer may import the
-   other. It audits all realized turns in **one batched call**
+   The shared machinery lives in `realized_audit.py`, beside the probes and the
+   scorer, which both use it. It audits all realized turns in **one batched call**
    (`verify_realized_transcript`) using an **independent auditor** (`judge_model` if
    wired, else `evaluator_model`, else `user_model`: see `resolve_audit_model`;
    overridable via `USERSIM_AUDIT_MODEL`), grading each topic three ways: `full` / `partial` /
@@ -111,7 +109,7 @@ Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
 - Heavy cognitions (`hopelessness`/`worthlessness`) are paced like risk for non-`open` users.
 
 The Guard is a pure veto layer (no LLM call) and is fully unit-tested in
-`tests/engine/probes/test_health_disclosure.py`.
+`tests/probes/health_disclosure/test_probe.py`.
 
 ## Enabling the move-space (per trajectory)
 The move-space is a **`probe_variant`**, not a process-global flag, so a single
@@ -174,14 +172,14 @@ user, so the family is safe to register and run by default.
 ## Clinical-profile bank (concealment ground truth)
 The hidden clinical profile (gated topics + concealment/risk ground truth, keyed
 by persona uuid) is a **versioned asset bank**, loaded through `BankBackedProbe`
-exactly like `fact_bank` / `agentic_bank` (`core/clinical_profile_bank.py`). This
+exactly like the `sov_ai_facts` and `safety_agentic` banks (`bank.py` here). This
 buys the family `provenance.bank_version` pinning (per client: no replay/drift
 hole), placeholder-entry discipline, and asset-audit test coverage.
 
 - **Per client, locale-independent.** One bank per registered probe:
   `assets/{health_therapy_disclosure,health_triage_disclosure,health_decision_support_disclosure,health_general_disclosure}/sample.yaml`.
 - **Bundled banks are SYNTHETIC placeholders** (`placeholder: true`). Any guarded
-  trajectory that uses one records `WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE`,
+  trajectory that uses one records the `used_placeholder_clinical_profile` warning,
   so its concealment scores rest on synthetic ground truth.
 - **Supplying your own bank.** Point `USERSIM_<CLIENT>_PROFILES` at a bank file of the
   same shape (`schema_version` / `client` / `bank_id` / `bank_version` / `entries`,
@@ -208,7 +206,7 @@ What the free-form utterances actually did (realized **behavior**) is not a
 trajectory column: the concealment scorer audits it at eval time, below.
 
 ### Concealment scorer (opt-in)
-`evaluator/scorers/health_disclosure.py` scores in two stages:
+`probes/health_disclosure/scorer.py` scores in two stages:
 
 1. The realized-behavior audit described under **VERIFY** above, rebuilt from the
    stored `conversation_messages`, `moves_detail` and `concealment_topics`.
@@ -247,7 +245,7 @@ for comparable-strata rollups. Enable it at eval time with
 ## Locale
 The conversational **output** language is driven by the interpolated
 `{language_instruction}`; the *scaffold* (role framing, gate rubric, the DECIDE
-prompt here and the VERIFY prompt in `core/realized_audit.py`) is intentionally
+prompt here and the VERIFY prompt in `realized_audit.py`) is intentionally
 English. Every shippable scaffold is
 registered through `LocalePromptPack` (`core/probes.py`) under every shipped
 locale, so it flows through the same **all-locales-or-fail** validation as the
@@ -260,15 +258,15 @@ The per-client judge axes are authored defaults on a generic 1-5 ladder.
 A clinical deployment should replace them with a rubric validated by its own
 clinicians; the axes are declared in one place to make that a single edit.
 
-They live inline in **`evaluator/axes.py`** (`PROBE_SCORES`, keyed by the client
-`family`): the same place every other probe declares its axes, so the evaluator
-never imports a probe package. Each axis is a name + a description on a generic
-1–5 ladder (`_md_axis(...)`). To change them:
+They live in this package's **`axes.py`** (`JUDGE_AXES`, keyed by the probe's
+label), a definitions-only module the evaluator imports without importing any
+probe code. Each axis is a name + a description on a generic 1–5 ladder
+(`_md_axis(...)`). To change them:
 
-1. Edit the family's list in `evaluator/axes.py::PROBE_SCORES` (add/remove/reword axes).
+1. Edit the probe's list in `axes.py::JUDGE_AXES` (add/remove/reword axes).
 2. At eval time, restrict to specific axes with `--axes name1,name2` if desired.
 
-To replace the option ladder (the 1–5 wording), edit `_MD_LADDER` in `evaluator/axes.py`.
+To replace the option ladder (the 1–5 wording), edit `_MD_LADDER` in `axes.py`.
 
 ## Provenance
 The move-space + Guard are a general three-axis disclosure mechanism (dialogue act +

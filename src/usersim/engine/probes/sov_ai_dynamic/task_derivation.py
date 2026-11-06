@@ -34,11 +34,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable
 
-from usersim.engine.core.probing_taxonomy import (
-    Category,
-    ProbingTaxonomy,
-    select_category,
-)
+from usersim.extension import Category, ProbingTaxonomy, persona_to_tags, select_category
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -51,7 +47,7 @@ def persona_to_interest_tags(
 ) -> list[str]:
     """Return the structured interest-tag set this persona projects to.
 
-    Re-uses :func:`sov_ai_facts.task_derivation.persona_to_tags`
+    Re-uses :func:`~usersim.engine.core.persona_tags.persona_to_tags`
     so both probes speak the same persona-tag dialect. The returned
     set is **not** used to filter categories (categories are universal in
     population probing) — it is exposed so the user-agent prompt can
@@ -59,12 +55,6 @@ def persona_to_interest_tags(
     can join probing trajectories with sovereign-knowledge ones on the
     same persona-feature axis.
     """
-    # Lazy import keeps a circular import from accidentally appearing if
-    # the sovereign-knowledge package ever pulls anything from here.
-    from usersim.engine.probes.sov_ai_facts.task_derivation import (
-        persona_to_tags,
-    )
-
     return persona_to_tags(persona, locale)
 
 

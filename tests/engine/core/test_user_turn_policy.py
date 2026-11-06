@@ -19,25 +19,18 @@ from usersim.engine.core.simulation import (
     _is_fourth_wall_break,
     _is_user_script_compliant,
 )
-from usersim.engine.core.user_turn_policy import (
-    FIRST_MESSAGE_PHRASES,
-    LANGUAGE_MODEL_NOUNS,
-    PUSHBACK_OPENERS,
-    UserTurnPolicy,
-    resolve_user_turn_policy,
-)
+from usersim.engine.core.user_turn_policy import UserTurnPolicy, resolve_user_turn_policy
 
-ALLOWED = LANGUAGE_MODEL_NOUNS | FIRST_MESSAGE_PHRASES | PUSHBACK_OPENERS
+#: Two fourth-wall entries and one refusal-echo entry, as a probe allows them.
+ALLOWED = frozenset({"modèle de langage", "premier message", "i understand, but"})
 #: Long enough for the loop to summarise it when compression is on.
 LONG_REPLY = "I am a language model, and I was built to answer questions. " * 12
 SUCCESS = "<explanation>Fine.</explanation>\n<rating>success</rating>"
 
 
 class TestFilters:
-    def test_the_phrase_groups_are_entries_of_the_loop_filters(self) -> None:
-        listed = set(_FOURTH_WALL_PHRASES) | set(_ASSISTANT_REFUSAL_ECHO_PHRASES)
-        for group in (LANGUAGE_MODEL_NOUNS, FIRST_MESSAGE_PHRASES, PUSHBACK_OPENERS):
-            assert group <= listed
+    def test_the_allowed_phrases_are_entries_of_the_loop_filters(self) -> None:
+        assert ALLOWED <= set(_FOURTH_WALL_PHRASES) | set(_ASSISTANT_REFUSAL_ECHO_PHRASES)
 
     def test_allowed_phrases_pass_and_the_rest_stay_caught(self) -> None:
         question = "Es-tu un modèle de langage d'OpenAI ?"
@@ -104,8 +97,6 @@ class _Config:
     persona_column: str = "persona"
     probe_type_column: str = "probe_type"
     theme_column: str = "theme"
-    tools_column: str | None = None
-    max_tools: int = 5
     max_steps: int = 10
 
 

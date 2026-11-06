@@ -5,8 +5,15 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
+from usersim.engine.core.builtin_packages import builtin_modules
 from usersim.taxonomy.capabilities import (
     ALL_PROBES,
+    _probe_ref,
+    _scorer_ref,
     capabilities_missing_scorer,
     capability_by_id,
     capability_definitions,
@@ -63,7 +70,7 @@ def test_finance_verifiable_capability_is_stratified_by_institution_type() -> No
     """A per-institution-type verifiable capability exists for each shipped
     finance institution type, scoped via row_filter to that type but reusing
     the aggregate capability's axes/policy."""
-    from usersim.taxonomy.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
+    from usersim.engine.probes.financial_services.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
 
     ids = {d.id for d in capability_definitions()}
     assert "financial_task_success" in ids  # aggregate stays
@@ -89,7 +96,7 @@ def test_finance_retrieval_recall_is_decoupled_from_task_success() -> None:
     assert recall.scale == "rate"
 
     # The recall axis must NOT appear in task-success (aggregate or per-type).
-    from usersim.taxonomy.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
+    from usersim.engine.probes.financial_services.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
 
     success_ids = ["financial_task_success"] + [
         f"financial_task_success_{itype}" for itype in FINANCE_CAPABILITY_INSTITUTION_TYPES
@@ -170,13 +177,31 @@ def test_all_probe_capabilities_are_declared_with_sentinel() -> None:
 
 def test_capabilities_expose_implementation_refs() -> None:
     assert any(
-        ref.endswith("evaluator/scorers/sov_ai_facts.py")
+        ref.endswith("probes/sov_ai_facts/scorer.py")
         for ref in implementation_refs_for_capability(capability_by_id("sovereign_local_knowledge"))
     )
     assert any(
-        ref.endswith("probes/safety_agentic/generator.py")
+        ref.endswith("probes/safety_agentic/probe.py")
         for ref in implementation_refs_for_capability(capability_by_id("agentic_disclosure"))
     )
+
+
+def test_each_probe_and_scorer_a_capability_names_has_a_ref() -> None:
+    """A probe's or scorer's ref is the file its registered class or function is defined in."""
+    sources = [source for definition in capability_definitions() for source in definition.sources]
+    probes = {source.probe for source in sources if source.probe and source.probe != ALL_PROBES}
+    scorers = {source.scorer for source in sources if source.scorer}
+    assert probes and scorers
+    assert sorted(probe for probe in probes if _probe_ref(probe) is None) == []
+    assert sorted(scorer for scorer in scorers if _scorer_ref(scorer) is None) == []
+
+
+def test_every_implementation_ref_names_a_file_in_the_repo() -> None:
+    """A ref is a path from the repo root; a probe's module, scorer or bank that moves takes its refs along."""
+    root = Path(__file__).resolve().parents[1]
+    refs = {ref for definition in capability_definitions() for ref in implementation_refs_for_capability(definition)}
+    assert refs
+    assert sorted(ref for ref in refs if not (root / ref).is_file()) == []
 
 
 def test_safety_pressure_uses_axis_aggregation() -> None:
@@ -228,9 +253,8 @@ def test_every_declared_scorer_actually_exists() -> None:
     The symptom is indistinguishable from an untested model -- the cell reads
     Untested with n=0 -- so a typo here is invisible without this check.
     """
-    from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
+    from usersim.engine.evaluator.scorers import get_scorer
 
-    load_default_scorers()
     for scorer in scorers_required_by_capabilities():
         get_scorer(scorer)  # raises KeyError if unregistered
 
@@ -270,3 +294,18 @@ def test_missing_scorer_map_names_the_capabilities_that_go_untested() -> None:
     assert len(missing["financial_services"]) == sum(
         1 for d in capability_definitions() if any(s.scorer == "financial_services" for s in d.sources)
     )
+
+
+def test_reading_the_capabilities_loads_no_probe() -> None:
+    """The report reads every capability without importing a probe, so a probe that fails
+    to import still leaves its capability rows, and every other, in the report."""
+    code = (
+        "import sys\n"
+        "from usersim.taxonomy.capabilities import axis_description, capability_definitions\n"
+        "capability_definitions(); axis_description('finance.tool_selection_rate')\n"
+        "loaded = sorted(m for m in sys.modules if m.startswith('usersim.engine.probes.') and m.count('.') > 3)\n"
+        "print([m for m in loaded if not m.endswith('.capabilities')], len(loaded))\n"
+    )
+    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == f"[] {len(builtin_modules('capabilities'))}", result.stdout

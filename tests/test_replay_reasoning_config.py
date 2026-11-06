@@ -18,20 +18,19 @@ from pathlib import Path
 
 import pytest
 
-from usersim.cli._errors import ConfigError
-from usersim.cli._models import (
+from usersim.cli._models import apply_model_overrides
+from usersim.cli._pipeline import build_simulator_config_builder
+from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.core.episode_input import construct_episode_preamble
+from usersim.engine.core.manifest import SimulationConfigSnapshot, build_run_manifest
+from usersim.engine.errors import ConfigError
+from usersim.engine.models_file import (
     ModelsConfig,
     ProviderSpec,
-    apply_model_overrides,
     assistant_replays_reasoning,
     default_models_path,
     load_models_config,
 )
-from usersim.cli._pipeline import build_simulator_config_builder
-from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
-from usersim.engine.core.episode_input import construct_episode_preamble
-from usersim.engine.core.manifest import SimulationConfigSnapshot, build_run_manifest
 
 
 def _models(providers=(), **by_alias):
@@ -85,7 +84,7 @@ def test_the_run_config_carries_the_switch(tmp_path):
         _, builder = build_simulator_config_builder(
             locale="en_US",
             models=models,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             probe_mix={"general_open_ended": 1.0},
             **kwargs,
         )
@@ -203,7 +202,7 @@ def test_a_plain_run_records_the_switch_in_its_manifest(tmp_path):
             locales=["en_US"],
             num_rows=1,
             out=tmp_path,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=1,
@@ -223,7 +222,7 @@ def test_materialized_rows_carry_the_switch_to_a_host(monkeypatch):
         locale="en_US",
         num_rows=1,
         models=_models(**_REPLAY),
-        assets_dir=packaged_assets_dir(),
+        assets_dir=None,
         probe_mix={"general_open_ended": 1.0},
     )
 
@@ -289,4 +288,7 @@ def test_the_simulate_notebook_records_the_switch_in_its_manifest():
     notebook = Path(__file__).resolve().parents[1] / "notebooks" / "01_simulate.ipynb"
     source = "\n".join("".join(cell["source"]) for cell in json.loads(notebook.read_text())["cells"])
 
-    assert "replay_assistant_reasoning=assistant_replays_reasoning(MODELS" in source
+    # The manifest's config is simulator_config of the run's settings, whose
+    # models decide replay, as they do for the rows.
+    assert "sim_config=simulator_config(locale=LOCALES[0], **RUN_SETTINGS)" in source
+    assert "RUN_SETTINGS = dict(\n    models=MODELS," in source

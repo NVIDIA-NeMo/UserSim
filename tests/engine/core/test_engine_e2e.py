@@ -101,8 +101,6 @@ class StubConfig:
     persona_column: str = "persona"
     probe_type_column: str = "probe_type"
     theme_column: str = "theme"
-    tools_column: str | None = None
-    max_tools: int = 5
     max_steps: int = 10
 
 

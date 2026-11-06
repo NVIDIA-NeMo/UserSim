@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -35,9 +35,9 @@ def finance_assets_without_fr_tasks(tmp_path: Path) -> Path:
     """
     import shutil
 
-    from usersim.engine.core._assets import packaged_assets_dir
+    from usersim.engine.core._assets import probe_assets_dir
 
-    source = packaged_assets_dir() / "financial_services" / "en_US"
+    source = probe_assets_dir("financial_services") / "en_US"
     root = tmp_path / "assets"
     for locale in ("en_US", "fr_FR"):
         dest = root / "financial_services" / locale
@@ -406,20 +406,37 @@ def evaluator_df(trajectory_df):
 
 
 @pytest.fixture
-def register_test_probe(monkeypatch) -> Callable[..., type]:
-    """Register throwaway ``BaseProbe`` subclasses in a copy of the probe registry.
+def restored_registries() -> Iterator[None]:
+    """Put the probe and scorer registries back after the test, so nothing it registers reaches another test."""
+    from usersim.testing import registry_snapshot
+
+    with registry_snapshot():
+        yield
+
+
+@pytest.fixture
+def empty_scorer_registry(restored_registries) -> None:
+    """Start the test from an empty scorer registry; the registered scorers are back after it."""
+    from usersim.engine.evaluator import scorers
+
+    scorers.clear_registry()
+
+
+@pytest.fixture
+def register_test_probe(restored_registries) -> Callable[..., type]:
+    """Register throwaway ``BaseProbe`` subclasses for one test.
 
     ``register_test_probe("ext_probe", assets_root=root)`` registers a class
-    labelled ``ext_probe`` with the given class attributes. The registry is
-    restored after the test, so nothing registered here reaches another test.
+    labelled ``ext_probe`` with the given class attributes, such as
+    ``prompt_version``, so the asset lookup sees it as it sees any registered
+    probe. The registry's entries
+    are restored after the test, so nothing registered here reaches another
+    test.
     """
     from usersim.engine.core import probes
 
-    monkeypatch.setattr(probes, "_PROBE_REGISTRY", dict(probes._PROBE_REGISTRY))
-
     def register(label: str, **attributes: Any) -> type:
-        cls = type(label, (probes.BaseProbe,), {"label": label, **attributes})
-        return probes.register_probe(family=label, prompt_version="v1.0", variants=("default",))(cls)
+        return probes.register_probe(type(label, (probes.BaseProbe,), {"label": label, **attributes}))
 
     return register
 
@@ -442,3 +459,43 @@ def git() -> Callable[..., str]:
         return done.stdout.strip()
 
     return run
+
+
+@pytest.fixture
+def sample_tools():
+    return [
+        {
+            "tool": {
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"},
+                            "units": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }
+        },
+        {
+            "tool": {
+                "type": "function",
+                "function": {
+                    "name": "search_recipes",
+                    "description": "Search for recipes by ingredient",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "ingredient": {"type": "string"},
+                            "cuisine": {"type": "string"},
+                        },
+                        "required": ["ingredient"],
+                    },
+                },
+            }
+        },
+    ]

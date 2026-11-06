@@ -1,27 +1,29 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Probing-taxonomy loader + validator + lookup helpers for ``sov_ai_dynamic``.
+"""Probing-taxonomy loader + validator + lookup helpers.
 
-A probing taxonomy is a curated, per-locale YAML file used by the
-``sov_ai_dynamic`` probe to seed the user-agent's opening turn with a
-category-bound, persona-driven probe. It carries **no ground truth** —
+A probing taxonomy is a curated, per-locale YAML file used to seed the
+user-agent's opening turn with a category-bound, persona-driven probe,
+by the ``sov_ai_dynamic`` probe and by ``financial_services``'s dynamic
+tier. It carries **no ground truth** —
 that's the whole point of dynamic probing — just per-category invitation
 prose and sub-topic hints used for collapse avoidance via per-trajectory
 rotation.
 
-Schema specified in ``assets/sov_ai_dynamic/SCHEMA.md``. This module
-exposes:
+Schema specified in the ``sov_ai_dynamic`` probe's
+``assets/sov_ai_dynamic/SCHEMA.md``. This module exposes:
 
 - :class:`Category` — typed view of a single category entry.
 - :class:`ProbingTaxonomy` — typed view of the whole taxonomy + lookup
   helpers.
 - :class:`ProbingTaxonomyError` — raised for schema violations.
 - :func:`load_probing_taxonomy` — parse + validate a single file.
-- :func:`load_probing_taxonomy_for_locale` / :func:`reset_probing_taxonomy_cache`
-  — locale-keyed shared cache so the probe and the ``sov_ai_dynamic``
-  scorer agree on ``taxonomy_version`` from one source of truth
-  (same pattern as ``core.fact_bank``).
+- :func:`load_probing_taxonomy_for` / :func:`reset_probing_taxonomy_cache`
+  — a cache keyed by family and locale, so a probe and its scorer agree
+  on ``taxonomy_version`` from one source of truth (same pattern as
+  ``probes.sov_ai_facts.bank``). ``probes.sov_ai_dynamic.taxonomy`` names
+  that probe's files in it.
 """
 
 from __future__ import annotations
@@ -89,6 +91,16 @@ class ProbingTaxonomy:
     placeholder: bool = False
     categories: tuple[Category, ...] = field(default_factory=tuple)
     source_path: str | None = None
+
+    @property
+    def bank_id(self) -> str:
+        """``taxonomy_id``, under the name ``BankBackedProbe`` reads from every bank."""
+        return self.taxonomy_id
+
+    @property
+    def bank_version(self) -> str:
+        """``taxonomy_version``, under the name ``BankBackedProbe`` reads from every bank."""
+        return self.taxonomy_version
 
     # ── Lookups ─────────────────────────────────────────────────────
 
@@ -358,7 +370,7 @@ def _taxonomy_salt(taxonomy: ProbingTaxonomy) -> int:
 # Family + locale-indexed cache (shared by a domain's probe and its scorer)
 # ---------------------------------------------------------------------------
 #
-# Same pattern as ``core.fact_bank``: one cache, one source of truth, so the
+# Same pattern as ``probes.sov_ai_facts.bank``: one cache, one source of truth, so the
 # simulator-side and evaluator-side both see the same ``taxonomy_version`` for
 # cross-run drift detection. Keyed by (family, locale, filename) so multiple
 # domains (sov_ai_dynamic, financial_services, ...) share the machinery.
@@ -428,32 +440,6 @@ def load_probing_taxonomy_for(
             path,
         )
         return taxonomy
-
-
-# ── sov_ai_dynamic back-compat shims (family = "sov_ai_dynamic") ──────────
-
-
-def default_probing_taxonomy_path(locale: str) -> Path:
-    return taxonomy_path_for(
-        "sov_ai_dynamic",
-        locale,
-        filename="categories.yaml",
-        env_prefix="USERSIM_SOV_AI_DYNAMIC_TAXONOMY",
-    )
-
-
-def probing_taxonomy_path_for(locale: str) -> Path:
-    return default_probing_taxonomy_path(locale)
-
-
-def load_probing_taxonomy_for_locale(locale: str) -> ProbingTaxonomy:
-    """Cached sov_ai_dynamic taxonomy for ``locale`` (back-compat wrapper)."""
-    return load_probing_taxonomy_for(
-        "sov_ai_dynamic",
-        locale,
-        filename="categories.yaml",
-        env_prefix="USERSIM_SOV_AI_DYNAMIC_TAXONOMY",
-    )
 
 
 def reset_probing_taxonomy_cache() -> None:

@@ -24,11 +24,12 @@ that is invisible until it bites:
   envelope here would make the next full eval re-judge every patched row at full
   LLM cost. The envelope keeps describing the run that produced the judge axes,
   which is what it is for.
-- **Only genuinely model-free scorers are allowed.** ``financial_services`` and
-  ``safety_agentic`` look deterministic (they emit mechanical axes) but branch
-  into an LLM judge on some rows — ``task_tier == "dynamic"`` and certain
-  ``sub_protocol`` values. Passing them here would silently spend money, so
-  they are refused by name rather than trusted to behave.
+- **Only scorers registered as deterministic are allowed**
+  (``register_scorer(..., deterministic=True)``). ``financial_services`` and
+  ``safety_agentic`` emit mechanical axes but call an LLM judge on some rows
+  (``task_tier == "dynamic"`` and certain ``sub_protocol`` values), so they are
+  not registered as deterministic, and rescore refuses them rather than spend
+  money.
 
 The scorers' inputs come from the TRAJECTORY frame, not the eval frame: the eval
 parquet carries only ``assistant_eval`` plus the three key columns, so
@@ -46,23 +47,6 @@ from typing import Any
 logger = logging.getLogger("usersim.cli.rescore")
 
 _ROOT = Path(__file__).resolve().parents[1]
-
-# Scorers that provably issue no LLM call: the only three whose envelopes carry
-# ``scorer_kind="deterministic"``. Kept as an explicit allowlist rather than
-# derived from that field, because the field is absent on the hybrids and a
-# missing marker must not read as "safe".
-DETERMINISTIC_SCORERS: tuple[str, ...] = (
-    "language_compliance",
-    "refusal_basics",
-    "response_shape",
-)
-
-# Hybrids, named so the error can say WHY instead of "unknown scorer".
-_HYBRID_SCORERS: dict[str, str] = {
-    "financial_services": "calls an LLM judge on dynamic-tier rows",
-    "safety_agentic": "calls an LLM judge on some sub-protocols",
-    "health_disclosure_concealment": ("runs an LLM realized-behavior audit whenever a judge model is wired"),
-}
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:
@@ -97,7 +81,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--scorers",
         nargs="+",
         required=True,
-        help=("Deterministic scorers to recompute. One or more of: " + ", ".join(DETERMINISTIC_SCORERS)),
+        help="Scorers to recompute: any scorer registered as deterministic, such as language_compliance.",
     )
     p.add_argument(
         "--eval-column",
@@ -113,17 +97,23 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
 
 def _validate_scorers(names: list[str]) -> list[str]:
-    """Reject anything that might reach an LLM, with a reason."""
+    """Reject any scorer not registered as deterministic, with a reason: rescore calls no model."""
+    from usersim.engine.evaluator.scorers import deterministic_scorers, list_scorers
+
+    allowed = deterministic_scorers()
+    known = set(list_scorers())
     bad: list[str] = []
     for name in names:
-        if name in DETERMINISTIC_SCORERS:
+        if name in allowed:
             continue
-        if name in _HYBRID_SCORERS:
-            bad.append(f"{name!r} ({_HYBRID_SCORERS[name]}) — refused: rescore is LLM-free")
+        if name in known:
+            bad.append(
+                f"{name!r} is not registered as deterministic, so it may call a model; refused: rescore is LLM-free"
+            )
         else:
-            bad.append(f"{name!r} — not a known deterministic scorer")
+            bad.append(f"{name!r} is not a known deterministic scorer")
     if bad:
-        raise SystemExit("cannot rescore:\n  " + "\n  ".join(bad) + "\n\nallowed: " + ", ".join(DETERMINISTIC_SCORERS))
+        raise SystemExit("cannot rescore:\n  " + "\n  ".join(bad) + "\n\nallowed: " + ", ".join(allowed))
     return list(dict.fromkeys(names))
 
 

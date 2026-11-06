@@ -24,7 +24,7 @@ Two derived identifiers, both in `core/identity.py`, make runs comparable:
 **`persona_uuid`** is a content hash of the persona. The same person is the
 same id in every run, forever.
 
-**`trajectory_id`** hashes the persona together with the probe (family and
+**`trajectory_id`** hashes the persona together with the probe (label and
 variant), the scenario seed, the user and assistant models, the prompt version
 and the locale, plus the reasoning-replay setting when it is on.
 
@@ -44,7 +44,12 @@ That combination buys three things at once. A run is **resumable**, because
 probe's `prompt_version`, produces a different id rather than silently
 overwriting. And two assistants are **comparable** on the same simulated
 users: write the rows once with `usersim simulate --materialize-inputs`, run
-each setup with `--inputs`, and pair the runs on `input_id`.
+each setup with `--inputs`, and pair the runs on `input_id`. A run of stored
+rows derives each row's id from the stored row, a core part of the setup that
+every row shares, and its own probe's part (`setup_fingerprint` in
+`cli/_inputs.py`), and its run record stores the core part and each probe's;
+a change to one probe's assets, prompt version, models or settings gives only
+that probe's rows new ids.
 
 ## Episode construction, in one place
 

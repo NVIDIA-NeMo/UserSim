@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Literal, Mapping, Sequence
 
 from usersim.engine.core.episode_input import EpisodeConstructionError, EpisodePreamble, construct_probe_episode
 from usersim.engine.core.identity import resolve_model_name
-from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
+from usersim.engine.core.llm import outcome_builder_scope
 from usersim.engine.core.outcomes import Provenance
 from usersim.engine.core.probes import BaseProbe, dispatch_episode
 from usersim.engine.core.simulation import ConversationState
@@ -575,32 +575,30 @@ class ProbeEpisodeRuntime:
         return event
 
     async def _drive_native_lifecycle(self) -> None:
-        previous_builder = get_current_outcome_builder()
-        set_current_outcome_builder(self.outcome)
-        self.probe.set_tool_call_observer(self._record_executed_tool_call)
-        try:
-            result = await dispatch_episode(
-                self.probe,
-                models=self._activation_models,
-                data=self.probe._data,
-                cfg=self.config,
-                state=self.state,
-                seed_state=False,
-            )
-            # The generator's output row is the resolved input row updated with
-            # the dispatch result; loop-written columns such as ``user_query``
-            # live on the former. Hosted rows must match it exactly.
-            final_row = {**deepcopy(self.probe._data), **deepcopy(result)}
-            self._finalized = True
-            self._final_result = final_row
-            await self._activation_events.put(EpisodeLifecycleComplete(deepcopy(final_row)))
-        except asyncio.CancelledError:
-            raise
-        except Exception as error:
-            await self._activation_events.put(_LifecycleFailure(error))
-        finally:
-            set_current_outcome_builder(previous_builder)
-            self.probe.set_tool_call_observer(None)
+        with outcome_builder_scope(self.outcome):
+            self.probe.set_tool_call_observer(self._record_executed_tool_call)
+            try:
+                result = await dispatch_episode(
+                    self.probe,
+                    models=self._activation_models,
+                    data=self.probe._data,
+                    cfg=self.config,
+                    state=self.state,
+                    seed_state=False,
+                )
+                # The generator's output row is the resolved input row updated with
+                # the dispatch result; loop-written columns such as ``user_query``
+                # live on the former. Hosted rows must match it exactly.
+                final_row = {**deepcopy(self.probe._data), **deepcopy(result)}
+                self._finalized = True
+                self._final_result = final_row
+                await self._activation_events.put(EpisodeLifecycleComplete(deepcopy(final_row)))
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                await self._activation_events.put(_LifecycleFailure(error))
+            finally:
+                self.probe.set_tool_call_observer(None)
 
     async def _request_activation(
         self,

@@ -144,8 +144,8 @@ uv run usersim smoke        # offline self-check; no API key, no network
 ```
 
 `smoke` is the fastest way to confirm an install is sound. It resolves the
-model catalog, every probe's assets, and the plugin entry points without
-making a single model call.
+model catalog, runs each probe's check of the assets it ships, and loads the
+plugin entry points without making a single model call.
 
 ### Choosing models and providers
 
@@ -226,7 +226,7 @@ Without it the project defaults (`temperature = 0.7`, `top_p = 0.95`) apply and
 the call fails. `max_tokens` is droppable the same way.
 
 Adding a model means adding it to
-[`model_catalog.py`](src/usersim/cli/model_catalog.py) as well, so its sampling
+[`model_catalog.py`](src/usersim/engine/model_catalog.py) as well, so its sampling
 parameters resolve. `usersim smoke` fails if a shipped config names a model the
 catalog does not define. A model absent from `VLLM_DEFAULTS` also needs an
 explicitly declared provider: overriding an alias to one without a provider to
@@ -252,7 +252,7 @@ packaging or the extension seams:
 
 ```bash
 make check-dist         # builds and checks the sdist and wheel, installs the wheel clean, runs it from an empty dir
-make check-extensions   # installs an out-of-tree package, asserts all six seams work
+make check-extensions   # installs an out-of-tree package, asserts all six seams work, tests the template and the guide's example
 ```
 
 `make update-license-headers` adds the SPDX header to new files.
@@ -348,11 +348,15 @@ through entry points; see the seven groups in
 `src/usersim/engine/core/_extensions.py`. Give a probe or scorer a name no
 other probe or scorer uses: registering one under a taken name raises an
 error naming both, and an extension that does so is skipped. Start every name
-your package adds with its own prefix, such as `acme_recipes`; unprefixed
+your package adds with its own prefix, such as `my_bookings`; unprefixed
 names belong to the built-ins, and
 [`architecture/plugins.md`](architecture/plugins.md) lists the names this
 covers. [`docs/extensions.md`](docs/extensions.md) builds a whole extension
-package, a probe with its bank, a scorer and their tests, step by step.
+package, a probe with its bank, a scorer and their tests, step by step, and
+[`templates/extension_package/`](templates/extension_package/) is one to copy
+and fill in. Import
+from `usersim.extension` and `usersim.testing`;
+[`docs/extension_api.md`](docs/extension_api.md) lists every name they export.
 
 To check your extension satisfies the contract:
 
@@ -394,6 +398,7 @@ pytest_plugins = ["usersim.testing.pytest_plugin"]
 [tool.pytest.ini_options]
 env = ["USERSIM_DISABLE_EXTENSIONS=1"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 ```
 
 The `env` setting needs `pytest-env`, and the plugin stops the run without
@@ -406,7 +411,10 @@ it does.
 
 If you are adding a probe *in tree*, `templates/probe/` has a copy-and-edit
 gallery and [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md)
-is the end-to-end walkthrough.
+is the end-to-end walkthrough. Besides its own folder, an in-tree probe adds
+its row to the catalog in [`docs/probes.md`](docs/probes.md) and raises the
+probe counts in `README.md` and that page; the tests check both against the
+registry, and the walkthrough lists where else a built-in is registered.
 
 ### Where should a probe live?
 
@@ -424,12 +432,14 @@ A probe belongs in this repository when all of these hold:
   reproduces a standalone run.
 - **Its README** says which locales it supports, how its assets were produced
   and how to add a locale.
-- **It has an owner:** a GitHub team with write access to this repository,
-  listed in [`.github/CODEOWNERS`](.github/CODEOWNERS) for the probe's
-  directories and in `KNOWN_TEAMS` in `tests/test_ci_workflows.py`, which
-  refuses a CODEOWNERS team missing from that list. A probe from a contributor
-  without write access is co-owned by a maintainer who agrees to it when the
-  issue is triaged.
+- **It has an owner:** `@NVIDIA-NeMo/user_sim_team`, the default owner in
+  [`.github/CODEOWNERS`](.github/CODEOWNERS), owns every built-in probe. A
+  GitHub team or user with write access to this repository who owns a probe
+  with it gets a line for the probe's directories that names both, and is
+  listed in `KNOWN_TEAMS` or `KNOWN_USERS` in `tests/test_ci_workflows.py`,
+  which refuses a CODEOWNERS owner missing from both. A probe from a
+  contributor without write access is co-owned by a maintainer who agrees to it
+  when the issue is triaged.
 - **Its pull request fills in "Results impact"**, saying what the probe adds to
   a run's results.
 
@@ -442,6 +452,31 @@ To propose a probe, open the
 [New probe form](https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=new-probe.yml).
 Triage settles where it lives: in this repository, as an extension, or as an
 extension first.
+
+### Adding a hook
+
+When a probe, scorer or other extension needs something no hook, class
+attribute or entry point offers, open the
+[Extension hook form](https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=extension-hook.yml).
+[`architecture/probes.md`](architecture/probes.md) lists the hooks and
+declarations a probe has, and [`docs/extension_api.md`](docs/extension_api.md)
+the names an extension imports.
+
+A new hook:
+
+- **is general:** it serves probes beyond the one that asks for it, and its
+  name and documentation describe that general use.
+- **keeps today's behaviour by default:** a probe that does not define it runs,
+  and stores its rows, as before.
+- **is `async def` if it can call a model,** so the loop awaits it.
+- **works when a host drives the probe:** `assert_hosted_parity` passes for a
+  probe that uses it.
+- **comes with its uses:** the extension fixture in
+  `tests/fixtures/extension_package/` uses it, so `make check-extensions`
+  proves it works from an installed package. The pull request that adds it
+  also updates the conformance checks, `templates/probe/`,
+  [`architecture/probes.md`](architecture/probes.md) and
+  [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md).
 
 ## Code style
 

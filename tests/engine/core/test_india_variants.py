@@ -222,9 +222,9 @@ class TestBehavioral:
         # for a variant that resolves to en_IN's exact vocabulary.
         loc = L.persona_dataset_locale("ta_Taml_IN")
         assert loc == "en_IN"
-        assert B._education_ordinal("Graduate & above", loc) == 1.0
+        assert B.education_ordinal("Graduate & above", loc) == 1.0
         # Without the routing, the variant locale would miss the exact map.
-        assert B._education_ordinal("Graduate & above", "ta_Taml_IN") != 1.0
+        assert B.education_ordinal("Graduate & above", "ta_Taml_IN") != 1.0
 
 
 # ---------------------------------------------------------------------------

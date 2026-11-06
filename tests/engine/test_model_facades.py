@@ -17,8 +17,8 @@ from typing import Any
 
 import pytest
 
-from usersim.cli._errors import ConfigError
 from usersim.engine.core.llm import acall_llm
+from usersim.engine.errors import ConfigError
 from usersim.engine.external import model_facades, replays_assistant_reasoning
 
 # TEST-NET-3: never routable; the facades must not connect while being built.

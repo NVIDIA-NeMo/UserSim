@@ -16,9 +16,12 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from usersim.engine.config import MODEL_ASSISTANT
+
+if TYPE_CHECKING:
+    from usersim.engine.core.outcomes import OutcomeBuilder
 
 _MAX_RETRIES = 3
 _BASE_DELAY = 1.0
@@ -168,32 +171,27 @@ _MODEL_STATS: dict[str, dict[str, float]] = {}
 
 
 # ── Per-trajectory outcome hook (context-scoped) ───────────────────────
-# generator.py sets this to the current ConversationState.outcome builder
-# at the start of generate() and clears it at the end. Every successful
-# acall_llm invocation feeds its per-call tokens/calls/latency into the
-# builder as well as the cross-trajectory MODEL_STATS aggregate. Exposed
-# via set_current_outcome_builder() so the simulator's per-row resource
-# profile is populated without threading state through every caller.
+# The generator runs each row inside outcome_builder_scope with the row's
+# ConversationState.outcome builder. Every successful acall_llm invocation
+# feeds its per-call tokens/calls/latency into that builder as well as the
+# cross-trajectory MODEL_STATS aggregate, so the row's resource profile is
+# populated without threading state through every caller.
 
 
-def set_current_outcome_builder(builder) -> None:  # type: ignore[no-untyped-def]
-    """Set (or clear) the OutcomeBuilder receiving per-call stats.
+@contextmanager
+def outcome_builder_scope(builder: OutcomeBuilder | None) -> Iterator[None]:
+    """Record the model calls made inside the block on ``builder``.
 
-    Pass ``None`` to clear. Safe to call with any object exposing
-    ``record_call(alias, input_tokens, output_tokens, elapsed_s)`` —
-    typed loosely to avoid a circular import from core.outcomes.
+    Each ``acall_llm`` call in the block adds its alias, tokens and latency to
+    ``builder``; ``None`` records them nowhere. The builder in place before the
+    block receives calls again after it, also when the block raises, so a probe
+    that runs its own loop cannot leave the row's calls unrecorded.
     """
-    _OUTCOME_BUILDER.set(builder)
-
-
-def get_current_outcome_builder():  # type: ignore[no-untyped-def]
-    """Return the OutcomeBuilder currently receiving per-call stats, if any.
-
-    A scope that installs its own builder saves this first and puts it back
-    on the way out, so an inner scope cannot detach the row's builder and
-    leave the calls after it unattributed.
-    """
-    return _OUTCOME_BUILDER.get()
+    token = _OUTCOME_BUILDER.set(builder)
+    try:
+        yield
+    finally:
+        _OUTCOME_BUILDER.reset(token)
 
 
 def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, elapsed_s: float) -> None:

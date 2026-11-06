@@ -36,6 +36,10 @@ Models are declared in TOML rather than code, so a deployment can repoint
 providers without touching Python. `src/usersim/cli/models_default.toml` is
 the shipped catalog, with `models_openai.toml` and `models_openrouter.toml`
 alongside it for those providers; `--models` points at your own file.
+`usersim.engine.models_file` loads and validates a models file and turns it
+into Data Designer model configs, so code below the CLI reads it too; the CLI
+adds the `--model` and `--parallel` overrides, the model smoke test and the
+prompt for missing keys.
 
 Three aliases are required for a simulation run: `user_model`,
 `assistant_model` and `judge_model`. Two more are used when a run reaches for
@@ -43,12 +47,15 @@ them: `api_response_model` for tool-calling probes and `summary_model` for the
 loop's light work: summaries for context management, early-stop checks, the
 pressure probe's capitulation check, and translating India-variant openings
 and `financial_services` search queries.
-Without it, `user_model` does that work. `eval` requires `evaluator_model`,
-kept distinct from `judge_model` so the in-sim gate and the post-hoc rubric
-can be sized independently. A missing required alias fails at config
-construction, not mid-run.
+Without it, `user_model` does that work. A probe that calls a model of its own
+names the alias in `model_aliases` on its class, as `financial_services` does
+for the model that embeds its search queries: each declared alias the file
+defines reaches the probe, and one it lacks is left out. `eval` requires
+`evaluator_model`, kept distinct from `judge_model` so the in-sim gate and the
+post-hoc rubric can be sized independently. A missing required alias fails at
+config construction, not mid-run.
 
-`usersim.cli.model_catalog` holds per-model inference defaults: temperature,
+`usersim.engine.model_catalog` holds per-model inference defaults: temperature,
 top_p, max_tokens, and any model-family-specific `extra_body`. A TOML row
 overrides the catalog per field, and the row is self-describing for
 anything it sets.
@@ -71,7 +78,7 @@ drops earlier thinking makes it a no-op.
 
 ## Failure handling
 
-`usersim.cli._errors.ConfigError` is a `ValueError` subclass, never a
+`usersim.engine.errors.ConfigError` is a `ValueError` subclass, never a
 `SystemExit`, so library callers can catch it. `main()` catches it at the
 boundary and prints a message rather than a traceback, exiting 2.
 

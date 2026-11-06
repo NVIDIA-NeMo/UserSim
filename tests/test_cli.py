@@ -23,9 +23,16 @@ import pandas as pd
 import pytest
 
 from usersim import cli
-from usersim.cli._models import (
+from usersim.cli._pipeline import (
+    DEFAULT_PROBE_MIX,
+    build_simulator_config_builder,
+    known_probes,
+)
+from usersim.cli.evaluate import _parse_csv_or_none, _parse_judges
+from usersim.cli.simulate import _parse_probe_mix
+from usersim.engine.errors import ConfigError
+from usersim.engine.models_file import (
     REQUIRED_SIMULATOR_ALIASES,
-    ConfigError,
     ModelsConfig,
     ModelSpec,
     ProviderSpec,
@@ -34,15 +41,6 @@ from usersim.cli._models import (
     require_aliases,
     warn_if_missing_api_key,
 )
-from usersim.cli._pipeline import (
-    DEFAULT_PROBE_MIX,
-    THEME_DRIVEN_PROBES,
-    build_simulator_config_builder,
-    known_probes,
-)
-from usersim.cli.evaluate import _parse_csv_or_none, _parse_judges
-from usersim.cli.simulate import _parse_probe_mix
-from usersim.engine.core._assets import packaged_assets_dir
 
 # ---------------------------------------------------------------------------
 # Top-level parser
@@ -211,7 +209,7 @@ class TestToDataDesignerKwargs:
     """
 
     def test_no_custom_providers_returns_empty_kwargs(self):
-        from usersim.cli._models import to_data_designer_kwargs
+        from usersim.engine.models_file import to_data_designer_kwargs
 
         cfg = ModelsConfig(
             providers=(),
@@ -220,7 +218,7 @@ class TestToDataDesignerKwargs:
         assert to_data_designer_kwargs(cfg) == {}
 
     def test_custom_provider_merges_with_builtin_nvidia(self):
-        from usersim.cli._models import to_data_designer_kwargs
+        from usersim.engine.models_file import to_data_designer_kwargs
 
         cfg = ModelsConfig(
             providers=(
@@ -242,7 +240,7 @@ class TestToDataDesignerKwargs:
         assert "nvidia" in names  # built-in merged in for assistant_model
 
     def test_custom_provider_overrides_builtin_on_name_conflict(self):
-        from usersim.cli._models import to_data_designer_kwargs
+        from usersim.engine.models_file import to_data_designer_kwargs
 
         cfg = ModelsConfig(
             providers=(
@@ -369,11 +367,6 @@ class TestPipelineFactory:
             "general_educational",
         }
 
-    def test_theme_driven_set_matches_subcategory_branches(self):
-        # The pipeline's theme-column dispatcher only has explicit
-        # branches for these three; everything else uses the placeholder.
-        assert THEME_DRIVEN_PROBES == frozenset({"tool_calling", "general_open_ended", "general_educational"})
-
     @pytest.mark.parametrize(
         "probe",
         sorted(
@@ -395,7 +388,6 @@ class TestPipelineFactory:
         data_designer, builder = build_simulator_config_builder(
             locale="en_US",
             models=models,
-            assets_dir=packaged_assets_dir(),
             probe_mix={probe: 1.0},
         )
         assert data_designer is not None
@@ -407,7 +399,6 @@ class TestPipelineFactory:
             build_simulator_config_builder(
                 locale="en_US",
                 models=models,
-                assets_dir=packaged_assets_dir(),
                 probe_mix={"made_up": 1.0},
             )
 
@@ -416,7 +407,6 @@ class TestPipelineFactory:
         data_designer, builder = build_simulator_config_builder(
             locale="en_US",
             models=models,
-            assets_dir=packaged_assets_dir(),
             probe_mix={
                 "tool_calling": 0.4,
                 "safety_agentic": 0.3,
@@ -827,25 +817,13 @@ class TestEvalCliJudgesDefault:
 
 
 class TestAssetCommandDefaults:
-    """The three asset commands must default to where the banks actually are.
+    """With no ``--dir`` or ``--out``, the asset commands use the bank the domain's probe ships."""
 
-    Each resolved its default from a path relative to ``cli/``, which pointed
-    at a directory that does not exist, so running any of them without an
-    explicit ``--dir`` or ``--out`` failed to find the shipped banks. Nothing
-    caught it because every test passed a path.
-    """
+    def test_the_default_folder_is_the_probes_shipped_bank(self):
+        from usersim.cli._bank_dir import default_bank_dir
 
-    @pytest.mark.parametrize("command", ["validate-assets", "evaluate-assets", "gen-assets"])
-    def test_default_asset_dir_exists(self, command):
-        from usersim.cli import evaluate_assets, gen_assets, validate_assets
-
-        module = {
-            "validate-assets": validate_assets,
-            "evaluate-assets": evaluate_assets,
-            "gen-assets": gen_assets,
-        }[command]
-        default = module.packaged_assets_dir() / "financial_services" / "en_US"
-        assert default.is_dir(), f"{command} default resolves to a missing dir: {default}"
+        default = default_bank_dir("financial_services", "en_US", flag="--dir")
+        assert default.is_dir(), f"the default bank folder is missing: {default}"
         assert (default / "region_meta.yaml").exists() or any(default.iterdir())
 
     def test_validate_assets_finds_the_shipped_bank(self, capsys):
@@ -953,19 +931,9 @@ class TestDryRuns:
         assert row["theme"]
         assert row["tools"]
         assert row["usersim_config"]["random_seed"] == 42
-        assert row["usersim_config"]["finance_retrieval_mode"] == "hybrid"
+        assert row["usersim_config"]["probes"] == ["tool_calling"]
+        assert "probe_options" not in row["usersim_config"]
         assert row["usersim_config"]["store_reasoning"] is True
-
-    def test_finance_retrieval_defaults_to_the_engine_default(self):
-        """The CLI must not override the engine's retrieval mode with an ablation."""
-        from usersim.engine.config import ConversationSimulatorConfig
-
-        base = ["simulate", "--locale", "en_US", "--num-rows", "1", "--out", "out"]
-        engine_default = ConversationSimulatorConfig.model_fields["finance_retrieval_mode"].default
-        assert cli._build_parser().parse_args(base).finance_retrieval_mode == engine_default == "hybrid"
-        for mode in ("hybrid", "dense", "golden"):
-            args = cli._build_parser().parse_args([*base, "--finance-retrieval-mode", mode])
-            assert args.finance_retrieval_mode == mode
 
     def test_simulate_panel_or_locale_required(self, tmp_path):
         with pytest.raises(SystemExit):
@@ -1222,10 +1190,10 @@ class TestConfigErrorPresentation:
     """
 
     def test_main_presents_config_error_without_a_traceback(self, caplog):
-        from usersim.cli._errors import ConfigError
+        from usersim.engine.errors import ConfigError
 
         def _raises(args):
-            raise ConfigError("toolset seed not found: /nope.parquet")
+            raise ConfigError("seed table not found: /nope.parquet")
 
         with patch("usersim.cli._build_parser") as build:
             build.return_value.parse_args.return_value = SimpleNamespace(
@@ -1236,17 +1204,18 @@ class TestConfigErrorPresentation:
                 code = cli.main([])
 
         assert code == 2
-        assert "toolset seed not found: /nope.parquet" in caplog.text
+        assert "seed table not found: /nope.parquet" in caplog.text
 
-    def test_missing_toolset_seed_raises_config_error(self, tmp_path):
-        """The real path: an explicit ``--toolset-seed-path`` that is not
+    def test_missing_seed_table_raises_config_error(self, tmp_path):
+        """The real path: an explicit ``--seed-dataset-path`` that is not
         there is a user error, not a crash."""
-        from usersim.cli._errors import ConfigError
-        from usersim.cli._pipeline import resolve_toolset_seed_path
+        from usersim.cli._pipeline import resolve_seed_dataset_path
+        from usersim.engine.errors import ConfigError
 
-        with pytest.raises(ConfigError, match="toolset seed not found"):
-            resolve_toolset_seed_path(
-                toolset_seed_path=tmp_path / "absent.parquet",
+        with pytest.raises(ConfigError, match="seed table not found"):
+            resolve_seed_dataset_path(
+                "tool_calling",
+                seed_dataset_path=tmp_path / "absent.parquet",
             )
 
 

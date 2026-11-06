@@ -46,18 +46,18 @@ Total LOC: ~80. ``sov_ai_facts`` is a real example at ~190 LOC
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.probes import (
+# After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
+# also copy ``prompts.py`` next to it and import from
+# ``usersim.engine.probes.<your_probe>.prompts``.
+from usersim.engine.templates.probe.prompts import DEMO_USER_AGENT_PROMPTS  # type: ignore[import-not-found]
+from usersim.extension import (
     BankBackedProbe,
     BankVerbatimMixin,
     register_probe,
 )
-
-# After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
-# also copy ``prompts.py`` next to it and change this import to ``from .prompts``.
-from usersim.engine.templates.probe.prompts import DEMO_USER_AGENT_PROMPTS  # type: ignore[import-not-found]
 
 
 @dataclass
@@ -80,11 +80,7 @@ def _demo_bank_loader(locale: str = "en_US"):
     raise NotImplementedError("replace with your real bank loader")
 
 
-@register_probe(
-    family="demo_bank_verbatim",
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     """Verbatim-turn-1 probe driven by a curated asset bank.
 
@@ -93,10 +89,20 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "demo_bank_verbatim"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_bank_verbatim/, beside this module
     output_columns = ("sovereign_facts_probed",)
     bank_loader = staticmethod(_demo_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
+    placeholder_warning_kind = "used_placeholder_fact"
     bank_version_key: str | None = None  # locale-keyed (inclusion convention)
+
+    @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        """Stub check: load the bank in ``locale_dir``, one locale's folder.
+
+        A run's pre-flight calls it for each run locale before any model
+        call; whatever it raises refuses that locale.
+        """
+        raise NotImplementedError("replace with a load of one locale's bank")
 
     def derive_task(
         self,

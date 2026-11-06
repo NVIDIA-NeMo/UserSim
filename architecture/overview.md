@@ -52,7 +52,7 @@ the arrow pointing one direction, and a test enforces it.
 | `usersim.reporting` | Turning parquets into a capability dashboard | [reporting.md](reporting.md) |
 | `usersim.selection` | Curating trajectories into exportable datasets | [selection.md](selection.md) |
 | `usersim.taxonomy` | The shared vocabulary of capabilities and evidence | above |
-| `usersim.asset_gen` | Generating new asset banks for a domain | [assets.md](assets.md) |
+| `usersim.asset_gen` | Dispatching asset-bank generation to a domain's generator | [assets.md](assets.md) |
 | `usersim.testing` | Conformance checks and the test harness for extensions you write | [plugins.md](plugins.md) |
 
 Probes get their own page: [probes.md](probes.md) for the substrate,
@@ -84,16 +84,17 @@ throughout, so a name tells you which one you are reading about.
 src/usersim/
 ├── cli/               console driver; models_*.toml catalogs
 ├── engine/
-│   ├── core/          the conversation loop, probe base classes, banks,
-│   │                  identity, outcomes, storage
+│   ├── core/          the conversation loop, probe base classes, asset lookup,
+│   │                  shared bank loaders, identity, outcomes, storage
 │   ├── evaluator/     judges, axes, and the scorer registry
-│   ├── probes/        the shipped probes
-│   ├── assets/        per-probe YAML and parquet banks
+│   ├── probes/        the shipped probes, most with their banks, loaders and
+│   │                  scorer in their own folder
+│   ├── assets/        the banks of the probes that keep none of their own
 │   └── plugin.py      the two Data Designer entry points
 ├── reporting/         capability dashboard and model comparison
 ├── selection/         trajectory curation and export
 ├── taxonomy/          capability definitions, evaluation-cell decoding
-├── asset_gen/         asset-bank generation
+├── asset_gen/         the asset-domain registry the asset commands dispatch through
 └── testing/           conformance suites for extension authors
 
 architecture/          this directory

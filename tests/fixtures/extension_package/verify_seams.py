@@ -44,6 +44,11 @@ from usersim.engine.evaluator.scorers import list_scorers  # noqa: E402
 
 check("usersim.scorers", "fixture_scorer" in list_scorers())
 
+# A contributed scorer registered as deterministic is one usersim rescore reruns.
+from usersim.cli.rescore import _validate_scorers  # noqa: E402
+
+check("deterministic scorer is rescorable", _validate_scorers(["fixture_scorer"]) == ["fixture_scorer"])
+
 # 3. Asset domain
 from usersim.asset_gen.registry import domain_names  # noqa: E402
 
@@ -63,10 +68,15 @@ check("usersim.backends", "fixture_backend" in backends, f"saw {backends}")
 
 # 5. Capability — and, crucially, that it reaches a rendered report cell
 from usersim.reporting.capability_report import capability_order  # noqa: E402
-from usersim.taxonomy.capabilities import capability_definitions  # noqa: E402
+from usersim.taxonomy.capabilities import axis_description, capability_definitions  # noqa: E402
 
 ids = [d.id for d in capability_definitions()]
 check("usersim.capabilities", "fixture_capability" in ids)
+check(
+    "a capabilities module gives axis descriptions",
+    axis_description("fixture_axis") == "Share of turns the fixture probe counts.",
+    repr(axis_description("fixture_axis")),
+)
 check(
     "capability reaches the report",
     "fixture_capability" in [c for c, _ in capability_order()],
@@ -100,6 +110,76 @@ from usersim.engine.config import ConversationSimulatorConfig  # noqa: E402
 kept = ConversationSimulatorConfig(name="conversation_messages").side_effect_columns
 check("output_columns joins the run's columns", "fixture_probe_marker" in kept, f"saw {len(kept)} columns")
 
+# The pre-flight checks a contributed probe's locale banks with the check its
+# class declares, and a refusal links the probe's own authoring guide.
+from usersim.cli._pipeline import verify_probe_assets  # noqa: E402
+from usersim.engine.errors import ConfigError
+
+
+def preflight_refusal(locales: list[str]) -> str:
+    try:
+        verify_probe_assets({"fixture_probe": 1.0}, locales)
+    except ConfigError as error:
+        return str(error)
+    return ""
+
+
+check("pre-flight passes a locale with a bank", not preflight_refusal(["en_US"]), preflight_refusal(["en_US"]))
+refusal = preflight_refusal(["fr_FR"])
+check(
+    "pre-flight refuses a locale without one, linking the probe's guide",
+    "fixture_probe can't run fr_FR: no bank" in refusal and "https://example.com/fixture-probe/locales" in refusal,
+    refusal,
+)
+
+# A contributed probe's themes come from its installed assets, read as a run
+# reads them, with the run's asset root installed.
+from usersim.cli._pipeline import _probe_themes  # noqa: E402
+
+themes = _probe_themes("fixture_probe", "en_US", None)
+check(
+    "themes come from the contributed assets",
+    themes == ['{"type": "fixture topic", "description": "A topic every fixture row draws."}'],
+    str(themes),
+)
+
+# A contributed probe's seed table resolves from its installed assets, as a run
+# that holds the probe attaches it.
+from usersim.cli._pipeline import resolve_seed_dataset_for_mix  # noqa: E402
+
+seed = resolve_seed_dataset_for_mix({"fixture_probe": 1.0})
+check(
+    "seed_dataset resolves a contributed seed table",
+    seed is not None and seed.name == "fixture_seed.jsonl" and "usersim_extension_fixture" in seed.parts,
+    str(seed),
+)
+
+# A model a contributed probe declares joins the models every row resolves.
+from usersim.engine.core.probes import declared_model_aliases  # noqa: E402
+
+declared = declared_model_aliases(ConversationSimulatorConfig(name="conversation_messages"))
+check("model_aliases joins the run's models", "fixture_critic_model" in declared, str(declared))
+
+# `usersim eval --scorers auto` adds a contributed probe's default_scorers for
+# the rows stored under its label.
+from usersim.cli.evaluate import _resolve_scorers  # noqa: E402
+from usersim.engine.evaluator.scorers import GENERIC_SCORERS  # noqa: E402
+
+auto = _resolve_scorers(["auto"], ["fixture_probe"])
+check("default_scorers join --scorers auto", auto == [*GENERIC_SCORERS, "fixture_scorer"], str(auto))
+
+# The per-row preview shows the fields a contributed probe declares.
+import pandas as pd  # noqa: E402
+from rich.console import Console  # noqa: E402
+
+from usersim.engine.core.preview import _render_probe_inputs  # noqa: E402
+
+panel = _render_probe_inputs(pd.Series({"probe_type": "fixture_probe", "fixture_probe_marker": "yes"}), {})
+shown = Console(record=True, width=100)
+if panel is not None:
+    shown.print(panel)
+check("preview_fields reach the preview", "Marker: yes" in shown.export_text(), shown.export_text())
+
 # The published conformance suite must pass for a real external probe.
 from usersim.testing import probe_conformance_problems  # noqa: E402
 
@@ -108,7 +188,7 @@ check("usersim.testing conformance", not problems, str(problems))
 
 # A probe built on a shipped one: its spec layer ships in this package and
 # extends identity_disclosure's spec, which must be inside the installed wheel.
-from usersim.engine.core.identity_spec import load_identity_spec_default, validate_spec  # noqa: E402
+from usersim.engine.probes.identity_disclosure.spec import load_identity_spec_default, validate_spec  # noqa: E402
 
 check("probe built on identity_disclosure", "fixture_identity" in known_probes(), f"saw {known_probes()}")
 spec_problems = validate_spec("fixture_identity")
@@ -133,7 +213,7 @@ identity_problems = probe_conformance_problems("fixture_identity")
 check("identity probe conformance", not identity_problems, str(identity_problems))
 
 # `usersim smoke` names the installed package and finds nothing wrong with it.
-from usersim.cli.smoke import SmokeReport, _check_extensions  # noqa: E402
+from usersim.cli.smoke import SmokeReport, _check_extensions, _check_probe_assets  # noqa: E402
 
 smoke = SmokeReport()
 _check_extensions(smoke)
@@ -142,6 +222,18 @@ check(
     "usersim smoke reports the package",
     extensions.ok and extensions.detail == "usersim-extension-fixture 0.1.0: 7 entry point(s)",
     extensions.detail,
+)
+
+# It also runs the contributed probes' asset checks beside the shipped ones:
+# the fixture probe's own, and the spec check the identity probe inherits.
+assets = SmokeReport()
+_check_probe_assets(assets)
+(probe_assets,) = assets.results
+checked = probe_assets.detail.split(": ", 1)[-1].split(", ")
+check(
+    "usersim smoke runs the contributed asset checks",
+    probe_assets.ok and {"fixture_probe", "fixture_identity", "tool_calling"} <= set(checked),
+    probe_assets.detail,
 )
 
 if failures:

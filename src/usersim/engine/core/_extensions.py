@@ -112,8 +112,41 @@ def clear_extension_cache() -> None:
 
 
 def _select(group: str) -> tuple[EntryPoint, ...]:
-    """Entry points in ``group``, ordered by name for reproducible results."""
-    return tuple(sorted(entry_points(group=group), key=lambda ep: ep.name))
+    """Entry points in ``group``, ordered by name and then target for reproducible results."""
+    return tuple(sorted(entry_points(group=group), key=lambda ep: (ep.name, ep.value)))
+
+
+def extension_identities() -> list[dict[str, Any]]:
+    """Every advertised User Sim entry point, with the package release behind it.
+
+    In group order, then by name and target. Empty when discovery is off,
+    since no extension then reaches a run.
+    """
+    if extensions_disabled():
+        return []
+    identities: list[dict[str, Any]] = []
+    for group in ENTRY_POINT_GROUPS:
+        for ep in _select(group):
+            dist = getattr(ep, "dist", None)
+            identities.append(
+                {
+                    "group": group,
+                    "name": ep.name,
+                    "value": ep.value,
+                    "distribution": dist.name if dist is not None else None,
+                    "version": dist.version if dist is not None else None,
+                }
+            )
+    return identities
+
+
+def extension_distributions() -> dict[str, str]:
+    """Each installed distribution that advertises a User Sim entry point, with its version.
+
+    Empty when discovery is off, since no extension then reaches a run.
+    """
+    found = {i["distribution"]: i["version"] for i in extension_identities() if i["distribution"] is not None}
+    return dict(sorted(found.items()))
 
 
 def _package(ep: EntryPoint) -> str:

@@ -32,11 +32,8 @@ from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     OutcomeStatus,
     Provenance,
-    WarningKind,
 )
 from usersim.engine.core.probes import (
-    _PROBE_REGISTRY,
-    AgenticMixin,
     BankBackedProbe,
     BankLoadError,
     BankReframingMixin,
@@ -50,11 +47,12 @@ from usersim.engine.core.probes import (
     ToolCallingMixin,
     ToolExecutionMixin,
     assistant_message,
+    checks_each_locale,
     clear_registry,
     known_probes,
-    load_builtin_probes,
     register_probe,
     resolve_probe,
+    theme_problems,
 )
 from usersim.engine.core.user_turn_policy import UserTurnPolicy
 
@@ -117,6 +115,32 @@ class TestBaseProbeDefaults:
     def test_get_tools_for_assistant_default_none(self) -> None:
         assert self._build().get_tools_for_assistant() is None
 
+    @pytest.mark.parametrize(
+        "stored",
+        [
+            '{"type": "cooking", "description": "Weeknight dinners"}',
+            {"type": "cooking", "description": "Weeknight dinners"},
+        ],
+        ids=["json-text", "mapping"],
+    )
+    def test_a_row_reads_its_theme_back_as_a_mapping(self, stored) -> None:
+        """A run stores the theme as JSON text; a caller of run_episode may pass the mapping itself."""
+        probe = _MinimalProbe(persona={}, locale="en_US", language="English", models={}, data={"theme": stored})
+        assert probe.theme() == {"type": "cooking", "description": "Weeknight dinners"}
+
+    def test_a_row_without_a_theme_reads_as_empty(self) -> None:
+        assert self._build().theme() == {}
+
+    def test_a_row_of_a_probe_that_reads_no_theme_reads_as_empty(self) -> None:
+        """A run stores ``NO_THEME`` for a probe whose ``themes`` is None; it is not a theme."""
+        from usersim.engine.core.probes import NO_THEME
+
+        probe = _MinimalProbe(persona={}, locale="en_US", language="English", models={}, data={"theme": NO_THEME})
+        assert probe.theme() == {}
+
+    def test_a_probe_reads_no_theme_by_default(self) -> None:
+        assert _MinimalProbe.themes("en_US") is None
+
     def test_format_gate_prompt_substitutes(self) -> None:
         probe = self._build()
         prompt = probe.format_gate_prompt("Hello?", "(no history)")
@@ -159,8 +183,6 @@ class TestBaseProbeDefaults:
         assert probe.get_user_query_instruction(5) is None
         assert await probe.format_followup_user_instructions(1, state) == []
         assert probe.on_followup_failure(state, "gate_exhausted") == "skip"
-        assert probe.should_inline_judge_user_turn(0, state) is True
-        assert probe.should_inline_judge_assistant_turn(0, state) is True
         assert probe.allow_early_stop_at_turn(0, state) is True
         assert probe.user_turn_policy() == UserTurnPolicy()
 
@@ -196,7 +218,7 @@ def _stub_bank_loader_locale_independent() -> _StubBank:
 class _SubclassedBankProbe(BankBackedProbe):
     label = "bank_test"
     bank_loader = staticmethod(_stub_bank_loader_locale_aware)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
+    placeholder_warning_kind = "used_placeholder_fact"
     bank_version_key = None  # locale-keyed
 
     def get_user_system_prompt(self) -> str:
@@ -219,7 +241,7 @@ class _PlaceholderBankProbe(_SubclassedBankProbe):
 class _LocaleIndependentBankProbe(BankBackedProbe):
     label = "bank_test_locale_independent"
     bank_loader = staticmethod(_stub_bank_loader_locale_independent)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
+    placeholder_warning_kind = "used_placeholder_target"
     bank_version_key = "safety"
 
     def get_user_system_prompt(self) -> str:
@@ -293,7 +315,7 @@ class TestBankBackedProbe:
             ).OutcomeStatus.OK
         )
         kinds = [w.kind for w in outcome.warnings]
-        assert WarningKind.USED_PLACEHOLDER_FACT in kinds
+        assert _PlaceholderBankProbe.placeholder_warning_kind in kinds
 
     def test_placeholder_warning_names_the_recorded_bank_version(self) -> None:
         builder, prov = self._build_outcome()
@@ -306,7 +328,7 @@ class TestBankBackedProbe:
             provenance=prov,
         )
         outcome = builder.finalize(OutcomeStatus.OK)
-        [detail] = [w.detail for w in outcome.warnings if w.kind == WarningKind.USED_PLACEHOLDER_FACT]
+        [detail] = [w.detail for w in outcome.warnings if w.kind == _PlaceholderBankProbe.placeholder_warning_kind]
         assert detail == (
             f"task placeholder_task from bank_en_US {prov.bank_version['en_US']} is placeholder content; "
             "SME verification recommended before relying on this result"
@@ -489,28 +511,6 @@ class TestBankReframingMixin:
     async def test_inherits_bank_verbatim_first_turn(self) -> None:
         probe = self._build()
         assert await probe.get_verbatim_first_user_turn(_StubState()) == "Initial pressure question?"
-
-
-class _AgenticProbe(AgenticMixin, _SubclassedBankProbe):
-    label = "agentic_test"
-
-
-class TestAgenticMixin:
-    def _build(self) -> _AgenticProbe:
-        return _AgenticProbe(
-            persona={},
-            locale="en_US",
-            language="English",
-            models={},
-            outcome_builder=OutcomeBuilder(),
-            provenance=Provenance(),
-        )
-
-    def test_skips_user_judge_for_turn_zero(self) -> None:
-        probe = self._build()
-        state = _StubState()
-        assert probe.should_inline_judge_user_turn(0, state) is False
-        assert probe.should_inline_judge_user_turn(1, state) is True
 
 
 class _ToolCallingMixinProbe(ToolCallingMixin, _MinimalProbe):
@@ -725,29 +725,73 @@ class TestLocalePromptPack:
 # ---------------------------------------------------------------------------
 
 
-class TestRegisterProbe:
-    def setup_method(self) -> None:
-        # Loaded before the snapshot so it holds the built-ins, and so a
-        # lookup during the test cannot add them to the cleared registry.
-        load_builtin_probes()
-        self._snapshot = dict(_PROBE_REGISTRY)
-        clear_registry()
+class TestLocaleChecks:
+    """A probe that keeps one bank per locale defines ``check_locale``; ``asset_problems`` runs it on each it ships."""
 
-    def teardown_method(self) -> None:
+    @staticmethod
+    def _check(cls, locale_dir: Path) -> None:
+        if not (locale_dir / "bank.yaml").read_text(encoding="utf-8").strip():
+            raise ValueError("the bank is empty")
+
+    def test_asset_problems_checks_each_locale_folder_the_probe_ships(self, tmp_path, register_test_probe) -> None:
+        for locale, bank in (("en_US", "recipes: [curry]\n"), ("pt_BR", "")):
+            (tmp_path / "ext_banks" / locale).mkdir(parents=True)
+            (tmp_path / "ext_banks" / locale / "bank.yaml").write_text(bank, encoding="utf-8")
+        probe = register_test_probe("ext_banks", assets_root=tmp_path, check_locale=classmethod(self._check))
+
+        assert checks_each_locale(probe)
+        assert probe.asset_problems() == ["pt_BR: ValueError: the bank is empty"]
+
+    def test_a_probe_without_check_locale_checks_no_locale(self, tmp_path, register_test_probe) -> None:
+        (tmp_path / "ext_plain" / "en_US").mkdir(parents=True)
+        probe = register_test_probe("ext_plain", assets_root=tmp_path)
+
+        assert not checks_each_locale(probe)
+        assert probe.asset_problems() == []
+
+    def test_a_check_locale_a_mixin_defines_counts(self) -> None:
+        class _ChecksLocales:
+            @classmethod
+            def check_locale(cls, locale_dir: Path) -> None:
+                return None
+
+        class _Probe(_ChecksLocales, BaseProbe):
+            label = "_mixin_checked_probe"
+
+        assert checks_each_locale(_Probe)
+
+    def test_theme_problems_names_each_locale_whose_themes_do_not_read(self) -> None:
+        class _Themed(BaseProbe):
+            @classmethod
+            def themes(cls, locale: str) -> list[dict]:
+                if locale == "de_DE":
+                    raise FileNotFoundError("no topics.json")
+                return [{"type": "cooking"}]
+
+        assert theme_problems(_Themed, ["en_US", "de_DE"]) == ["no themes for de_DE: FileNotFoundError: no topics.json"]
+
+
+class TestRegisterProbe:
+    @pytest.fixture(autouse=True)
+    def _empty_registry(self, restored_registries):
+        """Each test starts from an empty registry, and the next test gets the built-ins back.
+
+        ``restored_registries`` loads the built-ins first, so a lookup during
+        the test cannot add them to the cleared registry.
+        """
         clear_registry()
-        _PROBE_REGISTRY.update(self._snapshot)
 
     def _make_module(self, name: str = "_probe_test_module") -> types.ModuleType:
         mod = types.ModuleType(name)
         sys.modules[name] = mod
         return mod
 
-    def test_registers_class_under_label_and_sets_its_metadata(self) -> None:
-        mod = self._make_module()
-
-        @register_probe(family="general", prompt_version="v1.2", variants=("default", "alt"))
+    def test_registers_class_under_label_with_its_declarations(self) -> None:
+        @register_probe
         class _Decorated(BaseProbe):
             label = "_decorated_probe"
+            prompt_version = "v1.2"
+            variants = ("default", "alt")
 
             def get_user_system_prompt(self) -> str:
                 return ""
@@ -755,24 +799,8 @@ class TestRegisterProbe:
             def get_assistant_system_prompt(self) -> str:
                 return ""
 
-        _Decorated.__module__ = mod.__name__
-        # Re-apply the decorator so the module-attr step runs against
-        # the module we just constructed (the original decoration ran
-        # before we reassigned __module__).
-        _Decorated = register_probe(
-            family="general",
-            prompt_version="v1.2",
-            variants=("default", "alt"),
-        )(_Decorated)
-
-        assert "_decorated_probe" in known_probes()
         assert resolve_probe("_decorated_probe") is _Decorated
-        assert _Decorated.family == "general"
-        assert _Decorated.prompt_version == "v1.2"
-        assert _Decorated.variants == ("default", "alt")
-        assert mod.PROBE_FAMILY == "general"
-        assert mod.PROMPT_VERSION == "v1.2"
-        assert mod.PROBE_VARIANTS == ("default", "alt")
+        assert (_Decorated.prompt_version, _Decorated.variants) == ("v1.2", ("default", "alt"))
 
     @staticmethod
     def _probe_class(name: str, label: str, module: str) -> type[BaseProbe]:
@@ -788,11 +816,34 @@ class TestRegisterProbe:
             },
         )
 
+    def test_a_class_that_declares_neither_gets_the_defaults(self) -> None:
+        mod = self._make_module()
+        plain = register_probe(self._probe_class("_Plain", "_plain_probe", mod.__name__))
+        assert (plain.prompt_version, plain.variants) == ("v1.0", ("default",))
+
+    @pytest.mark.parametrize(
+        ("attribute", "value", "problem"),
+        [
+            ("prompt_version", "", "prompt_version must be a non-empty string"),
+            ("prompt_version", 2, "prompt_version must be a non-empty string"),
+            ("variants", ["default"], "variants must be a non-empty tuple"),
+            ("variants", "default", "variants must be a non-empty tuple"),
+            ("variants", (), "variants must be a non-empty tuple"),
+            ("variants", ("default", ""), "variants must be a non-empty tuple"),
+        ],
+    )
+    def test_a_malformed_declaration_is_refused(self, attribute, value, problem) -> None:
+        mod = self._make_module()
+        cls = self._probe_class("_Malformed", "_malformed_probe", mod.__name__)
+        setattr(cls, attribute, value)
+
+        with pytest.raises(ProbeRegistrationError, match=rf"_Malformed\.{problem}"):
+            register_probe(cls)
+        assert "_malformed_probe" not in known_probes()
+
     def test_a_second_class_under_a_taken_label_is_refused(self) -> None:
         mod = self._make_module()
-        first = register_probe(family="general", prompt_version="v1.0", variants=("default",))(
-            self._probe_class("_First", "_contested_probe", mod.__name__)
-        )
+        first = register_probe(self._probe_class("_First", "_contested_probe", mod.__name__))
         second = self._probe_class("_Second", "_contested_probe", mod.__name__)
 
         with pytest.raises(
@@ -800,29 +851,13 @@ class TestRegisterProbe:
             match=r"'_contested_probe' is already registered by _probe_test_module\._First, "
             r"so _probe_test_module\._Second cannot take it",
         ):
-            register_probe(family="general", prompt_version="v2.0", variants=("default",))(second)
+            register_probe(second)
         assert resolve_probe("_contested_probe") is first
-        assert first.prompt_version == "v1.0"
-        assert second.prompt_version == ""
-        assert mod.PROMPT_VERSION == "v1.0"
-
-    def test_two_probes_in_one_module_keep_their_own_metadata(self) -> None:
-        mod = self._make_module()
-        first = register_probe(family="first", prompt_version="v1.0", variants=("alpha",))(
-            self._probe_class("_First", "_first_probe", mod.__name__)
-        )
-        second = register_probe(family="second", prompt_version="v2.0", variants=("beta",))(
-            self._probe_class("_Second", "_second_probe", mod.__name__)
-        )
-
-        assert (first.family, first.prompt_version, first.variants) == ("first", "v1.0", ("alpha",))
-        assert (second.family, second.prompt_version, second.variants) == ("second", "v2.0", ("beta",))
 
     def test_a_redefined_class_updates_its_entry(self) -> None:
         mod = self._make_module()
-        register = register_probe(family="general", prompt_version="v1.0", variants=("default",))
-        register(self._probe_class("_Reloaded", "_reloaded_probe", mod.__name__))
-        reloaded = register(self._probe_class("_Reloaded", "_reloaded_probe", mod.__name__))
+        register_probe(self._probe_class("_Reloaded", "_reloaded_probe", mod.__name__))
+        reloaded = register_probe(self._probe_class("_Reloaded", "_reloaded_probe", mod.__name__))
         assert resolve_probe("_reloaded_probe") is reloaded
 
     def test_rejects_non_baseprobe_class(self) -> None:
@@ -830,22 +865,14 @@ class TestRegisterProbe:
             label = "not_a_probe"
 
         with pytest.raises(ProbeRegistrationError, match="not a subclass"):
-            register_probe(
-                family="general",
-                prompt_version="v1.0",
-                variants=("default",),
-            )(_NotAProbe)
+            register_probe(_NotAProbe)
 
     def test_rejects_class_without_label_set(self) -> None:
         class _NoLabel(BaseProbe):
             pass
 
         with pytest.raises(ProbeRegistrationError, match="label"):
-            register_probe(
-                family="general",
-                prompt_version="v1.0",
-                variants=("default",),
-            )(_NoLabel)
+            register_probe(_NoLabel)
 
     def test_rejects_a_relative_assets_root(self) -> None:
         """A relative root would resolve against whatever directory a run starts in."""
@@ -854,9 +881,8 @@ class TestRegisterProbe:
         relative.assets_root = Path("assets")
 
         with pytest.raises(ProbeRegistrationError, match=r"_Relative declares the relative assets_root 'assets'"):
-            register_probe(family="general", prompt_version="v1.0", variants=("default",))(relative)
+            register_probe(relative)
         assert "_relative_root_probe" not in known_probes()
-        assert relative.family == ""
 
     def test_rejects_an_output_column_the_engine_writes(self) -> None:
         """A core column is written for every probe; a probe declaring one would collide with it."""
@@ -865,15 +891,15 @@ class TestRegisterProbe:
         clashing.output_columns = ("my_score", "trajectory_id")
 
         with pytest.raises(ProbeRegistrationError, match=r"_Clashing\.output_columns names \['trajectory_id'\]"):
-            register_probe(family="general", prompt_version="v1.0", variants=("default",))(clashing)
+            register_probe(clashing)
         assert "_clashing_columns_probe" not in known_probes()
 
     def test_accepts_a_prefixed_placeholder_warning_kind(self) -> None:
         mod = self._make_module()
         bank_probe = self._probe_class("_Recipes", "_recipe_bank_probe", mod.__name__)
-        bank_probe.placeholder_warning_kind = "acme_used_placeholder_recipe"
+        bank_probe.placeholder_warning_kind = "my_used_placeholder_booking"
 
-        registered = register_probe(family="general", prompt_version="v1.0", variants=("default",))(bank_probe)
+        registered = register_probe(bank_probe)
 
         assert resolve_probe("_recipe_bank_probe") is registered
 
@@ -881,11 +907,21 @@ class TestRegisterProbe:
         """The report counts placeholder rows by kind, so any other kind would hide them."""
         mod = self._make_module()
         bank_probe = self._probe_class("_Mislabelled", "_mislabelled_bank_probe", mod.__name__)
-        bank_probe.placeholder_warning_kind = "acme_slow_tool"
+        bank_probe.placeholder_warning_kind = "my_slow_tool"
 
         with pytest.raises(ProbeRegistrationError, match="placeholder_warning_kind must mark placeholder content"):
-            register_probe(family="general", prompt_version="v1.0", variants=("default",))(bank_probe)
+            register_probe(bank_probe)
         assert "_mislabelled_bank_probe" not in known_probes()
+
+    def test_rejects_a_class_that_declares_locale_bank_check(self) -> None:
+        """No run reads it, so a probe still declaring it would lose its locale check without a word."""
+        mod = self._make_module()
+        legacy = self._probe_class("_Legacy", "_legacy_check_probe", mod.__name__)
+        legacy.locale_bank_check = staticmethod(lambda locale_dir: None)
+
+        with pytest.raises(ProbeRegistrationError, match="declares locale_bank_check, which no run reads"):
+            register_probe(legacy)
+        assert "_legacy_check_probe" not in known_probes()
 
     def test_rejects_output_columns_given_as_one_string(self) -> None:
         """A bare string would be read as one column per character."""
@@ -894,14 +930,14 @@ class TestRegisterProbe:
         bare.output_columns = "my_score"
 
         with pytest.raises(ProbeRegistrationError, match="must be a tuple of column names"):
-            register_probe(family="general", prompt_version="v1.0", variants=("default",))(bare)
+            register_probe(bare)
 
     def test_resolve_probe_raises_keyerror_for_unknown(self) -> None:
         with pytest.raises(KeyError, match="bogus_probe"):
             resolve_probe("bogus_probe")
 
     def test_known_probes_returns_sorted_tuple(self) -> None:
-        @register_probe(family="general", prompt_version="v1.0", variants=("default",))
+        @register_probe
         class _Z(BaseProbe):
             label = "z_probe"
 
@@ -911,7 +947,7 @@ class TestRegisterProbe:
             def get_assistant_system_prompt(self) -> str:
                 return ""
 
-        @register_probe(family="general", prompt_version="v1.0", variants=("default",))
+        @register_probe
         class _A(BaseProbe):
             label = "a_probe"
 

@@ -4343,6 +4343,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
+    { name = "jsonschema" },
     { name = "jupyter" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -4374,6 +4375,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "exceptiongroup", marker = "python_full_version < '3.11'", specifier = ">=1.0" },
+    { name = "jsonschema", specifier = ">=4.0,<5" },
     { name = "jupyter" },
     { name = "pre-commit", specifier = ">=4.0,<5" },
     { name = "pytest", specifier = ">=8.0" },

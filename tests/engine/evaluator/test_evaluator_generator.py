@@ -21,7 +21,7 @@ import pandas as pd
 import pytest
 
 from usersim.engine.evaluator import scorers as scorers_module
-from usersim.engine.evaluator.axes import select_axes
+from usersim.engine.evaluator.axes import UNIVERSAL_SCORES, select_axes
 from usersim.engine.evaluator.config import (
     JudgeSpecConfig,
     TrajectoryEvaluatorConfig,
@@ -33,7 +33,7 @@ from usersim.engine.evaluator.generator import (
     _decode_json_field,
     judge_verdict,
 )
-from usersim.engine.evaluator.scorers.health_disclosure import score_health_disclosure_trajectory
+from usersim.engine.probes.health_disclosure.scorer import score_health_disclosure_trajectory
 
 # ── Pure helpers ────────────────────────────────────────────────────
 
@@ -136,6 +136,20 @@ class TestJudgePrompt:
             assert all(anchor in prompts[0] for anchor in axis.options.values()), (
                 f"an anchor of {axis.name} is missing from the judge prompt"
             )
+
+    async def test_a_row_with_no_family_is_judged_on_the_universal_axes_alone(self) -> None:
+        gen = _build_generator(TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges()))
+        row = {
+            "conversation_messages": json.dumps(
+                [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "hello"}]
+            ),
+            "persona": json.dumps({"first_name": "A", "last_name": "B"}),
+            "probe_family": None,
+        }
+
+        cell = json.loads((await gen.agenerate(row))["eval_v2"])
+
+        assert cell["envelope"]["axes"] == [s.name for s in UNIVERSAL_SCORES]
 
 
 class TestNoAssistantMessages:
@@ -438,20 +452,8 @@ class TestPartialReRunSkip:
         assert parsed["axes"]["helpfulness"]["judge_a"]["reasoning"] == "fresh"
 
 
+@pytest.mark.usefixtures("empty_scorer_registry")
 class TestScorerDispatch:
-    # Snapshot and restore rather than leaving the registry empty: it is
-    # process-global, so a bare clear() in teardown makes every later test in
-    # the same worker see zero scorers. Under `pytest -n auto` that surfaces
-    # only when the affected files land on the same worker, which is why it
-    # read as a flake. Mirrors TestRegisterProbe in test_probes_substrate.py.
-    def setup_method(self) -> None:
-        self._snapshot = dict(scorers_module._REGISTRY)
-        scorers_module.clear_registry()
-
-    def teardown_method(self) -> None:
-        scorers_module.clear_registry()
-        scorers_module._REGISTRY.update(self._snapshot)
-
     async def test_unknown_scorer_recorded_as_error_not_raised(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
@@ -546,6 +548,7 @@ class TestScorerDispatch:
         assert parsed["scorers"]["my_scorer"] == {"my_metric": 1.0}
 
 
+@pytest.mark.usefixtures("empty_scorer_registry")
 class TestScorerColumnPassthrough:
     """Pin the evaluator → scorer column-passthrough contract.
 
@@ -573,14 +576,6 @@ class TestScorerColumnPassthrough:
         "probing_subtopic_hints_used",
         "tool_subset",
     )
-
-    def setup_method(self) -> None:
-        self._snapshot = dict(scorers_module._REGISTRY)
-        scorers_module.clear_registry()
-
-    def teardown_method(self) -> None:
-        scorers_module.clear_registry()
-        scorers_module._REGISTRY.update(self._snapshot)
 
     def _make_data_with_probe_columns(self) -> dict:
         data = {
@@ -683,6 +678,14 @@ class TestScorerColumnPassthrough:
         traj_row = await self._scorer_row(data)
         assert traj_row["sub_protocol"] is None
         assert traj_row["locale"] == "en_US"
+
+    @pytest.mark.parametrize("empty", [None, float("nan"), pd.NA, ""], ids=["none", "nan", "na", "blank"])
+    async def test_a_row_with_no_family_reaches_the_scorer_with_an_empty_one(self, empty) -> None:
+        """A row that names no probe is attributed to none."""
+        data = self._make_data_with_probe_columns()
+        data["probe_family"] = empty
+
+        assert (await self._scorer_row(data))["probe_family"] == ""
 
 
 class TestEmptyCellsReachAShippedScorer:

@@ -24,8 +24,7 @@ per-locale templates to localize the scaffold; the validation then enforces
 completeness.
 """
 
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.probes import LocalePromptPack
+from usersim.extension import SHIPPED_LOCALES, LocalePromptPack
 
 
 def _english_scaffold_pack(label: str, template: str) -> LocalePromptPack:
@@ -235,9 +234,8 @@ PROPOSAL_SYSTEM_TEMPLATE = (
 PROPOSAL_SYSTEM_PACK = _english_scaffold_pack("health_disclosure.proposal_system", PROPOSAL_SYSTEM_TEMPLATE)
 
 
-# The realized-turn verification prompt lives in ``core/realized_audit.py``
-# alongside the auditor: the audit runs in the evaluator, and core may not
-# import a probe.
+# The realized-turn verification prompt lives in ``realized_audit.py`` beside this
+# module, alongside the auditor, which the scorer runs at scoring time.
 
 
 # ===========================================================================

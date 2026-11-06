@@ -8,12 +8,13 @@ Two pipelines are exposed:
 - :func:`build_simulator_config_builder` — assembles a ``ConfigBuilder``
   that produces trajectory rows (``conversation_messages`` + side-effect
   columns including ``simulation_outcome``, ``simulation_traces``,
-  ``persona_uuid``, ``trajectory_id``).
+  ``persona_uuid``, ``trajectory_id``). Its simulator column's config is
+  :func:`simulator_config`, which the run's manifest records too.
 - :func:`build_evaluator_config_builder` — assembles a ``ConfigBuilder``
   that reads a trajectory parquet and emits a wide evaluator cell
   (per-axis × per-judge scores + scorer outputs) for each row.
 
-Both builders take a ``ModelsConfig`` (loaded by :mod:`cli._models`)
+Both builders take a ``ModelsConfig`` (loaded by :mod:`usersim.engine.models_file`)
 and a small set of pipeline knobs. They are pure factory functions —
 they do not call the network or write files; the caller invokes
 ``DataDesigner.create(builder, num_records=N).load_dataset()`` (or
@@ -34,33 +35,38 @@ from collections.abc import Callable, Mapping, Sequence
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from usersim.cli._errors import ConfigError
-from usersim.cli._models import (
+from usersim.cli._persona_language import (
+    DEFAULT_PERSONA_DATASETS_DIR,
+    persona_sampler_params,
+)
+from usersim.engine.core._assets import probe_assets_dir, reset_runtime_assets_dir, set_runtime_assets_dir
+from usersim.engine.core.builtin_packages import builtin_modules
+from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES, persona_dataset_locale
+from usersim.engine.core.persona import persona_name_template
+from usersim.engine.core.probes import (
+    NO_THEME,
+    SEED_DATASET_SUFFIXES,
+    checks_each_locale,
+    probe_options_problems,
+    resolve_probe,
+)
+from usersim.engine.core.probes import known_probes as _known_probes
+from usersim.engine.errors import ConfigError
+from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
+from usersim.engine.models_file import (
     ModelsConfig,
     assistant_replays_reasoning,
     to_data_designer_kwargs,
     to_model_configs,
 )
-from usersim.cli._persona_language import (
-    DEFAULT_PERSONA_DATASETS_DIR,
-    persona_sampler_params,
-)
-from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
+
+if TYPE_CHECKING:
+    from usersim.engine.config import ConversationSimulatorConfig
+    from usersim.engine.core.probes import BaseProbe
 
 logger = logging.getLogger("usersim.cli.pipeline")
-
-DEFAULT_TOOL_CALLING_THEMES: tuple[str, ...] = (
-    '{"type": "Weather & Location Lookup", "description": "Look up current weather, forecasts, or location-based info.", "tool_expected": true}',
-    '{"type": "Calendar & Scheduling", "description": "Create, modify, or check calendar events and availability.", "tool_expected": true}',
-    '{"type": "Data Retrieval & Search", "description": "Search databases, look up records, or retrieve structured data.", "tool_expected": true}',
-    '{"type": "Financial Operations", "description": "Check balances, make transactions, or calculate financial metrics.", "tool_expected": true}',
-    '{"type": "Communication & Messaging", "description": "Send emails, messages, or notifications on behalf of the user.", "tool_expected": true}',
-    '{"type": "Multi-Step Workflow", "description": "Complete a task requiring multiple sequential tool calls.", "tool_expected": true}',
-    '{"type": "General Knowledge Question", "description": "Answer a factual question that requires no tools.", "tool_expected": false}',
-    '{"type": "Opinion or Advice Request", "description": "Ask for subjective advice or opinions where tools are unnecessary.", "tool_expected": false}',
-)
 
 DEFAULT_PROBE_MIX: dict[str, float] = {
     "tool_calling": 1 / 3,
@@ -68,181 +74,75 @@ DEFAULT_PROBE_MIX: dict[str, float] = {
     "general_educational": 1 / 3,
 }
 
-# Probes that consume the ``theme`` column. Other probes are
-# persona-derived (they read curated assets like fact / query / pressure
-# / agentic banks) and the ``theme`` column is irrelevant to them.
-THEME_DRIVEN_PROBES: frozenset = frozenset(
-    {
-        "tool_calling",
-        "general_open_ended",
-        "general_educational",
-    }
-)
 
-# Sentinel value used in the SubcategorySamplerParams entry for
-# non-theme-driven probes. The probe never reads this; it
-# exists so DD's SubcategorySampler has a value to draw when the
-# probe_type sampled is one that doesn't use themes.
-_NO_THEME_PLACEHOLDER: str = "__not_used__"
+def _probe_themes(probe: str, locale: str, assets_dir: Path | None) -> list[str]:
+    """``probe``'s themes in ``locale``, JSON-encoded for the sampler.
+
+    Read with ``assets_dir`` installed as the run installs it for each row, so
+    a probe finds its themes where its rows find their banks. ``None`` reads
+    each probe's own assets. ``ensure_ascii``
+    is off so non-Latin descriptions stay readable in the stored column.
+    """
+    token = set_runtime_assets_dir(assets_dir)
+    try:
+        themes = resolve_probe(probe).themes(locale)
+    finally:
+        reset_runtime_assets_dir(token)
+    if themes is None:
+        return [NO_THEME]
+    if not themes:
+        raise ConfigError(f"{probe} has no themes for {locale}, so none of its rows can be sampled.")
+    return [json.dumps(theme, ensure_ascii=False) for theme in themes]
 
 
-def seed_themes(
-    locale: str,
+def resolve_seed_dataset_path(
     probe: str,
-    kind: str,
     assets_dir: Path | str | None = None,
-) -> list[str]:
-    """Load a theme-driven probe's seeds and JSON-encode them for the sampler.
-
-    Called only for probes actually present in the run's ``probe_mix``, so an
-    assets root that ships seeds for just one general probe stays usable
-    (``load_seeds`` raises ``FileNotFoundError`` when neither the locale nor
-    the ``base`` seed file exists).
-
-    ``ensure_ascii=False`` so non-Latin theme descriptions (Japanese / Hindi /
-    Chinese / etc.) survive serialization as readable native script rather
-    than ``\\uXXXX`` escapes. Downstream ``json.loads`` reads either form
-    correctly; the parquet column is just easier on human eyeballs this way.
-    """
-    from usersim.engine.core.seeds import load_seeds
-
-    return [json.dumps(t, ensure_ascii=False) for t in load_seeds(locale, probe, kind, assets_dir)]
-
-
-#: Seed-file suffixes the ``tool_calling`` toolset seed may use. Both are
-#: accepted by Data Designer's
-#: ``LocalFileSeedSource`` (``VALID_DATASET_FILE_EXTENSIONS``); parquet is
-#: what ships, jsonl is the hand-editable alternative.
-TOOLSET_SEED_SUFFIXES: tuple[str, ...] = (".parquet", ".jsonl")
-
-
-def resolve_toolset_seed_path(
-    assets_dir: Path | str | None = None,
-    toolset_seed_path: Path | str | None = None,
+    seed_dataset_path: Path | str | None = None,
 ) -> Path | None:
-    """The ``tool_calling`` toolset seed to use, or ``None`` if there isn't one.
+    """The seed table ``probe`` reads, or ``None`` if its asset folder holds none.
 
-    Two sources, at least one of which must be given:
+    ``probe`` must declare a ``seed_dataset``. Two sources:
 
-    - ``toolset_seed_path`` — an explicit file, which wins when both are
-      passed.
-      It must exist: you named a path, and a run that silently ignores it
-      is worse than one that stops.
-    - ``assets_dir`` — the asset root to look under, accepting
-      ``toolsets_seed.parquet`` or ``toolsets_seed.jsonl``
-      (``TOOLSET_SEED_SUFFIXES``).
+    - ``seed_dataset_path`` — an explicit file, which wins when given. It
+      must exist: you named a path, and a run that silently ignores it is
+      worse than one that stops.
+    - the probe's asset folder, under ``assets_dir`` when it is given and
+      along the asset search path otherwise, holding ``<seed_dataset>.parquet``
+      or ``<seed_dataset>.jsonl`` (``SEED_DATASET_SUFFIXES``).
 
-    Lives here rather than in the CLI because ``assets_dir`` is already a
-    builder argument: any caller that names an asset root can have its
-    toolset found for it, including the notebooks.
-    Passing ``toolset_seed_path`` is an override, not a requirement.
-
-    Returns ``None`` only when ``assets_dir`` holds neither suffix.
-    Absence is a resolution result; whether it matters depends on the
-    probe mix, which ``_wire_toolsets`` decides.
-
-    Raises ``ConfigError`` (a ``ValueError``) — never ``SystemExit`` — so
+    Raises ``ConfigError`` (a ``ValueError``), never ``SystemExit``, so
     library callers can handle it and ``cli.main`` can present it as a
-    message rather than a traceback, when an explicit path is unusable or an
-    asset root holds BOTH suffixes. That last is a configuration error rather
+    message rather than a traceback, when an explicit path is unusable or the
+    folder holds both suffixes. That last is a configuration error rather
     than a precedence question, since silently preferring one would make an
-    edit to the other look like it had no effect. Passing neither source
-    searches the configured asset path, which is how an unpinned run finds
-    the shipped seed.
-
-    Routes through ``probe_assets_dir`` so the path is composed against the
-    same source-of-truth helper the asset loaders use, rather than a string
-    literal that can drift from the real layout.
+    edit to the other look like it had no effect.
     """
-
-    if toolset_seed_path is not None:
-        resolved = Path(toolset_seed_path).resolve()
+    if seed_dataset_path is not None:
+        resolved = Path(seed_dataset_path).resolve()
         if not resolved.is_file():
-            raise ConfigError(f"toolset seed not found: {resolved}")
-        if resolved.suffix not in TOOLSET_SEED_SUFFIXES:
+            raise ConfigError(f"seed table not found: {resolved}")
+        if resolved.suffix not in SEED_DATASET_SUFFIXES:
             raise ConfigError(
-                f"unsupported toolset seed suffix {resolved.suffix!r}: "
-                f"{resolved}. Expected one of {TOOLSET_SEED_SUFFIXES}."
+                f"unsupported seed table suffix {resolved.suffix!r}: {resolved}. Expected one of {SEED_DATASET_SUFFIXES}."
             )
         return resolved
 
-    from usersim.engine.core._assets import probe_assets_dir
-
-    # ``None`` means the caller did not pin a root, so the seed is looked
-    # for along the same search path the loaders use.
-    probe_dir = probe_assets_dir(
-        "tool_calling",
-        assets_root=Path(assets_dir).resolve() if assets_dir is not None else None,
-    )
-    candidates = [probe_dir / f"toolsets_seed{sfx}" for sfx in TOOLSET_SEED_SUFFIXES]
-    present = [p for p in candidates if p.is_file()]
+    stem = resolve_probe(probe).seed_dataset
+    probe_dir = probe_assets_dir(probe, assets_root=Path(assets_dir).resolve() if assets_dir is not None else None)
+    present = [probe_dir / f"{stem}{suffix}" for suffix in SEED_DATASET_SUFFIXES]
+    present = [path for path in present if path.is_file()]
     if len(present) > 1:
         raise ConfigError(
-            "ambiguous tool_calling toolset seed: "
-            + ", ".join(p.name for p in present)
+            f"ambiguous {probe} seed table: "
+            + ", ".join(path.name for path in present)
             + f" both exist in {probe_dir}. Keep exactly one."
         )
     return present[0] if present else None
 
 
-def _load_finance_locale(locale_dir: Path) -> None:
-    from usersim.engine.core.finance_bank import load_finance_bank
-
-    load_finance_bank(locale_dir)
-
-
-def _load_facts_locale(locale_dir: Path) -> None:
-    from usersim.engine.core.fact_bank import load_fact_bank
-
-    load_fact_bank(locale_dir / "sample.yaml")
-
-
-def _load_dynamic_locale(locale_dir: Path) -> None:
-    from usersim.engine.core.probing_taxonomy import load_probing_taxonomy
-
-    load_probing_taxonomy(locale_dir / "categories.yaml")
-
-
-#: Probe asset trees that are partitioned by locale rather than flat, with the
-#: loader for one locale's subtree. The subtree existing is not enough: a finance
-#: bank without tasks aborts every row once the run is already going, so the
-#: pre-flight loads it.
-_LOCALE_SCOPED_PROBES: dict[str, Callable[[Path], None]] = {
-    "financial_services": _load_finance_locale,
-    "sov_ai_dynamic": _load_dynamic_locale,
-    "sov_ai_facts": _load_facts_locale,
-}
-
-
-def _finance_bank_locale(probe_dir: Path, locale: str) -> str:
-    from usersim.engine.core.finance_bank import finance_bank_locale, has_finance_tasks
-
-    return finance_bank_locale(locale, has_tasks=lambda loc: has_finance_tasks(probe_dir / loc))
-
-
-def _own_or_base_bank_locale(probe_dir: Path, locale: str) -> str:
-    from usersim.engine.core.locale import asset_locale
-
-    return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
-
-
-#: Which locale's bank a row in a locale runs on, resolved as the probe and its
-#: scorer resolve it. A probe not listed uses an India variant's own bank when
-#: it has one, and its base locale's otherwise.
-_BANK_LOCALE: dict[str, Callable[[Path, str], str]] = {
-    "financial_services": _finance_bank_locale,
-}
-
-#: Where to ask for a probe in a locale it has no bank for.
+#: Where to ask for a locale of a probe that ships with User Sim.
 _FEATURE_REQUEST_URL = "https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=feature-request.yml"
-
-#: How to build a probe's bank for another locale, for the probes that document it.
-_BANK_AUTHORING_GUIDES: dict[str, str] = {
-    "financial_services": (
-        "https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
-        "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale"
-    ),
-}
 
 
 def verify_probe_assets(
@@ -272,11 +172,9 @@ def verify_probe_locales(
     Stored rows pair each probe with the locales it runs in; checking every probe
     against every locale would refuse pairs the rows never ask for.
     """
-    from usersim.engine.core._assets import probe_assets_dir
-
     root = Path(assets_dir) if assets_dir is not None else None
     problems: list[str] = []
-    probes_missing_a_locale: list[str] = []
+    probes_missing_a_locale: list[type[BaseProbe]] = []
 
     for probe in sorted(probe_locales):
         probe_dir = probe_assets_dir(probe, assets_root=root)
@@ -286,13 +184,13 @@ def verify_probe_locales(
         if not any(probe_dir.rglob("*.yaml")) and not any(probe_dir.rglob("*.json")):
             problems.append(f"{probe}: {probe_dir} contains no bank files")
             continue
-        load = _LOCALE_SCOPED_PROBES.get(probe)
-        if load is None:
+        cls = resolve_probe(probe)
+        if not checks_each_locale(cls):
             continue
-        locale_problems = _locale_bank_problems(probe, probe_dir, probe_locales[probe], load)
+        locale_problems = _locale_bank_problems(cls, probe_dir, probe_locales[probe])
         problems.extend(locale_problems)
         if locale_problems:
-            probes_missing_a_locale.append(probe)
+            probes_missing_a_locale.append(cls)
 
     if problems:
         raise ConfigError(
@@ -303,35 +201,33 @@ def verify_probe_locales(
         )
 
 
-def _remedies(probes_missing_a_locale: Sequence[str]) -> list[str]:
+def _remedies(probes_missing_a_locale: Sequence[type[BaseProbe]]) -> list[str]:
     """What to do about a refusal, with links when a probe can't run one of the run's locales."""
     remedies = [
         "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them."
     ]
-    if probes_missing_a_locale:
+    if any(cls.__module__ in builtin_modules("probe") for cls in probes_missing_a_locale):
         remedies.append(f"To ask for a locale, open a feature request: {_FEATURE_REQUEST_URL}")
     remedies.extend(
-        f"To build a {probe} bank yourself, see {_BANK_AUTHORING_GUIDES[probe]}"
-        for probe in probes_missing_a_locale
-        if probe in _BANK_AUTHORING_GUIDES
+        f"To build a {cls.label} bank yourself, see {cls.authoring_guide}"
+        for cls in probes_missing_a_locale
+        if cls.authoring_guide
     )
     return remedies
 
 
-def _locale_bank_problems(
-    probe: str,
-    probe_dir: Path,
-    locales: Sequence[str],
-    load: Callable[[Path], None],
-) -> list[str]:
-    """The locales ``probe`` can't run in, as one line naming those that can."""
-    resolve = _BANK_LOCALE.get(probe, _own_or_base_bank_locale)
+def _locale_bank_problems(cls: type[BaseProbe], probe_dir: Path, locales: Sequence[str]) -> list[str]:
+    """The locales ``cls`` can't run in, as one line naming those that can."""
+    probe = cls.label
     errors: dict[Path, str | None] = {}
+
+    def resolve(loc: str) -> str:
+        return cls.bank_locale(loc, probe_dir)
 
     def load_error(locale_dir: Path) -> str | None:
         if locale_dir not in errors:
             try:
-                load(locale_dir)
+                cls.check_locale(locale_dir)
                 errors[locale_dir] = None
             except Exception as exc:  # whatever stops the loader stops every row
                 errors[locale_dir] = f"{type(exc).__name__}: {exc}"
@@ -343,7 +239,7 @@ def _locale_bank_problems(
     failures: list[str] = []
     for loc in dict.fromkeys(locales):
         # A locale without a bank of its own may run on its base locale's.
-        bank_locale = resolve(probe_dir, loc)
+        bank_locale = resolve(loc)
         via = "" if bank_locale == loc else f" (through {bank_locale})"
         if not has_bank(bank_locale):
             failures.append(f"{loc}{via}: no bank")
@@ -352,14 +248,12 @@ def _locale_bank_problems(
     if not failures:
         return []
     runnable = sorted(d.name for d in probe_dir.iterdir() if d.is_dir() and load_error(d) is None)
-    can_run = _runnable_locales(runnable, lambda loc: resolve(probe_dir, loc))
+    can_run = _runnable_locales(runnable, resolve)
     return [f"{probe} can't run {'; '.join(failures)}. Locales that can run: {can_run}"]
 
 
 def _runnable_locales(runnable: Sequence[str], bank_locale: Callable[[str], str]) -> str:
     """``runnable``, plus the shipped locales and India variants that run on one of their banks."""
-    from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES
-
     if not runnable:
         return "none"
     described = ", ".join(runnable)
@@ -373,80 +267,108 @@ def _runnable_locales(runnable: Sequence[str], bank_locale: Callable[[str], str]
     return described
 
 
-def resolve_toolset_seed_for_mix(
-    probe_mix: dict[str, float],
-    assets_dir: Path | str | None = None,
-    toolset_seed_path: Path | str | None = None,
-) -> Path | None:
-    """Resolve a toolset only when the run actually includes ``tool_calling``.
+def seed_dataset_probe(probe_mix: Mapping[str, float]) -> str | None:
+    """The probe in ``probe_mix`` that reads a seed table, or ``None`` when none does.
 
-    A non-tool run must not be blocked by an ambiguous or missing toolset in
-    an otherwise valid asset tree, and its manifest must not claim it used a
-    file that never entered the pipeline. A tool run must resolve a real seed.
-    Conversely, an explicit override on a non-tool run is rejected rather than
-    silently ignored.
+    A run attaches one seed table, so a mix with two such probes is a
+    ``ConfigError``: run them separately.
     """
-    if "tool_calling" not in probe_mix:
-        if toolset_seed_path is not None:
+    readers = [probe for probe in probe_mix if resolve_probe(probe).seed_dataset is not None]
+    if len(readers) > 1:
+        raise ConfigError(
+            f"{', '.join(readers)} each read a seed table, and a run attaches one. Run them in separate runs."
+        )
+    return readers[0] if readers else None
+
+
+def resolve_seed_dataset_for_mix(
+    probe_mix: Mapping[str, float],
+    assets_dir: Path | str | None = None,
+    seed_dataset_path: Path | str | None = None,
+) -> Path | None:
+    """The seed table a run of ``probe_mix`` attaches, or ``None`` when no probe in it reads one.
+
+    A run without such a probe is not blocked by an ambiguous or missing
+    table in an otherwise valid asset tree, and its manifest does not claim
+    it used a file that never entered the pipeline; an explicit
+    ``seed_dataset_path`` for it is refused rather than silently ignored. A
+    run with one must resolve a real table.
+    """
+    probe = seed_dataset_probe(probe_mix)
+    if probe is None:
+        if seed_dataset_path is not None:
             raise ConfigError(
-                "toolset_seed_path was provided, but probe_mix does not "
-                "include tool_calling. Add tool_calling or remove the override."
+                "seed_dataset_path was provided, but no probe in probe_mix reads a seed table. "
+                "Add the probe it is for, or remove the override."
             )
         return None
-    resolved = resolve_toolset_seed_path(assets_dir, toolset_seed_path)
+    resolved = resolve_seed_dataset_path(probe, assets_dir, seed_dataset_path)
     if resolved is None:
+        stem = resolve_probe(probe).seed_dataset
         raise ConfigError(
-            "probe_mix includes tool_calling but no toolset seed is available. "
-            "Pass toolset_seed_path=<path>, point assets_dir at a tree with "
-            "tool_calling/toolsets_seed.{parquet,jsonl}, or drop tool_calling "
-            "from the mix."
+            f"probe_mix includes {probe}, which reads the seed table {stem}.parquet or {stem}.jsonl, and none is "
+            f"available. Pass seed_dataset_path=<path>, point assets_dir at a tree with {probe}/{stem}.parquet or "
+            f"{probe}/{stem}.jsonl, or drop {probe} from the mix."
         )
     return resolved
 
 
-def _wire_toolsets(
-    config_builder: Any,
-    dd: Any,
-    toolset_seed_path: Path | None,
-) -> dict[str, Any]:
-    """Attach ``tool_calling``'s toolset seed and return its config keys.
+def seed_dataset_columns(seed_path: Path) -> list[str]:
+    """The columns of the seed table at ``seed_path``: a parquet file's schema, or every key of a JSONL file."""
+    if seed_path.suffix == ".parquet":
+        import pyarrow.parquet as pq
 
-    Both halves of the wiring — the builder mutation and the
-    ``ConversationSimulatorConfig`` keys — are decided here together, so the
-    two cannot drift apart: a run that attaches the seed dataset always gets
-    the matching tool columns, and one that does not always leaves them
-    unset.
+        return list(pq.read_schema(seed_path).names)
+    columns: dict[str, None] = {}
+    with seed_path.open(encoding="utf-8") as lines:
+        for line in lines:
+            if line.strip():
+                columns.update(dict.fromkeys(json.loads(line)))
+    return list(columns)
 
-    Called only from the ``tool_calling`` branch. The mix-aware resolver
-    normally rejects a missing file first; the check here is a defensive
-    invariant. Failing at config-build time rather than letting the run start
-    is the point: with the columns unset, every ``tool_calling`` row aborts at
-    probe construction, so the whole partition comes back failed and the
-    cause is visible only by reading ``simulation_outcome`` afterwards.
 
-    ``ConfigError`` matches this module's other user-fixable errors (see
-    the ``probe_mix`` validation above) and guards every caller — the CLI,
-    and the notebooks — rather than just the one that
-    happens to resolve the path. ``cli.main`` catches it and prints the
-    message alone, so this text is the entire error output a user sees.
+def clear_seed_columns_of_other_probes(
+    df: Any,
+    *,
+    probe_mix: Mapping[str, float],
+    assets_dir: Path | str | None = None,
+    seed_dataset_path: Path | str | None = None,
+) -> Any:
+    """``df``, rows a run's Data Designer made, with the seed table's columns emptied on every row of another probe.
 
-    Takes an already-resolved path: the caller resolves only after confirming
-    that ``tool_calling`` is in the mix, so this function needs no
-    ``assets_dir``.
+    Data Designer gives each row of a run the columns of one seed-table row,
+    whatever the row's probe, and keeps them in the rows it returns. The
+    probe of such a row already saw them empty (``construct_episode_preamble``
+    empties them by the config's ``seed_dataset_columns``); without this the
+    saved row would still record the seed row it drew: a toolset its
+    conversation never offered, say. The table is the one the run attaches,
+    resolved from the same arguments, and ``df`` comes back unchanged when no
+    probe in the mix reads one. Stored rows from ``materialize_episode_inputs``
+    need none of this: they hold the episode's own data.
     """
-    if toolset_seed_path is None or not Path(toolset_seed_path).is_file():
-        raise ConfigError(
-            "probe_mix includes tool_calling but no toolset seed is "
-            f"available (resolved to {toolset_seed_path!r}). Pass "
-            "toolset_seed_path=<path>, point assets_dir at a tree with "
-            "tool_calling/toolsets_seed.{parquet,jsonl}, or drop "
-            "tool_calling from the mix."
-        )
+    seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, seed_dataset_path)
+    reader = seed_dataset_probe(probe_mix)
+    if seed_path is None or reader is None or "probe_type" not in df.columns:
+        return df
+    columns = [column for column in seed_dataset_columns(seed_path) if column in df.columns]
+    others = df["probe_type"].astype(str) != reader
+    if not columns or not others.any():
+        return df
+    df = df.copy()
+    for column in columns:
+        # Object dtype keeps the reader's values as they are (an integer stays
+        # an integer) when the other rows are emptied.
+        df[column] = df[column].astype(object)
+        df.loc[others, column] = None
+    return df
+
+
+def _wire_seed_dataset(config_builder: Any, dd: Any, seed_path: Path) -> None:
+    """Attach ``seed_path`` as the run's seed dataset, one shuffled row per row the run makes."""
     config_builder.with_seed_dataset(
-        dd.LocalFileSeedSource(path=str(toolset_seed_path)),
+        dd.LocalFileSeedSource(path=str(seed_path)),
         sampling_strategy=dd.SamplingStrategy.SHUFFLE,
     )
-    return {"tools_column": "tools", "toolset_name_column": "toolset_name"}
 
 
 def _set_run_config(data_designer, dd) -> None:
@@ -486,41 +408,80 @@ def known_probes() -> tuple[str, ...]:
     Used by ``cli.simulate`` to validate ``--probe-mix`` keys before
     running.
     """
-    from usersim.engine.core.probes import known_probes as _known
+    return _known_probes()
 
-    return _known()
+
+def _recorded_assets_dir(assets_dir: Path | str | None) -> str | None:
+    """The asset root a run's config records: the pinned folder, or ``None`` for each probe's own."""
+    return str(Path(assets_dir).resolve()) if assets_dir is not None else None
+
+
+#: The column the simulator writes each row's conversation to.
+SIMULATOR_COLUMN = "conversation_messages"
+
+
+def simulator_config(
+    *,
+    locale: str,
+    models: ModelsConfig,
+    assets_dir: Path | None = None,
+    max_turns: int = 5,
+    max_assistant_attempts: int = 1,
+    store_reasoning: bool = True,
+    verbosity: int = 1,
+    random_seed: int | None = None,
+    probe_options: Mapping[str, Mapping[str, Any]] | None = None,
+    probes: Sequence[str] = (),
+    seed_dataset_columns: Sequence[str] = (),
+) -> ConversationSimulatorConfig:
+    """The simulator column's config for one locale of a run.
+
+    A run's rows are made with it, stored rows carry it, and the run's
+    manifest records it: pass a run's manifest the config this function
+    gives for the same settings the rows were made with.
+    """
+    from usersim.engine.config import ConversationSimulatorConfig
+
+    return ConversationSimulatorConfig(
+        name=SIMULATOR_COLUMN,
+        locale=locale,
+        assets_dir=_recorded_assets_dir(assets_dir),
+        max_turns=max_turns,
+        max_assistant_attempts=max_assistant_attempts,
+        store_reasoning=store_reasoning,
+        replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
+        verbosity=verbosity,
+        random_seed=random_seed,
+        probe_options=probe_options or {},
+        probes=list(probes),
+        seed_dataset_columns=list(seed_dataset_columns),
+    )
 
 
 def build_simulator_config_builder(
     *,
     locale: str,
     models: ModelsConfig,
-    assets_dir: Path,
+    assets_dir: Path | None = None,
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
     probe_mix: dict[str, float] | None = None,
-    tool_calling_themes: tuple[str, ...] | None = None,
-    toolset_seed_path: Path | None = None,
+    seed_dataset_path: Path | None = None,
     match_persona_language: bool = False,
     verbosity: int = 1,
     random_seed: int | None = None,
-    finance_tier_mix: float = 0.0,
-    finance_retrieval_mode: str = "hybrid",
-    finance_embedding_model_alias: str = "embedding_model",
+    probe_options: Mapping[str, Mapping[str, Any]] | None = None,
 ):
     """Build a Data Designer ConfigBuilder for the conversation simulator.
 
     Returns ``(data_designer, config_builder)`` so the caller can
-    invoke ``data_designer.create(config_builder, num_records=N)``.
-    ``random_seed`` is forwarded to
-    ``ConversationSimulatorConfig.random_seed`` so tool sampling is
-    reproducible per run.
+    invoke ``data_designer.create(config_builder, num_records=N)``. The
+    simulator column's config is :func:`simulator_config` of the same
+    settings; ``random_seed`` makes tool sampling reproducible per run.
     """
     import data_designer.config as dd
     from data_designer.interface import DataDesigner
-
-    from usersim.engine.config import ConversationSimulatorConfig
 
     probe_mix = probe_mix or DEFAULT_PROBE_MIX
 
@@ -528,42 +489,41 @@ def build_simulator_config_builder(
     data_designer = DataDesigner(**dd_kwargs)
     _set_run_config(data_designer, dd)
     config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
-    toolset_kwargs = _add_episode_input_columns(
+    seed_path = _add_episode_input_columns(
         config_builder,
         dd,
         locale=locale,
         assets_dir=assets_dir,
         probe_mix=probe_mix,
-        tool_calling_themes=tool_calling_themes,
-        toolset_seed_path=toolset_seed_path,
+        seed_dataset_path=seed_dataset_path,
         match_persona_language=match_persona_language,
         drop_persona=True,
     )
 
     config_builder.add_column(
-        ConversationSimulatorConfig(
-            name="conversation_messages",
-            persona_column="persona",
-            probe_type_column="probe_type",
-            theme_column="theme",
-            **toolset_kwargs,
+        simulator_config(
             locale=locale,
-            assets_dir=str(Path(assets_dir).resolve()),
+            models=models,
+            assets_dir=assets_dir,
             max_turns=max_turns,
             max_assistant_attempts=max_assistant_attempts,
             store_reasoning=store_reasoning,
-            replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
-            context_compression=True,
-            compression_window=1,
             verbosity=verbosity,
             random_seed=random_seed,
-            finance_tier_mix=finance_tier_mix,
-            finance_retrieval_mode=finance_retrieval_mode,
-            finance_embedding_model_alias=finance_embedding_model_alias,
+            probe_options=probe_options,
+            probes=list(probe_mix),
+            seed_dataset_columns=seed_dataset_columns(seed_path) if seed_path is not None else (),
         )
     )
 
     return data_designer, config_builder
+
+
+def verify_probe_options(probe_options: Mapping[str, Mapping[str, Any]] | None) -> None:
+    """Fail before any model call if a run's ``probe_options`` name a probe or a setting that does not take them."""
+    problems = probe_options_problems(dict(probe_options or {}))
+    if problems:
+        raise ConfigError("probe options this run cannot use:\n  - " + "\n  - ".join(problems))
 
 
 def _add_episode_input_columns(
@@ -571,21 +531,21 @@ def _add_episode_input_columns(
     dd: Any,
     *,
     locale: str,
-    assets_dir: Path,
+    assets_dir: Path | None,
     probe_mix: dict[str, float],
-    tool_calling_themes: tuple[str, ...] | None,
-    toolset_seed_path: Path | None,
+    seed_dataset_path: Path | None,
     match_persona_language: bool,
     drop_persona: bool,
-) -> dict[str, Any]:
-    """Install the one canonical persona/probe/theme/toolset sampler graph."""
-    from usersim.engine.core.locale import persona_dataset_locale
+) -> Path | None:
+    """Install the one canonical persona, probe, theme and seed-table sampler graph.
 
+    Returns the seed table it attaches, or ``None`` when no probe in the mix reads one.
+    """
     persona_locale = persona_dataset_locale(locale, datasets_dir=DEFAULT_PERSONA_DATASETS_DIR)
     unknown = [key for key in probe_mix if key not in set(known_probes())]
     if unknown:
         raise ConfigError(f"Unknown probe_type(s) in probe_mix: {unknown}. Registered: {sorted(known_probes())}.")
-    resolved_toolset_seed = resolve_toolset_seed_for_mix(probe_mix, assets_dir, toolset_seed_path)
+    seed_path = resolve_seed_dataset_for_mix(probe_mix, assets_dir, seed_dataset_path)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="persona",
@@ -607,18 +567,9 @@ def _add_episode_input_columns(
             params=dd.CategorySamplerParams(values=list(probe_mix), weights=list(probe_mix.values())),
         )
     )
-    themes: dict[str, list[str]] = {}
-    toolset_kwargs: dict[str, Any] = {}
-    for probe in probe_mix:
-        if probe == "tool_calling":
-            themes[probe] = list(tool_calling_themes or DEFAULT_TOOL_CALLING_THEMES)
-            toolset_kwargs = _wire_toolsets(config_builder, dd, resolved_toolset_seed)
-        elif probe == "general_open_ended":
-            themes[probe] = seed_themes(locale, probe, "topics", assets_dir)
-        elif probe == "general_educational":
-            themes[probe] = seed_themes(locale, probe, "subjects", assets_dir)
-        else:
-            themes[probe] = [_NO_THEME_PLACEHOLDER]
+    themes = {probe: _probe_themes(probe, locale, assets_dir) for probe in probe_mix}
+    if seed_path is not None:
+        _wire_seed_dataset(config_builder, dd, seed_path)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="theme",
@@ -626,7 +577,7 @@ def _add_episode_input_columns(
             params=dd.SubcategorySamplerParams(category="probe_type", values=themes),
         )
     )
-    return toolset_kwargs
+    return seed_path
 
 
 def materialize_episode_inputs(
@@ -634,51 +585,46 @@ def materialize_episode_inputs(
     locale: str,
     num_rows: int,
     models: ModelsConfig,
-    assets_dir: Path,
     probe_mix: dict[str, float],
+    assets_dir: Path | None = None,
     random_seed: int | None = None,
-    tool_calling_themes: tuple[str, ...] | None = None,
-    toolset_seed_path: Path | None = None,
+    seed_dataset_path: Path | None = None,
     match_persona_language: bool = False,
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
-    finance_tier_mix: float = 0.0,
-    finance_retrieval_mode: str = "hybrid",
+    probe_options: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Materialize fully resolved simulator rows without model calls."""
     import data_designer.config as dd
     from data_designer.interface import DataDesigner
 
-    from usersim.engine.config import ConversationSimulatorConfig
     from usersim.engine.core.episode_input import construct_probe_episode
 
     designer = DataDesigner(**to_data_designer_kwargs(models))
     _set_run_config(designer, dd)
     builder = dd.DataDesignerConfigBuilder()
-    toolset_kwargs = _add_episode_input_columns(
+    seed_path = _add_episode_input_columns(
         builder,
         dd,
         locale=locale,
         assets_dir=assets_dir,
         probe_mix=probe_mix,
-        tool_calling_themes=tool_calling_themes,
-        toolset_seed_path=toolset_seed_path,
+        seed_dataset_path=seed_dataset_path,
         match_persona_language=match_persona_language,
         drop_persona=False,
     )
-    config = ConversationSimulatorConfig(
-        name="conversation_messages",
+    config = simulator_config(
         locale=locale,
-        assets_dir=str(assets_dir.resolve()),
-        random_seed=random_seed,
+        models=models,
+        assets_dir=assets_dir,
         max_turns=max_turns,
         max_assistant_attempts=max_assistant_attempts,
         store_reasoning=store_reasoning,
-        replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
-        finance_tier_mix=finance_tier_mix,
-        finance_retrieval_mode=finance_retrieval_mode,
-        **toolset_kwargs,
+        random_seed=random_seed,
+        probe_options=probe_options,
+        probes=list(probe_mix),
+        seed_dataset_columns=seed_dataset_columns(seed_path) if seed_path is not None else (),
     )
     model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}
     sampled = designer.preview(builder, num_records=num_rows).dataset
@@ -688,6 +634,11 @@ def materialize_episode_inputs(
     # host restore the episode with ProbeEpisodeRuntime.from_resolved_row; the
     # simulator's own trajectory rows do not repeat it.
     config_snapshot = config.model_dump(mode="json")
+    # Parquet cannot hold an empty mapping or list, and the config's defaults
+    # restore them.
+    for key in ("probe_options", "seed_dataset_columns"):
+        if not config_snapshot[key]:
+            del config_snapshot[key]
     rows: list[dict[str, Any]] = []
     for row in sampled.to_dict(orient="records"):
         resolved = construct_probe_episode(row, config=config, models=model_identities).preamble.to_row()
@@ -968,8 +919,6 @@ def _add_persona_expressions(config_builder, dd, persona_locale: str) -> None:
 
     ``persona_locale`` is the persona dataset's locale; it sets the name order.
     """
-    from usersim.engine.core.persona import persona_name_template
-
     config_builder.add_column(
         dd.ExpressionColumnConfig(name="persona_name", expr=persona_name_template(persona_locale))
     )

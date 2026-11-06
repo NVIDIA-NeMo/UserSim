@@ -3,7 +3,7 @@
 #
 #   usersim simulate --models src/usersim/cli/models_openai.toml ...
 #
-# Per-model sampling parameters live in cli/model_catalog.py. Note the
+# Per-model sampling parameters live in engine/model_catalog.py. Note the
 # reasoning models set no `max_tokens`: these endpoints reject it and expect
 # `max_completion_tokens` instead.
 #

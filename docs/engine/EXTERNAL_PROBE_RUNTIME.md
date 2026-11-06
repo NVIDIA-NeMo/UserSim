@@ -30,10 +30,12 @@ runtime = ProbeEpisodeRuntime.from_resolved_row(rows[0], models=runtime_models)
 This uses the same Data Designer persona, probe, theme and toolset sampler
 graph as `usersim simulate`; the host does not select panel indices or author
 themes and toolsets. Rows carry the persona, probe inputs, locale-aware
-behavioral settings, probe family and variant, trajectory ID, provenance, and
+behavioral settings, probe label and variant, trajectory ID, provenance, and
 the `usersim_config` snapshot `from_resolved_row()` restores. `models_path` and
 `assets_dir` are optional overrides. Model configuration supplies trajectory
-identities; no configured model is called.
+identities; no configured model is called. Before sampling, it checks each
+probe's bank as `usersim simulate` does, and raises `ValueError` when a probe in
+the mix has no usable bank for the locale.
 
 Rows are the dataset: store them, and replay from the stored rows. Regenerating
 the same rows from the same seed is explicitly *not* guaranteed, because
@@ -68,23 +70,36 @@ result = simulate_episode_inputs(rows, out=Path("output/trajectories"), models_p
 print(result.run_id, result.written, result.skipped)
 ```
 
+- **Checked before any model call.** The rows are checked as
+  `usersim simulate --inputs` checks them, including each probe's bank for its
+  rows' locales, and `ValueError` names what stops them.
 - **One run per setup.** A setup is everything that can change a
-  conversation:
+  conversation, in a core part every row shares and a part for each probe
+  in the rows' mix. The core part:
   - each simulator model as Data Designer sends it, provider settings
     included
   - whether the assistant's earlier reasoning is replayed
-  - the rows' shared settings
-  - the asset contents
-  - the `USERSIM_*` variables
-  - probe prompt versions
-  - extension, User Sim and Data Designer releases
+  - the rows' shared settings, apart from each probe's settings
+  - the `USERSIM_*` variables, apart from the asset search path
+  - model backend, User Sim and Data Designer releases
+
+  A probe's part:
+  - the contents of its asset folders, and of each probe's it reads
+    (`asset_labels`), on every root it searches
+  - its prompt version
+  - each model it names in `model_aliases`
+  - its settings in `probe_options`
+  - the release of the package that registers it, for an extension
 
   Running again with the same setup resumes its run and skips the rows already
-  saved there, so a caller can run rows in batches. A different setup starts
-  its own run.
+  saved there, so a caller can run rows in batches. A run resumes when its
+  core part and the part of every probe in the rows' mix match; otherwise the
+  rows start a run of their own.
 - **Ids.** Each saved row gets a `trajectory_id` of its own, derived from the
-  stored row and the setup. The stored row's id is kept as `input_id`, so two
-  runs of the same rows pair on it: `x.merge(y, on="input_id")`. A stored row
+  stored row, the core part and its own probe's part, so a change to one
+  probe's setup gives only that probe's rows new ids. The stored row's id is
+  kept as `input_id`, so two runs of the same rows pair on it:
+  `x.merge(y, on="input_id")`. A stored row
   whose contents changed under the same id is refused in the run that already
   holds it.
 - **Stored fields are saved with the rows.** A field whose values are all one
@@ -109,7 +124,8 @@ print(result.run_id, result.written, result.skipped)
   stored with. The rows in one call must share their settings apart from
   locale, asset folder and that replay setting.
   `--assets-dir` replaces the asset folder the rows were stored with, and is
-  required when that folder doesn't exist on this machine.
+  required when that folder doesn't exist on this machine. Rows stored by a
+  run that named no folder read each probe's own assets.
 - **Concurrent writers.** Writes into `--out` take a lock, so two calls can
   share it. On a filesystem without file locks, or whose locks don't reach
   every node (Lustre mounted without `flock` or with `localflock`, NFS with
@@ -148,9 +164,11 @@ as a Data Designer model facade.
 runtime_models["api_response_model"] = my_tool_response_model
 ```
 
+A probe names any other model it calls in `model_aliases` on its class.
 `financial_services` optionally embeds its `kb_search` queries with the model
-named by `finance_embedding_model_alias` (`embedding_model` by default, anything
-exposing `agenerate_text_embeddings()`); without one, dense retrieval falls back
+named by its `embedding_model_alias` setting (`embedding_model` unless the
+config's `probe_options` names another; any model exposing
+`agenerate_text_embeddings()`); without one, dense retrieval falls back
 to lexical search with a warning, so results can differ from a standalone run
 that has one configured.
 

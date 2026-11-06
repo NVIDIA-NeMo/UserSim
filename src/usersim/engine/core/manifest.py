@@ -99,6 +99,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from usersim.engine.models_file import BUILTIN_PROVIDER_API_KEY_ENV, BUILTIN_PROVIDER_ENDPOINTS
+
 logger = logging.getLogger("usersim.engine")
 
 
@@ -155,6 +157,9 @@ class CodeInfo:
     code_sha: str | None = None
     conversation_plugin_version: str | None = None
     data_designer_version: str | None = None
+    #: Each installed package that advertises a User Sim entry point, with its
+    #: version: the extensions that could contribute to the run.
+    extensions: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -163,7 +168,6 @@ class SimulationConfigSnapshot:
 
     max_turns: int
     max_steps: int
-    max_tools: int
     max_query_attempts: int
     max_assistant_attempts: int
     incremental_disclosure_ratio: float
@@ -173,6 +177,8 @@ class SimulationConfigSnapshot:
     random_seed: int | None = None
     store_reasoning: bool = True
     replay_assistant_reasoning: bool = False
+    #: Each probe's settings for the run, by label, as ``probe_options`` set them.
+    probe_options: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -182,9 +188,8 @@ class ScopeInfo:
     locales: list[str]
     probes: list[str]
     probe_mix: dict[str, float]
-    tool_calling_themes: list[str] = field(default_factory=list)
-    toolset_seed_path: str | None = None
-    toolset_content_hash: str | None = None
+    seed_dataset_path: str | None = None
+    seed_dataset_content_hash: str | None = None
     panel_path: str | None = None
     panel_content_hash: str | None = None
     trajectories_requested: dict[str, int] = field(default_factory=dict)
@@ -209,6 +214,9 @@ class AssetVersionsInfo:
     """Aggregated asset / prompt / variant lineage across the run."""
 
     assets_dir: str | None = None
+    #: The folder each probe in the run's mix read its assets from, so a run
+    #: that read a probe's banks from an override shows it.
+    probe_assets: dict[str, str] = field(default_factory=dict)
     nemotron_personas_version: str | None = None
     bank_versions: dict[str, str] = field(default_factory=dict)
     prompt_versions: dict[str, str] = field(default_factory=dict)
@@ -327,14 +335,19 @@ def _code_from_dict(d: Mapping[str, Any]) -> CodeInfo:
         code_sha=d.get("code_sha"),
         conversation_plugin_version=d.get("conversation_plugin_version"),
         data_designer_version=d.get("data_designer_version"),
+        extensions=dict(d.get("extensions") or {}),
     )
+
+
+def _plain_probe_options(probe_options: Mapping[str, Mapping[str, Any]] | None) -> dict[str, dict[str, Any]]:
+    """A run's ``probe_options`` as plain dicts, so the snapshot shares no mapping with its source."""
+    return {str(label): dict(values) for label, values in (probe_options or {}).items()}
 
 
 def _sim_config_from_dict(d: Mapping[str, Any]) -> SimulationConfigSnapshot:
     return SimulationConfigSnapshot(
         max_turns=int(d.get("max_turns", 5)),
         max_steps=int(d.get("max_steps", 10)),
-        max_tools=int(d.get("max_tools", 5)),
         max_query_attempts=int(d.get("max_query_attempts", 3)),
         max_assistant_attempts=int(d.get("max_assistant_attempts", 1)),
         store_reasoning=bool(d.get("store_reasoning", True)),
@@ -342,6 +355,7 @@ def _sim_config_from_dict(d: Mapping[str, Any]) -> SimulationConfigSnapshot:
         incremental_disclosure_ratio=float(d.get("incremental_disclosure_ratio", 0.6)),
         persona_grounding_ratio=float(d.get("persona_grounding_ratio", 1.0)),
         context_compression=bool(d.get("context_compression", True)),
+        probe_options=_plain_probe_options(d.get("probe_options")),
         compression_window=int(d.get("compression_window", 1)),
         random_seed=d.get("random_seed"),
     )
@@ -352,9 +366,10 @@ def _scope_from_dict(d: Mapping[str, Any]) -> ScopeInfo:
         locales=list(d.get("locales") or []),
         probes=list(d.get("probes") or []),
         probe_mix=dict(d.get("probe_mix") or {}),
-        tool_calling_themes=list(d.get("tool_calling_themes") or []),
-        toolset_seed_path=d.get("toolset_seed_path"),
-        toolset_content_hash=d.get("toolset_content_hash"),
+        # A manifest written by an earlier release names these after
+        # tool_calling's toolsets, the one probe that read a seed table.
+        seed_dataset_path=d.get("seed_dataset_path", d.get("toolset_seed_path")),
+        seed_dataset_content_hash=d.get("seed_dataset_content_hash", d.get("toolset_content_hash")),
         panel_path=d.get("panel_path"),
         panel_content_hash=d.get("panel_content_hash"),
         trajectories_requested=dict(d.get("trajectories_requested") or {}),
@@ -366,6 +381,7 @@ def _scope_from_dict(d: Mapping[str, Any]) -> ScopeInfo:
 def _asset_versions_from_dict(d: Mapping[str, Any]) -> AssetVersionsInfo:
     return AssetVersionsInfo(
         assets_dir=d.get("assets_dir"),
+        probe_assets=dict(d.get("probe_assets") or {}),
         nemotron_personas_version=d.get("nemotron_personas_version"),
         bank_versions=dict(d.get("bank_versions") or {}),
         prompt_versions=dict(d.get("prompt_versions") or {}),
@@ -468,12 +484,14 @@ def _detect_code_info() -> CodeInfo:
     development checkouts may resolve to ``None`` if the package isn't
     installed; that's fine, the manifest records the gap honestly.
     """
+    from usersim.engine.core._extensions import extension_distributions
     from usersim.engine.core.provenance import get_code_sha
 
     return CodeInfo(
         code_sha=get_code_sha(),
         conversation_plugin_version=_own_version(),
         data_designer_version=_pkg_version("data_designer"),
+        extensions=extension_distributions(),
     )
 
 
@@ -650,21 +668,6 @@ def _decode_json_field(raw: Any) -> Any:
 # ---------------------------------------------------------------------------
 
 
-# Mirrors cli/_models.py::_BUILTIN_PROVIDER_API_KEY_ENV +
-# _BUILTIN_PROVIDER_ENDPOINTS. Duplicated here because usersim.engine
-# core must not depend on cli/. Keep in sync.
-_BUILTIN_PROVIDER_API_KEY_ENV: dict[str, str] = {
-    "nvidia": "NVIDIA_API_KEY",
-    "openai": "OPENAI_API_KEY",
-    "openrouter": "OPENROUTER_API_KEY",
-}
-_BUILTIN_PROVIDER_ENDPOINTS: dict[str, str] = {
-    "nvidia": "https://integrate.api.nvidia.com/v1",
-    "openai": "https://api.openai.com/v1",
-    "openrouter": "https://openrouter.ai/api/v1",
-}
-
-
 def _resolve_models(
     *,
     model_specs: Sequence[Any],
@@ -672,12 +675,12 @@ def _resolve_models(
 ) -> dict[str, ModelIdentity]:
     """Build the alias → :class:`ModelIdentity` map from the simulator's
     typed config (``ModelsConfig.models`` and ``.providers`` from
-    ``cli/_models.py``).
+    ``usersim.engine.models_file``).
 
     ``provider_specs`` carries custom-provider endpoint + api_key env-var
     mappings; built-in providers (``nvidia`` / ``openai`` / ``openrouter``)
-    fall back to the static dicts at module top so we never store the
-    resolved key value.
+    fall back to the provider tables in ``usersim.engine.models_file``, so
+    the resolved key value is never stored.
     """
     custom_by_name: dict[str, Any] = {p.name: p for p in provider_specs}
     out: dict[str, ModelIdentity] = {}
@@ -690,8 +693,8 @@ def _resolve_models(
             endpoint = cp.endpoint
             env_var = cp.api_key
         else:
-            endpoint = _BUILTIN_PROVIDER_ENDPOINTS.get(spec.provider)
-            env_var = _BUILTIN_PROVIDER_API_KEY_ENV.get(spec.provider)
+            endpoint = BUILTIN_PROVIDER_ENDPOINTS.get(spec.provider)
+            env_var = BUILTIN_PROVIDER_API_KEY_ENV.get(spec.provider)
 
         out[spec.alias] = ModelIdentity(
             alias=spec.alias,
@@ -724,8 +727,7 @@ def build_run_manifest(
     sim_config: Any,
     locales_requested: Sequence[str],
     probe_mix: Mapping[str, float],
-    tool_calling_themes: Sequence[str] = (),
-    toolset_seed_path: Path | None = None,
+    seed_dataset_path: Path | None = None,
     panel_path: Path | None = None,
     assets_dir: Path | None = None,
     trajectories_requested: Mapping[str, int] | None = None,
@@ -739,7 +741,7 @@ def build_run_manifest(
     """Assemble a :class:`RunManifest` from the inputs the simulator has
     at run-end.
 
-    ``models_config`` is the typed ``ModelsConfig`` from ``cli/_models.py``
+    ``models_config`` is the typed ``ModelsConfig`` from ``usersim.engine.models_file``
     (carries both ``models`` and ``providers``). ``sim_config`` is the
     ``ConversationSimulatorConfig`` for any locale (the snapshot is
     locale-independent — only the ``locale`` field varies and it does not
@@ -767,7 +769,6 @@ def build_run_manifest(
     sim_snapshot = SimulationConfigSnapshot(
         max_turns=int(getattr(sim_config, "max_turns", 5)),
         max_steps=int(getattr(sim_config, "max_steps", 10)),
-        max_tools=int(getattr(sim_config, "max_tools", 5)),
         max_query_attempts=int(getattr(sim_config, "max_query_attempts", 3)),
         max_assistant_attempts=int(getattr(sim_config, "max_assistant_attempts", 1)),
         store_reasoning=bool(getattr(sim_config, "store_reasoning", True)),
@@ -777,6 +778,7 @@ def build_run_manifest(
         context_compression=bool(getattr(sim_config, "context_compression", True)),
         compression_window=int(getattr(sim_config, "compression_window", 1)),
         random_seed=getattr(sim_config, "random_seed", None),
+        probe_options=_plain_probe_options(getattr(sim_config, "probe_options", None)),
     )
 
     # ``probes`` from aggregates is what actually ran; ``probe_mix`` is
@@ -789,9 +791,8 @@ def build_run_manifest(
         locales=sorted(set(list(locales_run) + list(locales_requested))),
         probes=list(aggregates["probes"]) or sorted(probe_mix.keys()),
         probe_mix=dict(probe_mix),
-        tool_calling_themes=list(tool_calling_themes),
-        toolset_seed_path=str(toolset_seed_path) if toolset_seed_path else None,
-        toolset_content_hash=_file_content_hash(toolset_seed_path) if toolset_seed_path else None,
+        seed_dataset_path=str(seed_dataset_path) if seed_dataset_path else None,
+        seed_dataset_content_hash=_file_content_hash(seed_dataset_path) if seed_dataset_path else None,
         panel_path=str(panel_path) if panel_path else None,
         panel_content_hash=_file_content_hash(panel_path) if panel_path else None,
         trajectories_requested=requested_per_locale,
@@ -801,6 +802,7 @@ def build_run_manifest(
 
     asset_versions = AssetVersionsInfo(
         assets_dir=str(assets_dir) if assets_dir is not None else None,
+        probe_assets=_probe_assets(probe_mix, assets_dir),
         nemotron_personas_version=_nemotron_version(),
         bank_versions=aggregates["bank_versions"],
         prompt_versions=aggregates["prompt_versions"],
@@ -833,6 +835,16 @@ def build_run_manifest(
             matched_pair_group_id=matched_pair_group_id,
         ),
     )
+
+
+def _probe_assets(probe_mix: Mapping[str, float], assets_dir: Path | None) -> dict[str, str]:
+    """The folder each probe in ``probe_mix`` reads its assets from: under ``assets_dir`` when the run pinned one."""
+    from usersim.engine.core._assets import probe_assets_dir
+
+    return {
+        probe: str(probe_assets_dir(probe, assets_root=Path(assets_dir) if assets_dir is not None else None))
+        for probe in sorted(probe_mix)
+    }
 
 
 def _nemotron_version() -> str | None:
@@ -916,8 +928,7 @@ def write_simulator_manifest(
     sim_config: Any,
     locales_requested: Sequence[str],
     probe_mix: Mapping[str, float],
-    tool_calling_themes: Sequence[str] = (),
-    toolset_seed_path: Path | None = None,
+    seed_dataset_path: Path | None = None,
     panel_path: Path | None = None,
     assets_dir: Path | None = None,
     trajectories_requested: Mapping[str, int] | None = None,
@@ -954,8 +965,7 @@ def write_simulator_manifest(
         sim_config=sim_config,
         locales_requested=locales_requested,
         probe_mix=probe_mix,
-        tool_calling_themes=tool_calling_themes,
-        toolset_seed_path=toolset_seed_path,
+        seed_dataset_path=seed_dataset_path,
         panel_path=panel_path,
         assets_dir=assets_dir,
         trajectories_requested=trajectories_requested,

@@ -6,7 +6,8 @@
 ``run_episode`` runs a probe offline with scripted models, and every registered
 probe reproduces that standalone run when hosted. Both go through the same
 ``usersim.testing`` entry points a probe author would use, so the published
-checks are exercised by the probes they describe.
+checks are exercised by the probes they describe. The requests a probe sends
+to the judge ask for the reply the judge parser reads.
 """
 
 from __future__ import annotations
@@ -52,10 +53,7 @@ def _config(probe_type: str) -> ConversationSimulatorConfig:
         locale="en_US",
         max_turns=2,
         random_seed=4242,
-        tools_column="tools" if probe_type == "tool_calling" else None,
-        finance_tier_mix=0.0,
-        finance_tier="verifiable",
-        finance_retrieval_mode="hybrid",
+        probe_options={"financial_services": {"tier": "verifiable"}},
     )
 
 
@@ -82,6 +80,59 @@ async def test_every_registered_probe_runs_to_completion_with_scripted_models(pr
     assert json.loads(run.row["simulation_outcome"])["status"] != "failed"
     assert run.row["trajectory_id"]
     assert run.prompts and all(prompt["messages"] for prompt in run.prompts)
+
+
+async def test_a_model_given_for_an_alias_answers_for_it_and_records_its_requests() -> None:
+    class Terse(ScriptedModel):
+        CONTENT = {**ScriptedModel.CONTENT, "assistant": "Take the train; it is quicker."}
+
+    run = await run_episode(
+        "general_open_ended",
+        config=_config("general_open_ended"),
+        persona=_PERSONA,
+        data=_data("general_open_ended"),
+        models={"assistant_model": Terse("assistant")},
+    )
+
+    replies = [m["content"] for m in json.loads(run.row["conversation_messages"]) if m["role"] == "assistant"]
+    assert replies and set(replies) == {"Take the train; it is quicker."}
+    assert "assistant" in {prompt["role"] for prompt in run.prompts}
+
+
+#: Probes with no simulated user, which run their own loop and send nothing to the judge.
+_NO_JUDGE_REQUESTS = frozenset({"safety_agentic"})
+
+
+@pytest.mark.parametrize("probe_type", known_probes())
+async def test_every_judge_request_asks_for_a_rating_the_parser_reads(probe_type: str) -> None:
+    """``run_inline_judge`` reads an ``<explanation>`` and a ``<rating>`` of success, warn or failure.
+
+    A prompt that asks for any other reply costs a reformat call on every turn it judges.
+    """
+    run = await run_episode(
+        probe_type, config=_config(probe_type), persona=_PERSONA, data=_data(probe_type), profile=_PROFILE
+    )
+
+    asked = [prompt["messages"][-1]["content"] for prompt in run.prompts if prompt["role"] == "judge"]
+    assert bool(asked) is (probe_type not in _NO_JUDGE_REQUESTS)
+    for text in asked:
+        assert "<explanation>" in text and "<rating>" in text, text
+        rating_format = text.rsplit("<rating>", 1)[1]
+        assert "success" in rating_format and "failure" in rating_format, text
+
+
+@pytest.mark.parametrize(("probe_type", "shares_details"), [("tool_calling", True), ("general_open_ended", False)])
+async def test_only_the_tool_calling_user_may_share_details(probe_type: str, shares_details: bool) -> None:
+    """Its user hands the assistant the identifiers a tool call needs; an asking user gives only what is asked."""
+    run = await run_episode(
+        probe_type, config=_config(probe_type), persona=_PERSONA, data=_data(probe_type), profile=_PROFILE
+    )
+
+    system = next(
+        m["content"] for p in run.prompts if p["role"] == "user" for m in p["messages"] if m["role"] == "system"
+    )
+    assert ("share IDs, reference numbers" in system) is shares_details
+    assert ("provide ONLY what was asked" in system) is not shares_details
 
 
 async def test_a_model_factory_scripts_the_replies() -> None:

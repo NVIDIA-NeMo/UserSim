@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for ``cli/model_catalog.py`` + the auto-fill loader path.
+"""Tests for ``engine/model_catalog.py`` + the auto-fill loader path.
 
 Covers:
 
@@ -18,18 +18,14 @@ from pathlib import Path
 import pytest
 
 from usersim.cli._models import (
-    ConfigError,
-    ModelsConfig,
-    ModelSpec,
-    ProviderSpec,
     apply_model_overrides,
-    load_models_config,
     print_resolved_models,
     prompt_for_provider_keys,
     smoke_test_models,
     smoke_test_models_or_raise,
 )
-from usersim.cli.model_catalog import (
+from usersim.engine.errors import ConfigError
+from usersim.engine.model_catalog import (
     INFERENCE_DEFAULTS,
     VLLM_DEFAULTS,
     known_inference_models,
@@ -37,6 +33,7 @@ from usersim.cli.model_catalog import (
     resolve_inference_defaults,
     resolve_vllm_defaults,
 )
+from usersim.engine.models_file import ModelsConfig, ModelSpec, ProviderSpec, load_models_config
 
 # ---------------------------------------------------------------------------
 # Catalog primitives
@@ -60,7 +57,7 @@ class TestCatalogPrimitives:
         assert resolve_vllm_defaults("not/a/model") == {}
 
     def test_embedding_model_detection(self):
-        from usersim.cli.model_catalog import is_embedding_model
+        from usersim.engine.model_catalog import is_embedding_model
 
         assert is_embedding_model("nvidia/nvidia/nemotron-3-embed-1b")
         assert is_embedding_model("nvidia/qwen/qwen3-embedding-0.6b")
@@ -148,8 +145,8 @@ def _custom_provider_cfg() -> ModelsConfig:
         path.unlink(missing_ok=True)
 
     def test_qwen_embedding_defaults_supply_input_type_and_truncate(self):
-        from usersim.cli._models import to_model_configs
-        from usersim.cli.model_catalog import resolve_embedding_defaults
+        from usersim.engine.model_catalog import resolve_embedding_defaults
+        from usersim.engine.models_file import to_model_configs
 
         eb = resolve_embedding_defaults("nvidia/qwen/qwen3-embedding-0.6b")["extra_body"]
         assert eb == {"input_type": "passage", "truncate": "NONE"}
@@ -166,7 +163,7 @@ def _custom_provider_cfg() -> ModelsConfig:
         assert ip.extra_body == {"input_type": "passage", "truncate": "NONE"}
 
     def test_to_model_configs_uses_embedding_params_for_embedding_models(self):
-        from usersim.cli._models import to_model_configs
+        from usersim.engine.models_file import to_model_configs
 
         cfg = ModelsConfig(
             providers=(),
@@ -328,7 +325,7 @@ class TestLoaderAutofill:
     def test_unknown_model_warns_and_falls_back(self, tmp_path: Path, caplog):
         p = tmp_path / "unknown.toml"
         p.write_text('[[models]]\nalias="user_model"\nmodel="unknown/vendor/whatever-99b"\nprovider="nvidia"\n')
-        with caplog.at_level(logging.WARNING, logger="usersim.cli._models"):
+        with caplog.at_level(logging.WARNING, logger="usersim.engine.models_file"):
             spec = load_models_config(p).get("user_model")
         # Project-level fallbacks kick in.
         assert spec.temperature == 0.7
@@ -423,7 +420,7 @@ class TestLoaderAutofill:
         of the box without `MODEL_OVERRIDES`. The alias is distinct from
         the simulator's `judge_model` (separate roles, separately sourced).
         """
-        from usersim.cli._models import REQUIRED_EVALUATOR_ALIASES
+        from usersim.engine.models_file import REQUIRED_EVALUATOR_ALIASES
 
         assert REQUIRED_EVALUATOR_ALIASES == ("evaluator_model",)
 
@@ -442,7 +439,7 @@ class TestLoaderAutofill:
         SILENTLY degrades to lexical word-overlap. The alias must resolve to
         an embedding model matching the corpus vectors.
         """
-        from usersim.cli.model_catalog import is_embedding_model
+        from usersim.engine.model_catalog import is_embedding_model
 
         for toml_path in _shipped_model_tomls():
             toml_name = toml_path.name
@@ -675,7 +672,7 @@ class TestApplyModelOverrides:
         # The catalog sets temperature + top_p to None;
         # apply_model_overrides re-resolves; to_model_configs must then
         # OMIT both from the DD inference params (regression guard).
-        from usersim.cli._models import to_model_configs
+        from usersim.engine.models_file import to_model_configs
 
         cfg = _custom_provider_cfg()
         cfg2 = apply_model_overrides(cfg, {"judge_model": "aws/anthropic/bedrock-claude-opus-4-7"})
@@ -792,7 +789,7 @@ class TestApplyModelOverridesDictForm:
         )
         a = cfg2.get("assistant_model")
         # Catalog still wins for the other knobs.
-        from usersim.cli.model_catalog import resolve_inference_defaults
+        from usersim.engine.model_catalog import resolve_inference_defaults
 
         catalog = resolve_inference_defaults("nvidia/google/gemma-4-31b-it")
         assert a.temperature == catalog["temperature"]
@@ -1175,10 +1172,10 @@ class TestCatalogGapWarning:
         import logging
         from pathlib import Path
 
-        from usersim.cli._models import _to_model_spec
+        from usersim.engine.models_file import _to_model_spec
 
         entry = {"alias": "a", "model": model, "provider": "nvidia"}
-        with caplog.at_level(logging.WARNING, logger="usersim.cli._models"):
+        with caplog.at_level(logging.WARNING, logger="usersim.engine.models_file"):
             _to_model_spec(entry, source=Path("models_default.toml"))
         return [r.getMessage() for r in caplog.records]
 
@@ -1208,7 +1205,7 @@ class TestCatalogGapWarning:
         ``None`` is required rather than an absent key: absent applies the
         project fallbacks (0.7 / 0.95), which are then rejected.
         """
-        from usersim.cli.model_catalog import INFERENCE_DEFAULTS
+        from usersim.engine.model_catalog import INFERENCE_DEFAULTS
 
         offenders = []
         for model, entry in INFERENCE_DEFAULTS.items():
@@ -1237,7 +1234,7 @@ class TestCatalogGapWarning:
         broken once because the offline probe sends its own payload and never
         exercised the parameters a real run sends.
         """
-        from usersim.cli._models import load_models_config, to_model_configs
+        from usersim.engine.models_file import load_models_config, to_model_configs
 
         cfg = load_models_config(_cli_dir() / "models_openai.toml")
         for model_config in to_model_configs(cfg):
@@ -1251,7 +1248,7 @@ class TestCatalogGapWarning:
 
     def test_drop_params_omits_them(self, tmp_path) -> None:
         """A TOML row can suppress a parameter, which null cannot express."""
-        from usersim.cli._models import load_models_config, to_model_configs
+        from usersim.engine.models_file import load_models_config, to_model_configs
 
         path = tmp_path / "m.toml"
         path.write_text(
@@ -1272,8 +1269,8 @@ class TestCatalogGapWarning:
         assert getattr(by_alias["judge_model"], "temperature", None) == 0.85
 
     def test_drop_params_rejects_unknown_fields(self, tmp_path) -> None:
-        from usersim.cli._errors import ConfigError
-        from usersim.cli._models import load_models_config
+        from usersim.engine.errors import ConfigError
+        from usersim.engine.models_file import load_models_config
 
         path = tmp_path / "m.toml"
         path.write_text(
@@ -1289,7 +1286,7 @@ class TestCatalogGapWarning:
         models.local.toml pointing at their own endpoint must not change what
         the suite believes the project distributes.
         """
-        from usersim.cli._models import bundled_models_path
+        from usersim.engine.models_file import bundled_models_path
 
         (tmp_path / "models.local.toml").write_text("models = []\n")
         monkeypatch.chdir(tmp_path)
@@ -1298,7 +1295,7 @@ class TestCatalogGapWarning:
 
     def test_default_path_resolution_order(self, tmp_path, monkeypatch) -> None:
         """Env var, then a local file at or above cwd, then the bundled one."""
-        from usersim.cli._models import bundled_models_path, default_models_path
+        from usersim.engine.models_file import bundled_models_path, default_models_path
 
         nested = tmp_path / "a" / "b"
         nested.mkdir(parents=True)
@@ -1321,8 +1318,8 @@ class TestCatalogGapWarning:
 
     def test_unreadable_env_var_fails_loudly(self, tmp_path, monkeypatch) -> None:
         """A typo in the variable must not silently fall back to the default."""
-        from usersim.cli._errors import ConfigError
-        from usersim.cli._models import default_models_path
+        from usersim.engine.errors import ConfigError
+        from usersim.engine.models_file import default_models_path
 
         monkeypatch.chdir(tmp_path)
         monkeypatch.setenv("USERSIM_MODELS_CONFIG", str(tmp_path / "absent.toml"))
@@ -1335,8 +1332,8 @@ class TestCatalogGapWarning:
 
         # bundled_models_path, not default_models_path: this asserts what
         # ships, and default_models_path honours a developer's local override.
-        from usersim.cli._models import bundled_models_path, load_models_config
+        from usersim.engine.models_file import bundled_models_path, load_models_config
 
-        with caplog.at_level(logging.WARNING, logger="usersim.cli._models"):
+        with caplog.at_level(logging.WARNING, logger="usersim.engine.models_file"):
             load_models_config(bundled_models_path())
         assert [r.getMessage() for r in caplog.records] == []

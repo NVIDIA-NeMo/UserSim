@@ -26,7 +26,9 @@ keep.
 
 ``run_episode`` runs one episode of a probe offline with ``ScriptedModel``
 answering for every model alias, and returns the generator's row and the
-prompts sent, so a probe's tests patch nothing.
+prompts sent, so a probe's tests patch nothing. ``registry_snapshot`` puts
+the probe and scorer registries back as they were, for a test that registers
+its own.
 
 ``usersim.testing.pytest_plugin`` is the hermetic harness the built-in tests
 run under, for a suite to load with
@@ -42,12 +44,13 @@ import copy
 import inspect
 import json
 import textwrap
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, Iterator, Mapping, Sequence
 
-# Engine imports stay inside the functions that use them: loading
+# Engine and pydantic imports stay inside the functions that use them: loading
 # ``usersim.testing.pytest_plugin`` imports this package first, and a suite
 # that opts in to the plugin does not load the probe registry or the
 # conversation loop just to start.
@@ -61,6 +64,7 @@ __all__ = [
     "assert_scorer_conforms",
     "hosted_parity_report",
     "probe_conformance_problems",
+    "registry_snapshot",
     "run_episode",
     "scorer_conformance_problems",
 ]
@@ -94,7 +98,9 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     from usersim.engine.core.probes import (
         _PROBE_REGISTRY,
         BaseProbe,
+        PreviewField,
         known_probes,
+        seed_dataset_problems,
     )
 
     problems: list[str] = []
@@ -123,13 +129,6 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"{label!r} resolves to {_PROBE_REGISTRY.get(label)!r}, not "
             f"{cls.__qualname__}. Two probes cannot share a label."
         )
-
-    # @register_probe sets these on the class, where the dispatcher reads them.
-    for attr in ("family", "prompt_version", "variants"):
-        if getattr(cls, attr, None) in (None, "", ()):
-            problems.append(
-                f"{cls.__qualname__}.{attr} is unset. Use @register_probe rather than assigning to the registry directly."
-            )
 
     for method in _REQUIRED_PROBE_METHODS:
         impl = getattr(cls, method, None)
@@ -184,6 +183,39 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         if kind_problem:
             problems.append(f"{cls.__qualname__}.placeholder_warning_kind {kind_problem}")
 
+    description = getattr(cls, "description", "")
+    if not isinstance(description, str):
+        problems.append(f"{cls.__qualname__}.description must be a string; got {description!r}")
+    fields = getattr(cls, "preview_fields", ())
+    if not isinstance(fields, tuple) or not all(
+        isinstance(field, PreviewField) and all(isinstance(text, str) and text for text in (field.key, field.label))
+        for field in fields
+    ):
+        problems.append(
+            f"{cls.__qualname__}.preview_fields must be a tuple of PreviewField, each with a key and a label; "
+            f"got {fields!r}"
+        )
+    problems.extend(_default_scorers_problems(cls))
+
+    # A run reads these on the class, before any row runs.
+    for hook in ("check_locale", "bank_locale", "themes", "model_aliases", "asset_problems"):
+        if not isinstance(inspect.getattr_static(cls, hook, None), classmethod):
+            problems.append(f"{cls.__qualname__}.{hook} must be a classmethod; a run calls it on the class.")
+    if isinstance(inspect.getattr_static(cls, "model_aliases", None), classmethod):
+        problems.extend(_model_aliases_problems(cls))
+    if isinstance(inspect.getattr_static(cls, "asset_problems", None), classmethod):
+        problems.extend(_asset_check_problems(cls))
+    guide = getattr(cls, "authoring_guide", None)
+    if guide is not None and not (isinstance(guide, str) and guide.startswith("https://")):
+        problems.append(
+            f"{cls.__qualname__}.authoring_guide must be None or an https:// URL, which works from an "
+            f"installed package; got {guide!r}"
+        )
+
+    problems.extend(_options_problems(cls))
+    problems.extend(_asset_labels_problems(cls))
+    problems.extend(seed_dataset_problems(cls))
+
     for klass, key in _reserved_metadata_writes(cls):
         problems.append(
             f"{klass} writes state.metadata[{key!r}], which the conversation loop owns. "
@@ -198,6 +230,75 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         )
 
     return problems
+
+
+def _default_scorers_problems(cls: type) -> list[str]:
+    """What is wrong with the scorers ``cls.default_scorers`` names."""
+    from usersim.engine.evaluator.scorers import list_scorers
+
+    names = getattr(cls, "default_scorers", ())
+    if not isinstance(names, tuple) or not all(isinstance(name, str) and name for name in names):
+        return [f"{cls.__qualname__}.default_scorers must be a tuple of scorer names; got {names!r}"]
+    registered = list_scorers()
+    unknown = [name for name in names if name not in registered]
+    if unknown:
+        return [
+            f"{cls.__qualname__}.default_scorers names {unknown}, which no registered scorer holds, so "
+            f"`usersim eval --scorers auto` would record an error in its place on every row. "
+            f"Registered: {', '.join(registered)}"
+        ]
+    return []
+
+
+def _options_problems(cls: type) -> list[str]:
+    """Whether ``cls.Options`` is a pydantic model a run that sets nothing can build."""
+    from pydantic import BaseModel, ValidationError
+
+    options = getattr(cls, "Options", None)
+    if not (isinstance(options, type) and issubclass(options, BaseModel)):
+        return [f"{cls.__qualname__}.Options must be a pydantic model class; got {options!r}"]
+    try:
+        options()
+    except ValidationError as error:
+        return [
+            f"{cls.__qualname__}.Options needs a default for every setting, so a run that sets none still runs: "
+            + "; ".join(f"{'.'.join(map(str, detail['loc']))}: {detail['msg']}" for detail in error.errors())
+        ]
+    return []
+
+
+def _asset_labels_problems(cls: type) -> list[str]:
+    """Whether ``cls.asset_labels()`` is a tuple of labels that starts with the probe's own."""
+    labels = cls.asset_labels()
+    if not (isinstance(labels, tuple) and labels and all(isinstance(label, str) and label for label in labels)):
+        return [f"{cls.__qualname__}.asset_labels() must return a tuple of probe labels; got {labels!r}"]
+    if labels[0] != cls.label:
+        return [f"{cls.__qualname__}.asset_labels() must start with its own label {cls.label!r}; got {labels!r}"]
+    return []
+
+
+def _model_aliases_problems(cls: type) -> list[str]:
+    """What is wrong with the aliases ``cls.model_aliases`` gives a run with default settings."""
+    from usersim.engine.config import ConversationSimulatorConfig
+
+    try:
+        aliases = cls.model_aliases(ConversationSimulatorConfig(name="conversation_messages"))
+    except Exception as error:
+        return [f"{cls.__qualname__}.model_aliases raised {type(error).__name__}: {error}"]
+    if not isinstance(aliases, tuple) or not all(isinstance(alias, str) and alias for alias in aliases):
+        return [f"{cls.__qualname__}.model_aliases must return a tuple of alias names; got {aliases!r}"]
+    return []
+
+
+def _asset_check_problems(cls: type) -> list[str]:
+    """What ``cls.asset_problems`` finds in the probe's shipped assets, or what is wrong with the check itself."""
+    try:
+        found = cls.asset_problems()
+    except Exception as error:
+        return [f"{cls.__qualname__}.asset_problems raised {type(error).__name__}: {error}"]
+    if not isinstance(found, list) or not all(isinstance(problem, str) for problem in found):
+        return [f"{cls.__qualname__}.asset_problems must return a list of strings; got {found!r}"]
+    return [f"{cls.__qualname__}.asset_problems: {problem}" for problem in found]
 
 
 def _reserved_metadata_writes(cls: type) -> list[tuple[str, str]]:
@@ -271,6 +372,26 @@ def assert_probe_conforms(probe: str | type) -> None:
         raise AssertionError(f"probe {name!r} does not conform:\n  - " + "\n  - ".join(problems))
 
 
+class _ModelLookups(dict):
+    """An empty ``models`` mapping that records each alias a scorer looks up in it."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.asked: list[str] = []
+
+    def get(self, key: Any, default: Any = None) -> Any:
+        self.asked.append(key)
+        return default
+
+    def __getitem__(self, key: Any) -> Any:
+        self.asked.append(key)
+        raise KeyError(key)
+
+    def __contains__(self, key: object) -> bool:
+        self.asked.append(str(key))
+        return False
+
+
 async def scorer_conformance_problems(
     name: str,
     *,
@@ -292,7 +413,7 @@ async def scorer_conformance_problems(
     means awaiting it here too.
     """
     from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
-    from usersim.engine.evaluator.scorers import _REGISTRY, list_scorers
+    from usersim.engine.evaluator.scorers import _REGISTRY, deterministic_scorers, list_scorers
 
     if name not in _REGISTRY:
         return [
@@ -311,8 +432,9 @@ async def scorer_conformance_problems(
             f"{name!r} is not an async function. The evaluator awaits every scorer, so declare it with 'async def'."
         ]
 
+    models = _ModelLookups()
     try:
-        result = await fn(dict(sample_row or {}), {})
+        result = await fn(dict(sample_row or {}), models)
     except Exception as exc:
         problems.append(
             f"raised {type(exc).__name__} on an empty row: {exc}. The "
@@ -324,6 +446,11 @@ async def scorer_conformance_problems(
     if not isinstance(result, dict):
         problems.append(
             f"returned {type(result).__name__}, expected a dict the evaluator can merge into the eval cell."
+        )
+    if models.asked and name in deterministic_scorers():
+        problems.append(
+            f"{name!r} is registered as deterministic but looked up {', '.join(sorted(set(models.asked)))}. "
+            f"usersim rescore reruns a deterministic scorer on the promise that it calls no model."
         )
 
     emptied = sorted(key for key in sample_row or {} if key not in SCORER_FILLED_KEYS)
@@ -348,6 +475,36 @@ async def assert_scorer_conforms(
     problems = await scorer_conformance_problems(name, sample_row=sample_row)
     if problems:
         raise AssertionError(f"scorer {name!r} does not conform:\n  - " + "\n  - ".join(problems))
+
+
+@contextmanager
+def registry_snapshot() -> Iterator[None]:
+    """Put the probe and scorer registries back as they were on entry when the block exits.
+
+    A test that registers a probe or scorer of its own, or clears a registry,
+    runs inside it, so nothing it registers reaches the next test in the same
+    process::
+
+        async def test_my_scorer_conforms():
+            with registry_snapshot():
+                register_scorer("my_reply_length", reply_length)
+                await assert_scorer_conforms("my_reply_length")
+
+    The built-in probes are loaded on entry, so the snapshot holds them even
+    when nothing has looked a probe up yet. Each registry is restored in
+    place, so code holding a reference to one sees the restored entries.
+    """
+    from usersim.engine.core.probes import _PROBE_REGISTRY, load_builtin_probes
+    from usersim.engine.evaluator.scorers import _DETERMINISTIC, _REGISTRY
+
+    load_builtin_probes()
+    saved = [(registry, copy.copy(registry)) for registry in (_PROBE_REGISTRY, _REGISTRY, _DETERMINISTIC)]
+    try:
+        yield
+    finally:
+        for registry, entries in saved:
+            registry.clear()
+            registry.update(entries)
 
 
 # ---------------------------------------------------------------------------
@@ -488,6 +645,7 @@ async def run_episode(
     profile: Mapping[str, Any] | None = None,
     language: str = "English",
     model_factory: Callable[[str], Any] = ScriptedModel,
+    models: Mapping[str, Any] | None = None,
 ) -> EpisodeRun:
     """Run one episode of ``probe`` with scripted models, as ``usersim simulate`` runs it.
 
@@ -496,15 +654,23 @@ async def run_episode(
     comes from the same generator a run uses; ``prompts`` holds each request
     the models received, in order. Subclass ``ScriptedModel`` to script other
     replies.
+
+    ``models`` adds a model by alias, such as one the probe names in
+    ``model_aliases``, or replaces the scripted model of a conversation alias.
+    A ``ScriptedModel`` given there records its requests in ``prompts`` too.
     """
     from usersim.engine.generator import ConversationSimulatorGenerator
 
     prompts: list[dict[str, Any]] = []
-    models = _scripted_models(model_factory, prompts)
+    run_models = _scripted_models(model_factory, prompts)
+    for alias, model in (models or {}).items():
+        if isinstance(model, ScriptedModel):
+            model.prompts = prompts
+        run_models[alias] = model
     runtime = _episode_runtime(
-        probe, models, config=config, persona=persona, data=data, profile=profile, language=language
+        probe, run_models, config=config, persona=persona, data=data, profile=profile, language=language
     )
-    row = await ConversationSimulatorGenerator.with_models(config, models).agenerate(runtime.preamble.to_row())
+    row = await ConversationSimulatorGenerator.with_models(config, run_models).agenerate(runtime.preamble.to_row())
     return EpisodeRun(row=row, prompts=prompts)
 
 

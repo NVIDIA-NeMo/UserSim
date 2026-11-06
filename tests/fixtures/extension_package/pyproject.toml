@@ -24,7 +24,7 @@ fixture_domain = "usersim_extension_fixture.domain:DOMAIN"
 fixture_backend = "usersim_extension_fixture.backend:FixtureBackend"
 
 [project.entry-points."usersim.capabilities"]
-fixture_capability = "usersim_extension_fixture.capability:CAPABILITY"
+fixture_capability = "usersim_extension_fixture.capability"
 
 [project.entry-points."usersim.commands"]
 fixture-cmd = "usersim_extension_fixture.command:register"
@@ -33,4 +33,4 @@ fixture-cmd = "usersim_extension_fixture.command:register"
 include = ["usersim_extension_fixture*"]
 
 [tool.setuptools.package-data]
-usersim_extension_fixture = ["assets/**/*.yaml"]
+usersim_extension_fixture = ["assets/**/*.yaml", "assets/**/*.jsonl"]

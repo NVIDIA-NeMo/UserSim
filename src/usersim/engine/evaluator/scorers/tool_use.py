@@ -11,9 +11,10 @@ the in-sim / out-of-sim boundary.
 
 The scorer is registered as ``"tool_use"`` and is invoked by the
 ``TrajectoryEvaluator`` when a config carries ``scorers=["tool_use"]``.
-Configure this scorer for any tool-calling-family trajectory you want
-the 8-axis breakdown for. Future probes (e.g., agentic safety) will
-register their own scorers alongside.
+It judges a row that records the tools its assistant was offered
+(``tool_subset``) and skips any other row, as each probe's own scorer
+skips rows without its probe's columns, so a run that mixes probes
+scores only its tool conversations.
 """
 
 from __future__ import annotations
@@ -111,7 +112,9 @@ TRAJECTORY_SCORES: list[Score] = [
             "architecture to the user? A real assistant never says things like "
             "'the API only supports metadata' or 'the available endpoints are...' "
             "or names specific tool functions in its responses. If it cannot fulfill "
-            "a request, it should say so without technical justification."
+            "a request, it should say so without technical justification. Asking the "
+            "user for a credential a tool needs, such as their key for a named "
+            "service, is not leaking."
         ),
         options={
             1: "Fail — named tools, APIs, or endpoints",
@@ -190,8 +193,10 @@ async def score_tool_use_trajectory(
 
     Inputs (from the trajectory row dict):
       - ``conversation_messages``: list of messages.
-      - ``tool_subset``: optional, the tool definitions the assistant
-        was given (lives on the simulator's trajectory row for tool_calling).
+      - ``tool_subset``: the tool definitions the assistant was given,
+        which a probe that offers tools writes on its rows. A row without
+        them is skipped with the ``"no ... scorer skipped"`` sentinel,
+        before any model call.
       - implicitly, ``models`` (from the evaluator) holds the judge
         facades; we pick the first one as the scoring judge.
 
@@ -204,7 +209,7 @@ async def score_tool_use_trajectory(
             ...
           },
           "status_proposal": True | False,   # False if a critical axis scored 1
-          "error": "..."  (only present if scoring failed)
+          "error": "..."  (only present if scoring failed or the row was skipped)
         }
 
     ``status_proposal`` is a heuristic single-bit pass/fail derived from
@@ -214,6 +219,8 @@ async def score_tool_use_trajectory(
     """
     messages = trajectory.get("conversation_messages") or []
     tool_subset = _normalize_tool_subset(trajectory.get("tool_subset"))
+    if not tool_subset:
+        return {"error": "no tool_subset on this trajectory — scorer skipped"}
 
     # Pick the first available judge facade (the evaluator passes its
     # full {alias: facade} map; for ensemble usage the evaluator

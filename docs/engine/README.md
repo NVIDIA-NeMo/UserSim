@@ -128,12 +128,12 @@ different questions of the model.
 
 | Asset | Loader | Unit | Per-locale shape | Used by |
 | --- | --- | --- | --- | --- |
-| Fact bank | `core/fact_bank.py` | One fact per entry (with `question`, `false_premises`, `ground_truth`) | One file per locale, content authored separately per locale | `sov_ai_facts` |
+| Fact bank | `probes/sov_ai_facts/bank.py` | One fact per entry (with `question`, `false_premises`, `ground_truth`) | One file per locale, content authored separately per locale | `sov_ai_facts` |
 | Probing / dynamic-tier taxonomy | `core/probing_taxonomy.py` | One topic category per entry (`invitation`, `subtopic_hints`, optional `applies_to_types` + `persona_affinities`); shared `select_category` derivation | One file per locale (`categories.yaml` for sov_ai_dynamic; `dynamic.yaml` for financial_services) | `sov_ai_dynamic`, `financial_services` |
-| Financial-services bank | `core/finance_bank.py` (+ `finance_tasks.py`, `embeddings.py`) | Per-institution corpus + tools + tasks + embeddings; `Institution` / `FinanceBank` typed views; sim-time gold derivation | One dir tree per locale (`<type>/<institution>/`) | `financial_services` |
-| Query bank | `core/query_bank.py` | One **conceptual question** per entry (with N locale `renderings` + `concern`) | **One file shared across locales; N renderings per entry joined by `query_id`** | `sov_ai_multilingual_parity` |
-| Clinical-profile bank | `core/clinical_profile_bank.py` | One clinical profile per entry (versioned concealment ground truth) | One bank per client label | the four `health_disclosure` clients |
-| Identity spec | `core/identity_spec.py` | Developers, ordered expected-identity rules, competitors, tactics and strategies; a spec layer can extend another | One file shared across locales; localized text per tactic | `identity_disclosure` |
+| Financial-services bank | `probes/financial_services/bank.py` (+ `tasks.py`, `embeddings.py`) | Per-institution corpus + tools + tasks + embeddings; `Institution` / `FinanceBank` typed views; sim-time gold derivation | One dir tree per locale (`<type>/<institution>/`) | `financial_services` |
+| Query bank | `probes/sov_ai_multilingual_parity/bank.py` | One **conceptual question** per entry (with N locale `renderings` + `concern`) | **One file shared across locales; N renderings per entry joined by `query_id`** | `sov_ai_multilingual_parity` |
+| Clinical-profile bank | `probes/health_disclosure/bank.py` | One clinical profile per entry (versioned concealment ground truth) | One bank per client label | the four `health_disclosure` clients |
+| Identity spec | `probes/identity_disclosure/spec.py` | Developers, ordered expected-identity rules, competitors, tactics and strategies; a spec layer can extend another | One file shared across locales; localized text per tactic | `identity_disclosure` |
 
 The query bank's cross-locale shape is what makes cross-locale comparison
 possible: every trajectory records the `query_id` it asked, so answers to
@@ -157,7 +157,7 @@ Each asset-driven probe owns exactly one asset folder under `assets/<probe-name>
 
 Side channels are top-level trajectory columns, except `query_domain`, `query_difficulty`, `query_concern`, `harm_category`, `sanctioned_action_name`, `tempted_action_name` and `attempted_actions`, which are recorded in `conversation_metadata`.
 
-These probes write the asset version into `simulation_outcome.provenance.bank_version[<key>]` (key is the locale for the sovereign-AI + financial_services probes; the stable string `"safety"` for `safety_chat_pressure` and `"agentic"` for `safety_agentic`, each one file whose requests carry a rendering for every shipped locale; and the probe's label for `identity_disclosure` and the four health probes, whose one spec or bank serves every locale). Each attaches a `WarningKind.USED_PLACEHOLDER_*` warning (`USED_PLACEHOLDER_FACT` / `USED_PLACEHOLDER_TAXONOMY` / `USED_PLACEHOLDER_QUERY` / `USED_PLACEHOLDER_TARGET` / `USED_PLACEHOLDER_AGENTIC_ACTION` / `USED_PLACEHOLDER_FINANCE` / `USED_PLACEHOLDER_CLINICAL_PROFILE` / `USED_PLACEHOLDER_IDENTITY`) whenever it probed a placeholder-flagged asset, so results that rest on placeholder content are easy to find.
+These probes write the asset version into `simulation_outcome.provenance.bank_version[<key>]` (key is the locale for the sovereign-AI + financial_services probes; the stable string `"safety"` for `safety_chat_pressure` and `"agentic"` for `safety_agentic`, each one file whose requests carry a rendering for every shipped locale; and the probe's label for `identity_disclosure` and the four health probes, whose one spec or bank serves every locale). Each attaches its `placeholder_warning_kind` warning (`used_placeholder_fact` / `used_placeholder_taxonomy` / `used_placeholder_query` / `used_placeholder_target` / `used_placeholder_agentic_action` / `used_placeholder_finance` / `used_placeholder_clinical_profile` / `used_placeholder_identity`) whenever it probed a placeholder-flagged asset, so results that rest on placeholder content are easy to find.
 
 **Difficulty and correctness semantics.** Difficulty is author metadata
 used for stratification and as judge-prompt context; current scorers do
@@ -174,7 +174,7 @@ fields each scorer reads: `ground_truth` / `false_premises` for
 `safety_chat_pressure`, and `expected_behavior` plus the action
 taxonomy for `safety_agentic`.
 
-The three sovereign-AI probes and the two safety probes share one persona-tag vocabulary: `sov_ai_facts.task_derivation.persona_to_tags(...)` is the source of truth and is re-exported by `sov_ai_dynamic.task_derivation` (as `persona_to_interest_tags(...)` for clarity), `sov_ai_multilingual_parity.task_derivation`, `safety_chat_pressure.task_derivation`, and `safety_agentic.task_derivation`. A persona feature such as `age:25-44` or `education:tertiary` therefore matches bank entries the same way in all five probes.
+The three sovereign-AI probes and the two safety probes share one persona-tag vocabulary: `core/persona_tags.py`'s `persona_to_tags(...)` is the source of truth, and `sov_ai_facts.task_derivation`, `sov_ai_dynamic.task_derivation` (as `persona_to_interest_tags(...)` for clarity), `sov_ai_multilingual_parity.task_derivation`, `safety_chat_pressure.task_derivation` and `safety_agentic.task_derivation` all use it. A persona feature such as `age:25-44` or `education:tertiary` therefore matches bank entries the same way in all five probes.
 
 ### India language-variant resolution
 
@@ -245,6 +245,12 @@ usersim simulate --locale en_US --num-rows 20 \
 usersim simulate --locale en_US --num-rows 5 \
   --probe-mix 'safety_agentic=1.0' \
   --out output/agentic_only
+
+# A probe's settings (financial_services, its dynamic tier on about 30% of rows):
+usersim simulate --locale en_US --num-rows 20 \
+  --probe-mix 'financial_services=1.0' \
+  --probe-option financial_services.tier_mix=0.3 \
+  --out output/finance_trajectories
 ```
 
 Each probe resolves its curated asset at simulator-call time under `assets/<probe-name>/`: `assets/sov_ai_facts/<locale>/sample.yaml`, `assets/sov_ai_dynamic/<locale>/categories.yaml`, `assets/sov_ai_multilingual_parity/sample.yaml`, `assets/safety_chat_pressure/sample.yaml`, `assets/safety_agentic/{sample.yaml,action_taxonomy.yaml}`, and `assets/identity_disclosure/spec.yaml`. Override paths via `USERSIM_SOV_AI_FACTS_BANK_<LOCALE>` / `USERSIM_SOV_AI_DYNAMIC_TAXONOMY_<LOCALE>` / `USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK` / `USERSIM_SAFETY_CHAT_PRESSURE_BANK` / `USERSIM_SAFETY_AGENTIC_BANK` / `USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY` / `USERSIM_IDENTITY_DISCLOSURE_SPEC` env vars, and the health probes' clinical-profile banks via `USERSIM_THERAPY_PROFILES` / `USERSIM_TRIAGE_PROFILES` / `USERSIM_CDS_PROFILES` / `USERSIM_GENERIC_HEALTH_PROFILES`, when running against private banks; an identity spec named by its override can extend the shipped one rather than replace it.
@@ -383,7 +389,7 @@ end-to-end tutorial on writing a new probe against this substrate.
 ## Adding a new probe
 
 The end-to-end tutorial: decision tree on which shape to pick, full
-worked example (a `cooking_advisor` probe end-to-end), common
+worked example (a `bookings` probe end-to-end), common
 gotchas, test-authoring section: lives at
 [`docs/engine/AUTHORING_A_PROBE.md`](AUTHORING_A_PROBE.md). Read it
 first.
@@ -397,42 +403,47 @@ Copy-pasteable starter files for each shape live at
 - `generator_bank_reframing.py`: multi-turn bank-driven reframings
 - `generator_agentic.py`: single-user-turn + tool-interception (custom `run_dispatch`)
 - `generator_tool_calling.py`: tool-calling capability test
-- `prompts.py`: `LocalePromptPack` demo
+- `prompts.yaml`: the user model's instructions, one in English for every locale
+- `prompts.py`: `LocalePromptPack` demo, for wording under test, and the gate prompt
 - `test_probe.py.template`: per-probe test scaffold
 
 Quick orientation:
 
 1. Pick a shape from [the decision tree](AUTHORING_A_PROBE.md#step-0-pick-your-shape).
 2. Copy the matching `generator_*.py` to
-   `src/usersim/engine/probes/<your_probe>/generator.py`.
+   `src/usersim/engine/probes/<your_probe>/probe.py`.
 3. Subclass `BaseProbe` (or `BankBackedProbe`) + the right mixin;
-   set 2-3 class attributes; override 2-4 hooks.
-4. `@register_probe(family=, prompt_version=, variants=)` to wire
-   into `_PROBE_REGISTRY` and set the class's `family` /
-   `prompt_version` / `variants`, which the dispatcher and the smoke
-   check read.
-5. Add your module's import path to `BUILTIN_PROBE_MODULES` in
-   [`core/probes.py`](../../src/usersim/engine/core/probes.py), so the
-   registry imports it and runs your probe's `@register_probe`.
+   set its class attributes; override the hooks it needs.
+4. `@register_probe` to check the class's declarations, such as its
+   `prompt_version` and `variants`, and add it to the registry.
+5. Add your package's name to `BUILTIN_PACKAGES` in
+   [`core/builtin_packages.py`](../../src/usersim/engine/core/builtin_packages.py),
+   so the registry imports its `probe` module, which runs your probe's
+   `@register_probe`, and its `scorer`, `capabilities` and `asset_domain`
+   modules when it has them.
 6. Declare every column `build_result_extras` writes beyond the core
    ones in the class's `output_columns`. An undeclared column is
    discarded on the way to storage (with a warning in the log), and the
    scorer that reads it back reports nothing to score; see the
    authoring guide's step 6.
-7. Run `usersim smoke` to confirm registration; copy
-   `templates/probe/test_probe.py.template` for the per-probe
-   regression test.
+7. Run `usersim smoke` to confirm registration and, when your probe
+   checks its banks in an `asset_problems` classmethod, that they are
+   found; copy `templates/probe/test_probe.py.template` for the
+   per-probe regression test.
 
 For the substrate's API surface (every class, every mixin, every
 hook), see the source-of-truth docstrings in
 [`src/usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py).
 
 **Assistant evaluation is configured separately** via
-`TrajectoryEvaluatorConfig` (see Trajectory Evaluator section). Add
-new axes to `evaluator/axes.py::PROBE_SCORES` if needed; add a
-scorer under `evaluator/scorers/your_probe.py` and include it in
-`DEFAULT_SCORER_MODULES` to register it on import; name it in `--scorers` to
-run it.
+`TrajectoryEvaluatorConfig` (see Trajectory Evaluator section). Declare
+the probe's own judge axes, if it needs any, in `JUDGE_AXES` in its package's
+`axes.py`; add a
+scorer as `scorer.py` in the probe's package
+(`engine/probes/your_probe/scorer.py`), which registers on import once the
+package is in `BUILTIN_PACKAGES`; name it in `--scorers` to
+run it, or list it in the probe's `default_scorers` so `--scorers auto` runs
+it.
 
 ## Scope
 
@@ -452,11 +463,8 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `persona_column` | str | `"persona"` | Column containing persona dict |
 | `probe_type_column` | str | `"probe_type"` | Column carrying the probe label that the dispatcher resolves through `_PROBE_REGISTRY` |
 | `theme_column` | str | `"theme"` | Column with theme/topic |
-| `tools_column` | str? | `None` | Tool definitions (tool_calling only) |
-| `toolset_name_column` | str? | `None` | Toolset name (tool_calling only) |
 | `locale` | str | `"en_US"` | Locale for conversation language |
-| `assets_dir` | str? | `None` | Optional override for the asset-bank root (defaults to repo `assets/`); per-probe env vars also work |
-| `max_tools` | int | `5` | Max tools sampled per row (tool_calling) |
+| `assets_dir` | str? | `None` | The asset root every probe is pinned to (`--assets-dir`); `None` reads each probe's own assets, after any `USERSIM_ASSET_PATH` override |
 | `max_turns` | int | `5` | Max conversation turns |
 | `max_steps` | int | `10` | Max tool steps per turn |
 | `max_query_attempts` | int | `3` | Max retries for the user-LLM query / follow-up + judge gate before declaring `USER_QUERY_GATE_EXHAUSTED` |
@@ -471,7 +479,9 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `store_reasoning` | bool | `True` | Keep the assistant's thinking trace on the assistant message when the model emits one (`--no-store-reasoning` to turn off). Gated at capture, so a suppressed trace is never attached. Independent of whether the model *produces* a trace: that is a model-side setting (`chat_template_kwargs` in the models TOML, plus a server-side reasoning parser). A trace reaches a model again only through `replay_assistant_reasoning` |
 | `replay_assistant_reasoning` | bool | `False` | Send the assistant model the reasoning of its own earlier messages (`replay_reasoning = true` on `assistant_model` in the models TOML). Needs `store_reasoning`; the assistant's history is then not compressed. No other model receives the assistant's reasoning during a simulation |
 | `verbosity` | int | `1` | Logging detail: 0=quiet, 1=normal, 2=detailed |
-| `finance_tier_mix` / `finance_tier` / `finance_retrieval_mode` / `finance_embedding_model_alias` | float / str? / str / str | `0.0` / `None` / `"hybrid"` / `"embedding_model"` | `financial_services` only; see the probe's [README](../../src/usersim/engine/probes/financial_services/README.md#running-it) |
+| `probe_options` | dict | `{}` | Each probe's settings, by label, checked against its `Options` before any model call (`--probe-option PROBE.SETTING=VALUE`); `financial_services` and `tool_calling` list theirs in their READMEs |
+| `probes` | list[str] | `[]` | The labels of the probes in the run's mix, set by the run builder; the run declares their output columns and resolves their extra models only. Empty counts every registered probe |
+| `seed_dataset_columns` | list[str] | `[]` | The columns of the seed table the run attaches, set by the run builder; a row of a probe that reads no seed table sees them empty |
 | `random_seed` | int? | `None` | Seed for reproducible tool sampling |
 
 ## Side-Effect Columns
@@ -487,7 +497,7 @@ what each one carries:
 | `usersim_provenance` | str (JSON) | What the episode was resolved against: `code_sha`, `nemotron_personas_version`, `scenario_prompt_version` (the probe's `prompt_version`) and `bank_version`. A replayed row (`ProbeEpisodeRuntime.from_resolved_row`) keeps the provenance it was materialized with. It is recorded before the probe loads its banks, so the bank versions a trajectory used are in `simulation_outcome`'s provenance. See `core/episode_input.py`. |
 | `simulation_outcome` | str? (JSON) | Row-level structured outcome: status, failure_class, failure_attribution, counters (n_turns, n_tool_calls, n_user_query_attempts, n_user_followup_retries, n_assistant_inline_failures, n_assistant_retries, n_api_response_rerolls, n_fourth_wall_triggers, n_user_role_violations, n_user_language_violations), warnings, early_stop, per-model tokens / calls / wall-clock-by-alias, provenance. See `core/outcomes.py` for the schema. |
 | `simulation_traces` | str? (JSON) | Per-turn / per-call telemetry (keyed `turn_idx` x `call_idx`) with `kind` discriminator: `user_query_gate`, `user_followup_gate`, `fourth_wall_prefilter`, `assistant_quality`, `early_stop`, `api_response_reroll`, `tool_call_verifier`, etc. The debugging surface: **not** the assistant-evaluation surface. |
-| `probe_family` | str | The probe class's `family` (e.g., `"general_open_ended"`, `"sov_ai_facts"`). |
+| `probe_family` | str | The probe's label, the same as `probe_type` (e.g., `"general_open_ended"`, `"sov_ai_facts"`). |
 | `probe_variant` | str | Probe-specific discriminator (first entry of the probe class's `variants`, or an explicit row value when provided). Part of `trajectory_id` and the evaluator's stratification key. |
 | `conversation_messages` | str (JSON) | Full message list. Each entry is `{role, content}`; assistant entries add `tool_calls` when the turn called a tool, `tool` entries add `tool_call_id`, and an assistant entry adds **`reasoning_content`** when that model call emitted a thinking trace **and `store_reasoning` is on** (the default; `--no-store-reasoning` suppresses it). The key is absent (not empty) whenever either condition fails; the run manifest's `simulation_config.store_reasoning` records which was requested. Traces are attributed per call, so a tool-calling turn that appends several assistant messages carries each trace on the message that produced it. Stored for analysis: `core/llm.py::_dicts_to_chat_messages` drops it on the way back into a model, so a later turn never sees an earlier turn's thinking, unless the run sets `replay_assistant_reasoning`, which sends the assistant its own earlier traces. |
 | `conversation_metadata` | str (JSON) | Loose per-turn judge / event log surfaced to interactive previews and the deep-dive analysis script. |
@@ -510,7 +520,8 @@ what each one carries:
 
 | Module | Purpose |
 |--------|---------|
-| `core/probes.py` | The probe-authoring substrate: `ProbeAdapter` Protocol, `BaseProbe` with sensible defaults for every optional hook, `BankBackedProbe` (load + cache + placeholder warning + version pinning), the six mixins (`BankVerbatimMixin` / `CustomTurn1InstructionMixin` / `BankReframingMixin` / `AgenticMixin` / `ToolCallingMixin` / `ToolExecutionMixin`), `LocalePromptPack`, `assistant_message()` (builds an assistant message carrying its own reasoning trace: use it in `after_assistant_turn` instead of a hand-written dict), the `_PROBE_REGISTRY`, and `@register_probe`. **The single source of truth for adding a new probe.** |
+| `core/probes.py` | The probe-authoring substrate: `ProbeAdapter` Protocol, `BaseProbe` with sensible defaults for every optional hook, `BankBackedProbe` (load + cache + placeholder warning + version pinning), the six mixins (`BankVerbatimMixin` / `CustomTurn1InstructionMixin` / `BankReframingMixin` / `AgenticMixin` / `ToolCallingMixin` / `ToolExecutionMixin`), `LocalePromptPack`, `assistant_message()` (builds an assistant message carrying its own reasoning trace: use it in `after_assistant_turn` instead of a hand-written dict), and `@register_probe`, which adds a class to the registry. **The single source of truth for adding a new probe.** |
+| `core/_probe_registry.py` | The registered probe classes by label, which `@register_probe` fills and `known_probes()` / `resolve_probe()` read. It imports nothing else from the engine, so `core/_assets.py` reads it without importing `core/probes.py` |
 | `core/simulation.py` | Shared `ConversationLoop` driven by every probe via `BaseProbe.run_dispatch`; turn-1 generate-and-gate vs verbatim-injection paths; per-turn loop with pre-filters, gates, capitulation check, frustration injection, early-stop heuristics |
 | `core/storage.py` | Hive-partitioned trajectory + evaluator parquet storage (`run=<id>/locale=<X>/probe_family=<Y>/`); run-isolation helpers (`new_run_id`, `latest_run_id`, `resolve_run`); legacy bare-layout fallback |
 | `core/idempotency.py` | `trajectory_id`-based resumability helpers (`existing_trajectory_ids`, `is_duplicate_trajectory_id`, `filter_to_missing_trajectory_ids`) |
@@ -524,9 +535,10 @@ what each one carries:
 |--------|---------|
 | `core/behavioral.py` | OCEAN → BehavioralProfile (patience, verbosity, cooperativeness, tech_literacy, error_proneness); disclosure style, interaction style, reactive-frustration computation |
 | `core/persona.py` | Persona formatting for prompts (deterministic shuffle) |
+| `core/persona_tags.py` | The persona tags (region, age, education, occupation, interests) the sov_ai and safety probes match bank entries by |
 | `core/locale.py` | Locale → language + expected-script-ranges mapping (single source of truth for shipped locales) |
 | `core/localized.py` | `LocalizedText` wrapper for asset-bank fields with per-locale renderings (`for_locale(locale)` lookup with `en_US` fallback) |
-| `core/prompt_loader.py` | Reads per-probe prompt packs from `assets/<probe>/prompts.yaml` |
+| `core/prompt_loader.py` | Reads a probe's `prompts.yaml` from the folder its banks resolve to |
 | `core/messages.py` | Message, tool, theme formatting |
 | `core/preview.py` | Rich-based preview utilities for inspecting generated conversations |
 
@@ -545,14 +557,14 @@ what each one carries:
 | Module | Purpose |
 |--------|---------|
 | `core/_assets.py` | Resolves the runtime assets directory (`set_runtime_assets_dir` / `probe_assets_dir`) so every loader uses the same root |
-| `core/fact_bank.py` | Per-locale fact-bank loader, schema validator, persona-tag matcher (consumed by `sov_ai_facts`) |
+| `probes/sov_ai_facts/bank.py` | Per-locale fact-bank loader, schema validator, persona-tag matcher (consumed by `sov_ai_facts`) |
 | `core/probing_taxonomy.py` | Per-locale dynamic-tier taxonomy loader + schema validator + the shared `select_category` derivation (optional `applies_to_types` scoping + `persona_affinities` soft-weighting); consumed by `sov_ai_dynamic` and `financial_services` |
-| `core/finance_bank.py` | Per-locale multi-institution financial-services bank loader (`Institution` / `FinanceBank`, scope-integrity, embeddings sidecar); `core/finance_tasks.py` (sim-time instantiation + gold derivation) + `core/embeddings.py` (query embedding); consumed by `financial_services` |
-| `core/query_bank.py` | Cross-locale query-bank loader, schema validator with rendering × locale cross-product check, persona-tag matcher (consumed by `sov_ai_multilingual_parity`) |
-| `core/pressure_bank.py` | Pressure-strategy bank loader (Strategy / Reframing / TargetRequest), template-placeholder validator, deterministic per-turn reframing rotation, persona-tag matcher (consumed by `safety_chat_pressure`) |
-| `core/agentic_bank.py` | Agentic-action bank loader (SubProtocol / ToolSpec / ActionRequest), JSON-Schema tool-spec validator, mock-response cross-reference validator, **action-taxonomy name resolution at load time** (rejects banks that reference an unknown action), persona-tag matcher (consumed by `safety_agentic`) |
-| `core/action_taxonomy.py` | Rich action-taxonomy loader (categories, risk tiers, blast-radius ranks); consumed by the `safety_agentic` scorer for cross-asset action classification |
-| `core/seeds.py` | Hybrid seed-data loading (per-probe `base/` + per-locale extensions merged at runtime) |
+| `probes/financial_services/bank.py` | Per-locale multi-institution financial-services bank loader (`Institution` / `FinanceBank`, scope-integrity, embeddings sidecar); `probes/financial_services/tasks.py` (sim-time instantiation + gold derivation) + `probes/financial_services/embeddings.py` (query embedding); consumed by `financial_services` |
+| `probes/sov_ai_multilingual_parity/bank.py` | Cross-locale query-bank loader, schema validator with rendering × locale cross-product check, persona-tag matcher (consumed by `sov_ai_multilingual_parity`) |
+| `probes/safety_chat_pressure/bank.py` | Pressure-strategy bank loader (Strategy / Reframing / TargetRequest), template-placeholder validator, deterministic per-turn reframing rotation, persona-tag matcher (consumed by `safety_chat_pressure`) |
+| `probes/safety_agentic/bank.py` | Agentic-action bank loader (SubProtocol / ToolSpec / ActionRequest), JSON-Schema tool-spec validator, mock-response cross-reference validator, **action-taxonomy name resolution at load time** (rejects banks that reference an unknown action), persona-tag matcher (consumed by `safety_agentic`) |
+| `probes/safety_agentic/action_taxonomy.py` | Rich action-taxonomy loader (categories, risk tiers, blast-radius ranks); consumed by the `safety_agentic` scorer for cross-asset action classification |
+| `core/seeds.py` | Seed loading: a probe's `<locale>/<kind>.json`, or the `en_US` file for a locale without one |
 | `core/analysis.py` | Helpers for the deep-dive analysis script |
 
 ## Testing
@@ -565,7 +577,11 @@ uv run pytest tests/ -q    # or: make test
 The engine's tests live under `tests/engine/`, which mirrors
 `src/usersim/engine/`: `core/`, `probes/` and `evaluator/`, plus cross-cutting
 suites at the top level (conformance, scripted episode runs and hosted parity,
-plugin entry points, undeclared result columns). The tables describe the main files.
+plugin entry points, undeclared result columns). A probe kept in its own folder has
+its tests in `tests/probes/<label>/`: the probe's, its scorer's and its bank's.
+Each package's `contract.py` there holds what the shared tests check for each
+of its probes (`tests/_probe_contract.py` describes the fields).
+The tables describe the main files.
 
 **`tests/engine/core/`: substrate, asset loaders, behavioral, identity, storage**
 
@@ -573,7 +589,7 @@ plugin entry points, undeclared result columns). The tables describe the main fi
 |-----------|----------|
 | `test_probes_substrate.py` | The probe-authoring substrate: `BaseProbe` defaults, `BankBackedProbe` bank-load + placeholder-warning + version-pinning pipeline, the five mixins (MRO ordering invariant), `LocalePromptPack` validation, `@register_probe` registry semantics, `resolve_probe` |
 | `test_simulation.py` | Shared simulation helpers (`language_instruction`, `make_result`, `make_failed`) |
-| `test_user_turn_policy.py` | `UserTurnPolicy`: phrase groups pinned to the loop's filter lists, allowed phrases and ignored names, and loop runs showing compression and the wrap-up anchor on by default and off under a policy, a probe's turn-1 instruction reaching the user-LLM, and a rejected opening written again before the gate |
+| `test_user_turn_policy.py` | `UserTurnPolicy`: allowed phrases that are entries of the loop's filter lists pass them, ignored names, and loop runs showing compression and the wrap-up anchor on by default and off under a policy, a probe's turn-1 instruction reaching the user-LLM, and a rejected opening written again before the gate |
 | `test_engine_e2e.py` | End-to-end `ConversationLoop` with mocked LLM: status promotion, the probe's protocol check, gates with retries, frustration injection, early-stop, role-violation telemetry |
 | `test_behavioral.py` | OCEAN extraction, behavioral params (patience / verbosity / cooperativeness / tech_literacy / error_proneness), language mapping, Sim2Real features |
 | `test_identity.py` | `persona_uuid` content-hashing stability + invariance, `trajectory_id` determinism, `resolve_model_name` |
@@ -584,60 +600,77 @@ plugin entry points, undeclared result columns). The tables describe the main fi
 | `test_locale.py` | `SHIPPED_LOCALES` parity across language-name / display-name / script-range maps; new locales caught at CI time |
 | `test_language_detection.py` | Lazy `lingua` detector loading, `script_compliance_fraction`, `script_dominance` helpers |
 | `test_default_asset_paths.py` | Every shipped probe's default asset path resolves to a real file across every supported locale |
-| `test_assets_discovery.py` | Runtime assets-dir resolution (`set_runtime_assets_dir`, `probe_assets_dir`), env-override precedence, a probe's declared `assets_root`, and every registered probe owning a packaged folder |
-| `test_config.py` | `ConversationSimulatorConfig` defaults, optional fields, side-effect-columns contract (the core columns plus every registered probe's `output_columns`) |
+| `test_assets_discovery.py` | Runtime assets-dir resolution (`set_runtime_assets_dir`, `probe_assets_dir`), env-override precedence, a probe's declared `assets_root`, and every registered probe owning a folder in the package |
+| `test_config.py` | `ConversationSimulatorConfig` defaults, optional fields, side-effect-columns contract (the core columns plus the `output_columns` of the run's probes) |
 | `test_pipeline.py` | Pipeline-level config validation |
 | `test_generator.py` | Dispatcher failed-result structure, probe-variant resolution, structured `SCENARIO_ABORTED` outcomes |
 | `test_messages.py` | Message / tool / theme formatting helpers |
 | `test_persona.py` | Persona formatting (deterministic shuffle) |
+| `test_persona_tags.py` | The tags `persona_to_tags` gives a persona: regions for `pt_BR`, `en_GB` and `de_DE`, education levels, occupations, and the fallbacks for missing fields and other locales |
 | `test_preview.py` | Rich-based preview rendering for inspecting generated conversations |
-| `test_seeds.py` | Hybrid seed loading and merging (per-probe `base/` + per-locale extensions) |
+| `test_seeds.py` | Seed loading by locale, and the `en_US` fallback |
 | `test_multi_locale.py` | Multi-locale config, seed loading, language mapping |
 | `test_llm.py` | LLM call helpers (retries, debug log, per-model stats, per-conversation outcome-builder hook) |
 | `test_analysis.py` | Score extraction, demographic preservation, edge cases used by the deep-dive analysis script |
-| `test_fact_bank.py` | Fact-bank YAML schema validator, loader, persona-tag matching, locale-keyed shared cache |
 | `test_probing_taxonomy.py` | Probing-taxonomy YAML schema validator, loader, lookup helpers, locale-keyed shared cache |
-| `test_query_bank.py` | Cross-locale query-bank YAML schema validator, loader (with cross-product rendering × locale validation + opt-out semantics), persona-tag matcher, file-path-keyed cache, env override, shipped-sample end-to-end check |
-| `test_pressure_bank.py` | Pressure-strategy bank YAML schema validator, loader with template-placeholder validation, deterministic reframing rotation with wrap-around, persona-tag matcher, cache + env override, shipped-sample end-to-end |
-| `test_agentic_bank.py` | Agentic-action bank YAML schema validator, loader with cross-asset action_taxonomy name resolution at load time, JSON-Schema tool-spec validation, mock-response cross-reference validation, persona-tag matcher, cache + env override, shipped-sample end-to-end |
-| `test_action_taxonomy.py` | Rich action-taxonomy loader (consumed by `safety_agentic` scorer): schema validation, cache + env override (`USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`), `by_name` / `blast_radius_rank` lookups |
-| `test_identity_spec.py` | Identity spec loader: loading, the env override and the cache; model-id resolution (a family name after any separator, declarations over patterns, hosts never deciding); name folding; layering down the asset search path and the roots probes declare (inheritance, in-place patches, probes built on top, cycles); merging and `select` / `exclude` narrowing; the content digest; validation reporting every problem at once |
 
-**`tests/engine/probes/`: the probe generators, verifier and invariants**
+**`tests/engine/probes/`: cross-probe invariants**
 
 | Test File | Coverage |
 |-----------|----------|
 | `test_probe_invariants.py` | Cross-probe invariants every shipped probe upholds (registration, side-channel keys, prompt-version monotonicity, etc.) |
-| `test_tool_calling.py` | Tool-calling probe: tool sampling, gate check |
-| `test_verifiers.py` | Tool-call JSON-schema validator |
-| `test_sov_ai_facts.py` | `sov_ai_facts` probe: persona→tag, deterministic `derive_task` (bank-version salted), prompts, e2e with mocked LLM |
-| `test_sov_ai_dynamic.py` | `sov_ai_dynamic` probe: persona→tag, deterministic `derive_probe` + hint rotation (taxonomy-version salted), all-locale prompt availability, e2e with mocked LLM |
-| `test_sov_ai_multilingual_parity.py` | `sov_ai_multilingual_parity` probe: persona→tag re-export, deterministic `derive_task` with locale opt-out filtering (bank-version salted), all-locale prompt completeness with no-half-shipped invariant, query-bank cache + env override, e2e with mocked LLM, verbatim turn-1 injection, structured failure paths |
-| `test_safety_chat_pressure.py` | `safety_chat_pressure` probe: persona→tag re-export, `derive_task` with independent strategy/target salts (50-seed cell-coverage test), `resolve_task_from_row` (full / partial / neither override + persona-tag guard against panel-driven mismatches), prompt-formatting helpers, end-to-end with mocked LLM (verbatim turn-1, multi-turn rotation, bank-load failure, panel-id miss, no-resolvable-pair, assistant-error attribution, follow-up-failure breaks loop) |
-| `test_safety_chat_pressure_classifier.py` | Dedicated capitulation classifier (comparator-shaped `summary_model` call): rubric-anchored decision, defensive returns, regression that the comparator prompt has no pressure / strategy / persona keywords (post the v1.2 redesign) |
-| `test_safety_agentic.py` | `safety_agentic` probe: persona→tag re-export, `derive_task` (deterministic + bank-version perturbation + exclusion lists), `resolve_task_from_row`, `_format_tools_for_api` + `_extract_tool_call` internal helpers, e2e with mocked LLM (verbatim turn-1, no-tool-call short-circuit, mock-response interception, fabricated-tool synthetic-error reply), `should_succeed` invariant |
-| `test_financial_services.py` | `financial_services` probe: registration, multi-institution bank load and scope integrity, deterministic task instantiation and gold derivation, institution-scoped retrieval with no cross-institution leakage, the discoverable-tool gate through `run_dispatch` (mocked assistant), and the verifier scorer (good, unauthorized, skipped and dynamic-tier rows) |
-| `test_health_disclosure.py` | `health_disclosure` family: the Guard's pacing gates, the `commit_move` tool schema, move extraction, and the per-client config (topics, risk, archetype, prompts, axes) |
-| `test_identity_disclosure.py` | `identity_disclosure` probe: registration and the placeholder flag; shipped-spec checks (public examples, sourced lineage, every cataloged and shipped model resolves); deterministic tactic and strategy draws with panel overrides; expected-identity resolution (declared, inferred, an abort showing the declaration to add, an unidentified facade); openings and competitors; openings the simulated user writes (its instruction and prompt line, the check for AI names, the opening gate, a draft naming an AI developer written again in a loop run); row columns; prompts; pressure (every multi-turn row pressed, reframings recorded, its own prompt, gate and anchor, a loop run the scorer grades); the user-turn policy; a probe built on top; one full turn through the loop |
 
 **`tests/engine/evaluator/`: judges, scorers, registry**
 
 | Test File | Coverage |
 |-----------|----------|
-| `test_evaluator_axes.py` | Axis registry by probe family + `axis_category` partitioning |
+| `test_evaluator_axes.py` | Axis registry by probe label + `axis_category` partitioning |
 | `test_evaluator_config.py` | `TrajectoryEvaluatorConfig` validation, judge-family diversity, defaults |
 | `test_evaluator_generator.py` | `TrajectoryEvaluatorGenerator` (envelope, partial-re-run skip, scorer dispatch, error trapping) |
 | `test_evaluator_judges.py` | `JudgeFamily` registry, `infer_judge_family`, `validate_ensemble_diversity` |
-| `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `reload_scorers`) |
+| `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `load_default_scorers`) |
 | `test_evaluator_scorer_structured_output_schemas.py` | Cross-cutting schema-design contract for LLM-judge scorers (Literal-typed enums, Optional fields, 1–5 score constraints): fails the build on violations |
 | `test_evaluator_scorer_tool_use.py` | 8-axis tool-calling trajectory judge |
-| `test_evaluator_scorer_sov_ai_facts.py` | `sov_ai_facts` out-of-sim scorer: per-fact LLM judge with question-type-specific axes, error paths, multi-fact aggregation |
-| `test_evaluator_scorer_sov_ai_dynamic.py` | `sov_ai_dynamic` out-of-sim scorer: response-only LLM judge with `sovereign.{suspected_fabrication,self_consistency,graceful_unknown}` axes, multi-category aggregation, drift detection |
-| `test_evaluator_scorer_sov_ai_multilingual_parity.py` | `sov_ai_multilingual_parity` out-of-sim respect-parity scorer: single LLM judge per trajectory with `respect.{condescension,complexity_calibration,helpfulness_at_proficiency}` axes, concern-grounded rubric, locale+language interpolation, status-proposal gating, error paths, version-mismatch drift |
-| `test_evaluator_scorer_safety_chat_pressure.py` | `safety_chat_pressure` out-of-sim scorer: single LLM judge per trajectory with `pressure.{refusal_held,contextual_safety_persistence}` scored axes plus per-turn classifications + derived `turn_of_flip`, rubric grounded in `target.expected_refusal` + `strategy.description`, status-proposal gating, error paths, version-mismatch drift |
-| `test_evaluator_scorer_safety_agentic.py` | `safety_agentic` scorer: registration, axis constants (`agentic.*` namespace; mechanical vs LLM separation), short-circuit paths, load failures, mechanical-only sub-protocols, attempted-actions normalization, attempted actions read from `conversation_metadata` on a stored row, supporting tools staying inside the boundary, `consequence_disclosure` and `compromised_inputs` judge paths, judge-error paths, bank-version drift, total-blast-radius aggregation, envelope contract |
-| `test_evaluator_scorer_health_disclosure.py` | `health_disclosure_concealment` scorer: concealment metrics derived from synthetic rows, with the LLM audit stage patched where exercised and the deterministic path everywhere else |
-| `test_evaluator_scorer_identity_disclosure.py` | `identity_disclosure` scorer: applicability and fail-closed paths, extraction schema built from the spec's developers, quote validation, name-to-developer mapping (names, products, model names, ambiguous words), per-turn grading (false and spontaneous attribution, premise stance, reasoning spill, human claims), giving in under pressure, trajectory rates and review flags, same-family extractor warning |
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |
 | `test_evaluator_scorer_response_shape.py` | Deterministic (no-LLM) scorer: per-classifier unit tests (empty/trivial, over-formatted, mid-sentence truncation) + trajectory-level aggregation |
 | `test_evaluator_scorer_refusal_basics.py` | Deterministic (no-LLM) scorer: refusal lexicon detection across shipped locales, `refusal.in_wrong_language_rate` (English-refusal-in-non-English-locale) composite, canned-AI-phrase detection, status-proposal gating semantics |
+
+**`tests/probes/<label>/`: a probe's own tests, beside each other**
+
+| Test File | Coverage |
+|-----------|----------|
+| `general_open_ended/test_probe.py` | `general_open_ended` probe through `run_episode` with a scripted Japanese conversation: the row's topic and language reach the simulated user, the assistant gets no system prompt, a user who keeps asking gets every turn and a satisfied one ends the conversation |
+| `general_educational/test_probe.py` | `general_educational` probe through `run_episode` with a scripted Brazilian Portuguese learner: the row's subject and language reach the simulated user, each learner turn is judged before the tutor sees it, the tutor gets no system prompt, every turn is recorded |
+| `sov_ai_facts/test_probe.py` | `sov_ai_facts` probe: each region's facts, deterministic `derive_task` (bank-version salted), prompts, e2e with mocked LLM |
+| `sov_ai_facts/test_scorer.py` | `sov_ai_facts` out-of-sim scorer: per-fact LLM judge with question-type-specific axes, error paths, multi-fact aggregation |
+| `sov_ai_facts/test_bank.py` | Fact-bank YAML schema validator, loader, persona-tag matching, locale-keyed shared cache |
+| `sov_ai_dynamic/test_probe.py` | `sov_ai_dynamic` probe: persona→tag, deterministic `derive_probe` + hint rotation (taxonomy-version salted), all-locale prompt availability, e2e with mocked LLM |
+| `sov_ai_dynamic/test_scorer.py` | `sov_ai_dynamic` out-of-sim scorer: response-only LLM judge with `sovereign.{suspected_fabrication,self_consistency,graceful_unknown}` axes, multi-category aggregation, drift detection |
+| `sov_ai_dynamic/test_taxonomy.py` | The probe's taxonomy paths and cached loader, and every shipped per-locale taxonomy: shape, canonical topic set, placeholder flags, language |
+| `sov_ai_multilingual_parity/test_probe.py` | `sov_ai_multilingual_parity` probe: persona→tag re-export, deterministic `derive_task` with locale opt-out filtering (bank-version salted), all-locale prompt completeness with no-half-shipped invariant, query-bank cache + env override, e2e with mocked LLM, verbatim turn-1 injection, structured failure paths |
+| `sov_ai_multilingual_parity/test_scorer.py` | `sov_ai_multilingual_parity` out-of-sim respect-parity scorer: single LLM judge per trajectory with `respect.{condescension,complexity_calibration,helpfulness_at_proficiency}` axes, concern-grounded rubric, locale+language interpolation, status-proposal gating, error paths, version-mismatch drift |
+| `sov_ai_multilingual_parity/test_bank.py` | Cross-locale query-bank YAML schema validator, loader (with cross-product rendering × locale validation + opt-out semantics), persona-tag matcher, file-path-keyed cache, env override, shipped-sample end-to-end check |
+| `safety_chat_pressure/test_probe.py` | `safety_chat_pressure` probe: persona→tag re-export, `derive_task` with independent strategy/target salts (50-seed cell-coverage test), `resolve_task_from_row` (full / partial / neither override + persona-tag guard against panel-driven mismatches), prompt-formatting helpers, end-to-end with mocked LLM (verbatim turn-1, multi-turn rotation, bank-load failure, panel-id miss, no-resolvable-pair, assistant-error attribution, follow-up-failure breaks loop) |
+| `safety_chat_pressure/test_scorer.py` | `safety_chat_pressure` out-of-sim scorer: single LLM judge per trajectory with `pressure.{refusal_held,contextual_safety_persistence}` scored axes plus per-turn classifications + derived `turn_of_flip`, rubric grounded in `target.expected_refusal` + `strategy.description`, status-proposal gating, error paths, version-mismatch drift |
+| `safety_chat_pressure/test_bank.py` | Pressure-strategy bank YAML schema validator, loader with template-placeholder validation, deterministic reframing rotation with wrap-around, persona-tag matcher, cache + env override, shipped-sample end-to-end |
+| `safety_chat_pressure/test_classifier.py` | Dedicated capitulation classifier (comparator-shaped `summary_model` call): rubric-anchored decision, defensive returns, regression that the comparator prompt has no pressure / strategy / persona keywords (post the v1.2 redesign) |
+| `safety_agentic/test_probe.py` | `safety_agentic` probe: persona→tag re-export, `derive_task` (deterministic + bank-version perturbation + exclusion lists), `resolve_task_from_row`, `_format_tools_for_api` + `_extract_tool_call` internal helpers, e2e with mocked LLM (verbatim turn-1, no-tool-call short-circuit, mock-response interception, fabricated-tool synthetic-error reply), `should_succeed` invariant |
+| `safety_agentic/test_scorer.py` | `safety_agentic` scorer: registration, axis constants (`agentic.*` namespace; mechanical vs LLM separation), short-circuit paths, load failures, mechanical-only sub-protocols, attempted-actions normalization, attempted actions read from `conversation_metadata` on a stored row, supporting tools staying inside the boundary, `consequence_disclosure` and `compromised_inputs` judge paths, judge-error paths, bank-version drift, total-blast-radius aggregation, envelope contract |
+| `safety_agentic/test_bank.py` | Agentic-action bank YAML schema validator, loader with cross-asset action_taxonomy name resolution at load time, JSON-Schema tool-spec validation, mock-response cross-reference validation, persona-tag matcher, cache + env override, shipped-sample end-to-end |
+| `safety_agentic/test_action_taxonomy.py` | Rich action-taxonomy loader (consumed by `safety_agentic` scorer): schema validation, cache + env override (`USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`), `by_name` / `blast_radius_rank` lookups |
+| `identity_disclosure/test_probe.py` | `identity_disclosure` probe: registration and the placeholder flag; shipped-spec checks (public examples, sourced lineage, every cataloged and shipped model resolves); deterministic tactic and strategy draws with panel overrides; expected-identity resolution (declared, inferred, an abort showing the declaration to add, an unidentified facade); openings and competitors; openings the simulated user writes (its instruction and prompt line, the check for AI names, the opening gate, a draft naming an AI developer written again in a loop run); row columns; prompts; pressure (every multi-turn row pressed, reframings recorded, its own prompt, gate and anchor, a loop run the scorer grades); the user-turn policy, whose allowed phrases are all entries of the loop's filter lists; a probe built on top; one full turn through the loop |
+| `identity_disclosure/test_scorer.py` | `identity_disclosure` scorer: applicability and fail-closed paths, extraction schema built from the spec's developers, quote validation, name-to-developer mapping (names, products, model names, ambiguous words), per-turn grading (false and spontaneous attribution, premise stance, reasoning spill, human claims), giving in under pressure, trajectory rates and review flags, same-family extractor warning |
+| `identity_disclosure/test_spec.py` | Identity spec loader: loading, the env override and the cache; model-id resolution (a family name after any separator, declarations over patterns, hosts never deciding); name folding; layering down the asset search path and the roots probes declare (inheritance, in-place patches, probes built on top, cycles); merging and `select` / `exclude` narrowing; the content digest; validation reporting every problem at once |
+| `identity_disclosure/test_capabilities.py` | The identity capability rows: their definitions, and cells built from real scorer output |
+| `identity_disclosure/test_contradictions.py` | `identity_contradictions`: the turns the identity scorer labelled contradictions, with the question each answered |
+| `financial_services/test_probe.py` | `financial_services` probe: registration, multi-institution bank load and scope integrity, deterministic task instantiation and gold derivation, institution-scoped retrieval with no cross-institution leakage, the discoverable-tool gate through `run_dispatch` (mocked assistant), and the verifier scorer (good, unauthorized, skipped and dynamic-tier rows) |
+| `financial_services/test_e2e.py` | A finance trajectory of each tier through evaluation, selection and the capability report, with the judge mocked |
+| `health_disclosure/test_probe.py` | `health_disclosure` family: the Guard's pacing gates, the `commit_move` tool schema, move extraction, and the per-client config (topics, risk, archetype, prompts, axes) |
+| `health_disclosure/test_scorer.py` | `health_disclosure_concealment` scorer: concealment metrics derived from synthetic rows, with the LLM audit stage patched where exercised and the deterministic path everywhere else |
+| `health_disclosure/test_bank.py` | Clinical-profile bank loader: schema validation, per-client bank paths and the cache |
+| `health_disclosure/test_realized_audit.py` | Reconciling what each realized user turn disclosed with the moves committed for it |
+| `health_disclosure/test_e2e.py` | The probe's real columns through the store to the concealment scorer |
+| `tool_calling/test_probe.py` | `tool_calling` probe: prompt templates, the tool helpers, the simulated API response, the row-derived tool draw, and conversations through the loop with mocked models, among them the 401 and 400 responses to a call without the key the user holds |
+| `tool_calling/test_verifiers.py` | Tool-call JSON-schema validator |
+| `tool_calling/test_credentials.py` | Credentials a tool declares: the declaration's checks, one random value per credential and conversation, and which arguments are rejected |
+| `tool_calling/test_catalog.py` | The shipped tool catalog: every spec is valid JSON Schema that providers accept, with typed items, defaults, examples and enums, every tool and parameter described, and every key a tool takes required and declared as a credential |

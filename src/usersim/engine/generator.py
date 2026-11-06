@@ -36,13 +36,13 @@ from usersim.engine.core.llm import (
     flush_debug_log,
     get_call_stats,
     get_record_stats,
+    outcome_builder_scope,
     record_finished,
     set_conversation_id,
-    set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import Provenance
 from usersim.engine.core.persona import persona_full_name
-from usersim.engine.core.probes import BankLoadError, dispatch_episode, load_builtin_probes
+from usersim.engine.core.probes import BankLoadError, declared_model_aliases, dispatch_episode, load_builtin_probes
 from usersim.engine.core.provenance import get_code_sha
 
 logger = logging.getLogger("usersim.engine")
@@ -148,20 +148,16 @@ class ConversationSimulatorGenerator(
                 else:
                     raise
 
-        # The embedding model is NOT a chat alias, so it's absent from
-        # MODEL_ALIASES -- but the financial_services probe needs its facade in
-        # the models dict to embed kb_search queries for dense retrieval. Add it
-        # best-effort: if it isn't configured/resolvable, dense retrieval falls
-        # back to lexical (the probe logs a loud warning), never a hard failure.
-        embed_alias = getattr(self.config, "finance_embedding_model_alias", None)
-        if embed_alias and embed_alias not in models:
+        # The models probes call beyond the conversation's own, best-effort:
+        # one the registry lacks is left out, and the probe that names it
+        # handles its absence.
+        for alias in declared_model_aliases(cfg):
+            if alias in models:
+                continue
             try:
-                models[embed_alias] = self.get_model(embed_alias)
+                models[alias] = self.get_model(alias)
             except Exception:
-                logger.debug(
-                    "  |-- embedding model %r not in registry; finance dense retrieval will fall back to lexical",
-                    embed_alias,
-                )
+                logger.debug("  |-- model alias %r not in the model registry; probes run without it", alias)
 
         t_record_start = time.monotonic()
 
@@ -200,15 +196,13 @@ class ConversationSimulatorGenerator(
         # specific replayed row.
         set_conversation_id(f"{traj_id} | {persona_name} | {probe_type}")
 
-        # Install the per-conversation outcome-builder hook so await acall_llm()
-        # invocations inside this trajectory feed per-model tokens /
-        # calls / latencies into simulation_outcome. Cleared in the
-        # finally block so we never leak the builder across rows.
+        # Every acall_llm call inside this trajectory feeds its per-model
+        # tokens, calls and latency into the row's simulation_outcome; the
+        # scope ends with the row, so no builder carries over to the next.
         row_outcome_builder = constructed.outcome if constructed is not None else None
-        set_current_outcome_builder(row_outcome_builder)
 
         t_sim_start = time.monotonic()
-        try:
+        with outcome_builder_scope(row_outcome_builder):
             try:
                 if construction_error is not None:
                     raise construction_error.cause
@@ -238,8 +232,6 @@ class ConversationSimulatorGenerator(
                 # than crashing the row.
                 logger.warning(f"  |-- Simulation failed for {persona_name}: {e}")
                 result = _make_aborted_result(str(e), provenance=provenance)
-        finally:
-            set_current_outcome_builder(None)
         t_sim_elapsed = time.monotonic() - t_sim_start
 
         data.update(result)
@@ -400,9 +392,9 @@ def _make_aborted_result(
     INFRASTRUCTURE): a probe abort is a SCENARIO_ABORTED outcome
     attributed to SCENARIO_LOGIC — the asset bank failed to load,
     no resolvable task for the persona, prompt pack missing for the
-    locale, etc. The matching probe shim raises one of these errors
-    at construction time; the dispatcher catches and surfaces a
-    structured outcome rather than crashing the row.
+    locale, etc. A probe raises one of these errors at construction
+    time; the generator catches it and records a structured outcome
+    rather than crashing the row.
     """
     from usersim.engine.core.outcomes import (
         FailureAttribution,

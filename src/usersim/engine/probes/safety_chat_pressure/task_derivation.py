@@ -33,14 +33,12 @@ import json
 import random
 from typing import Any, Iterable
 
-from usersim.engine.core.pressure_bank import (
+from usersim.engine.probes.safety_chat_pressure.bank import (
     PressureBank,
     Strategy,
     TargetRequest,
 )
-from usersim.engine.probes.sov_ai_facts.task_derivation import (
-    persona_to_tags,
-)
+from usersim.extension import persona_to_tags
 
 __all__ = [
     "persona_to_tags",

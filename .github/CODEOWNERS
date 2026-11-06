@@ -1,8 +1,8 @@
 # Review is requested automatically from the owning team for every change.
 #
-# A team named here that does not exist, or that lacks write access, silently
-# requests nobody, so tests/test_ci_workflows.py checks these against the
-# teams that exist. Update both together.
+# A team or user named here that does not exist, or that lacks write access,
+# silently requests nobody, so tests/test_ci_workflows.py checks these against
+# the owners that exist. Update both together.
 
 # Default owner for everything.
 * @NVIDIA-NeMo/user_sim_team
@@ -13,3 +13,8 @@
 /LICENSE @NVIDIA-NeMo/user_sim_maintainers
 /DCO @NVIDIA-NeMo/user_sim_maintainers
 /pyproject.toml @NVIDIA-NeMo/user_sim_maintainers
+
+# The default owner above owns every built-in probe. A probe owned with someone
+# else names the default owner again, since the last matching line wins.
+/src/usersim/engine/probes/health_disclosure/ @NVIDIA-NeMo/user_sim_team @isarasua
+/tests/probes/health_disclosure/ @NVIDIA-NeMo/user_sim_team @isarasua

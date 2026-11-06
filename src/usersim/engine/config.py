@@ -5,13 +5,13 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from data_designer.config.base import SingleColumnConfig
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from usersim.engine.core.columns import CORE_RESULT_COLUMNS
-from usersim.engine.core.probes import declared_output_columns
+from usersim.engine.core.probes import declared_output_columns, run_probes
 
 MODEL_USER = "user_model"
 MODEL_ASSISTANT = "assistant_model"
@@ -43,7 +43,7 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     """Configuration for the unified conversation simulator plugin.
 
     Dispatches to probe-specific generators based on the probe_type column.
-    Tool-calling-specific fields are optional (None when not applicable).
+    A probe's own settings are in ``probe_options``.
     """
 
     column_type: Literal["conversation-simulator"] = "conversation-simulator"
@@ -55,16 +55,11 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     probe_type_column: str = "probe_type"
     theme_column: str = "theme"
 
-    # Tool-calling-specific columns (optional, None for non-tool probes)
-    tools_column: str | None = None
-    toolset_name_column: str | None = None
-
     # Locale (set per pipeline run, not per row)
     locale: str = "en_US"
     assets_dir: str | None = None
 
     # Simulation parameters
-    max_tools: int = 5
     max_turns: int = 5
     max_steps: int = 10
     max_query_attempts: int = 3
@@ -146,26 +141,22 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # Logging verbosity: 0=quiet, 1=normal (default), 2=detailed per-call timing
     verbosity: int = 1
 
-    # financial_services probe knobs (ignored by other probes).
-    # ``finance_tier_mix`` is the probability [0,1] a trajectory uses the DYNAMIC
-    # tier (generated open-ended, judge-scored) vs the default VERIFIABLE tier;
-    # ``finance_tier`` force-pins a tier ("verifiable"|"dynamic") when set.
-    # ``finance_retrieval_mode`` selects the kb_search backend: "hybrid" (default,
-    # the PRIMARY setting — normalised dense cosine blended with lexical overlap
-    # over the institution's corpus; both tiers retrieve from the KB) | "dense"
-    # (cosine ALONE — kept as an ablation, and measurably weak on a corpus this
-    # homogeneous: 88.8% of its results were tool-reference docs against an 11.3%
-    # corpus share) | "golden" (a reasoning-isolation ABLATION that injects the
-    # verifiable task's gold docs so retrieval quality is removed as a variable;
-    # the dynamic tier has no gold docs so it falls back to lexical). Every mode
-    # degrades to lexical when no embedding endpoint is reachable. Retrieval
-    # quality itself is measured separately by the financial_retrieval_recall
-    # capability (document recall).
-    # ``finance_embedding_model_alias`` is the query-embedding alias.
-    finance_tier_mix: float = 0.0
-    finance_tier: str | None = None
-    finance_retrieval_mode: str = "hybrid"
-    finance_embedding_model_alias: str = "embedding_model"
+    # Each probe's settings for the run, by label: ``{"<label>": {"<name>":
+    # value}}``. A probe declares the settings it takes in its ``Options``;
+    # the run checks them before any model call, and the probe reads them as
+    # ``self.options``. A probe left out runs on its defaults.
+    probe_options: dict[str, dict[str, Any]] = Field(default_factory=dict)
+
+    # The labels of the probes in the run's mix. A run declares the output
+    # columns and resolves the extra models of these probes only; a config
+    # that names none counts every registered probe.
+    probes: list[str] = Field(default_factory=list)
+
+    # The columns of the seed table the run attaches. Data Designer gives every
+    # row one row of that table; a row of a probe that reads no seed table
+    # gets these columns empty, so it neither sees nor records a seed row its
+    # conversation never used.
+    seed_dataset_columns: list[str] = Field(default_factory=list)
 
     # Reproducibility
     random_seed: int | None = None
@@ -178,12 +169,20 @@ class ConversationSimulatorConfig(SingleColumnConfig):
         them here means an unreachable endpoint or a typo surfaces in the
         startup health check rather than partway through a paid run.
 
-        ``summary_model`` and ``finance_embedding_model_alias`` are left
-        out on purpose. Both are optional at run time -- summaries fall
-        back to the user model, dense retrieval falls back to lexical --
-        and the health check treats every alias it is given as required.
+        ``summary_model`` and the aliases probes name in ``model_aliases``
+        are left out on purpose. They are optional at run time -- summaries
+        fall back to the user model, and each probe handles a missing alias
+        of its own -- and the health check treats every alias it is given as
+        required.
         """
         return list(REQUIRED_MODEL_ALIASES)
+
+    @field_validator("probe_options")
+    @classmethod
+    def _leave_out_probes_given_no_setting(cls, probe_options: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        # Such a probe runs on its defaults either way, and stored rows, which
+        # carry this config, cannot hold an empty mapping in parquet.
+        return {label: values for label, values in probe_options.items() if values}
 
     @model_validator(mode="after")
     def _replay_needs_stored_reasoning(self) -> "ConversationSimulatorConfig":
@@ -205,10 +204,11 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     def side_effect_columns(self) -> list[str]:
         """The columns a run keeps besides the configured one.
 
-        The core columns the engine writes for every probe, then each
-        registered probe's ``output_columns``. A run writes back only these
+        The core columns the engine writes for every probe, then the
+        ``output_columns`` of each probe in the run (``probes``, or every
+        registered probe when it names none). A run writes back only these
         and drops any other key a probe returns (the generator logs a
         warning), so an undeclared column never reaches the scorer that
         reads it.
         """
-        return [*CORE_RESULT_COLUMNS, *declared_output_columns()]
+        return [*CORE_RESULT_COLUMNS, *declared_output_columns(run_probes(self))]

@@ -16,30 +16,6 @@ from dataclasses import dataclass
 from functools import cache
 from typing import Any
 
-#: The noun "language model" as the loop's fourth-wall filter lists it, for a probe
-#: whose users ask what the model is. The English entry is the phrase "as a language
-#: model", which stays caught.
-LANGUAGE_MODEL_NOUNS: frozenset[str] = frozenset(
-    {
-        "modèle de langage",
-        "modèle linguistique",
-        "modelo de linguagem",
-        "modelo linguístico",
-        "言語モデル",
-        "भाषा मॉडल",
-        "언어 모델",
-    }
-)
-
-#: "First message" as the fourth-wall filter lists it, for a probe whose users point
-#: back to how the conversation began.
-FIRST_MESSAGE_PHRASES: frozenset[str] = frozenset(
-    {"premier message", "primeira mensagem", "最初のメッセージ", "पहला संदेश", "첫 메시지"}
-)
-
-#: "I understand, but" as the refusal-echo filter lists it, for a probe whose users push back.
-PUSHBACK_OPENERS: frozenset[str] = frozenset({"i understand, but", "i understand — but", "i understand--but"})
-
 
 @dataclass(frozen=True)
 class UserTurnPolicy:

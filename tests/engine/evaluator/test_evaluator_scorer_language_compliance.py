@@ -12,28 +12,11 @@ from __future__ import annotations
 import json
 from typing import Any
 
-import pytest
-
-from usersim.engine.evaluator.scorers import (
-    clear_registry,
-    get_scorer,
-    list_scorers,
-    load_default_scorers,
-)
+from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 from usersim.engine.evaluator.scorers.language_compliance import (
     LANGUAGE_AXES,
     score_language_compliance_trajectory,
 )
-
-# ---------------------------------------------------------------------------
-# Shared fixtures
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture(autouse=True)
-def _ensure_scorers_loaded():
-    load_default_scorers()
-    yield
 
 
 def _trajectory(
@@ -62,14 +45,7 @@ class TestRegistration:
         assert "language_compliance" in list_scorers()
 
     def test_resolvable_via_registry(self) -> None:
-        fn = get_scorer("language_compliance")
-        assert fn.__name__ == score_language_compliance_trajectory.__name__
-        assert fn.__module__ == score_language_compliance_trajectory.__module__
-
-    def test_reload_picks_up_registration(self) -> None:
-        clear_registry()
-        load_default_scorers()
-        assert "language_compliance" in list_scorers()
+        assert get_scorer("language_compliance") is score_language_compliance_trajectory
 
 
 # ---------------------------------------------------------------------------

@@ -52,24 +52,6 @@ def extension(monkeypatch, tmp_path):
     clear_extension_cache()
 
 
-@pytest.fixture
-def probe_registry():
-    """Restore the probe registry exactly, rather than clearing it.
-
-    ``clear_registry()`` drops the built-ins as well, which would leave an
-    empty registry for whatever test runs next in the same worker.
-    """
-    from usersim.engine.core import probes
-
-    # Loaded first so the snapshot holds the built-ins even when no earlier
-    # test has looked a probe up.
-    probes.load_builtin_probes()
-    snapshot = dict(probes._PROBE_REGISTRY)
-    yield
-    probes._PROBE_REGISTRY.clear()
-    probes._PROBE_REGISTRY.update(snapshot)
-
-
 class TestProbeDiscovery:
     """A probe package must register through the same decorator a built-in uses."""
 
@@ -77,12 +59,12 @@ class TestProbeDiscovery:
 from usersim.engine.core.probes import BaseProbe, register_probe
 
 
-@register_probe(family="general", prompt_version="v1.0", variants=("default",))
+@register_probe
 class PartnerProbe(BaseProbe):
     label = "partner_probe"
 """
 
-    def test_contributed_probe_appears(self, extension, probe_registry) -> None:
+    def test_contributed_probe_appears(self, extension, restored_registries) -> None:
         from usersim.engine.core.probes import known_probes
 
         extension(
@@ -92,7 +74,7 @@ class PartnerProbe(BaseProbe):
         )
         assert "partner_probe" in known_probes()
 
-    def test_contributed_probe_resolves(self, extension, probe_registry) -> None:
+    def test_contributed_probe_resolves(self, extension, restored_registries) -> None:
         from usersim.engine.core.probes import resolve_probe
 
         extension(
@@ -102,7 +84,7 @@ class PartnerProbe(BaseProbe):
         )
         assert resolve_probe("partner_probe").label == "partner_probe"
 
-    def test_absent_when_discovery_is_off(self, extension, probe_registry, monkeypatch) -> None:
+    def test_absent_when_discovery_is_off(self, extension, restored_registries, monkeypatch) -> None:
         from usersim.engine.core.probes import known_probes
 
         extension(
@@ -113,7 +95,7 @@ class PartnerProbe(BaseProbe):
         monkeypatch.setenv(DISABLE_ENV_VAR, "1")
         assert "partner_probe" not in known_probes()
 
-    def test_a_contributed_probe_cannot_take_a_builtin_label(self, extension, probe_registry, caplog) -> None:
+    def test_a_contributed_probe_cannot_take_a_builtin_label(self, extension, restored_registries, caplog) -> None:
         from usersim.engine.core.probes import known_probes, resolve_probe
 
         builtin = resolve_probe("tool_calling")
@@ -125,18 +107,7 @@ class PartnerProbe(BaseProbe):
         with caplog.at_level(logging.WARNING, logger="usersim.engine"):
             assert "tool_calling" in known_probes()
         assert resolve_probe("tool_calling") is builtin
-        assert "'tool_calling' is already registered by usersim.engine.probes.tool_calling.generator" in caplog.text
-
-
-@pytest.fixture
-def scorer_registry():
-    """Restore the scorer registry so a fixture scorer does not leak."""
-    from usersim.engine.evaluator import scorers
-
-    snapshot = dict(scorers._REGISTRY)
-    yield
-    scorers._REGISTRY.clear()
-    scorers._REGISTRY.update(snapshot)
+        assert "'tool_calling' is already registered by usersim.engine.probes.tool_calling.probe" in caplog.text
 
 
 class TestScorerDiscovery:
@@ -151,7 +122,7 @@ def _score(row, models):
 register_scorer("partner_scorer", _score)
 """
 
-    def test_contributed_scorer_resolves(self, extension, scorer_registry) -> None:
+    def test_contributed_scorer_resolves(self, extension, restored_registries) -> None:
         from usersim.engine.evaluator.scorers import get_scorer
 
         extension(
@@ -161,7 +132,7 @@ register_scorer("partner_scorer", _score)
         )
         assert get_scorer("partner_scorer")({}, {}) == {"score": 1.0}
 
-    def test_contributed_scorer_is_listed(self, extension, scorer_registry) -> None:
+    def test_contributed_scorer_is_listed(self, extension, restored_registries) -> None:
         from usersim.engine.evaluator.scorers import list_scorers
 
         extension(
@@ -171,7 +142,7 @@ register_scorer("partner_scorer", _score)
         )
         assert "partner_scorer" in list_scorers()
 
-    def test_a_contributed_scorer_cannot_take_a_builtin_name(self, extension, scorer_registry, caplog) -> None:
+    def test_a_contributed_scorer_cannot_take_a_builtin_name(self, extension, restored_registries, caplog) -> None:
         from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 
         builtin = get_scorer("tool_use")
@@ -259,6 +230,25 @@ def factory():
             assert domain.region_spec_dir is not None, "the extension displaced the built-in financial_services domain"
         finally:
             clear_domain_cache()
+
+    @pytest.mark.parametrize(("command", "flag"), [("validate-assets", "--dir"), ("evaluate-assets", "--dir")])
+    def test_a_domain_with_no_probe_of_its_name_is_asked_for_a_folder(self, extension, caplog, command, flag) -> None:
+        """A domain's default bank is its probe's asset folder; without that probe the command asks for one."""
+        from usersim import cli
+        from usersim.asset_gen.registry import clear_domain_cache
+
+        extension(
+            "ext_domain_mod4.py",
+            self.SOURCE,
+            ("partner_domain", "ext_domain_mod4:DOMAIN", ASSET_DOMAINS),
+        )
+        clear_domain_cache()
+        try:
+            with caplog.at_level(logging.ERROR):
+                assert cli.main([command, "--domain", "partner_domain", "--locale", "en_US"]) == 2
+        finally:
+            clear_domain_cache()
+        assert f"pass {flag}" in caplog.text
 
 
 class TestCapabilityDiscovery:
@@ -350,33 +340,54 @@ PAIR = (PARTNER,)
         ids = [d.id for d in capability_definitions()]
         assert ids.count(builtin_id) == 1
 
+    MODULE = (
+        SOURCE
+        + """
+CAPABILITIES = (PARTNER,)
+AXIS_DESCRIPTIONS = {"partner_axis": "Share of turns the partner probe counts."}
+"""
+    )
+
+    def test_a_capabilities_module_gives_its_capabilities_and_axis_descriptions(self, extension) -> None:
+        """The same shape as a built-in package's capabilities.py."""
+        from usersim.taxonomy.capabilities import axis_description, capability_definitions
+
+        extension("ext_cap_mod6.py", self.MODULE, ("partner_capabilities", "ext_cap_mod6", CAPABILITIES))
+
+        assert "partner_capability" in [d.id for d in capability_definitions()]
+        assert axis_description("partner_axis") == "Share of turns the partner probe counts."
+
+    def test_a_module_without_capabilities_is_reported(self, extension) -> None:
+        from usersim.engine.core._extensions import extension_records
+        from usersim.taxonomy.capabilities import capability_definitions
+
+        extension("ext_cap_mod7.py", "AXIS_DESCRIPTIONS = {}\n", ("partner_capabilities", "ext_cap_mod7", CAPABILITIES))
+
+        capability_definitions()
+        (record,) = [r for r in extension_records() if r.name == "partner_capabilities"]
+        assert record.problem == "module ext_cap_mod7 defines no CAPABILITIES"
+
+    def test_a_description_of_an_axis_already_described_is_rejected(self, extension, caplog) -> None:
+        """Which text a reviewer reads must not depend on what else is installed."""
+        from usersim.engine.core._extensions import extension_records
+        from usersim.taxonomy.capabilities import axis_description
+
+        builtin = axis_description("language_appropriateness")
+        extension(
+            "ext_cap_mod8.py",
+            self.SOURCE + 'CAPABILITIES = (PARTNER,)\nAXIS_DESCRIPTIONS = {"language_appropriateness": "Mine."}\n',
+            ("partner_capabilities", "ext_cap_mod8", CAPABILITIES),
+        )
+
+        with caplog.at_level(logging.WARNING, logger="usersim.engine"):
+            assert axis_description("language_appropriateness") == builtin
+        assert "axis description 'language_appropriateness'" in caplog.text
+        (record,) = [r for r in extension_records() if r.name == "partner_capabilities"]
+        assert record.problem == "axis 'language_appropriateness' is already described by the built-ins"
+
 
 class TestLayering:
-    """The taxonomy package exists to break a cycle; assert it stays broken."""
-
-    def test_taxonomy_does_not_import_its_consumers(self) -> None:
-        import ast
-        import pathlib
-
-        offenders = []
-        from usersim import taxonomy
-
-        taxonomy_dir = pathlib.Path(taxonomy.__file__).resolve().parent
-        for path in taxonomy_dir.glob("*.py"):
-            for node in ast.walk(ast.parse(path.read_text())):
-                names = []
-                if isinstance(node, ast.ImportFrom) and node.module:
-                    names = [node.module]
-                elif isinstance(node, ast.Import):
-                    names = [a.name for a in node.names]
-                for n in names:
-                    # Everything now shares the ``usersim`` root, so the
-                    # subpackage is the second component.
-                    parts = n.split(".")
-                    layer = parts[1] if parts[:1] == ["usersim"] else parts[0]
-                    if layer in {"reporting", "selection", "cli"}:
-                        offenders.append(f"{path}: {n}")
-        assert not offenders, "taxonomy must not import the layers that depend on it: " + str(offenders)
+    """Config-time construction stays clear of the reporting layer; ``test_layering.py`` states the layers."""
 
     def test_config_time_construction_avoids_reporting(self) -> None:
         """Config-time construction must not import the reporting layer."""

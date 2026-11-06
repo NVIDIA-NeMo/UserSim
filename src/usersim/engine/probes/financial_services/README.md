@@ -51,7 +51,7 @@ set. The remaining shipped locales have the persona substrate in place but no
 region spec. See [Authoring a new locale](#authoring-a-new-locale).
 
 > For the asset-bank contract see
-> [SCHEMA.md](../../assets/financial_services/SCHEMA.md). A file-by-file
+> [SCHEMA.md](assets/financial_services/SCHEMA.md). A file-by-file
 > code map is at the [bottom of this document](#code-layout).
 
 ## Two tiers
@@ -201,9 +201,9 @@ practical consequence was that the assistant answered product questions without
 ever seeing the product documents. Blending in the lexical signal restores
 topical discrimination while cosine still supplies paraphrase matching.
 
-The mode is selected at run time with `--finance-retrieval-mode` (`usersim
-simulate`, default `hybrid`) or `FINANCE_RETRIEVAL_MODE`
-(`notebooks/01_simulate.ipynb`).
+The mode is the probe's `retrieval_mode` setting (default `hybrid`), set with
+`--probe-option financial_services.retrieval_mode=<mode>` on `usersim simulate`
+or in `PROBE_OPTIONS` in `notebooks/01_simulate.ipynb`.
 
 **Disentangling retrieval from reasoning.** Success is scored on the verifiable
 state/action outcome, *not* on retrieval. Retrieval is reported separately, on two
@@ -312,16 +312,19 @@ The probe is opt-in: it is not part of the default probe mix. Run it with:
 
 ```bash
 usersim simulate --locale en_US --num-rows 20 --probe-mix 'financial_services=1.0' \
-  --finance-tier-mix 0.5 --out output/trajectories   # 0.0 = verifiable-only (default); 1.0 = dynamic-only
+  --probe-option financial_services.tier_mix=0.5 --out output/trajectories   # 0.0 = verifiable-only (default); 1.0 = dynamic-only
 ```
 
-Configuration (all optional):
+Settings (all optional), each set with `--probe-option
+financial_services.<name>=<value>`, or in Python as
+`probe_options={"financial_services": {...}}`:
 
-- `finance_tier_mix` (`--finance-tier-mix`): probability a conversation uses the
-  `dynamic` tier; `0.0` (default) means verifiable-only.
-- `finance_tier`: force a single tier (`verifiable` or `dynamic`).
-- `finance_retrieval_mode`: `hybrid` (default), `dense` or `golden`.
-- `finance_embedding_model_alias`: the embedding model used for dense retrieval.
+- `tier_mix`: probability a conversation uses the `dynamic` tier, from 0 to 1;
+  `0.0` (default) means verifiable-only.
+- `tier`: force a single tier (`verifiable` or `dynamic`).
+- `retrieval_mode`: `hybrid` (default), `dense` or `golden`.
+- `embedding_model_alias`: the models-file alias that embeds `kb_search`
+  queries (default `embedding_model`).
 
 ## Generating the assets
 
@@ -333,9 +336,9 @@ faithfulness, language/script, plain text, near-duplicates, coverage, scope) and
 `evaluate-assets` runs an LLM-judge scorecard. Document ids are stable across
 regenerations, and a task's gold documents are derived from its tool sequence at
 load time. The authoring workflow lives in
-[finance_assets.ipynb](../../../asset_gen/notebooks/finance_assets.ipynb),
+[finance_assets.ipynb](asset_gen/notebooks/finance_assets.ipynb),
 and the asset contract in
-[SCHEMA.md](../../assets/financial_services/SCHEMA.md).
+[SCHEMA.md](assets/financial_services/SCHEMA.md).
 
 ### Tuning a generation run
 
@@ -377,7 +380,7 @@ A locale is only as good as its task set: the corpus can be excellent while the
 eval still measures very little. The conventions below are calibrated from the
 `en_US` and `en_IN` builds and are what a reviewer should check a new locale
 against. Field-level semantics live in
-[SCHEMA.md](../../assets/financial_services/SCHEMA.md); this is the
+[SCHEMA.md](assets/financial_services/SCHEMA.md); this is the
 *shape* the authored set should have.
 
 **Reference numbers.** `en_US` ships 70 verifiable tasks across 4 institutions;
@@ -505,23 +508,25 @@ Files in this package:
 
 | File | Responsibility |
 | --- | --- |
-| `generator.py` | The probe class + its hooks, the trajectory-column contract, and the entry-point shim. |
+| `probe.py` | The probe class + its hooks, and the trajectory-column contract. |
+| `bank.py` | The bank loader and validator: a locale's region metadata and its institutions' documents, tools and tasks. |
+| `tasks.py` | Task templates and sim-time gold derivation. |
+| `task_derivation.py` | Persona → tags + financial-literacy, tier choice, and institution/category selection with population weighting. |
 | `tools.py` | Offered-tool schemas and the discoverable-tool gate helpers. |
 | `retrieval.py` | Institution-scoped whole-document retrieval: `hybrid` (default), `dense` and `golden`, with a lexical fallback. |
-| `task_derivation.py` | Persona → tags + financial-literacy, tier choice, and institution/category selection with population weighting. |
+| `embeddings.py` | Query embedding for dense retrieval. |
 | `prompts.py` | User-simulator prompts and behavior instruction blocks. |
-| `__init__.py` | Package marker. |
+| `scorer.py` | The `financial_services` scorer. |
+| `capabilities.py` | The capability rows this probe's evidence feeds. |
+| `asset_domain.py` | The `financial_services` asset domain `usersim gen-assets` builds banks for. |
+| `asset_gen/` | Offline bank generation: region specs and `notebooks/finance_assets.ipynb`. |
+| `assets/financial_services/` | The banks by locale, and `SCHEMA.md`. |
+| `__init__.py` | The package docstring. |
 
 Related code elsewhere:
 
 | Concern | Location |
 | --- | --- |
-| Bank loader / sim-time gold | `core/finance_bank.py`, `core/finance_tasks.py` |
 | Dynamic-tier taxonomy + selection (shared) | `core/probing_taxonomy.py` |
 | Inner tool-loop scaffold (shared) | `core/probes.py` (`ToolExecutionMixin`) |
-| Query embedding (dense retrieval) | `core/embeddings.py` |
-| Scorer | `evaluator/scorers/financial_services.py` |
-| Capabilities | `taxonomy/capabilities.py` |
 | Training-export columns | `selection/schemas.py` (`finance` group) |
-| Assets + schema | `assets/financial_services/<locale>/` + `assets/financial_services/SCHEMA.md` |
-| Offline generation | `asset_gen/financial_services/` + `asset_gen/notebooks/finance_assets.ipynb` |

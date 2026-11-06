@@ -17,7 +17,7 @@ import pytest
 
 import usersim.engine.generator  # noqa: F401  (populates the registry)
 from usersim.engine.core import simulation
-from usersim.engine.core.probes import BaseProbe, known_probes
+from usersim.engine.core.probes import BaseProbe, PreviewField, known_probes
 from usersim.engine.evaluator import scorers
 from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
 from usersim.engine.evaluator.scorers import list_scorers
@@ -62,9 +62,9 @@ class _WritesItsOwnKeys(BaseProbe):
     label = "writes_its_own_keys"
 
     def seed_state_metadata(self, state):
-        state.metadata["acme_checks"] = []
-        state.metadata.update({"acme_seen": True})
-        state.metadata.setdefault("acme_turns", 0)
+        state.metadata["my_checks"] = []
+        state.metadata.update({"my_seen": True})
+        state.metadata.setdefault("my_turns", 0)
 
 
 #: A row shaped like one the evaluator hands a scorer. Passing it makes the
@@ -172,12 +172,138 @@ class TestTheChecksCanFail:
 
         class Mislabelled(BaseProbe):
             label = "mislabelled_probe"
-            placeholder_warning_kind = "acme_slow_tool"
+            placeholder_warning_kind = "my_slow_tool"
 
         problems = probe_conformance_problems(Mislabelled)
         assert any("Mislabelled.placeholder_warning_kind must mark placeholder content" in p for p in problems), (
             problems
         )
+
+    @pytest.mark.parametrize(
+        ("attributes", "expected"),
+        [
+            ({"check_locale": lambda self, locale_dir: None}, "PreflightProbe.check_locale must be a classmethod"),
+            (
+                {"bank_locale": lambda self, locale, probe_dir: locale},
+                "PreflightProbe.bank_locale must be a classmethod",
+            ),
+            (
+                {"authoring_guide": "README.md#locales"},
+                "PreflightProbe.authoring_guide must be None or an https:// URL",
+            ),
+            ({"themes": lambda self, locale: None}, "PreflightProbe.themes must be a classmethod"),
+            ({"description": ("Tests", "cooking")}, "PreflightProbe.description must be a string"),
+            (
+                {"preview_fields": PreviewField("theme", "Topic")},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField",
+            ),
+            (
+                {"preview_fields": (("theme", "Topic"),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField",
+            ),
+            (
+                {"preview_fields": (PreviewField("theme", ""),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField, each with a key and a label",
+            ),
+            (
+                {"preview_fields": (PreviewField("theme", 1),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField, each with a key and a label",
+            ),
+            (
+                {"default_scorers": "tool_use"},
+                "PreflightProbe.default_scorers must be a tuple of scorer names; got 'tool_use'",
+            ),
+            (
+                {"default_scorers": ("tool_use", "no_such_scorer")},
+                "PreflightProbe.default_scorers names ['no_such_scorer'], which no registered scorer holds",
+            ),
+            ({"model_aliases": lambda self, cfg: ()}, "PreflightProbe.model_aliases must be a classmethod"),
+            (
+                {"model_aliases": classmethod(lambda cls, cfg: "critic_model")},
+                "PreflightProbe.model_aliases must return a tuple of alias names; got 'critic_model'",
+            ),
+            ({"asset_problems": lambda self: []}, "PreflightProbe.asset_problems must be a classmethod"),
+            (
+                {"asset_problems": classmethod(lambda cls: "no bank for fr_FR")},
+                "PreflightProbe.asset_problems must return a list of strings; got 'no bank for fr_FR'",
+            ),
+            (
+                {"asset_problems": classmethod(lambda cls: ["no bank for fr_FR"])},
+                "PreflightProbe.asset_problems: no bank for fr_FR",
+            ),
+            (
+                {"asset_problems": classmethod(lambda cls: {}["fr_FR"])},
+                "PreflightProbe.asset_problems raised KeyError: 'fr_FR'",
+            ),
+        ],
+        ids=[
+            "check-not-callable",
+            "bank-locale-not-a-classmethod",
+            "relative-guide",
+            "themes-not-a-classmethod",
+            "description-not-a-string",
+            "preview-fields-a-bare-field",
+            "preview-fields-plain-tuples",
+            "preview-field-without-a-label",
+            "preview-field-with-a-label-that-is-not-text",
+            "default-scorers-a-bare-string",
+            "default-scorers-naming-no-scorer",
+            "model-aliases-not-a-classmethod",
+            "model-aliases-a-bare-string",
+            "asset-check-not-a-classmethod",
+            "asset-check-a-bare-string",
+            "asset-check-finding-a-problem",
+            "asset-check-raising",
+        ],
+    )
+    async def test_unusable_preflight_declarations_are_reported(self, attributes, expected) -> None:
+        """A run reads these on the class before any row runs, so a wrong one fails the whole run."""
+        cls = type("PreflightProbe", (BaseProbe,), {"label": "preflight_probe", **attributes})
+
+        problems = probe_conformance_problems(cls)
+        assert any(expected in p for p in problems), problems
+
+    async def test_usable_preflight_declarations_are_accepted(self) -> None:
+        class Declared(BaseProbe):
+            label = "declared_probe"
+            authoring_guide = "https://example.com/declared-probe/locales"
+            default_scorers = ("tool_use", "language_compliance")
+            preview_fields = (
+                PreviewField("theme", "Topic"),
+                PreviewField("taxonomy_id", "Taxonomy", from_metadata=True),
+            )
+
+            @classmethod
+            def check_locale(cls, locale_dir):
+                return None
+
+            @classmethod
+            def bank_locale(cls, locale, probe_dir):
+                return locale
+
+            @classmethod
+            def themes(cls, locale):
+                return [{"type": "cooking"}]
+
+            @classmethod
+            def model_aliases(cls, cfg):
+                return ("critic_model",)
+
+            @classmethod
+            def asset_problems(cls):
+                return []
+
+        declarations = (
+            "check_locale",
+            "bank_locale",
+            "authoring_guide",
+            "themes",
+            "model_aliases",
+            "default_scorers",
+            "asset_problems",
+            "preview_fields",
+        )
+        assert not [p for p in probe_conformance_problems(Declared) if any(d in p for d in declarations)]
 
     @pytest.mark.parametrize(
         ("probe", "key"), [(_WritesEarlyStop, "early_stop"), (_SeedsJudgeRatings, "user_judge_ratings")]
@@ -232,6 +358,20 @@ class TestTheChecksCanFail:
         monkeypatch.setitem(scorers._REGISTRY, "defaulted", defaulted)
         problems = await scorer_conformance_problems("defaulted", sample_row={"sub_protocol": "Triage"})
         assert any("AttributeError" in p and "sub_protocol" in p for p in problems)
+
+    @pytest.mark.parametrize(("deterministic", "reported"), [(True, True), (False, False)])
+    async def test_a_deterministic_scorer_that_looks_up_a_model_is_reported(
+        self, restored_registries, deterministic, reported
+    ) -> None:
+        """usersim rescore reruns a deterministic scorer with no models, trusting it calls none."""
+
+        async def judged_when_wired(row, models):
+            return {"judged": models.get("judge_model") is not None}
+
+        scorers.register_scorer("judged_when_wired", judged_when_wired, deterministic=deterministic)
+        problems = await scorer_conformance_problems("judged_when_wired")
+        expected = "'judged_when_wired' is registered as deterministic but looked up judge_model"
+        assert any(expected in p for p in problems) is reported, problems
 
     async def test_keys_the_evaluator_fills_are_never_emptied(self, monkeypatch) -> None:
         async def relies_on_filled_keys(row, models):

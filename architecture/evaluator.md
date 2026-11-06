@@ -11,9 +11,17 @@ ensemble of two or more must span at least two architecturally diverse model
 families, validated when the config is built and again at run time, so an
 ensemble never rests on one model family. A single judge is allowed.
 
+Every row is judged on the axes every probe shares. A built-in probe whose
+rows need axes of their own declares them in its package's `axes.py`, as
+`JUDGE_AXES` keyed by the probe's label, which is the row's `probe_family`.
+The evaluator reads those modules in the order of `BUILTIN_PACKAGES`, on first
+use, and never a probe's `probe.py`.
+
 **Scorers** are per-probe functions over stored columns, each returning a
 structured verdict rather than a free-form opinion. Three are fully
-deterministic (`language_compliance`, `refusal_basics`, `response_shape`); the
+deterministic (`language_compliance`, `refusal_basics`, `response_shape`) and
+register with `deterministic=True`, which is what lets `usersim rescore`
+recompute them on a stored evaluation; the
 other nine call a model to reach a judgment the stored columns cannot settle on
 their own, such as whether a retrieved fact is actually supported or what a
 free-form turn actually disclosed (`health_disclosure_concealment`, which falls
@@ -35,10 +43,16 @@ Twelve ship:
 | `response_shape` | structural expectations |
 | `refusal_basics` | refusal presence and form |
 
-Scorers are opt-in per run. A capability whose scorer was not dispatched
-renders as *untested* rather than as a failure, and
+Scorers are opt-in per run. `usersim eval --scorers auto` runs the three
+deterministic scorers, which apply to every probe, plus the `default_scorers`
+each probe in the run declares, found by the `probe_family` its rows are stored
+under; `auto` combines with scorer names. Over a run holding every built-in
+probe it runs every scorer the capability report reads. A capability whose
+scorer was not dispatched renders as *untested* rather than as a failure, and
 `capabilities_missing_scorer()` exists so a run can warn about that instead
-of silently producing an empty column.
+of silently producing an empty column. The evaluator calls every scorer it runs
+on every row, so a probe's scorer skips the rows of other probes, and the
+capability report counts a skipped row as not applicable.
 
 ## The evaluation cell
 
@@ -62,6 +76,8 @@ Scorers register through `register_scorer` at import, and are discovered
 out-of-tree through the `usersim.scorers` entry point. A scorer receives the
 trajectory row as a dict in which every empty cell is `None`, apart from
 `conversation_messages`, `persona`, `probe_family`, `locale` and `language`,
-which the evaluator always fills. `usersim.testing` publishes a conformance
+which the evaluator always fills: `probe_family` is an empty string for a row
+that names no probe, and the judges score such a row only on the axes every
+probe shares. `usersim.testing` publishes a conformance
 check, including that a scorer tolerates a row missing any given field, since
 the evaluator calls it on incomplete trajectories. See [plugins.md](plugins.md).

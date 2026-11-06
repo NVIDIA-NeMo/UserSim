@@ -10,7 +10,7 @@
 > trajectories: evaluation signal, failure analysis, and curated training data,
 > before you have production traffic to learn from.
 
-**14 probes · 11 shipped locales across 9 countries (+ 22 preview India-language variants) · 8M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 4,000+ tests · offline `usersim smoke` in seconds**
+**14 probes · 11 shipped locales across 9 countries (+ 22 preview India-language variants) · 8M+ census-grounded personas · 3,406 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 4,000+ tests · offline `usersim smoke` in seconds**
 
 <img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/hero.jpg" width="800" alt="NeMo User Sim: Population-Grounded User Simulation. Simulated users in the USA, Brazil, France, India and Japan, each speaking their own language under a different probe, on a world map beside headline counts for people represented, languages, locales and probes.">
 
@@ -294,6 +294,8 @@ full plan and exits before the first network call.
 
 **Extending it**
 
+- [`docs/extensions.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/extensions.md): a probe and a scorer in a package of your own, installed next to `usersim`
+- [`docs/extension_api.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/extension_api.md): every name an extension imports from `usersim`
 - [`docs/engine/AUTHORING_A_PROBE.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/engine/AUTHORING_A_PROBE.md): end-to-end tutorial for a new probe
 - [`docs/engine/README.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/engine/README.md): the substrate's full API surface
 - [`templates/probe/`](https://github.com/NVIDIA-NeMo/UserSim/tree/main/templates/probe/): copy-and-edit starters, one per probe shape

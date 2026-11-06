@@ -19,7 +19,8 @@ import json
 
 import pytest
 
-from usersim.cli.rescore import DETERMINISTIC_SCORERS, run
+from usersim.cli.rescore import run
+from usersim.engine.evaluator import scorers as scorers_module
 
 
 def _judge_axes():
@@ -179,21 +180,17 @@ class TestRoundTrip:
 
 
 class TestScorerInput:
-    def test_empty_cells_reach_the_scorer_as_none(self, run_on_disk, monkeypatch):
+    def test_empty_cells_reach_the_scorer_as_none(self, run_on_disk, restored_registries):
         """The store reads an empty cell back as pandas NA, which a scorer's
         falsy fallback cannot test, so it has to arrive as None, as it does
         from the evaluator."""
-        from usersim.cli import rescore
-        from usersim.engine.evaluator import scorers as scorers_module
-
         seen = {}
 
         async def spy(traj, models):
             seen["traj_row"] = traj
             return {"scores": {}}
 
-        monkeypatch.setitem(scorers_module._REGISTRY, "__spy__", spy)
-        monkeypatch.setattr(rescore, "DETERMINISTIC_SCORERS", (*rescore.DETERMINISTIC_SCORERS, "__spy__"))
+        scorers_module.register_scorer("__spy__", spy, deterministic=True)
         run_on_disk.scorers = ["__spy__"]
 
         assert run(run_on_disk) == 0
@@ -213,8 +210,20 @@ class TestRefusesToSpendMoney:
         run_on_disk.scorers = [scorer]
         with pytest.raises(SystemExit) as excinfo:
             run(run_on_disk)
-        assert scorer in str(excinfo.value)
+        assert f"{scorer!r} is not registered as deterministic" in str(excinfo.value)
         assert "LLM-free" in str(excinfo.value)
+
+    def test_a_scorer_registered_without_the_flag_is_refused(self, run_on_disk, restored_registries):
+        """Rescore reruns only what a scorer's registration promises calls no model."""
+
+        async def my_judged(traj, models):
+            return {"scores": {}}
+
+        scorers_module.register_scorer("my_judged", my_judged)
+        run_on_disk.scorers = ["my_judged"]
+        with pytest.raises(SystemExit) as excinfo:
+            run(run_on_disk)
+        assert "'my_judged' is not registered as deterministic" in str(excinfo.value)
 
     def test_unknown_scorer_is_refused(self, run_on_disk):
         run_on_disk.scorers = ["not_a_scorer"]
@@ -222,8 +231,8 @@ class TestRefusesToSpendMoney:
             run(run_on_disk)
         assert "not a known deterministic scorer" in str(excinfo.value)
 
-    def test_allowlist_is_only_the_model_free_scorers(self):
-        assert set(DETERMINISTIC_SCORERS) == {
+    def test_only_the_model_free_scorers_are_registered_as_deterministic(self):
+        assert set(scorers_module.deterministic_scorers()) == {
             "language_compliance",
             "refusal_basics",
             "response_shape",

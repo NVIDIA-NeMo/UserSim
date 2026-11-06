@@ -9,7 +9,7 @@
 #
 # Ids are namespaced `<vendor>/<model>` and do not always match another
 # provider's spelling for the same model, so add any id you use to
-# cli/model_catalog.py for its sampling parameters to resolve.
+# engine/model_catalog.py for its sampling parameters to resolve.
 #
 # Judges are a different model from `assistant_model` on purpose, so the model
 # under test is not scoring its own output.

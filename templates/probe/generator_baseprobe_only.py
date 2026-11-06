@@ -3,9 +3,12 @@
 
 """Probe template — BaseProbe only, no asset bank.
 
-Use this shape when the probe asks general questions of the assistant
-without needing reviewer-curated content (the ``general_open_ended``
-and ``general_educational`` probes use this shape).
+Use this shape when the probe sets topics for the simulated user to
+explore, without needing reviewer-curated content (the
+``general_open_ended`` and ``general_educational`` probes use this
+shape). Each row draws one topic from ``themes(locale)``, and the user
+explores it in the persona's own words: the probe sets the area, never
+the message.
 
 What the unified ``ConversationLoop`` provides for you:
 - Multi-turn back-and-forth with the user-LLM.
@@ -15,7 +18,12 @@ What the unified ``ConversationLoop`` provides for you:
 - Frustration escalation, early-stop heuristics.
 
 What you provide:
-- The user-agent system prompt (how the simulated user behaves).
+- ``themes(locale)``: the topics a run draws from, one per row, each a
+  mapping with at least a ``description``.
+- The user-agent system prompt: one instruction in ``prompts.yaml``
+  (copy ``prompts.yaml`` to ``assets/<your_probe>/``), filled with the
+  persona and the row's topic, plus ``language_instruction`` so the user
+  writes in the row's language.
 - The assistant system prompt (empty per pure-capability-test policy;
   see docs/engine/README.md "Assistant under test").
 
@@ -25,32 +33,48 @@ real example at ~50 LOC.
 
 from __future__ import annotations
 
-from usersim.engine.core.probes import BaseProbe, register_probe
+from pathlib import Path
+
+import yaml
 
 # After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
-# also copy ``prompts.py`` next to it and change this import to a
-# relative one: ``from .prompts import ...``.
+# also copy ``prompts.py`` next to it and import from
+# ``usersim.engine.probes.<your_probe>.prompts``.
 from usersim.engine.templates.probe.prompts import (  # type: ignore[import-not-found]
     DEMO_GATE_PROMPT_TEMPLATE,
-    DEMO_USER_AGENT_PROMPTS,
+)
+from usersim.extension import (
+    BaseProbe,
+    format_persona_for_prompt,
+    get_prompt,
+    language_instruction,
+    register_probe,
+    render_prompt,
 )
 
 
-@register_probe(
-    family="demo_general",
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoGeneralProbe(BaseProbe):
     """Smallest viable probe — no asset bank, default everything else."""
 
     label = "demo_general"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_general/, beside this module
+
+    @classmethod
+    def themes(cls, locale: str) -> list[dict]:
+        # One file of topics per locale, written in its language. A run
+        # draws one per row and stores it in the row's ``theme`` column.
+        return yaml.safe_load((cls.assets_dir() / locale / "themes.yaml").read_text(encoding="utf-8"))
 
     def get_user_system_prompt(self) -> str:
-        return DEMO_USER_AGENT_PROMPTS.get(
-            self._locale,
-            persona=self._persona.get("first_name", "the user"),
+        # The topic bounds the conversation; the persona picks the question.
+        prompt = render_prompt(
+            get_prompt(self.label, "user_system_prompt"),
+            self._data,
+            persona=format_persona_for_prompt(self._persona),
+            topic=self.theme()["description"],
         )
+        return f"{prompt}\n\n{language_instruction(self._language, self._locale)}"
 
     def get_assistant_system_prompt(self) -> str:
         # Pure-capability-test policy. Empty system prompt;

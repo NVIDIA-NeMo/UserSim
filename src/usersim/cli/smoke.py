@@ -23,15 +23,12 @@ Checks performed:
 6. **dry-run subcommands** — the four LLM-driven subcommands accept
    their typical argument sets without touching the network.
 7. **probe registry** — every probe in
-   ``usersim.engine.core.probes.known_probes()`` resolves
-   to a class that carries ``family`` / ``prompt_version`` /
-   ``variants`` metadata.
-8. **asset paths** — every shipped probe's default asset path
-   (``probe_assets_dir(probe) / ...``) resolves to a real file on
-   disk for every supported locale. Catches the regression class
-   where a default-path constant points at a non-existent directory
-   (the sort of half-rename bug that ships at notebook-run time
-   instead of install time).
+   ``usersim.engine.core.probes.known_probes()`` resolves to its
+   class; ``@register_probe`` has checked each class's declarations.
+8. **probe assets** — every registered probe's ``asset_problems()``
+   comes back empty: each probe checks the assets it ships, such as a
+   bank per locale, so a default path pointing at a missing directory
+   fails at install time rather than partway through a run.
 9. **reporting bundles** — both bundles build from a tiny synthetic
    trajectory + evaluator frame and produce non-empty HTML.
 10. **extensions** — what each installed extension package contributes.
@@ -143,7 +140,7 @@ def run(args: argparse.Namespace) -> int:
     _check_evaluator_config(report)
     _check_scorer_registry(report)
     _check_probe_registry(report)
-    _check_asset_paths(report)
+    _check_probe_assets(report)
     _check_dry_runs(report)
     fixtures_path = _check_capability_dashboard(
         report,
@@ -205,7 +202,7 @@ def _check_imports(report: SmokeReport) -> None:
 
 def _check_models_config(report: SmokeReport) -> None:
     try:
-        from usersim.cli._models import (
+        from usersim.engine.models_file import (
             REQUIRED_SIMULATOR_ALIASES,
             default_models_path,
             load_models_config,
@@ -228,18 +225,18 @@ def _check_model_catalog(report: SmokeReport) -> None:
     """Verify every TOML in ``cli/`` resolves cleanly against the catalog.
 
     Catches catalog drift: a model named in a shipped TOML that is absent
-    from ``cli/model_catalog.py:INFERENCE_DEFAULTS`` (or, for embedding
+    from ``engine/model_catalog.py:INFERENCE_DEFAULTS`` (or, for embedding
     aliases, from the embedding catalog). Drift means a run silently falls
     back to project defaults instead of the intended per-model parameters,
     so this check fails rather than warning.
     """
     try:
-        from usersim.cli._models import load_models_config
-        from usersim.cli.model_catalog import (
+        from usersim.engine.model_catalog import (
             is_embedding_model,
             known_embedding_models,
             known_inference_models,
         )
+        from usersim.engine.models_file import load_models_config
 
         toml_paths = sorted(Path(__file__).parent.glob("models_*.toml"))
         if not toml_paths:
@@ -338,24 +335,7 @@ def _check_evaluator_config(report: SmokeReport) -> None:
 
 def _check_scorer_registry(report: SmokeReport) -> None:
     try:
-        from usersim.engine.evaluator.scorers import (
-            get_scorer,
-            list_scorers,
-            load_default_scorers,
-        )
-
-        # Defensively load defaults before inspecting. The scorer
-        # package eagerly registers on import, but tests in the
-        # plugin suite legitimately call ``clear_registry`` for
-        # isolation; running the smoke check inside the same pytest
-        # session as those tests would otherwise observe an empty
-        # registry. ``load_default_scorers`` is idempotent and is
-        # what production does at import time — calling it again
-        # mirrors production state without masking real
-        # registration bugs (an import-time failure in a scorer
-        # module would raise here and be caught by the outer
-        # ``except``).
-        load_default_scorers()
+        from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 
         names = sorted(list_scorers())
         if "tool_use" not in names:
@@ -386,14 +366,7 @@ def _check_scorer_registry(report: SmokeReport) -> None:
 
 
 def _check_probe_registry(report: SmokeReport) -> None:
-    """Confirm every registered probe resolves and exposes metadata.
-
-    Catches the regression where a probe's metadata is dropped: each
-    probe class registered in ``_PROBE_REGISTRY`` must carry ``family``
-    (string), ``prompt_version`` (string), and ``variants`` (non-empty
-    sequence). These drive trajectory metadata and reporting joins;
-    missing them silently corrupts downstream aggregation.
-    """
+    """Confirm the registry holds probes and every one resolves to its class."""
     try:
         from usersim.engine.core.probes import known_probes, resolve_probe
 
@@ -413,17 +386,9 @@ def _check_probe_registry(report: SmokeReport) -> None:
     failures: list[str] = []
     for probe_name in probe_names:
         try:
-            probe_cls = resolve_probe(probe_name)
+            resolve_probe(probe_name)
         except Exception as e:
             failures.append(f"{probe_name}: resolve raised {type(e).__name__}: {e}")
-            continue
-        # ``@register_probe`` sets these on the class.
-        if not isinstance(probe_cls.family, str) or not probe_cls.family:
-            failures.append(f"{probe_name}: family missing or non-string")
-        if not isinstance(probe_cls.prompt_version, str) or not probe_cls.prompt_version:
-            failures.append(f"{probe_name}: prompt_version missing or non-string")
-        if not isinstance(probe_cls.variants, (list, tuple)) or not probe_cls.variants:
-            failures.append(f"{probe_name}: variants missing or empty")
 
     if failures:
         report.add(
@@ -439,164 +404,45 @@ def _check_probe_registry(report: SmokeReport) -> None:
     )
 
 
-def _check_asset_paths(report: SmokeReport) -> None:
-    """Verify every shipped probe's default asset path exists + loads.
+def _check_probe_assets(report: SmokeReport) -> None:
+    """Run every registered probe's ``asset_problems`` check, and check the seed table it declares.
 
-    The user-facing analog of
-    ``tests/engine/core/test_default_asset_paths.py``:
-    fails the smoke if a default-path constant in any ``core/``
-    loader points at a directory that doesn't exist on disk. The
-    test-suite version catches this for contributors at PR time;
-    this catches it for users at install time so they don't burn
-    a notebook run discovering it.
+    Each probe checks the assets it ships, such as a bank per locale, so a
+    missing or broken bank fails at install time rather than partway through
+    a run. ``tests/engine/core/test_default_asset_paths.py`` checks the
+    shipped default paths for contributors at PR time. A probe from another
+    package is checked the same way as a built-in one.
     """
     try:
-        from usersim.engine.core.action_taxonomy import (
-            load_action_taxonomy_default,
-        )
-        from usersim.engine.core.agentic_bank import default_agentic_bank_path
-        from usersim.engine.core.fact_bank import default_fact_bank_path
-        from usersim.engine.core.locale import SHIPPED_LOCALES
-        from usersim.engine.core.pressure_bank import default_pressure_bank_path
-        from usersim.engine.core.probing_taxonomy import (
-            default_probing_taxonomy_path,
-        )
-        from usersim.engine.core.prompt_loader import load_prompt_file
-        from usersim.engine.core.query_bank import default_query_bank_path
-        from usersim.engine.core.seeds import load_seeds
+        from usersim.engine.core.probes import BaseProbe, known_probes, resolve_probe, seed_dataset_problems
+
+        labels = known_probes()
     except Exception as e:
-        report.add(
-            "asset paths",
-            False,
-            f"loader import failed: {type(e).__name__}: {e}",
-        )
+        report.add("probe assets", False, f"import failed: {type(e).__name__}: {e}")
         return
 
-    failures: list[str] = []
-    n_paths = 0
+    default_check = inspect.getattr_static(BaseProbe, "asset_problems")
+    checked: list[str] = []
+    problems: list[str] = []
+    for label in labels:
+        try:
+            cls = resolve_probe(label)
+            own_check = inspect.getattr_static(cls, "asset_problems") is not default_check
+            if not own_check and cls.seed_dataset is None:
+                continue
+            checked.append(label)
+            found = [*(cls.asset_problems() if own_check else []), *seed_dataset_problems(cls)]
+            problems.extend(f"{label}: {problem}" for problem in found)
+        except Exception as e:  # smoke reports, never raises
+            problems.append(f"{label}: asset_problems raised {type(e).__name__}: {e}")
 
-    # Per-locale loaders.
-    for locale in SHIPPED_LOCALES:
-        for label, fn in (
-            ("fact_bank", lambda l=locale: default_fact_bank_path(l)),
-            ("probing_taxonomy", lambda l=locale: default_probing_taxonomy_path(l)),
-        ):
-            n_paths += 1
-            p = fn()
-            if not p.exists():
-                failures.append(f"{label}({locale}): {p}")
-        # Per-probe seed loaders raise FileNotFoundError when absent
-        # rather than returning a path; treat that as the failure.
-        for probe, kind in (
-            ("general_open_ended", "topics"),
-            ("general_educational", "subjects"),
-        ):
-            n_paths += 1
-            try:
-                load_seeds(locale, probe, kind)
-            except FileNotFoundError as e:
-                failures.append(f"seeds({locale}, {probe}/{kind}): {e}")
-
-    # Locale-agnostic loaders.
-    for label, fn in (
-        ("query_bank", default_query_bank_path),
-        ("pressure_bank", default_pressure_bank_path),
-        ("agentic_bank", default_agentic_bank_path),
-    ):
-        n_paths += 1
-        p = fn()
-        if not p.exists():
-            failures.append(f"{label}: {p}")
-
-    # Action taxonomy resolves its path internally; raises if missing.
-    n_paths += 1
-    try:
-        load_action_taxonomy_default()
-    except Exception as e:
-        failures.append(f"action_taxonomy: {type(e).__name__}: {e}")
-
-    # Per-probe prompts.yaml — the loader silently falls back to
-    # compiled-in Python defaults on miss, so we explicitly assert
-    # non-empty here.
-    for probe in ("tool_calling", "general_open_ended", "general_educational"):
-        n_paths += 1
-        if not load_prompt_file(probe):
-            failures.append(f"prompts({probe}): assets/{probe}/prompts.yaml missing or empty")
-
-    # tool_calling toolsets_seed.parquet — composed manually by
-    # cli/simulate.py + the notebook (no loader fronts it). When
-    # missing, ``use_tools`` silently flips to False and every
-    # tool_calling trajectory fails at probe construction with
-    # ``cfg.tools_column not configured``.
-    from usersim.engine.core._assets import probe_assets_dir
-
-    n_paths += 1
-    toolset = probe_assets_dir("tool_calling") / "toolsets_seed.parquet"
-    if not toolset.exists():
-        failures.append(
-            f"tool_calling/toolsets_seed.parquet: {toolset} (without it "
-            "all tool_calling trajectories fail at construction)"
-        )
-
-    # financial_services multi-institution bank + dynamic-tier taxonomy. Shipped
-    # en_US only (other locales are the replication phase). Loading the bank
-    # exercises the whole loader (raises on any cross-institution gold/scope
-    # break); the taxonomy load exercises the dynamic tier's asset.
-    n_paths += 1
-    try:
-        from usersim.engine.core.finance_bank import (
-            load_finance_bank_for_locale,
-        )
-
-        fin_bank = load_finance_bank_for_locale("en_US")
-        if not fin_bank.institutions:
-            failures.append("financial_services(en_US): bank has no institutions")
-    except Exception as e:  # noqa: BLE001 — smoke reports, never raises
-        failures.append(f"financial_services(en_US): {type(e).__name__}: {e}")
-    n_paths += 1
-    try:
-        from usersim.engine.core.probing_taxonomy import (
-            load_probing_taxonomy_for,
-        )
-
-        fin_tax = load_probing_taxonomy_for(
-            "financial_services",
-            "en_US",
-            filename="dynamic.yaml",
-            env_prefix="USERSIM_FINANCIAL_SERVICES_DYNAMIC_TAXONOMY",
-        )
-        if not fin_tax.categories:
-            failures.append("financial_services dynamic.yaml(en_US): no categories")
-    except Exception as e:  # noqa: BLE001 — smoke reports, never raises
-        failures.append(f"financial_services dynamic.yaml(en_US): {type(e).__name__}: {e}")
-
-    # identity_disclosure spec: loading it follows its layers and checks every
-    # cross-reference (developers, competitors, placeholders, rule examples).
-    n_paths += 1
-    try:
-        from usersim.engine.core.identity_spec import validate_spec
-
-        failures.extend(f"identity_disclosure spec: {problem}" for problem in validate_spec("identity_disclosure"))
-    except Exception as e:  # noqa: BLE001 — smoke reports, never raises
-        failures.append(f"identity_disclosure spec: {type(e).__name__}: {e}")
-
-    if failures:
-        # Show first three failures to keep the smoke output readable;
-        # the full count lands in the failure detail.
-        head = failures[:3]
-        more = f" (+{len(failures) - 3} more)" if len(failures) > 3 else ""
-        report.add(
-            "asset paths",
-            False,
-            f"{len(failures)}/{n_paths} default paths missing: {'; '.join(head)}{more}",
-        )
+    if problems:
+        # The first three keep the line readable; the count covers the rest.
+        head = problems[:3]
+        more = f" (+{len(problems) - 3} more)" if len(problems) > 3 else ""
+        report.add("probe assets", False, f"{len(problems)} problem(s): {'; '.join(head)}{more}")
         return
-
-    report.add(
-        "asset paths",
-        True,
-        f"{n_paths} default paths resolve cleanly across {len(SHIPPED_LOCALES)} locales",
-    )
+    report.add("probe assets", True, f"{len(checked)} probe(s) checked their assets: {', '.join(checked)}")
 
 
 def _check_dry_runs(report: SmokeReport) -> None:
@@ -874,7 +720,7 @@ def _check_extensions(report: SmokeReport) -> None:
         from usersim.engine.core.backends import known_backends
         from usersim.engine.core.probes import known_probes
         from usersim.engine.evaluator.scorers import list_scorers
-        from usersim.taxonomy.capabilities import capability_definitions
+        from usersim.taxonomy.capabilities import axis_descriptions, capability_definitions
 
         if extensions_disabled():
             report.add("extensions", True, f"discovery is off ({DISABLE_ENV_VAR} is set)")
@@ -886,6 +732,7 @@ def _check_extensions(report: SmokeReport) -> None:
         domain_names()
         known_backends()
         capability_definitions()
+        axis_descriptions()
         _build_parser()
 
         records = extension_records()

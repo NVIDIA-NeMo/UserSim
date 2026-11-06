@@ -9,7 +9,7 @@ This is the test that would have caught the regression where
 ``core/probing_taxonomy.py`` returned ``assets/sov_ai_dynamic/<locale>/categories.yaml``
 while the on-disk directory was still ``assets/population_probing/``.
 The per-loader unit-test files all bypass ``default_*_path()`` — they
-either write tmp_path fixtures or hardcode ``(packaged_assets_dir() / "...")``
+either write tmp_path fixtures or hardcode ``(probe_assets_dir(probe) / "...")``
 strings — so a default-path constant could point at ``/nonexistent``
 and every per-loader suite would still be green.
 
@@ -43,48 +43,45 @@ from __future__ import annotations
 
 import pytest
 
-from usersim.engine.core.action_taxonomy import (
-    load_action_taxonomy_default,
-    reset_action_taxonomy_cache,
-)
-from usersim.engine.core.agentic_bank import (
-    default_agentic_bank_path,
-    load_agentic_bank,
-    reset_agentic_bank_cache,
-)
-from usersim.engine.core.clinical_profile_bank import (
+from usersim.engine.core.locale import SHIPPED_LOCALES
+from usersim.engine.core.probing_taxonomy import load_probing_taxonomy, reset_probing_taxonomy_cache
+from usersim.engine.core.prompt_loader import load_prompt_file
+from usersim.engine.core.seeds import load_seeds
+from usersim.engine.probes.health_disclosure.bank import (
     CLIENT_PROBE_LABELS,
     default_clinical_profile_bank_path,
     load_clinical_profile_bank,
     reset_clinical_profile_bank_cache,
 )
-from usersim.engine.core.fact_bank import (
-    default_fact_bank_path,
-    load_fact_bank,
-    reset_fact_bank_cache,
-)
-from usersim.engine.core.identity_spec import (
+from usersim.engine.probes.identity_disclosure.spec import (
     default_identity_spec_path,
     load_identity_spec,
 )
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.pressure_bank import (
+from usersim.engine.probes.safety_agentic.action_taxonomy import (
+    load_action_taxonomy_default,
+    reset_action_taxonomy_cache,
+)
+from usersim.engine.probes.safety_agentic.bank import (
+    default_agentic_bank_path,
+    load_agentic_bank,
+    reset_agentic_bank_cache,
+)
+from usersim.engine.probes.safety_chat_pressure.bank import (
     default_pressure_bank_path,
     load_pressure_bank,
     reset_pressure_bank_cache,
 )
-from usersim.engine.core.probing_taxonomy import (
-    default_probing_taxonomy_path,
-    load_probing_taxonomy,
-    reset_probing_taxonomy_cache,
+from usersim.engine.probes.sov_ai_dynamic.taxonomy import default_probing_taxonomy_path
+from usersim.engine.probes.sov_ai_facts.bank import (
+    default_fact_bank_path,
+    load_fact_bank,
+    reset_fact_bank_cache,
 )
-from usersim.engine.core.prompt_loader import load_prompt_file
-from usersim.engine.core.query_bank import (
+from usersim.engine.probes.sov_ai_multilingual_parity.bank import (
     default_query_bank_path,
     load_query_bank,
     reset_query_bank_cache,
 )
-from usersim.engine.core.seeds import load_seeds
 
 # ---------------------------------------------------------------------------
 # Per-locale loaders: fact_bank + probing_taxonomy
@@ -158,7 +155,7 @@ def test_seeds_default_path_loads_for_every_locale(
     kind: str,
 ) -> None:
     """``load_seeds`` raises ``FileNotFoundError`` when neither the
-    locale-specific file nor the ``base/`` fallback exists. We assert
+    locale's own file nor the ``en_US`` fallback exists. We assert
     a non-empty result so a bug that ships an empty file (or points at
     one) also fails."""
     seeds = load_seeds(locale, probe, kind)
@@ -272,27 +269,16 @@ def test_prompt_loader_returns_nonempty_for_each_probe(probe: str) -> None:
 
 
 def test_tool_calling_toolsets_seed_exists_and_loads() -> None:
-    """``cli/simulate.py`` and ``notebooks/01_simulate.ipynb`` compose the
-    toolset-seed path manually as ``assets_dir / "tool_calling" /
-    "toolsets_seed.parquet"`` rather than going through a loader. When
-    the file is absent both branches silently set ``use_tools=False``
-    in ``cli/_pipeline.py``, which sets ``ConversationSimulatorConfig.tools_column=None``,
-    which makes every ``tool_calling`` probe fail at construction with
-    ``cfg.tools_column not configured``. We pin the existence + structural
-    health here so a future move (e.g. somebody renaming the
-    ``tool_calling/`` directory without updating the path-composition sites)
-    fails the test suite instead of silently producing 100% failed
-    ``tool_calling`` trajectories.
+    """The toolset table every ``tool_calling`` row is drawn from ships, loads and holds the columns rows read.
+
+    The probe takes a row's tools from its ``tools`` column (the probe's
+    ``tools_column`` setting) and refuses a row without it, so a missing or
+    malformed table fails every ``tool_calling`` conversation.
     """
     from usersim.engine.core._assets import probe_assets_dir
 
     p = probe_assets_dir("tool_calling") / "toolsets_seed.parquet"
-    assert p.exists(), (
-        f"tool_calling toolset seed missing: {p}\n"
-        "Without it cli/simulate.py's `use_tools` branch resolves to "
-        "False and every tool_calling probe fails at construction with "
-        "'cfg.tools_column not configured'."
-    )
+    assert p.exists(), f"tool_calling toolset seed missing: {p}"
 
     # Structural health: parquet readable, non-empty, has the columns the
     # data-designer SamplerColumnConfig consumes.

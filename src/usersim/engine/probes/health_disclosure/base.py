@@ -5,8 +5,8 @@
 
 ``HealthDisclosureProbe`` holds ALL the behavior; each client is a thin
 subclass that sets ``label`` + ``CLIENT`` (a config dict from ``clients.py``)
-and carries its own ``@register_probe`` (so it gets its own ``family`` →
-its own judge axes). See therapy.py / triage.py / decision_support.py.
+and carries its own ``@register_probe`` (so its rows are stored under its
+own label, which gives it its own judge axes). The four clients' classes are in ``probe.py``.
 
 The auditable move + Guard layer is provided by the reusable
 :class:`~usersim.engine.probes.health_disclosure.mixin.GuardedMoveMixin`
@@ -19,24 +19,27 @@ local-dev override only.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Mapping
 
-from usersim.engine.core.behavioral import (
-    format_behavioral_profile_for_prompt,
-    format_disclosure_instructions,
-    format_interaction_style_instructions,
-)
-from usersim.engine.core.clinical_profile_bank import (
+from usersim.engine.probes.health_disclosure.bank import (
     DEFAULT_PROFILE_ID,
     ClinicalProfile,
+    ClinicalProfileBankError,
+    clinical_profile_bank_path_for,
+    load_clinical_profile_bank,
 )
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import BankBackedProbe
-from usersim.engine.core.simulation import language_instruction
 from usersim.engine.probes.health_disclosure.mixin import (
     GuardedMoveMixin,
     env_override,
+)
+from usersim.extension import (
+    BankBackedProbe,
+    format_behavioral_profile_for_prompt,
+    format_disclosure_instructions,
+    format_interaction_style_instructions,
+    format_persona_for_prompt,
+    language_instruction,
 )
 
 # Local-dev override for the guarded move-space (primary switch is the ``guarded``
@@ -55,15 +58,35 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
     clinical profile (gated topics + concealment/risk ground truth) comes from a
     versioned clinical-profile bank via ``BankBackedProbe``. Each client subclass
     sets ``label`` + ``CLIENT`` and its own ``bank_loader`` + ``bank_version_key``
-    (one bank per client; see therapy.py / triage.py / decision_support.py).
+    (one bank per client; see ``probe.py``).
     """
 
+    #: ``default`` is a plain incremental-disclosure user; ``guarded`` turns on
+    #: the Guard-paced move-space for the row.
+    variants = ("default", "guarded")
+    #: The four clients' banks, each in its own ``<label>/`` folder.
+    assets_root = Path(__file__).parent / "assets"
     #: Set by each client subclass to a config dict from ``clients.py``.
     CLIENT: dict = {}
     #: Local-dev override honoured by ``GuardedMoveMixin.guarded_moves_enabled``.
     GUARDED_MOVE_ENV = _MOVES_ENV
     #: Emitted (by BankBackedProbe) whenever the derived profile is a placeholder.
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE
+    placeholder_warning_kind = "used_placeholder_clinical_profile"
+    #: The concealment scorer, which scores each client's ``guarded`` rows and skips the rest.
+    default_scorers = ("health_disclosure_concealment",)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The clinical-profile bank each of this client's rows draws its profile from.
+
+        Read where a run reads it, so a customer bank named by the client's
+        ``profiles_env`` variable is checked in place of the shipped one.
+        """
+        try:
+            load_clinical_profile_bank(clinical_profile_bank_path_for(cls.label, cls.CLIENT.get("profiles_env")))
+        except ClinicalProfileBankError as error:
+            return [f"no clinical-profile bank: {error}"]
+        return []
 
     # ── BankBackedProbe hook ────────────────────────────────────────
     def derive_task(

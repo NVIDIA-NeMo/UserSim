@@ -3,12 +3,13 @@
 
 """health_disclosure — a config-driven family of health disclosure probes.
 
-One mechanism (a move-space + a deterministic Guard on the *user* side), three
+One mechanism (a move-space + a deterministic Guard on the *user* side), and
 client-shaped probes that differ only by configuration:
 
   * ``health_therapy_disclosure``       — a therapy patient discloses to a therapist (mental health).
   * ``health_triage_disclosure``        — a patient discloses to a care-navigation / triage assistant.
   * ``health_decision_support_disclosure``— a clinician presents a case to a decision-support assistant.
+  * ``health_general_disclosure``       — a patient discloses to a general health assistant.
 
 The *user* side is the product in every case: a persona-grounded simulated
 user who reveals sensitive information **gradually and strategically**, only

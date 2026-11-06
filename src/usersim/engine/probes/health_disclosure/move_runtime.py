@@ -21,7 +21,7 @@ What is client-specific (topic vocabulary, what "risk" means, proposal framing)
 comes from the client config in ``clients.py``. The full hidden clinical profile
 (concealment ground-truth + gated topics, keyed by persona uuid) is supplied by
 the host probe from the versioned clinical-profile bank (``BankBackedProbe`` →
-``self._task``; see ``core/clinical_profile_bank.py``), passed into ``build_env``.
+``self._task``; see ``probes/health_disclosure/bank.py``), passed into ``build_env``.
 Absent a profile, we fall back to generic topics so the probe still runs.
 """
 
@@ -33,8 +33,6 @@ import math
 import os
 from typing import Any, Callable
 
-from usersim.engine.core.llm import acall_llm
-from usersim.engine.core.tool_calls import recover_tool_call
 from usersim.engine.probes.health_disclosure import clients as C
 from usersim.engine.probes.health_disclosure.moves import (
     AFFECTS,
@@ -45,6 +43,7 @@ from usersim.engine.probes.health_disclosure.moves import (
     PatientEnv,
 )
 from usersim.engine.probes.health_disclosure.prompts import PROPOSAL_SYSTEM_PACK
+from usersim.extension import acall_llm, recover_tool_call
 
 MODEL_USER = "user_model"
 

@@ -37,22 +37,24 @@ from test_simulator_pipeline_e2e import _mock_call_llm_side_effect
 
 from usersim import cli
 from usersim.cli import _inputs
-from usersim.cli._errors import ConfigError
 from usersim.cli._inputs import (
     INPUT_ID_COLUMN,
     load_episode_inputs,
     prepare_episode_inputs,
+    replay_trajectory_id,
     setup_fingerprint,
     simulate_inputs_to_dataset,
 )
-from usersim.cli._models import ModelsConfig, ProviderSpec, default_models_path, load_models_config
-from usersim.cli._models import to_model_configs as _real_to_model_configs
 from usersim.cli._pipeline import materialize_episode_inputs
 from usersim.engine import generator as generator_module
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.manifest import load_run_manifest
 from usersim.engine.core.missing import none_for_missing
+from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.storage import list_runs, read_partitioned_dataset
+from usersim.engine.errors import ConfigError
+from usersim.engine.models_file import ModelsConfig, ProviderSpec, default_models_path, load_models_config
+from usersim.engine.models_file import to_model_configs as _real_to_model_configs
 
 #: Every simulator-side module that holds its own reference to ``acall_llm``,
 #: plus the module itself for the code that imports it at call time.
@@ -62,11 +64,11 @@ _LLM_MODULES = (
     "usersim.engine.core.judges",
     "usersim.engine.core.context",
     "usersim.engine.core.translation",
-    "usersim.engine.core.realized_audit",
+    "usersim.engine.probes.health_disclosure.realized_audit",
     "usersim.engine.probes.health_disclosure.move_runtime",
-    "usersim.engine.probes.safety_agentic.generator",
+    "usersim.engine.probes.safety_agentic.probe",
     "usersim.engine.probes.safety_chat_pressure.classifier",
-    "usersim.engine.probes.tool_calling.generator",
+    "usersim.engine.probes.tool_calling.probe",
 )
 _LLM_SITES = tuple(m for m in _LLM_MODULES if hasattr(importlib.import_module(m), "acall_llm"))
 
@@ -122,7 +124,6 @@ def _materialize(probe_mix: dict[str, float], num_rows: int, seed: int = 1, max_
         locale="en_US",
         num_rows=num_rows,
         models=_models(),
-        assets_dir=packaged_assets_dir(),
         probe_mix=probe_mix,
         random_seed=seed,
         max_turns=max_turns,
@@ -164,7 +165,7 @@ def _saved(out: Path, run_id: str):
     return read_partitioned_dataset(out, run=run_id)
 
 
-def _fingerprint(rows, models=None, *, assets_dir=None) -> str:
+def _fingerprint(rows, models=None, *, assets_dir=None) -> _inputs.SetupFingerprint:
     return setup_fingerprint(models or _models(), prepare_episode_inputs(rows, assets_dir=assets_dir))[0]
 
 
@@ -192,6 +193,15 @@ def test_both_setups_offer_each_tool_calling_row_the_same_tools(rows, tmp_path):
     tools = pairs[pairs["probe_type_x"] == "tool_calling"]
     assert len(tools)
     assert tools["tool_subset_x"].astype(str).tolist() == tools["tool_subset_y"].astype(str).tolist()
+
+
+def test_a_later_batch_holding_another_probe_of_the_mix_resumes_the_run(rows, tmp_path):
+    """Every probe in the rows' mix counts, whichever rows a batch holds, so the rows can run in batches."""
+    general = [row for row in rows if row["probe_type"] == "general_open_ended"]
+    first = _run(general, tmp_path)
+    second = _run(rows, tmp_path)
+
+    assert (second.run_id, second.resumed, second.skipped) == (first.run_id, True, len(general))
 
 
 def test_a_resume_reopens_the_run_with_the_same_setup(rows, tmp_path):
@@ -244,6 +254,36 @@ def test_debug_logging_keeps_the_setup(rows, monkeypatch):
 )
 def test_a_model_setting_that_can_change_a_conversation_is_a_new_setup(rows, models):
     assert _fingerprint(rows, models()) != _fingerprint(rows)
+
+
+def _with_a_row_of(rows, label: str) -> list[dict[str, Any]]:
+    """The stored rows plus a copy of the first with probe ``label``, which joins every row's mix."""
+    held = _edited(rows, lambda r: [row["usersim_config"]["probes"].append(label) for row in r])
+    extra = {**copy.deepcopy(held[0]), "probe_type": label, "trajectory_id": f"{label}-row"}
+    return [*held, extra]
+
+
+def _the_others(fingerprint, label: str) -> tuple[str, dict[str, str]]:
+    """The core part and every probe's part but ``label``'s, which must hold the rows' own probes."""
+    others = {probe: part for probe, part in fingerprint.probes.items() if probe != label}
+    assert {"general_open_ended", "tool_calling"} <= set(others)
+    return fingerprint.core, others
+
+
+def test_a_model_a_probe_in_the_rows_mix_declares_is_part_of_its_setup(rows, register_test_probe):
+    """A model a probe calls changes what its conversations say; a probe outside the rows' mix changes nothing."""
+    register_test_probe("ext_critic", model_aliases=classmethod(lambda cls, cfg: ("ext_critic_model",)))
+
+    def with_critic(model: str) -> ModelsConfig:
+        base = _models()
+        critic = replace(base.models[0], alias="ext_critic_model", model=model)
+        return ModelsConfig(providers=base.providers, models=(*base.models, critic))
+
+    held = _with_a_row_of(rows, "ext_critic")
+    first, second = _fingerprint(held, with_critic("acme/critic-a")), _fingerprint(held, with_critic("acme/critic-b"))
+    assert first.probes["ext_critic"] != second.probes["ext_critic"]
+    assert _the_others(first, "ext_critic") == _the_others(second, "ext_critic")
+    assert _fingerprint(rows, with_critic("acme/critic-a")) == _fingerprint(rows, with_critic("acme/critic-b"))
 
 
 def test_the_runs_models_file_decides_replay_whatever_the_rows_were_stored_with(rows, tmp_path):
@@ -304,8 +344,8 @@ def test_a_providers_own_request_settings_are_part_of_the_setup(rows, monkeypatc
 
 def test_changed_assets_are_a_new_setup_and_moved_ones_are_not(rows, tmp_path):
     first, second = tmp_path / "assets", tmp_path / "elsewhere"
-    shutil.copytree(packaged_assets_dir(), first)
-    shutil.copytree(packaged_assets_dir(), second)
+    shutil.copytree(probe_assets_dir("tool_calling").parent, first)
+    shutil.copytree(probe_assets_dir("tool_calling").parent, second)
     moved = _fingerprint(rows, assets_dir=first)
     readme = next(first.rglob("README.md"))
     readme.write_text(readme.read_text() + "\nedited\n")
@@ -314,17 +354,56 @@ def test_changed_assets_are_a_new_setup_and_moved_ones_are_not(rows, tmp_path):
     assert _fingerprint(rows, assets_dir=first) != moved
 
 
+def test_an_edit_to_one_probe_s_bank_gives_only_its_rows_new_ids(rows, tmp_path):
+    root = tmp_path / "assets"
+    shutil.copytree(probe_assets_dir("tool_calling").parent, root)
+    before = _fingerprint(rows, assets_dir=root)
+    readme = next((root / "tool_calling").rglob("README.md"))
+    readme.write_text(readme.read_text() + "\nedited\n")
+    after = _fingerprint(rows, assets_dir=root)
+
+    assert after.core == before.core
+    assert after.probes["general_open_ended"] == before.probes["general_open_ended"]
+    assert after.probes["tool_calling"] != before.probes["tool_calling"]
+    for row in rows:
+        kept = replay_trajectory_id(row, after) == replay_trajectory_id(row, before)
+        assert kept is (row["probe_type"] != "tool_calling")
+
+
+def test_a_run_resumes_only_when_each_probe_s_part_matches(rows, tmp_path):
+    root = tmp_path / "assets"
+    shutil.copytree(probe_assets_dir("tool_calling").parent, root)
+    first = _run(rows, tmp_path / "out", assets_dir=root)
+    fingerprint, record = setup_fingerprint(_models(), prepare_episode_inputs(rows, assets_dir=root))
+    readme = next((root / "tool_calling").rglob("README.md"))
+    readme.write_text(readme.read_text() + "\nedited\n")
+    again = _run(rows, tmp_path / "out", assets_dir=root)
+
+    assert (record["fingerprint"], record["probes"]) == (fingerprint.core, dict(fingerprint.probes))
+    assert again.run_id != first.run_id and not again.resumed
+
+
+def test_a_probe_outside_the_rows_mix_changes_no_setup(rows, register_test_probe, tmp_path):
+    before = _fingerprint(rows)
+    bank = tmp_path / "pkg" / "ext_other" / "sample.yaml"
+    bank.parent.mkdir(parents=True)
+    bank.write_text("items: []\n")
+    register_test_probe("ext_other", assets_root=tmp_path / "pkg", prompt_version="v9.9")
+
+    assert _fingerprint(rows) == before
+
+
 def test_a_change_in_a_lower_priority_asset_root_is_a_new_setup(monkeypatch, tmp_path):
     """A spec that ``extends`` its own probe reads the copy below it, so every root counts."""
     top, below = tmp_path / "top", tmp_path / "below"
-    shutil.copytree(packaged_assets_dir(), top)
-    shutil.copytree(packaged_assets_dir(), below)
+    shutil.copytree(probe_assets_dir("identity_disclosure").parent, top)
+    shutil.copytree(probe_assets_dir("identity_disclosure").parent, below)
     monkeypatch.setenv("USERSIM_ASSET_PATH", str(below))
-    before = _inputs._asset_roots_digest(top)
+    before = _inputs._probe_assets_digest("identity_disclosure", top)
     shadowed = next(below.rglob("spec.yaml"))
     shadowed.write_text(shadowed.read_text() + "\n# edited\n")
 
-    assert _inputs._asset_roots_digest(top) != before
+    assert _inputs._probe_assets_digest("identity_disclosure", top) != before
 
 
 def test_a_change_under_a_probe_declared_assets_root_is_a_new_setup(register_test_probe, tmp_path):
@@ -333,10 +412,27 @@ def test_a_change_under_a_probe_declared_assets_root_is_a_new_setup(register_tes
     bank.parent.mkdir(parents=True)
     bank.write_text("items: []\n")
     register_test_probe("ext_probe", assets_root=tmp_path / "pkg")
-    before = _inputs._asset_roots_digest(packaged_assets_dir())
+    before = _inputs._probe_assets_digest("ext_probe", None)
     bank.write_text("items: [edited]\n")
 
-    assert _inputs._asset_roots_digest(packaged_assets_dir()) != before
+    assert _inputs._probe_assets_digest("ext_probe", None) != before
+
+
+def test_a_probe_counts_the_assets_of_each_probe_it_reads(register_test_probe, tmp_path):
+    """A probe that reads another probe's assets names it in ``asset_labels``, and an edit there is its own."""
+    for label in ("ext_reader", "ext_source"):
+        (tmp_path / "pkg" / label).mkdir(parents=True)
+        (tmp_path / "pkg" / label / "sample.yaml").write_text("items: []\n")
+    register_test_probe("ext_source", assets_root=tmp_path / "pkg")
+    register_test_probe(
+        "ext_reader",
+        assets_root=tmp_path / "pkg",
+        asset_labels=classmethod(lambda cls: (cls.label, "ext_source")),
+    )
+    before = _inputs._probe_assets_digest("ext_reader", None)
+    (tmp_path / "pkg" / "ext_source" / "sample.yaml").write_text("items: [edited]\n")
+
+    assert _inputs._probe_assets_digest("ext_reader", None) != before
 
 
 def test_a_data_designer_release_is_part_of_the_setup(rows, monkeypatch):
@@ -390,25 +486,48 @@ def test_a_bank_override_counts_by_its_contents(rows, monkeypatch, tmp_path):
     assert _fingerprint(rows) != original
 
 
-def test_an_extension_release_is_part_of_the_setup(rows, monkeypatch):
-    # The suite runs with discovery off; this test is about what it finds.
+def _installed(monkeypatch, wanted: str, value: str, version: str) -> None:
+    """One package advertising ``value`` in the group ``wanted`` at ``version``, as entry-point discovery finds it."""
+    entry = SimpleNamespace(name="partner", value=value, dist=SimpleNamespace(name="partner", version=version))
+    monkeypatch.setattr(
+        "usersim.engine.core._extensions.entry_points", lambda group=None: [entry] if group == wanted else []
+    )
+
+
+@pytest.fixture
+def discovery_on(monkeypatch):
+    # The suite runs with discovery off; these tests are about what it finds.
     monkeypatch.delenv("USERSIM_DISABLE_EXTENSIONS", raising=False)
 
-    def installed(version: str):
-        entry = SimpleNamespace(
-            name="partner_probe",
-            value="partner.probes:PartnerProbe",
-            dist=SimpleNamespace(name="partner", version=version),
-        )
-        monkeypatch.setattr(
-            "importlib.metadata.entry_points", lambda group: [entry] if group == "usersim.probes" else []
-        )
 
-    installed("1.0")
+def test_the_release_of_a_package_registering_a_probe_in_the_rows_mix_is_part_of_its_setup(
+    rows, monkeypatch, register_test_probe, discovery_on
+):
+    register_test_probe("partner_probe", __module__="partner.probes")
+    held = _with_a_row_of(rows, "partner_probe")
+    _installed(monkeypatch, "usersim.probes", "partner.probes", "1.0")
+    first = _fingerprint(held)
+    _installed(monkeypatch, "usersim.probes", "partner.probes", "2.0")
+    second = _fingerprint(held)
+
+    assert first.probes["partner_probe"] != second.probes["partner_probe"]
+    assert _the_others(first, "partner_probe") == _the_others(second, "partner_probe")
+
+
+def test_a_package_registering_a_probe_outside_the_rows_mix_changes_no_setup(rows, monkeypatch, discovery_on):
+    _installed(monkeypatch, "usersim.probes", "partner.probes", "1.0")
     first = _fingerprint(rows)
-    installed("2.0")
+    _installed(monkeypatch, "usersim.probes", "partner.probes", "2.0")
 
-    assert _fingerprint(rows) != first
+    assert _fingerprint(rows) == first
+
+
+def test_a_model_backend_release_is_part_of_every_row_s_setup(rows, monkeypatch, discovery_on):
+    _installed(monkeypatch, "usersim.backends", "partner.backend:PartnerBackend", "1.0")
+    first = _fingerprint(rows)
+    _installed(monkeypatch, "usersim.backends", "partner.backend:PartnerBackend", "2.0")
+
+    assert _fingerprint(rows).core != first.core
 
 
 # ── changed rows, concurrent writers, failures ──────────────────────────
@@ -553,7 +672,7 @@ def test_an_override_column_on_a_stored_row_reaches_the_probe(tmp_path):
     (stored,) = _materialize({"safety_chat_pressure": 1.0}, num_rows=1)
     first = _run([stored], tmp_path / "derived")
     (derived,) = _saved(tmp_path / "derived", first.run_id)["strategy_id"]
-    bank = yaml.safe_load((packaged_assets_dir() / "safety_chat_pressure" / "sample.yaml").read_text(encoding="utf-8"))
+    bank = yaml.safe_load((probe_assets_dir("safety_chat_pressure") / "sample.yaml").read_text(encoding="utf-8"))
     chosen = next(strategy["id"] for strategy in bank["strategies"] if strategy["id"] != derived)
 
     stored["pressure_strategy_id"] = chosen
@@ -581,7 +700,7 @@ def test_saved_rows_have_a_plain_runs_columns_plus_input_id(probe_type, tmp_path
             locales=["en_US"],
             num_rows=2,
             out=plain_out,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={probe_type: 1.0},
             random_seed=1,
@@ -670,7 +789,7 @@ def test_a_plain_run_records_when_it_started_and_leaves_no_artifacts(tmp_path, m
             locales=["en_US"],
             num_rows=2,
             out=tmp_path / "plain",
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=1,
@@ -821,6 +940,10 @@ def _edited(rows, edit):
         (lambda r: r[0].update(persona=None), "persona"),
         (lambda r: r[0].update(extension_blob=b"bytes"), "JSON"),
         (lambda r: r[0].update(trajectory_id=""), "trajectory_id"),
+        (
+            lambda r: [row["usersim_config"].update(probes=["general_educational"]) for row in r],
+            "not among its run's probes",
+        ),
     ],
 )
 def test_rows_that_cannot_run_are_refused(rows, edit, message):
@@ -828,12 +951,59 @@ def test_rows_that_cannot_run_are_refused(rows, edit, message):
         prepare_episode_inputs(_edited(rows, edit))
 
 
-def test_a_missing_stored_asset_folder_is_an_error_until_one_is_given(rows):
+def test_the_library_refuses_stored_rows_whose_banks_are_missing_before_any_model_call(rows, tmp_path):
+    """``simulate_episode_inputs`` runs the CLI's pre-flight, so a host learns of a missing bank up front."""
+    from usersim.engine.external import simulate_episode_inputs
+    from usersim.engine.models_file import bundled_models_path
+
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    with pytest.raises(ValueError, match="probe assets are missing or unusable"):
+        simulate_episode_inputs(rows, out=tmp_path / "out", models_path=bundled_models_path(), assets_dir=empty)
+    assert not (tmp_path / "out").exists()
+
+
+def test_the_library_refuses_stored_rows_whose_settings_a_probe_rejects_before_any_model_call(rows, tmp_path):
+    """``simulate_episode_inputs`` checks the stored rows' probe settings as the CLI does."""
+    from usersim.engine.external import simulate_episode_inputs
+    from usersim.engine.models_file import bundled_models_path
+
+    bad = _edited(
+        rows, lambda r: [row["usersim_config"].update(probe_options={"tool_calling": {"max_tools": 0}}) for row in r]
+    )
+    with pytest.raises(ValueError, match="tool_calling.max_tools: Input should be greater than or equal to 1"):
+        simulate_episode_inputs(bad, out=tmp_path / "out", models_path=bundled_models_path())
+    assert not (tmp_path / "out").exists()
+
+
+def test_the_library_refuses_a_mix_whose_banks_are_missing_before_materializing(tmp_path):
+    """``materialize_episode_inputs`` runs the CLI's pre-flight for its locale."""
+    from usersim.engine.external import materialize_episode_inputs as materialize
+    from usersim.engine.models_file import bundled_models_path
+
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    with pytest.raises(ValueError, match="probe assets are missing or unusable"):
+        materialize(
+            locale="en_US",
+            num_rows=1,
+            probe_mix={"general_open_ended": 1.0},
+            models_path=bundled_models_path(),
+            assets_dir=empty,
+        )
+
+
+def test_rows_stored_without_an_asset_folder_read_each_probe_s_own(rows):
+    assert {row["usersim_config"]["assets_dir"] for row in rows} == {None}
+    assert prepare_episode_inputs(rows).assets_dir is None
+
+
+def test_a_missing_stored_asset_folder_is_an_error_until_one_is_given(rows, tmp_path):
     moved = _edited(rows, lambda r: [row["usersim_config"].update(assets_dir="/no/such/assets") for row in r])
 
     with pytest.raises(ValueError, match="--assets-dir"):
         prepare_episode_inputs(moved)
-    assert prepare_episode_inputs(moved, assets_dir=packaged_assets_dir()).assets_dir == packaged_assets_dir()
+    assert prepare_episode_inputs(moved, assets_dir=tmp_path).assets_dir == tmp_path.resolve()
 
 
 def _write(rows, path: Path) -> Path:
@@ -848,12 +1018,69 @@ def _write(rows, path: Path) -> Path:
         ("--probe-mix", "general_open_ended=1"),
         ("--random-seed", "4"),
         ("--no-store-reasoning", None),
+        ("--probe-option", "general_open_ended.tone=warm"),
     ],
 )
 def test_a_flag_the_stored_rows_settle_is_refused(rows, tmp_path, flag, value):
     argv = ["simulate", "--inputs", str(_write(rows, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]
     with pytest.raises(SystemExit, match=flag):
         cli.main([*argv, flag, *([value] if value else []), "--dry-run"])
+
+
+def test_a_run_s_probe_settings_reach_its_stored_rows_and_their_replay(register_test_probe, tmp_path):
+    class _Options(BaseProbe.Options):
+        party_size: int = 2
+
+    register_test_probe("ext_options", Options=_Options)
+    stored = tmp_path / "rows.parquet"
+    argv = [
+        "simulate",
+        "--locale",
+        "en_US",
+        "--num-rows",
+        "1",
+        "--max-turns",
+        "1",
+        "--probe-mix",
+        "general_open_ended=1",
+    ]
+    assert (
+        cli.main([*argv, "--probe-option", "ext_options.party_size=4", "--materialize-inputs", "--out", str(stored)])
+        == 0
+    )
+    rows = load_episode_inputs(stored)
+    assert [row["usersim_config"]["probe_options"] for row in rows] == [{"ext_options": {"party_size": 4}}]
+
+    configs = []
+    construct = generator_module.construct_probe_episode
+
+    def spy(data, **kwargs):
+        configs.append(kwargs["config"])
+        return construct(data, **kwargs)
+
+    with patch.object(generator_module, "construct_probe_episode", spy):
+        _run(rows, tmp_path / "out")
+    assert configs
+    assert all(config.probe_options == {"ext_options": {"party_size": 4}} for config in configs)
+
+
+def test_a_stored_row_keeps_the_seed_table_s_row_only_for_the_probe_that_reads_it(rows):
+    columns = rows[0]["usersim_config"]["seed_dataset_columns"]
+    assert {"tools", "toolset_source"} <= set(columns)
+    for row in rows:
+        if row["probe_type"] == "tool_calling":
+            # Every toolset has tools and a source; only some have a name.
+            assert row["tools"] and row["toolset_source"]
+        else:
+            assert [row[column] for column in columns] == [None] * len(columns)
+
+
+def test_stored_rows_whose_settings_a_probe_rejects_stop_before_any_model_call(rows, tmp_path, caplog):
+    rejected = _edited(rows, lambda r: [row["usersim_config"].update(probe_options={"no_such_probe": {}}) for row in r])
+    argv = ["simulate", "--inputs", str(_write(rejected, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]
+    with caplog.at_level(logging.ERROR):
+        assert cli.main([*argv, "--dry-run"]) == 2
+    assert "'no_such_probe' is not a registered probe" in caplog.text
 
 
 def test_stored_rows_get_the_asset_pre_flight_against_the_root_they_run_on(rows, tmp_path, caplog):

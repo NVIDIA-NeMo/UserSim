@@ -12,6 +12,7 @@ from types import ModuleType, SimpleNamespace
 
 import pandas as pd
 import pytest
+from _probe_contract import built_in_labels, probe_contract
 
 from usersim.cli._pipeline import known_probes
 from usersim.engine.config import ConversationSimulatorConfig
@@ -114,27 +115,89 @@ _PERSONA_DERIVED_COLUMNS = (
     "usersim_config",
 )
 _PINNED_ASSISTANT_MODEL = "nvidia/llama-3.1-nemotron-70b-instruct"
-_PINNED_TRAJECTORY_IDS = {
-    "financial_services": "f29c0dac38c0ba2a",
-    "general_educational": "fef0f90231a81da0",
-    "general_open_ended": "0fb84850f75a3f00",
-    "health_decision_support_disclosure": "fd69ae7b7cfc94a9",
-    "health_general_disclosure": "53a2c75f6cd26bce",
-    "health_therapy_disclosure": "e34d48f7eac319a6",
-    "health_triage_disclosure": "8c2c67f3cbd0f7b0",
-    "identity_disclosure": "ab9a7b113d58f3d3",
-    "safety_agentic": "0dd753b33d0edb8c",
-    "safety_chat_pressure": "34650e5f725ae448",
-    "sov_ai_dynamic": "f2fb3d9172800ca5",
-    "sov_ai_facts": "dfc5df24a426aad0",
-    "sov_ai_multilingual_parity": "6d1ca33ea06f0977",
-    "tool_calling": "820a7661b9bde4d2",
-}
 
 
-def test_every_registered_probe_has_a_pinned_trajectory_id() -> None:
-    """Guard against a probe landing without a trajectory-identity decision."""
-    assert set(_PINNED_TRAJECTORY_IDS) == set(known_probes())
+@pytest.mark.parametrize(
+    ("probe_type", "kind"), [("general_open_ended", "topics"), ("general_educational", "subjects")]
+)
+def test_a_general_probe_draws_its_theme_from_its_seeds(probe_type: str, kind: str) -> None:
+    from usersim.engine.core.seeds import load_seeds
+
+    (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={probe_type: 1.0}, random_seed=5)
+
+    assert json.loads(row["theme"]) in load_seeds("en_US", probe_type, kind)
+
+
+def test_a_tool_calling_row_stores_no_drawn_theme() -> None:
+    """A tool_calling row's theme is its toolset, so the run draws none and the row holds the placeholder."""
+    (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"tool_calling": 1.0}, random_seed=5)
+
+    assert row["theme"] == "__not_used__"
+    assert row["toolset_category"]
+
+
+def test_materialized_rows_keep_the_seed_table_to_the_probe_that_reads_it() -> None:
+    """A host gets the toolset columns on the tool_calling rows only, as a simulate run stores them."""
+    probe_mix = {"tool_calling": 0.5, "general_open_ended": 0.5}
+    # No seed fixes which probe a row samples, and the test persona dataset
+    # gives at most four rows a call, so draw until each probe has rows.
+    rows: list[dict[str, object]] = []
+    for _ in range(10):
+        rows += materialize_episode_inputs(locale="en_US", num_rows=4, probe_mix=probe_mix)
+        if {row["probe_type"] for row in rows} == set(probe_mix):
+            break
+    columns = ("toolset_source", "toolset_category", "toolset_name", "num_tools", "tools")
+    by_probe = {probe: [row for row in rows if row["probe_type"] == probe] for probe in probe_mix}
+
+    assert by_probe["tool_calling"] and by_probe["general_open_ended"]
+    assert all(row["tools"] and row["toolset_category"] for row in by_probe["tool_calling"])
+    assert all(row.get(column) is None for row in by_probe["general_open_ended"] for column in columns)
+
+
+def _themes_from_its_folder(cls: type, locale: str) -> list[dict]:
+    return json.loads((cls.assets_dir() / locale / "themes.json").read_text(encoding="utf-8"))
+
+
+def test_a_probes_themes_reach_its_rows(register_test_probe, tmp_path: Path) -> None:
+    """A probe's themes, read under its own asset folder as its banks are, are what its rows sample."""
+    (tmp_path / "ext_themes" / "en_US").mkdir(parents=True)
+    bread = {"type": "Baking", "description": "Pain de campagne à la maison"}
+    (tmp_path / "ext_themes" / "en_US" / "themes.json").write_text(json.dumps([bread]), encoding="utf-8")
+    register_test_probe("ext_themes", assets_root=tmp_path, themes=classmethod(_themes_from_its_folder))
+
+    (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_themes": 1.0}, random_seed=5)
+
+    assert json.loads(row["theme"]) == bread
+    assert "à la maison" in row["theme"]
+
+
+def _bank_root(tmp_path: Path, label: str) -> Path:
+    """An asset root whose ``<label>/`` folder holds one bank file, as the pre-flight requires of every probe."""
+    (tmp_path / label).mkdir()
+    (tmp_path / label / "bank.yaml").write_text("entries: []\n", encoding="utf-8")
+    return tmp_path
+
+
+def test_a_probe_that_reads_no_theme_gets_a_placeholder(register_test_probe, tmp_path) -> None:
+    register_test_probe("ext_no_themes", assets_root=_bank_root(tmp_path, "ext_no_themes"))
+
+    (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_no_themes": 1.0}, random_seed=5)
+
+    assert row["theme"] == probes.NO_THEME
+
+
+def test_a_probe_with_no_themes_for_the_locale_is_refused(register_test_probe, tmp_path) -> None:
+    """An empty list leaves the sampler nothing to draw for the probe's rows."""
+    from usersim.engine.errors import ConfigError
+
+    register_test_probe(
+        "ext_no_themes",
+        assets_root=_bank_root(tmp_path, "ext_no_themes"),
+        themes=classmethod(lambda cls, locale: []),
+    )
+
+    with pytest.raises(ConfigError, match="ext_no_themes has no themes for en_US"):
+        materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_no_themes": 1.0}, random_seed=5)
 
 
 def _pinned_inputs(probe_type: str) -> tuple[dict, ConversationSimulatorConfig, dict]:
@@ -157,27 +220,28 @@ def _pinned_inputs(probe_type: str) -> tuple[dict, ConversationSimulatorConfig, 
     return data, config, models
 
 
-@pytest.mark.parametrize("probe_type", sorted(_PINNED_TRAJECTORY_IDS))
+@pytest.mark.parametrize("probe_type", built_in_labels())
 def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
+    """Each built-in's contract pins the id of one episode, so a change to its identity scheme fails."""
     data, config, models = _pinned_inputs(probe_type)
 
     # construct_probe_episode, not construct_episode_preamble: the probe is built
     # here, which is where a probe-discovered variant could leak into the id.
     episode = construct_probe_episode(data, config=config, models=models)
 
-    assert episode.preamble.trajectory_id == _PINNED_TRAJECTORY_IDS[probe_type]
+    assert episode.preamble.trajectory_id == probe_contract(probe_type).trajectory_id
 
 
-def test_two_probes_in_one_module_record_their_own_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
-    """A probe's family, variant and prompt version come from its own class, so
+def test_two_probes_in_one_module_record_their_own_metadata(
+    monkeypatch: pytest.MonkeyPatch, register_test_probe
+) -> None:
+    """A probe's label, variant and prompt version come from its own class, so
     two probes defined in one module each record their own."""
     data, config, models = _pinned_inputs("general_open_ended")
     module = ModuleType("_two_probes_module")
     monkeypatch.setitem(sys.modules, module.__name__, module)
-    monkeypatch.setattr(probes, "_PROBE_REGISTRY", dict(probes._PROBE_REGISTRY))
     for label, version, variant in (("_first_probe", "v1.0", "alpha"), ("_second_probe", "v2.0", "beta")):
-        cls = type(label, (probes.BaseProbe,), {"label": label, "__module__": module.__name__})
-        probes.register_probe(family=label, prompt_version=version, variants=(variant,))(cls)
+        register_test_probe(label, prompt_version=version, variants=(variant,), __module__=module.__name__)
 
     first = construct_episode_preamble({**data, "probe_type": "_first_probe"}, config=config, models=models)
     second = construct_episode_preamble({**data, "probe_type": "_second_probe"}, config=config, models=models)
@@ -192,6 +256,21 @@ def test_two_probes_in_one_module_record_their_own_metadata(monkeypatch: pytest.
         "beta",
         "v2.0",
     )
+
+
+def test_a_probe_that_reads_no_seed_table_sees_the_run_s_seed_columns_empty() -> None:
+    """Data Designer gives every row of a run a row of its seed table; only the probe that reads it sees it."""
+    data, config, models = _pinned_inputs("tool_calling")
+    config = config.model_copy(update={"seed_dataset_columns": ["toolset_name", "num_tools"]})
+    seeded = {**data, "toolset_name": "Weather", "num_tools": 3}
+
+    tool = construct_episode_preamble(seeded, config=config, models=models)
+    general = construct_episode_preamble(
+        {**seeded, "probe_type": "general_open_ended", "theme": '{"type": "cooking"}'}, config=config, models=models
+    )
+
+    assert (tool.data["toolset_name"], tool.data["num_tools"]) == ("Weather", 3)
+    assert (general.data["toolset_name"], general.data["num_tools"]) == (None, None)
 
 
 @pytest.mark.parametrize("empty", [float("nan"), pd.NA], ids=["nan", "na"])

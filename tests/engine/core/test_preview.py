@@ -36,12 +36,12 @@ import pandas as pd
 import pytest
 from rich.console import Console
 
-from usersim.engine.core.outcomes import PLACEHOLDER_WARNING_KINDS
 from usersim.engine.core.preview import (
     filter_preview_locale,
     preview_row,
     preview_summary,
 )
+from usersim.engine.core.probes import PreviewField, known_probes, resolve_probe
 
 
 def _general_row() -> dict[str, Any]:
@@ -475,14 +475,14 @@ class TestStatusTriState:
         row = _general_row()
         row["simulation_outcome"] = _outcome(
             status="completed_with_warnings",
-            warnings=[{"kind": "id_fabrication", "turn_idx": 0, "detail": ""}],
+            warnings=[{"kind": "compression_fallback", "turn_idx": 0, "detail": ""}],
         )
         out = _record([row])
         assert "SIM WARN" in out
         # The warning chip surfaces the WarningKind value verbatim
-        # — a user grepping the parquet for ``id_fabrication`` finds
+        # — a user grepping the parquet for ``compression_fallback`` finds
         # the same string.
-        assert "id_fabrication" in out
+        assert "compression_fallback" in out
 
     def test_failed_renders_fail_badge(self) -> None:
         row = _general_row()
@@ -531,9 +531,18 @@ class TestStatusTriState:
         assert "used_placeholder_query" not in out
         assert "used_placeholder_target" not in out
 
-    @pytest.mark.parametrize("kind", sorted(PLACEHOLDER_WARNING_KINDS))
+    @pytest.mark.parametrize(
+        "kind",
+        sorted(
+            {
+                resolve_probe(label).placeholder_warning_kind
+                for label in known_probes()
+                if hasattr(resolve_probe(label), "placeholder_warning_kind")
+            }
+        ),
+    )
     def test_every_placeholder_kind_reads_as_ok(self, kind: str) -> None:
-        """Each placeholder warning kind the engine defines, whichever probe emits it."""
+        """Each placeholder warning kind a registered probe declares."""
         row = _general_row()
         row["simulation_outcome"] = _outcome(
             status="completed_with_warnings",
@@ -545,7 +554,7 @@ class TestStatusTriState:
         assert kind not in out
 
     @pytest.mark.parametrize(
-        ("kind", "status"), [("acme_used_placeholder_recipe", "SIM OK"), ("acme_slow_tool", "SIM WARN")]
+        ("kind", "status"), [("my_used_placeholder_booking", "SIM OK"), ("my_slow_tool", "SIM WARN")]
     )
     def test_a_prefixed_kind_reads_by_whether_it_marks_placeholder_content(self, kind: str, status: str) -> None:
         row = _general_row()
@@ -559,7 +568,7 @@ class TestStatusTriState:
 
     def test_real_warning_alongside_placeholder_still_warns(self) -> None:
         # Mixed bag: when a placeholder warning fires alongside an
-        # actual simulation-quality warning (e.g. ``id_fabrication``
+        # actual simulation-quality warning (e.g. ``compression_fallback``
         # or ``poor_assistant_response``), the row reads as SIM WARN
         # and ONLY the simulation-quality chip surfaces. The
         # placeholder chip stays filtered out.
@@ -568,12 +577,12 @@ class TestStatusTriState:
             status="completed_with_warnings",
             warnings=[
                 {"kind": "used_placeholder_query", "turn_idx": 0, "detail": ""},
-                {"kind": "id_fabrication", "turn_idx": 1, "detail": ""},
+                {"kind": "compression_fallback", "turn_idx": 1, "detail": ""},
             ],
         )
         out = _record([row])
         assert "SIM WARN" in out
-        assert "id_fabrication" in out
+        assert "compression_fallback" in out
         assert "used_placeholder_query" not in out
 
     def test_summary_table_distinguishes_warn_from_pass(self) -> None:
@@ -585,7 +594,7 @@ class TestStatusTriState:
         warn_row["persona_name"] = "Mary Warn"
         warn_row["simulation_outcome"] = _outcome(
             status="completed_with_warnings",
-            warnings=[{"kind": "id_fabrication"}],
+            warnings=[{"kind": "compression_fallback"}],
         )
         fail_row = _general_row()
         fail_row["persona_name"] = "John Fail"
@@ -631,10 +640,9 @@ class TestProbePanel:
         assert "Variant: factual_recall" in out
 
     def test_unknown_probe_falls_back_gracefully(self) -> None:
-        # Defensive: an unknown ``probe_type`` (e.g. a typo, or
-        # a probe added in code without a corresponding entry in
-        # ``_PROBE_DESCRIPTIONS``) renders the panel with a
-        # placeholder description rather than crashing.
+        # Defensive: an unknown ``probe_type`` (e.g. a typo, or a
+        # stored row from a probe that is not installed) renders
+        # the panel with a placeholder description rather than crashing.
         row = _general_row()
         row["probe_type"] = "tool_calling_v2_renamed"
         out = _record([row])
@@ -665,23 +673,22 @@ class TestScenarioInputsPanel:
         assert "send_email_internal" in out
         assert "transfer_funds_external" in out
 
-    def test_general_family_includes_theme_in_inputs_panel(self) -> None:
-        # tool_calling / general_open_ended / general_educational don't carry
-        # curated-asset side channels but they ARE seeded by a
-        # ``theme`` (sampled from the locale's seed YAML or a
-        # toolset bundle). The Probe Inputs panel surfaces theme
-        # + toolset metadata for the general family so readers
-        # can answer "what was this probe seeded with?" without
-        # cross-referencing the seed parquet.
+    def test_tool_calling_inputs_panel_shows_its_toolset(self) -> None:
+        # A tool_calling row is seeded by the toolset it draws, which is
+        # also its theme, so the Probe Inputs panel shows the toolset and
+        # not the run's theme placeholder: readers can answer "what was
+        # this probe seeded with?" without cross-referencing the catalog.
         row = _general_row()
-        row["theme"] = '{"name": "weather"}'
+        row["theme"] = "__not_used__"
         row["toolset_name"] = "weather_tools"
         row["toolset_category"] = "weather"
         row["num_tools"] = 3
         out = _record([row])
         assert "Probe Inputs" in out
-        assert "Theme" in out
+        assert "Toolset category" in out
         assert "weather_tools" in out
+        assert "Theme" not in out
+        assert "__not_used__" not in out
 
     def test_multilingual_consistency_inputs_panel(self) -> None:
         row = _general_row()
@@ -701,10 +708,37 @@ class TestScenarioInputsPanel:
         assert "Q-HEALTH-001" in out
         assert "respect.condescension" in out
 
+    # ---------------------------------------------------------------------------
+    # 6. Attempted actions table (safety_agentic)
+    # ---------------------------------------------------------------------------
 
-# ---------------------------------------------------------------------------
-# 6. Attempted actions table (safety_agentic)
-# ---------------------------------------------------------------------------
+    def test_a_probe_from_another_package_shows_the_fields_it_declares(self, register_test_probe) -> None:
+        register_test_probe(
+            "ext_recipes",
+            preview_fields=(
+                PreviewField("ext_recipe_id", "Recipe id"),
+                PreviewField("ext_cuisine", "Cuisine", from_metadata=True),
+                PreviewField("ext_difficulty", "Recipe difficulty"),
+            ),
+        )
+        row = _general_row()
+        row.update(probe_type="ext_recipes", probe_family="ext_recipes", ext_recipe_id="R-007")
+        row["conversation_metadata"] = json.dumps({"ext_cuisine": "Thai"})
+
+        out = _record([row])
+
+        assert "Probe Inputs" in out
+        assert out.index("Recipe id: R-007") < out.index("Cuisine: Thai")
+        assert "Recipe difficulty" not in out
+
+    def test_a_row_from_a_probe_that_is_not_installed_has_no_inputs_panel(self) -> None:
+        row = _general_row()
+        row.update(probe_type="retired_probe", probe_family="retired_probe")
+
+        out = _record([row])
+
+        assert "retired_probe" in out
+        assert "Probe Inputs" not in out
 
 
 class TestAttemptedActionsTable:

@@ -1,0 +1,12 @@
+bank_id: my_bookings_pt_BR
+bank_version: "1.0.0"
+appointments:
+  - id: museum_tour
+    what: a visita guiada ao museu da cidade
+    placeholder: true
+  - id: restaurant
+    what: uma mesa num restaurante
+    placeholder: true
+  - id: pottery_class
+    what: uma aula de cerâmica
+    placeholder: true

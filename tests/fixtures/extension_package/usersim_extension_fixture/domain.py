@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-from usersim.asset_gen.registry import AssetDomain
+from usersim.extension import AssetDomain
 
 
 def _noop(*args, **kwargs):

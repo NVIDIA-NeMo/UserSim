@@ -41,7 +41,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.storage import (
     list_runs,
     new_run_id,
@@ -226,8 +225,8 @@ class TestNewRunIdWiring:
         DataDesigner whose ``create().load_dataset()`` returns our
         synthetic frame. This isolates the run-id wiring without
         needing API keys."""
-        from usersim.cli._models import default_models_path, load_models_config
         from usersim.cli.simulate import _simulate_to_parquet
+        from usersim.engine.models_file import default_models_path, load_models_config
 
         out = tmp_path / "trajs"
         out.mkdir()
@@ -268,7 +267,7 @@ class TestNewRunIdWiring:
                 locales=["en_US"],
                 num_rows=1,
                 out=out,
-                assets_dir=packaged_assets_dir(),
+                assets_dir=None,
                 max_turns=1,
                 probe_mix={"general_open_ended": 1.0},
                 random_seed=42,
@@ -276,7 +275,7 @@ class TestNewRunIdWiring:
                 store_reasoning=False,
             )
         assert rc == 0
-        assert captured_builder_kwargs["toolset_seed_path"] is None
+        assert captured_builder_kwargs["seed_dataset_path"] is None
         assert captured_builder_kwargs["store_reasoning"] is False
 
         # Two distinct runs on disk now: the seeded "1700000000"
@@ -307,8 +306,8 @@ class TestNewRunIdWiring:
         assert fresh_manifest.manifest_schema_version == "v1"
         assert fresh_manifest.run_id == new_id
         assert "assistant_model" in fresh_manifest.models
-        assert fresh_manifest.scope.toolset_seed_path is None
-        assert fresh_manifest.scope.toolset_content_hash is None
+        assert fresh_manifest.scope.seed_dataset_path is None
+        assert fresh_manifest.scope.seed_dataset_content_hash is None
         assert fresh_manifest.simulation_config.store_reasoning is False
         assert fresh_manifest.source.kind == "cli"
         assert fresh_manifest.source.invocation == "usersim simulate --locale en_US --num-rows 1"
@@ -322,8 +321,8 @@ class TestNewRunIdWiring:
         """``skip_existing=True`` resumes into the most-recent
         existing run; the FRESH trajectory lands in that same run
         partition, not a new one."""
-        from usersim.cli._models import default_models_path, load_models_config
         from usersim.cli.simulate import _simulate_to_parquet
+        from usersim.engine.models_file import default_models_path, load_models_config
 
         out = tmp_path / "trajs"
         out.mkdir()
@@ -355,7 +354,7 @@ class TestNewRunIdWiring:
                 locales=["en_US"],
                 num_rows=1,
                 out=out,
-                assets_dir=packaged_assets_dir(),
+                assets_dir=None,
                 max_turns=1,
                 probe_mix={"general_open_ended": 1.0},
                 random_seed=42,
@@ -373,8 +372,8 @@ class TestNewRunIdWiring:
 
 def test_context_failure_row_survives_cli_storage(tmp_path: Path) -> None:
     """A structured partial failure is a row, not a Data Designer omission."""
-    from usersim.cli._models import default_models_path, load_models_config
     from usersim.cli.simulate import _simulate_to_parquet
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     out = tmp_path / "trajs"
     models = load_models_config(default_models_path())
@@ -399,7 +398,7 @@ def test_context_failure_row_survives_cli_storage(tmp_path: Path) -> None:
             locales=["en_US"],
             num_rows=1,
             out=out,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"financial_services": 1.0},
             random_seed=42,
@@ -425,8 +424,8 @@ def test_each_batch_gets_its_own_artifacts_and_the_manifest_its_start(tmp_path: 
     from types import SimpleNamespace
 
     from usersim.cli import simulate
-    from usersim.cli._models import default_models_path, load_models_config
     from usersim.engine.core.manifest import load_run_manifest
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     folders: list[Path] = []
 
@@ -451,7 +450,7 @@ def test_each_batch_gets_its_own_artifacts_and_the_manifest_its_start(tmp_path: 
             locales=["en_US"],
             num_rows=1,
             out=out,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=42,
@@ -465,6 +464,54 @@ def test_each_batch_gets_its_own_artifacts_and_the_manifest_its_start(tmp_path: 
     assert tmp_path not in folders[0].parents
 
 
+def test_the_manifest_records_the_settings_the_rows_were_made_with(tmp_path: Path, monkeypatch) -> None:
+    """The manifest's simulation config comes from the settings each locale's simulator column was built with."""
+    from usersim.cli import simulate
+    from usersim.engine.core.manifest import load_run_manifest
+    from usersim.engine.models_file import default_models_path, load_models_config
+
+    built: list[dict] = []
+
+    class _FakeResult:
+        def load_dataset(self):
+            return _synthetic_trajectory("SETTINGS")
+
+    class _FakeDD:
+        def create(self, builder, num_records=None, artifact_path=None):
+            return _FakeResult()
+
+    def fake_builder(**kwargs):
+        built.append(kwargs)
+        return _FakeDD(), object()
+
+    monkeypatch.chdir(tmp_path)
+    out = tmp_path / "trajs"
+    settings = {"financial_services": {"tier_mix": 0.3}}
+    with patch("usersim.cli._pipeline.build_simulator_config_builder", fake_builder):
+        rc = simulate._simulate_to_parquet(
+            models=load_models_config(default_models_path()),
+            models_path=default_models_path(),
+            panel=None,
+            locales=["en_US"],
+            num_rows=1,
+            out=out,
+            assets_dir=None,
+            max_turns=1,
+            max_assistant_attempts=2,
+            probe_mix={"general_open_ended": 1.0},
+            probe_options=settings,
+            random_seed=42,
+            skip_existing=False,
+        )
+
+    assert rc == 0
+    (run_id,) = list_runs(out)
+    recorded = load_run_manifest(run_id, out).simulation_config
+    assert [(kwargs["max_assistant_attempts"], kwargs["probe_options"]) for kwargs in built] == [(2, settings)]
+    assert (recorded.max_turns, recorded.max_assistant_attempts, recorded.random_seed) == (1, 2, 42)
+    assert recorded.probe_options == settings
+
+
 def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path: Path, monkeypatch, caplog) -> None:
     """Shared filesystems such as Lustre are often mounted without ``flock``; a run is written there anyway."""
     fcntl = pytest.importorskip("fcntl")
@@ -472,7 +519,7 @@ def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path:
     import logging
 
     from usersim.cli import simulate
-    from usersim.cli._models import default_models_path, load_models_config
+    from usersim.engine.models_file import default_models_path, load_models_config
 
     def unsupported(*args, **kwargs):
         raise OSError(errno.ENOSYS, "flock is not supported here")
@@ -499,7 +546,7 @@ def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path:
             locales=["en_US"],
             num_rows=1,
             out=out,
-            assets_dir=packaged_assets_dir(),
+            assets_dir=None,
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=42,

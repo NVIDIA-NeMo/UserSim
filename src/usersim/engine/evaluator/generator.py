@@ -86,9 +86,10 @@ logger = logging.getLogger("usersim.engine")
 EVALUATOR_VERSION = "v1.0"
 
 #: Keys the evaluator fills itself in the row it hands a scorer: it decodes
-#: ``conversation_messages`` to a list and ``persona`` to a dict, and defaults
-#: ``probe_family``, ``locale`` and ``language``. Every other key carries the
-#: trajectory's own cell, which is None when that cell is empty.
+#: ``conversation_messages`` to a list and ``persona`` to a dict, sets
+#: ``probe_family`` to an empty string when the row has none, and defaults
+#: ``locale`` and ``language``. Every other key carries the trajectory's own
+#: cell, which is None when that cell is empty.
 SCORER_FILLED_KEYS = frozenset({"conversation_messages", "persona", "probe_family", "locale", "language"})
 
 # Locales whose scripts need a higher token budget for judge responses.
@@ -194,7 +195,9 @@ class TrajectoryEvaluatorGenerator(
         data = none_for_missing(data)
 
         # ── Resolve probe family from the row ─────────────────────
-        probe_family = data.get(cfg.probe_family_column) or "general_open_ended"
+        # A row with no family is judged on the universal axes alone, and its
+        # scorers see an empty family.
+        probe_family = data.get(cfg.probe_family_column) or ""
         if not isinstance(probe_family, str):
             probe_family = str(probe_family)
 

@@ -1,0 +1,84 @@
+name: 🔌 Extension hook
+description: Ask for a hook your probe, scorer or other extension needs and User Sim does not offer
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Use this form when an extension needs something no hook, class
+        attribute or entry point offers. A maintainer reviews the request,
+        agrees the hook's shape with you and adds the `triaged` label when a
+        pull request is wanted.
+        [Adding a hook](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md#adding-a-hook)
+        lists what a new hook must do.
+
+  - type: textarea
+    id: need
+    attributes:
+      label: What does your extension need to do?
+      description: >-
+        The need in general terms: what the extension has to read or change,
+        and at which stage of a run (setup, the conversation, the stored
+        columns, scoring or the report). The general shape is enough to design
+        a hook, so leave out anything confidential about your project.
+    validations:
+      required: true
+
+  - type: textarea
+    id: gap
+    attributes:
+      label: Why don't the existing hooks cover it?
+      description: >-
+        The hooks, class attributes and entry points you looked at, in
+        [architecture/probes.md](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/probes.md)
+        and [docs/extension_api.md](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/extension_api.md),
+        and where each falls short.
+    validations:
+      required: true
+
+  - type: textarea
+    id: shape
+    attributes:
+      label: What shape do you propose?
+      description: >-
+        A method, class attribute or entry point, its signature, and what
+        happens for a probe that does not define it. That default should keep
+        today's behaviour.
+    validations:
+      required: true
+
+  - type: textarea
+    id: hosted
+    attributes:
+      label: Does it work when a host drives the probe?
+      description: >-
+        A host can run a probe from its own loop through `ProbeEpisodeRuntime`,
+        as
+        [EXTERNAL_PROBE_RUNTIME.md](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/engine/EXTERNAL_PROBE_RUNTIME.md)
+        describes. Say whether the hook runs there too, and whether it calls a
+        model.
+    validations:
+      required: true
+
+  - type: textarea
+    id: investigation
+    attributes:
+      label: Prior investigation
+      description: >-
+        What you or your coding agent found in the code, documentation and
+        existing issues, such as a hook that covers part of this or an open
+        request for the same thing. If an agent investigated, paste its
+        findings.
+      placeholder: Paste the agent's findings, or describe what you checked.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and the documentation, or had my agent do so
+          required: true
+        - label: The request describes the need in general terms and holds nothing confidential
+          required: true
+        - label: If an agent helped, its findings are under Prior investigation
+          required: false

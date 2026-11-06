@@ -3,14 +3,33 @@
 
 from pathlib import Path
 
-from usersim.engine.core.probes import BaseProbe, register_probe
+import yaml
+
+from usersim.extension import BaseProbe, PreviewField, register_probe
 
 
-@register_probe(family="fixture", prompt_version="v1.0", variants=("default",))
+@register_probe
 class FixtureProbe(BaseProbe):
     label = "fixture_probe"
     assets_root = Path(__file__).parent / "assets"
     output_columns = ("fixture_probe_marker",)
+    preview_fields = (PreviewField("fixture_probe_marker", "Marker"),)
+    default_scorers = ("fixture_scorer",)
+    authoring_guide = "https://example.com/fixture-probe/locales"
+    seed_dataset = "fixture_seed"
+
+    @classmethod
+    def model_aliases(cls, cfg) -> tuple[str, ...]:
+        return ("fixture_critic_model",)
+
+    @classmethod
+    def check_locale(cls, locale_dir: Path) -> None:
+        if not (locale_dir / "sample.yaml").is_file():
+            raise FileNotFoundError(f"no sample.yaml in {locale_dir}")
+
+    @classmethod
+    def themes(cls, locale: str) -> list[dict]:
+        return yaml.safe_load((cls.assets_dir() / locale / "themes.yaml").read_text(encoding="utf-8"))
 
     def get_user_system_prompt(self) -> str:
         return "You are a fixture user."

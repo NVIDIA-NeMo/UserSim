@@ -23,7 +23,7 @@ UV ?= uv
 # CI, and templates/probe/ is example code a contributor copies, so both
 # should meet the same bar as src/. Leaving them out meant a later scope
 # change would trigger a second repo-wide reformat.
-PY_SRC   ?= src scripts templates
+PY_SRC   ?= src scripts templates docs/examples
 PY_TESTS ?= tests conftest.py
 PY_ALL   := $(PY_SRC) $(PY_TESTS)
 
@@ -233,7 +233,7 @@ HEALTH_PROBE    ?= sov_ai_dynamic
 # is red until every secret is provisioned, which trains people to ignore it.
 define REQUIRE_KEYS_PY
 import sys
-from usersim.cli._models import load_models_config, required_api_key_env_vars
+from usersim.engine.models_file import load_models_config, required_api_key_env_vars
 config = sys.argv[1]
 missing = sorted(v for v in required_api_key_env_vars(load_models_config(config)) if not __import__("os").environ.get(v))
 if missing:
@@ -268,7 +268,7 @@ health-check:  ## Live one-row simulate + eval + report against a provider
 		|| { echo "report produced no index.html"; exit 1; }; \
 	echo "✓ simulate, eval and report all completed"
 
-check-extensions:  ## Install an out-of-tree package and prove all six seams work
+check-extensions:  ## Install an out-of-tree package, prove all six seams work, and test the package template and the guide's example
 	@set -eu; \
 	WORK=$$(mktemp -d); \
 	EMPTY=$$(mktemp -d); \
@@ -280,10 +280,19 @@ check-extensions:  ## Install an out-of-tree package and prove all six seams wor
 	test -x "$$WORK/venv/bin/python" || { echo "venv was not created"; exit 1; }; \
 	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK"/*.whl; \
 	cp -R tests/fixtures/extension_package "$$WORK/ext"; \
+	cp -R templates/extension_package "$$WORK/template"; \
+	cp -R docs/examples/my-bookings "$$WORK/example"; \
 	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK/ext"; \
 	echo "→ asking the installed CLI what it can see, from $$EMPTY"; \
 	cp tests/fixtures/extension_package/verify_seams.py "$$EMPTY/"; \
-	cd "$$EMPTY" && "$$WORK/venv/bin/python" verify_seams.py
+	cd "$$EMPTY" && "$$WORK/venv/bin/python" verify_seams.py; \
+	echo "→ installing templates/extension_package and running its tests"; \
+	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK/template" \
+		"pytest>=8.0" "pytest-asyncio>=1.0,<2" "pytest-env>=1.1,<2"; \
+	(cd "$$WORK/template" && "$$WORK/venv/bin/python" -m pytest -q -p no:cacheprovider); \
+	echo "→ installing docs/examples/my-bookings and running its tests"; \
+	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK/example"; \
+	cd "$$WORK/example" && "$$WORK/venv/bin/python" -m pytest -q -p no:cacheprovider
 
 # --- housekeeping ----------------------------------------------------------
 

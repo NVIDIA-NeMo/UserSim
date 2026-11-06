@@ -34,23 +34,56 @@ stored instead of sampling, one run per setup; see ``cli/_inputs.py``.
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import tempfile
 import time
 from collections import Counter
 from fractions import Fraction
 from pathlib import Path
+from typing import Any
 
-from usersim.cli._errors import ConfigError
 from usersim.cli._persona_language import persona_dataset_report
-from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets, verify_probe_locales
+from usersim.cli._pipeline import (
+    clear_seed_columns_of_other_probes,
+    known_probes,
+    resolve_seed_dataset_for_mix,
+    verify_probe_assets,
+    verify_probe_locales,
+    verify_probe_options,
+)
+from usersim.engine.errors import ConfigError
 
 logger = logging.getLogger("usersim.cli.simulate")
+
+#: How a run that pins no asset folder reports where its assets come from.
+_OWN_ASSETS = "each probe's own assets"
+
+
+class _HelpWithProbes(argparse.Action):
+    """``-h``/``--help``: prints the help with the registered probes ending ``--probe-mix``'s.
+
+    The registry is read only when the help is asked for, since loading it
+    imports every probe module. argparse can expand a help string as soon as
+    its option is added (Python 3.14 does), so the list joins the help here.
+    """
+
+    def __init__(self, option_strings: list[str], dest: str, help: str | None = None) -> None:
+        super().__init__(option_strings, dest=argparse.SUPPRESS, default=argparse.SUPPRESS, nargs=0, help=help)
+        #: The ``--probe-mix`` option, set once it is added.
+        self.probe_mix: argparse.Action | None = None
+
+    def __call__(self, parser: argparse.ArgumentParser, namespace: object, values: object, option_string=None) -> None:
+        if self.probe_mix is not None:
+            self.probe_mix.help = f"{self.probe_mix.help} Registered probes: {', '.join(known_probes())}."
+        parser.print_help()
+        parser.exit()
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:
     p = subparsers.add_parser(
         "simulate",
+        add_help=False,
         help="🗣  Run the conversation simulator and write a trajectory parquet.",
         description=(
             "Run the simulator pipeline against a panel parquet (or an "
@@ -59,6 +92,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "rows that run already holds; --no-skip-existing starts a new run."
         ),
     )
+    show_help = p.add_argument("-h", "--help", action=_HelpWithProbes, help="show this help message and exit")
 
     src = p.add_mutually_exclusive_group(required=True)
     src.add_argument(
@@ -120,7 +154,8 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         type=Path,
         default=None,
         help=(
-            "Path to an alternate assets/ tree (seeds + toolsets). Defaults to the banks shipped inside the package."
+            "Read every probe's assets from this folder, which holds a <probe>/ folder per probe. "
+            "Without it, each probe reads the banks it ships with, after any USERSIM_ASSET_PATH override."
         ),
     )
     p.add_argument(
@@ -138,18 +173,16 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     p.add_argument(
-        "--toolset-seed-path",
+        "--seed-dataset-path",
         type=Path,
         default=None,
         help=(
-            "Toolset file for the tool_calling probe (.parquet or .jsonl), "
-            "one row per toolset with columns toolset_source, "
-            "toolset_category, toolset_name, num_tools and tools (JSON list "
-            "of OpenAI-style function specs) -- see the Schema section of "
-            "assets/tool_calling/README.md. "
-            "Defaults to <assets-dir>/tool_calling/toolsets_seed.{parquet,jsonl}. "
-            "Requires tool_calling in --probe-mix; a missing or unsupported "
-            "explicit file is an error."
+            "Seed table (.parquet or .jsonl) for the probe in --probe-mix that "
+            "reads one, in place of the table it declares in its assets, with the "
+            "columns that probe reads: for tool_calling, its toolset catalog (see the "
+            "Schema section of engine/probes/tool_calling/assets/tool_calling/README.md "
+            "in the package). Requires a probe in --probe-mix that reads a seed table; "
+            "a missing or unsupported explicit file is an error."
         ),
     )
     p.add_argument(
@@ -170,7 +203,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "side-effectful after_assistant_turn are capped to 1."
         ),
     )
-    p.add_argument(
+    show_help.probe_mix = p.add_argument(
         "--probe-mix",
         type=str,
         default="tool_calling=0.34,general_open_ended=0.33,general_educational=0.33",
@@ -178,15 +211,8 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "Comma-separated probe=weight pairs. A weight can be an integer, "
             "a decimal or a fraction (1/3); weights are normalized to sum to "
             "1. The default runs tool_calling and the two general probes. "
-            "Built-in probes: general_open_ended, general_educational, "
-            "tool_calling, financial_services, sov_ai_facts, sov_ai_dynamic, "
-            "sov_ai_multilingual_parity, safety_chat_pressure, safety_agentic, "
-            "identity_disclosure, health_general_disclosure, "
-            "health_triage_disclosure, health_therapy_disclosure, "
-            "health_decision_support_disclosure. An unknown name is refused "
-            "with the full registered list, including installed extensions, "
-            "and a probe that cannot run in a requested locale stops the run "
-            "before any model call."
+            "An unknown name is refused, and a probe that cannot run in a "
+            "requested locale stops the run before any model call."
         ),
     )
     p.add_argument(
@@ -200,31 +226,16 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     p.add_argument(
-        "--finance-tier-mix",
-        type=float,
-        default=0.0,
+        "--probe-option",
+        action="append",
+        default=None,
+        metavar="PROBE.SETTING=VALUE",
         help=(
-            "financial_services only: probability [0,1] a trajectory uses the "
-            "DYNAMIC tier (generated open-ended, judge-scored) vs the default "
-            "VERIFIABLE tier (param-locked, deterministically verified). "
-            "0.0 (default) = verifiable-only."
-        ),
-    )
-    p.add_argument(
-        "--finance-retrieval-mode",
-        choices=("hybrid", "dense", "golden"),
-        default="hybrid",
-        help=(
-            "financial_services only: kb_search backend. 'hybrid' (default) "
-            "blends word overlap with cosine similarity over the institution's "
-            "document vectors (embeddings.parquet, written by gen-assets; the "
-            "query is embedded with the 'embedding_model' alias), and ranks on "
-            "word overlap alone when the bank has no vectors. 'dense' uses "
-            "cosine alone, as an ablation. 'golden' is a reasoning-isolation "
-            "ablation that injects the verifiable task's gold documents; the "
-            "dynamic tier has no gold documents, so it ranks on word overlap "
-            "there. Retrieval quality is measured separately by the "
-            "financial_retrieval_recall capability."
+            "A setting for one probe in the mix, such as financial_services.tier_mix=0.3; "
+            "repeat it for more. "
+            "The value is read as JSON when it parses, else as text. "
+            "Each probe lists the settings it takes in its Options; an unknown probe or "
+            "setting, or a bad value, stops the run before any model call."
         ),
     )
     p.add_argument(
@@ -281,13 +292,32 @@ _STORED_ROW_FLAGS = {
     "max_assistant_attempts": "--max-assistant-attempts",
     "probe_mix": "--probe-mix",
     "random_seed": "--random-seed",
-    "finance_tier_mix": "--finance-tier-mix",
-    "finance_retrieval_mode": "--finance-retrieval-mode",
+    "probe_option": "--probe-option",
     "no_store_reasoning": "--no-store-reasoning",
-    "toolset_seed_path": "--toolset-seed-path",
+    "seed_dataset_path": "--seed-dataset-path",
     "match_persona_language": "--match-persona-language",
     "materialize_inputs": "--materialize-inputs",
 }
+
+
+def _parse_probe_options(specs: list[str] | None) -> dict[str, dict[str, Any]]:
+    """``--probe-option PROBE.SETTING=VALUE`` flags as ``{probe: {setting: value}}``.
+
+    A value that parses as JSON is read as JSON, so ``0.3`` is a number and
+    ``true`` a boolean; any other value is text.
+    """
+    options: dict[str, dict[str, Any]] = {}
+    for spec in specs or ():
+        name, sep, raw = spec.partition("=")
+        probe, dot, setting = name.strip().partition(".")
+        if not sep or not dot or not probe or not setting:
+            raise SystemExit(f"--probe-option expects PROBE.SETTING=VALUE; got {spec!r}")
+        try:
+            value = json.loads(raw)
+        except json.JSONDecodeError:
+            value = raw
+        options.setdefault(probe, {})[setting] = value
+    return options
 
 
 def _parse_probe_mix(spec: str) -> dict:
@@ -297,8 +327,6 @@ def _parse_probe_mix(spec: str) -> dict:
     unknown probe fails at argument-parse time with a friendly
     error rather than as an opaque sampler error mid-run.
     """
-    from usersim.cli._pipeline import known_probes
-
     out: dict[str, float] = {}
     for pair in spec.split(","):
         pair = pair.strip()
@@ -334,7 +362,7 @@ def _parse_probe_mix(spec: str) -> dict:
 
 
 def run(args: argparse.Namespace) -> int:
-    from usersim.cli._models import (
+    from usersim.engine.models_file import (
         REQUIRED_SIMULATOR_ALIASES,
         assistant_replays_reasoning,
         default_models_path,
@@ -353,25 +381,19 @@ def run(args: argparse.Namespace) -> int:
         return _run_inputs(args, models, models_path)
 
     probe_mix = _parse_probe_mix(args.probe_mix)
+    probe_options = _parse_probe_options(args.probe_option)
+    verify_probe_options(probe_options)
 
-    # Resolve --assets-dir once, here, so every downstream consumer sees a
-    # real path rather than None.
-    from usersim.engine.core._assets import default_assets_dir
-
-    # Two different questions. ``pinned`` is whether the user named a
-    # directory: if so, resolution stays there and a missing bank is an
-    # error rather than a silent fall-through to the packaged copies.
-    # ``args.assets_dir`` is the single concrete root recorded in the
-    # generator config and the run manifest, which cannot hold a list.
-    pinned_assets_dir = args.assets_dir
-    if args.assets_dir is None:
-        args.assets_dir = default_assets_dir()
-
+    # ``args.assets_dir`` is the folder the user pinned, or None. A pinned run
+    # reads every bank there, and a missing one is an error rather than a
+    # silent fall-through; otherwise each probe reads its own assets.
+    if args.assets_dir is not None:
+        args.assets_dir = args.assets_dir.resolve()
     if args.locale and args.num_rows is None:
         raise SystemExit("--locale requires --num-rows")
 
     if args.materialize_inputs:
-        return _materialize_inputs(args, models, probe_mix, pinned_assets_dir)
+        return _materialize_inputs(args, models, probe_mix, probe_options)
 
     if args.dry_run:
         run_locales = (
@@ -379,11 +401,11 @@ def run(args: argparse.Namespace) -> int:
         )
         # Resolved before anything is printed so a bad config fails cleanly
         # instead of interleaving with a half-written plan.
-        verify_probe_assets(probe_mix, run_locales, pinned_assets_dir)
-        seed = resolve_toolset_seed_for_mix(
+        verify_probe_assets(probe_mix, run_locales, args.assets_dir)
+        seed = resolve_seed_dataset_for_mix(
             probe_mix,
-            pinned_assets_dir,
-            args.toolset_seed_path,
+            args.assets_dir,
+            args.seed_dataset_path,
         )
         # Reported, not refused: the offline check a new install runs comes
         # before the persona download.
@@ -403,14 +425,14 @@ def run(args: argparse.Namespace) -> int:
         print(f"  max_assistant_attempts: {args.max_assistant_attempts}")
         print(f"  random_seed:   {args.random_seed}")
         print(f"  models config: {models_path}")
-        if pinned_assets_dir is not None:
+        if args.assets_dir is not None:
             print(f"  assets_dir:    {args.assets_dir}")
         else:
             from usersim.engine.core._assets import asset_search_path
 
-            print(f"  asset path:    {', '.join(str(r) for r in asset_search_path())}")
+            print(f"  asset path:    {', '.join([*map(str, asset_search_path()), _OWN_ASSETS])}")
         print(f"  match_persona_language: {args.match_persona_language}")
-        print(f"  toolset_seed_path: {seed or '(not used)'}")
+        print(f"  seed_dataset_path: {seed or '(not used)'}")
         print(f"  output:        {args.out}")
         print(f"  resumable:     {not args.no_skip_existing}")
         print(f"  store_reasoning: {not args.no_store_reasoning}")
@@ -430,15 +452,13 @@ def run(args: argparse.Namespace) -> int:
         num_rows=args.num_rows,
         out=args.out,
         assets_dir=args.assets_dir,
-        pinned_assets_dir=pinned_assets_dir,
         match_persona_language=args.match_persona_language,
-        toolset_seed_path=args.toolset_seed_path,
+        seed_dataset_path=args.seed_dataset_path,
         max_turns=args.max_turns,
         max_assistant_attempts=args.max_assistant_attempts,
         probe_mix=probe_mix,
         random_seed=args.random_seed,
-        finance_tier_mix=args.finance_tier_mix,
-        finance_retrieval_mode=args.finance_retrieval_mode,
+        probe_options=probe_options,
         skip_existing=not args.no_skip_existing,
         store_reasoning=not args.no_store_reasoning,
     )
@@ -471,16 +491,14 @@ def run(args: argparse.Namespace) -> int:
     return status.exit_code or 0
 
 
-def _materialize_inputs(args, models, probe_mix: dict[str, float], pinned_assets_dir) -> int:
+def _materialize_inputs(args, models, probe_mix: dict[str, float], probe_options: dict[str, dict[str, Any]]) -> int:
     """CLI adapter for the public no-model-call materialization seam."""
-    import json
-
     import pandas as pd
 
     from usersim.cli._pipeline import materialize_episode_inputs
 
     locales = _locales_from_panel(args.panel) if args.panel else list(args.locale or [])
-    verify_probe_assets(probe_mix, locales, pinned_assets_dir)
+    verify_probe_assets(probe_mix, locales, args.assets_dir)
     if (report := persona_dataset_report(locales)) is not None:
         raise ConfigError(report)
     rows = []
@@ -491,16 +509,15 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float], pinned_assets
                 locale=locale,
                 num_rows=count,
                 models=models,
-                assets_dir=Path(args.assets_dir).resolve(),
+                assets_dir=args.assets_dir,
                 probe_mix=probe_mix,
                 random_seed=args.random_seed,
-                toolset_seed_path=args.toolset_seed_path,
+                seed_dataset_path=args.seed_dataset_path,
                 match_persona_language=args.match_persona_language,
                 max_turns=args.max_turns,
                 max_assistant_attempts=args.max_assistant_attempts,
                 store_reasoning=not args.no_store_reasoning,
-                finance_tier_mix=args.finance_tier_mix,
-                finance_retrieval_mode=args.finance_retrieval_mode,
+                probe_options=probe_options,
             )
         )
     out = Path(args.out)
@@ -523,7 +540,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         prepare_episode_inputs,
         simulate_inputs_to_dataset,
     )
-    from usersim.cli._models import warn_if_missing_api_key
+    from usersim.engine.models_file import warn_if_missing_api_key
 
     defaults = args._stored_row_flag_defaults
     given = [flag for dest, flag in _STORED_ROW_FLAGS.items() if getattr(args, dest) != defaults[dest]]
@@ -539,10 +556,8 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         plan = plan_inputs_run(inputs, models, args.out, skip_existing=not args.no_skip_existing)
     except (OSError, ValueError) as error:
         raise SystemExit(f"--inputs {args.inputs}: {error}") from None
-    probe_locales: dict[str, list[str]] = {}
-    for row in inputs.rows:
-        probe_locales.setdefault(str(row["probe_type"]), []).append(row["usersim_config"]["locale"])
-    verify_probe_locales(probe_locales, inputs.assets_dir)
+    verify_probe_locales(inputs.probe_locales, inputs.assets_dir)
+    verify_probe_options(inputs.config.get("probe_options"))
 
     config = inputs.config
     print("usersim simulate --inputs" + (" — dry run" if args.dry_run else ""))
@@ -556,9 +571,9 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
             for key in ("max_turns", "max_assistant_attempts", "random_seed", "store_reasoning")
         )
     )
-    print(f"  assets_dir:    {inputs.assets_dir}")
+    print(f"  assets_dir:    {inputs.assets_dir or _OWN_ASSETS}")
     print(f"  models config: {models_path}")
-    print(f"  setup:         {plan.fingerprint[:12]}")
+    print(f"  setup:         {plan.fingerprint.label}")
     if plan.matching_run is not None:
         print(f"  run_id:        {plan.matching_run} (resume; {plan.saved} of {len(inputs.rows)} rows already saved)")
     else:
@@ -601,7 +616,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         "inputs": str(args.inputs),
         "out": str(args.out),
         "models_path": str(models_path),
-        "assets_dir": str(inputs.assets_dir),
+        "assets_dir": str(inputs.assets_dir) if inputs.assets_dir is not None else None,
         "skip_existing": not args.no_skip_existing,
     }
     handle = backend.submit(JobSpec(name="simulate-inputs", params=params, callable_=job))
@@ -623,28 +638,22 @@ def _simulate_to_parquet(
     num_rows,
     out,
     assets_dir,
-    pinned_assets_dir=None,
     max_turns,
     match_persona_language=False,
-    toolset_seed_path=None,
+    seed_dataset_path=None,
     probe_mix,
     random_seed,
-    finance_tier_mix=0.0,
-    finance_retrieval_mode="hybrid",
+    probe_options=None,
     skip_existing,
     max_assistant_attempts=1,
     store_reasoning=True,
 ) -> int:
-    from usersim.cli._models import assistant_replays_reasoning
     from usersim.cli._persona_language import (
         DEFAULT_PERSONA_DATASETS_DIR,
         log_persona_language_population,
         persona_language_filter,
     )
-    from usersim.cli._pipeline import (
-        DEFAULT_TOOL_CALLING_THEMES,
-        build_simulator_config_builder,
-    )
+    from usersim.cli._pipeline import build_simulator_config_builder, simulator_config
     from usersim.engine.core.locale import persona_dataset_locale
     from usersim.engine.core.manifest import write_simulator_manifest
     from usersim.engine.core.storage import (
@@ -678,13 +687,13 @@ def _simulate_to_parquet(
             len(already_done),
         )
 
-    # Resolve only for a run that includes tool_calling. The builder also
+    # Resolve only for a run whose mix reads a seed table. The builder also
     # enforces this for library callers, while doing it here gives the manifest
-    # the exact file used and keeps non-tool runs independent of toolset assets.
-    toolset_seed_path = resolve_toolset_seed_for_mix(
+    # the exact file used and keeps other runs independent of seed tables.
+    seed_dataset_path = resolve_seed_dataset_for_mix(
         probe_mix,
-        pinned_assets_dir,
-        toolset_seed_path,
+        assets_dir,
+        seed_dataset_path,
     )
 
     if panel:
@@ -696,10 +705,21 @@ def _simulate_to_parquet(
 
     # Fail before any model call rather than from inside a loader mid-run.
     # Checked here, where the run executes, since that host holds the datasets.
-    verify_probe_assets(probe_mix, run_locales, pinned_assets_dir)
+    verify_probe_assets(probe_mix, run_locales, assets_dir)
     if (report := persona_dataset_report(run_locales)) is not None:
         raise ConfigError(report)
 
+    # One set of settings makes each locale's simulator column and the
+    # manifest's record of it, so the manifest describes the rows.
+    run_settings = {
+        "models": models,
+        "assets_dir": assets_dir,
+        "max_turns": max_turns,
+        "max_assistant_attempts": max_assistant_attempts,
+        "store_reasoning": store_reasoning,
+        "random_seed": random_seed,
+        "probe_options": probe_options,
+    }
     total_written = 0
     # What the persona sampler actually narrowed to, per locale. Recorded
     # rather than the flag: the two disagree wherever the corpus has no
@@ -726,17 +746,10 @@ def _simulate_to_parquet(
             )
         data_designer, builder = build_simulator_config_builder(
             locale=locale,
-            models=models,
-            assets_dir=Path(assets_dir).resolve(),
-            max_turns=max_turns,
-            max_assistant_attempts=max_assistant_attempts,
-            store_reasoning=store_reasoning,
             probe_mix=probe_mix,
             match_persona_language=match_persona_language,
-            toolset_seed_path=toolset_seed_path,
-            random_seed=random_seed,
-            finance_tier_mix=finance_tier_mix,
-            finance_retrieval_mode=finance_retrieval_mode,
+            seed_dataset_path=seed_dataset_path,
+            **run_settings,
         )
         if seed_source is not None:
             n = _count_rows_for_locale(panel, locale)
@@ -747,6 +760,9 @@ def _simulate_to_parquet(
         # folder, removed once its rows are loaded.
         with tempfile.TemporaryDirectory(prefix="usersim_simulate_") as artifacts:
             df = data_designer.create(builder, num_records=n, artifact_path=artifacts).load_dataset()
+        df = clear_seed_columns_of_other_probes(
+            df, probe_mix=probe_mix, assets_dir=assets_dir, seed_dataset_path=seed_dataset_path
+        )
         # Per-locale atomic write: this locale's partition lands on
         # disk before the next locale starts. A crash mid-run leaves
         # earlier locales' partitions intact and resumable (within
@@ -786,12 +802,6 @@ def _simulate_to_parquet(
     # invocation; the manifest's ``trajectories_completed`` comes from
     # re-reading the parquet partitions for this run.
     requested_per_locale: dict[str, int] = {l: int(num_rows) for l in run_locales} if num_rows else {}
-    sim_cfg_for_manifest = _build_sim_config_for_manifest(
-        max_turns=max_turns,
-        random_seed=random_seed,
-        store_reasoning=store_reasoning,
-        replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
-    )
     try:
         manifest_path_written = write_simulator_manifest(
             run_id=run_id,
@@ -799,13 +809,12 @@ def _simulate_to_parquet(
             trajectory_root=out,
             models_config=models,
             models_config_path=models_path,
-            sim_config=sim_cfg_for_manifest,
+            sim_config=simulator_config(locale=run_locales[0], **run_settings),
             locales_requested=run_locales,
             probe_mix=probe_mix,
-            tool_calling_themes=DEFAULT_TOOL_CALLING_THEMES,
-            toolset_seed_path=toolset_seed_path,
+            seed_dataset_path=seed_dataset_path,
             panel_path=Path(panel) if panel else None,
-            assets_dir=Path(assets_dir).resolve(),
+            assets_dir=Path(assets_dir).resolve() if assets_dir is not None else None,
             trajectories_requested=requested_per_locale,
             persona_language_filters=applied_language_filters,
         )
@@ -813,34 +822,6 @@ def _simulate_to_parquet(
     except Exception as e:  # pragma: no cover — defensive: never fail a run on manifest issues
         logger.warning("failed to write run manifest: %s", e)
     return 0
-
-
-def _build_sim_config_for_manifest(
-    *,
-    max_turns: int,
-    random_seed,
-    store_reasoning: bool = True,
-    replay_assistant_reasoning: bool = False,
-):
-    """Snapshot the sim-config knobs the manifest captures.
-
-    Mirrors what ``cli/_pipeline.build_simulator_config_builder`` passes
-    to ``ConversationSimulatorConfig``. Default fields fall through from
-    the Pydantic config class so that any future default change is
-    picked up automatically by the manifest snapshot.
-    """
-    from usersim.engine.config import ConversationSimulatorConfig
-
-    return ConversationSimulatorConfig(
-        name="conversation_messages",
-        locale="placeholder",
-        max_turns=max_turns,
-        context_compression=True,
-        compression_window=1,
-        random_seed=random_seed,
-        store_reasoning=store_reasoning,
-        replay_assistant_reasoning=replay_assistant_reasoning,
-    )
 
 
 def _locales_from_panel(panel_path: Path) -> list[str]:

@@ -115,6 +115,9 @@ dev = [
     # tests/test_network_guard.py unwraps exception groups, which Python 3.10
     # has only through this backport.
     "exceptiongroup>=1.0; python_version < '3.11'",
+    # Validates each tool spec in the tool_calling catalog against the JSON
+    # Schema 2020-12 meta-schema, in tests/probes/tool_calling/test_catalog.py.
+    "jsonschema>=4.0,<5",
 ]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the
@@ -165,21 +168,17 @@ include = ["usersim*"]
     "models_*.toml",
 ]
 "usersim.engine" = [
-    # The asset banks. setuptools ships package data only when it is named,
-    # and a wheel without the banks fails every probe at asset resolution.
-    # `make check-dist` fails if the wheel misses any bank file.
-    "assets/**/*.yaml",
-    "assets/**/*.yml",
-    "assets/**/*.json",
-    "assets/**/*.parquet",
-    "assets/**/*.md",
+    # The asset banks, each in its probe's own folder, under probes/<folder>/assets/.
+    # setuptools ships package data only when it is named, and a wheel without the
+    # banks fails every probe at asset resolution. `make check-dist` fails if the
+    # wheel misses any bank file.
+    "probes/*/assets/**/*.yml",
+    "probes/*/assets/**/*.json",
+    "probes/*/assets/**/*.parquet",
+    "probes/*/assets/**/*.md",
+    # Every other YAML, the region specs an asset domain beside its probe reads
+    # among them: without those an installed package reports no locales to generate.
     "**/*.yaml",
-]
-"usersim.asset_gen" = [
-    # The region specs gen-assets, validate-assets and evaluate-assets read
-    # when no --region-spec is given. Without them an installed package
-    # reports no locales to generate.
-    "*/region_spec/*.yaml",
 ]
 
 [tool.setuptools.exclude-package-data]
@@ -188,9 +187,9 @@ include = ["usersim*"]
 # vectors `gen-assets` writes beside a bank stay local, as do the judge
 # scorecards `evaluate-assets` writes there.
 "usersim.engine" = [
-    "assets/financial_services/**/embeddings.parquet",
-    "assets/financial_services/**/_eval_scorecard.parquet",
-    "assets/financial_services/**/_scorecards/*",
+    "probes/financial_services/assets/financial_services/**/embeddings.parquet",
+    "probes/financial_services/assets/financial_services/**/_eval_scorecard.parquet",
+    "probes/financial_services/assets/financial_services/**/_scorecards/*",
 ]
 
 [tool.pytest.ini_options]

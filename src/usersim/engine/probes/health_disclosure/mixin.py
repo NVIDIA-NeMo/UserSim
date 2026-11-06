@@ -233,7 +233,7 @@ class GuardedMoveMixin:
         return {
             "trajectory_id": data.get("trajectory_id"),
             "persona_uuid": uuid or None,
-            "probe_family": data.get("probe_family") or cfg.get("family"),
+            "probe_family": data.get("probe_family") or cfg.get("label"),
             "probe_variant": data.get("probe_variant"),
         }
 

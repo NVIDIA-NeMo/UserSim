@@ -92,7 +92,7 @@ def _mt_warned(ob: OutcomeBuilder) -> bool:
 
 
 async def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> None:
-    from usersim.engine.probes.sov_ai_facts.generator import SovAiFactsProbe
+    from usersim.engine.probes.sov_ai_facts.probe import SovAiFactsProbe
 
     T.reset_translation_cache()
     ob = _builder()
@@ -124,7 +124,7 @@ async def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> Non
 
 
 async def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
-    from usersim.engine.probes.sov_ai_multilingual_parity.generator import (
+    from usersim.engine.probes.sov_ai_multilingual_parity.probe import (
         SovAiMultilingualParityProbe,
     )
 
@@ -155,7 +155,7 @@ async def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
 def test_parity_variants_share_query_id_matched_pair(indian_persona, cfg) -> None:
     """Two India-language variants drawing the same en_IN persona pick the
     SAME query_id — so cross-language parity joins on query_id work."""
-    from usersim.engine.probes.sov_ai_multilingual_parity.generator import (
+    from usersim.engine.probes.sov_ai_multilingual_parity.probe import (
         SovAiMultilingualParityProbe,
     )
 
@@ -183,7 +183,7 @@ def test_parity_variants_share_query_id_matched_pair(indian_persona, cfg) -> Non
 
 
 async def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg) -> None:
-    from usersim.engine.probes.safety_chat_pressure.generator import (
+    from usersim.engine.probes.safety_chat_pressure.probe import (
         SafetyChatPressureProbe,
     )
 
@@ -217,7 +217,7 @@ async def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg
 
 
 async def test_safety_agentic_variant_constructs_and_routes(indian_persona, cfg) -> None:
-    from usersim.engine.probes.safety_agentic.generator import SafetyAgenticProbe
+    from usersim.engine.probes.safety_agentic.probe import SafetyAgenticProbe
 
     ob = _builder()
     probe = SafetyAgenticProbe(
@@ -245,7 +245,7 @@ async def test_safety_agentic_variant_constructs_and_routes(indian_persona, cfg)
 
 
 def test_sov_ai_dynamic_variant_uses_en_in_taxonomy(indian_persona, cfg) -> None:
-    from usersim.engine.probes.sov_ai_dynamic.generator import SovAiDynamicProbe
+    from usersim.engine.probes.sov_ai_dynamic.probe import SovAiDynamicProbe
 
     ob = _builder()
     probe = SovAiDynamicProbe(
@@ -274,7 +274,7 @@ def test_sov_ai_dynamic_variant_uses_en_in_taxonomy(indian_persona, cfg) -> None
 
 
 def test_sov_ai_dynamic_romanized_variant_gets_romanized_directive(indian_persona, cfg) -> None:
-    from usersim.engine.probes.sov_ai_dynamic.generator import SovAiDynamicProbe
+    from usersim.engine.probes.sov_ai_dynamic.probe import SovAiDynamicProbe
 
     probe = SovAiDynamicProbe(
         persona=indian_persona,
@@ -292,7 +292,7 @@ def test_sov_ai_dynamic_romanized_variant_gets_romanized_directive(indian_person
 
 def test_sov_ai_dynamic_shipped_locale_prompt_unchanged(indian_persona, cfg) -> None:
     # Shipped locales must not get an appended directive (asset_locale == locale).
-    from usersim.engine.probes.sov_ai_dynamic.generator import SovAiDynamicProbe
+    from usersim.engine.probes.sov_ai_dynamic.probe import SovAiDynamicProbe
 
     probe = SovAiDynamicProbe(
         persona=indian_persona,

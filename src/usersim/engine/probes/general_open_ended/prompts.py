@@ -7,7 +7,7 @@ Templates are loaded from assets/general_open_ended/prompts.yaml when available,
 falling back to the compiled-in defaults below.
 """
 
-from usersim.engine.core.prompt_loader import get_prompt
+from usersim.extension import get_prompt
 
 _SCENARIO = "general_open_ended"
 
@@ -72,36 +72,6 @@ Criteria for failure:
 - The user references the conversation itself, the simulation, or how messages are being constructed — this is a fourth-wall break."""
 
 
-_DEFAULT_TRAJECTORY_RUBRIC = """Evaluate the overall quality of this information-seeking conversation.
-
-SUCCESS criteria:
-- The assistant provided relevant, accurate information.
-- The conversation flow was natural and responsive to the user's needs.
-- The assistant adapted its explanation level to the user's apparent background.
-- When the user's request was vague or overly broad, the assistant asked for
-  clarification instead of assuming intent or dumping excessive information.
-- The user-LLM stayed in character as a realistic user throughout — only asking
-  questions, making requests, providing requested details, and reacting to answers.
-
-FAILURE criteria:
-- The assistant provided incorrect or misleading information.
-- The conversation became incoherent or circular.
-- The assistant was condescending, dismissive, or used inappropriate language.
-- The assistant responded to a vague or broad request with an unfocused information
-  dump instead of asking what specifically the user wanted to know.
-- The assistant produced an unintelligible, empty, or non-responsive reply to the
-  user's question in any turn.
-- Role inversion: the user-LLM took over the assistant's job — e.g., providing
-  explanations, structured data, analysis, or performing tasks that the assistant
-  should do. A real user asks for help; they do not do the work themselves.
-- The user-LLM offered help or expertise to the assistant, reversing the
-  help-seeker/help-giver dynamic.
-- The user-LLM broke the fourth wall by referencing the conversation structure,
-  the simulation, or how messages should be written.
-- The user-LLM broke character (gave assistant-like responses, used structured output,
-  markdown, tables, or numbered lists)."""
-
-
 _INLINE_JUDGE_RESPONSE_FORMAT = """
 Strictly respond in the following format:
 <explanation>
@@ -116,8 +86,6 @@ Strictly respond in the following format:
 OPEN_ENDED_USER_AGENT_SYSTEM_PROMPT = get_prompt(_SCENARIO, "user_agent_system_prompt", _DEFAULT_USER_AGENT)
 
 OPEN_ENDED_USER_JUDGE_RUBRIC = get_prompt(_SCENARIO, "user_judge_rubric", _DEFAULT_USER_JUDGE_RUBRIC)
-
-OPEN_ENDED_TRAJECTORY_RUBRIC = get_prompt(_SCENARIO, "trajectory_rubric", _DEFAULT_TRAJECTORY_RUBRIC)
 
 
 USER_JUDGE_TURN_PROMPT = (
@@ -143,29 +111,12 @@ User message to judge:
 )
 
 
-TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT = (
-    """You are an expert evaluator. Judge the entire conversation.
-
-<CONVERSATION>
-{conversation_history}
-</CONVERSATION>
-
-<RUBRIC>
-"""
-    + OPEN_ENDED_TRAJECTORY_RUBRIC
-    + """
-</RUBRIC>
-"""
-    + _INLINE_JUDGE_RESPONSE_FORMAT
-)
-
-
 # ── Call-time resolution ─────────────────────────────────────────────
 # The module-level constants above bind whatever asset root was active at
 # IMPORT time. Probes are imported at plugin bootstrap, before a run's
 # ``assets_dir`` is known, so a per-run root would never reach them. These
 # accessors re-resolve on every call, which is what makes
-# ``--assets-dir`` / ``USERSIM_ASSETS_DIR`` govern prompts the same way it
+# ``--assets-dir`` / ``USERSIM_ASSET_PATH`` govern prompts the same way it
 # already governs seeds and banks. The constants are kept for callers that
 # import them directly.
 
@@ -194,16 +145,6 @@ def user_judge_rubric() -> str:
     return get_prompt(_SCENARIO, "user_judge_rubric", _DEFAULT_USER_JUDGE_RUBRIC)
 
 
-def trajectory_rubric() -> str:
-    """Resolve ``trajectory_rubric`` against the currently-active asset root."""
-    return get_prompt(_SCENARIO, "trajectory_rubric", _DEFAULT_TRAJECTORY_RUBRIC)
-
-
 def user_judge_turn_prompt() -> str:
     """``USER_JUDGE_TURN_PROMPT`` with the rubric resolved at call time."""
     return USER_JUDGE_TURN_PROMPT.replace(OPEN_ENDED_USER_JUDGE_RUBRIC, user_judge_rubric())
-
-
-def trajectory_level_judge_turn_prompt() -> str:
-    """``TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT`` with the rubric resolved at call time."""
-    return TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT.replace(OPEN_ENDED_TRAJECTORY_RUBRIC, trajectory_rubric())

@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import default_assets_dir
+from usersim.engine.core._assets import asset_search_path
 from usersim.engine.generator import ConversationSimulatorGenerator
 
 
@@ -32,13 +32,13 @@ class TestRuntimeAssetsRoot:
     """The per-row asset root must not outlive the row that set it."""
 
     async def test_restored_after_a_row_fails(self, tmp_path: Path) -> None:
-        baseline = default_assets_dir()
+        baseline = asset_search_path()
         gen = _generator_without_resources(ConversationSimulatorConfig(name="conversation", assets_dir=str(tmp_path)))
 
         with pytest.raises(Exception):
             await gen.agenerate({})
 
-        assert default_assets_dir() == baseline, (
+        assert asset_search_path() == baseline, (
             "the row's asset root is still installed, so banks for whatever "
             "runs next resolve against it instead of the configured root"
         )
@@ -52,9 +52,9 @@ class TestRuntimeAssetsRoot:
         """
         import types
 
-        from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
+        from usersim.engine.core import llm
         from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
-        from usersim.engine.probes.safety_agentic import generator as safety_agentic
+        from usersim.engine.probes.safety_agentic import probe as safety_agentic
 
         row_builder = OutcomeBuilder(provenance=Provenance())
         probe = safety_agentic.SafetyAgenticProbe.__new__(safety_agentic.SafetyAgenticProbe)
@@ -74,18 +74,15 @@ class TestRuntimeAssetsRoot:
         def _explode(*_args: object, **_kwargs: object) -> None:
             raise RuntimeError("stop once the nested builder is installed")
 
-        set_current_outcome_builder(row_builder)
-        try:
+        with llm.outcome_builder_scope(row_builder):
             with pytest.raises(RuntimeError):
                 with pytest.MonkeyPatch.context() as mp:
                     mp.setattr(safety_agentic, "ConversationState", _explode)
                     await probe.run_dispatch(models={}, data={}, cfg=types.SimpleNamespace())
-            assert get_current_outcome_builder() is row_builder, (
+            assert llm._OUTCOME_BUILDER.get() is row_builder, (
                 "the nested scope cleared the row's outcome builder instead of "
                 "restoring it, so later calls in this row record nowhere"
             )
-        finally:
-            set_current_outcome_builder(None)
 
     async def test_a_row_does_not_change_the_process_log_level(self) -> None:
         """Verbosity belongs to the run, so a row must not raise it globally."""
@@ -129,7 +126,9 @@ class TestRuntimeAssetsRoot:
         """Guards the test above: it must fail for the right reason."""
         seen: list[Path] = []
         gen = _generator_without_resources(ConversationSimulatorConfig(name="conversation", assets_dir=str(tmp_path)))
-        gen.get_model = lambda *a, **k: seen.append(default_assets_dir()) or (_ for _ in ()).throw(RuntimeError("stop"))
+        gen.get_model = lambda *a, **k: seen.append(asset_search_path()[0]) or (_ for _ in ()).throw(
+            RuntimeError("stop")
+        )
 
         with pytest.raises(Exception):
             await gen.agenerate({})

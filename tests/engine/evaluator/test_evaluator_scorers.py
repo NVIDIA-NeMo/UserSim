@@ -10,17 +10,8 @@ import pytest
 from usersim.engine.evaluator import scorers as scorers_module
 
 
+@pytest.mark.usefixtures("empty_scorer_registry")
 class TestScorerRegistry:
-    # The registry is process-global, so teardown restores what was there
-    # instead of leaving it empty for whatever runs next in this worker.
-    def setup_method(self) -> None:
-        self._snapshot = dict(scorers_module._REGISTRY)
-        scorers_module.clear_registry()
-
-    def teardown_method(self) -> None:
-        scorers_module.clear_registry()
-        scorers_module._REGISTRY.update(self._snapshot)
-
     def test_register_and_get(self) -> None:
         def fake_scorer(traj: dict, models: dict) -> dict:
             return {"score": 0.5}
@@ -48,6 +39,12 @@ class TestScorerRegistry:
             scorers_module.register_scorer("x", b)
         assert scorers_module.get_scorer("x") is a
 
+    def test_the_auto_entry_cannot_be_a_scorer_name(self) -> None:
+        """``--scorers auto`` stands for a set of scorers, so no one scorer may answer to it."""
+        with pytest.raises(scorers_module.ScorerRegistrationError, match=r"'auto' is reserved"):
+            scorers_module.register_scorer("auto", lambda t, m: {})
+        assert "auto" not in scorers_module.list_scorers()
+
     def test_registering_the_same_scorer_again_keeps_it(self) -> None:
         def a(traj, models):
             return {"v": 1}
@@ -56,11 +53,19 @@ class TestScorerRegistry:
         scorers_module.register_scorer("x", a)
         assert scorers_module.get_scorer("x") is a
 
-    def test_reloading_a_scorer_module_updates_its_scorer(self) -> None:
-        scorers_module.reload_scorers(["usersim.engine.evaluator.scorers.tool_use"])
-        first = scorers_module.get_scorer("tool_use")
-        scorers_module.reload_scorers(["usersim.engine.evaluator.scorers.tool_use"])
-        assert scorers_module.get_scorer("tool_use") is not first
+    def test_a_scorer_defined_again_in_the_same_place_takes_its_name(self) -> None:
+        """A module reloaded in a notebook defines its scorer again, as a new function of the same name."""
+
+        def define():
+            def scorer(traj, models):
+                return {"v": 1}
+
+            return scorer
+
+        first, again = define(), define()
+        scorers_module.register_scorer("x", first)
+        scorers_module.register_scorer("x", again)
+        assert scorers_module.get_scorer("x") is again
 
     def test_clear_registry(self) -> None:
         scorers_module.register_scorer("a", lambda t, m: {})
@@ -69,8 +74,13 @@ class TestScorerRegistry:
         scorers_module.clear_registry()
         assert scorers_module.list_scorers() == []
 
-    def test_reload_scorers_imports(self) -> None:
-        # reload_scorers should not raise on a valid module path even
-        # if it doesn't define any scorers (e.g., the scorers package
-        # __init__ itself).
-        scorers_module.reload_scorers(["usersim.engine.evaluator.scorers"])
+
+def test_loading_the_bundled_scorers_again_keeps_the_registered_functions() -> None:
+    """Each scorer module is imported once, so the registry holds the function the module defines."""
+    from usersim.engine.evaluator.scorers import tool_use
+
+    registered = dict(scorers_module._REGISTRY)
+    scorers_module.load_default_scorers()
+
+    assert scorers_module._REGISTRY == registered
+    assert scorers_module.get_scorer("tool_use") is tool_use.score_tool_use_trajectory

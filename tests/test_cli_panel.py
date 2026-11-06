@@ -8,7 +8,7 @@ from __future__ import annotations
 import pandas as pd
 
 from usersim import cli
-from usersim.cli._models import bundled_models_path
+from usersim.engine.models_file import bundled_models_path
 
 
 def test_panel_reopens_with_plain_pandas(tmp_path, monkeypatch):

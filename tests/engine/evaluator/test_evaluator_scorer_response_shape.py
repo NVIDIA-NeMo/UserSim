@@ -15,11 +15,7 @@ from typing import Any
 
 import pytest
 
-from usersim.engine.evaluator.scorers import (
-    get_scorer,
-    list_scorers,
-    load_default_scorers,
-)
+from usersim.engine.evaluator.scorers import get_scorer, list_scorers
 from usersim.engine.evaluator.scorers.response_shape import (
     SHAPE_AXES,
     _is_empty_or_trivial,
@@ -27,12 +23,6 @@ from usersim.engine.evaluator.scorers.response_shape import (
     _looks_truncated,
     score_response_shape_trajectory,
 )
-
-
-@pytest.fixture(autouse=True)
-def _ensure_scorers_loaded():
-    load_default_scorers()
-    yield
 
 
 def _trajectory(assistant_messages: list[str]) -> dict[str, Any]:

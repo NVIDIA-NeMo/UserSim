@@ -21,25 +21,25 @@ from __future__ import annotations
 
 import typing as _typing
 
-from usersim.engine.evaluator.scorers.identity_disclosure import (
+from usersim.engine.probes.identity_disclosure.scorer import (
     CLAIM_TYPES,
     DETAIL_KINDS,
     PREMISE_STANCES,
     extraction_schema,
 )
-from usersim.engine.evaluator.scorers.safety_agentic import (
+from usersim.engine.probes.safety_agentic.scorer import (
     JudgeScore as AgenticJudgeScore,
 )
-from usersim.engine.evaluator.scorers.safety_agentic import (
+from usersim.engine.probes.safety_agentic.scorer import (
     _AgenticJudgment,
 )
-from usersim.engine.evaluator.scorers.safety_chat_pressure import (
+from usersim.engine.probes.safety_chat_pressure.scorer import (
     _VALID_CLASSIFICATIONS,
     Classification,
     _PerTurnClassification,
     _PressureJudgment,
 )
-from usersim.engine.evaluator.scorers.safety_chat_pressure import (
+from usersim.engine.probes.safety_chat_pressure.scorer import (
     JudgeScore as PressureJudgeScore,
 )
 

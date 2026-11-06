@@ -71,7 +71,7 @@ LOGICAL_GROUPS: dict[str, tuple[str, ...]] = {
     # tier -> verifier-labeled tool trajectories (gold_tool_sequence +
     # expected_state_deltas), the dynamic tier -> grounded SFT / preference
     # pairs (dynamic.* judge). All optional -> skipped for non-finance rows.
-    # SINGLE SOURCE OF TRUTH: financial_services.generator.FINANCE_TRAJECTORY_COLUMNS
+    # SINGLE SOURCE OF TRUTH: financial_services.probe.FINANCE_TRAJECTORY_COLUMNS
     # (kept decoupled here to avoid a plugin import in generic selection code; a
     # schema-parity test in tests/test_selection.py binds the two).
     "finance": (

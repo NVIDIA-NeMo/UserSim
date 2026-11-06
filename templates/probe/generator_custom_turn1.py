@@ -42,10 +42,10 @@ Total LOC: ~100. ``sov_ai_dynamic`` is a real example at ~280 LOC.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.probes import BankBackedProbe, register_probe
+from usersim.extension import BankBackedProbe, register_probe
 
 
 @dataclass
@@ -60,18 +60,15 @@ def _demo_taxonomy_loader(locale: str = "en_US"):
     raise NotImplementedError("replace with your real taxonomy loader")
 
 
-@register_probe(
-    family="demo_custom_turn1",
-    prompt_version="v1.0",
-    variants=("default",),
-)
+@register_probe
 class DemoCustomTurn1Probe(BankBackedProbe):
     """Bank-anchored, generated-in-voice turn-1 probe."""
 
     label = "demo_custom_turn1"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_custom_turn1/, beside this module
     output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_demo_taxonomy_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
+    placeholder_warning_kind = "used_placeholder_taxonomy"
     bank_version_key: str | None = None  # locale-keyed
 
     def __init__(self, **kwargs: Any) -> None:

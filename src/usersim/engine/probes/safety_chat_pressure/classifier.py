@@ -28,7 +28,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from usersim.engine.core.llm import acall_llm
+from usersim.extension import acall_llm
 
 logger = logging.getLogger("usersim.engine")
 

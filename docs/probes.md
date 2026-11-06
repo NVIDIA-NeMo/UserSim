@@ -87,6 +87,24 @@ Probes are discovered through the `usersim.probes` entry point, so an
 installed package can add one without modifying this project. See
 [`architecture/plugins.md`](../architecture/plugins.md).
 
+## A probe's settings
+
+A probe that a run can tune takes settings, each set by label with
+`--probe-option LABEL.SETTING=VALUE` (repeated for more), or in `PROBE_OPTIONS`
+in notebook 01. The run checks each against the probe's `Options` before any
+model call, so an unknown probe or setting, or a value the probe rejects, stops
+it. Of the probes here, `financial_services` takes `tier_mix`, `tier`,
+`retrieval_mode` and `embedding_model_alias`, and `tool_calling` takes
+`max_tools` and `tools_column`; each README lists what they do. This run gives
+`financial_services` its dynamic tier on about 30% of its rows:
+
+```bash
+usersim simulate --locale en_US --num-rows 20 \
+  --probe-mix 'financial_services=1.0' \
+  --probe-option financial_services.tier_mix=0.3 \
+  --out output/finance_trajectories
+```
+
 ## Community probes
 
 Probes published as extension packages are listed here, each with what it

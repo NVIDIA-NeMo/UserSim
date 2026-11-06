@@ -8,10 +8,7 @@ LLM API calls. Full end-to-end generation tests require an NVIDIA API key
 and are marked with @pytest.mark.integration.
 """
 
-import pytest
-
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.behavioral import compute_behavioral_profile, get_conversation_language
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.seeds import load_seeds
@@ -31,8 +28,6 @@ class TestPipelineConfig:
             persona_column="persona",
             probe_type_column="probe_type",
             theme_column="theme",
-            tools_column="tools",
-            toolset_name_column="toolset_name",
             locale="en_US",
         )
         assert "conversation_messages" in cfg.side_effect_columns
@@ -45,7 +40,6 @@ class TestPipelineConfig:
             name="conversation_messages",
             locale="pt_BR",
         )
-        assert cfg.tools_column is None
         assert cfg.locale == "pt_BR"
 
     def test_locale_language_mapping(self):
@@ -111,23 +105,15 @@ class TestMultiLocaleConsistency:
     """Verify multi-locale support is consistent."""
 
     def test_seed_loading_per_locale(self):
-        assets = packaged_assets_dir()
-        if not (assets / "general_open_ended" / "topics" / "base").exists():
-            pytest.skip("Assets directory not found")
-
         for locale in SHIPPED_LOCALES:
-            topics = load_seeds(locale, "general_open_ended", "topics", assets)
+            topics = load_seeds(locale, "general_open_ended", "topics")
             assert len(topics) > 0
             assert all(isinstance(t, dict) for t in topics)
             assert all("type" in t and "description" in t for t in topics)
 
     def test_pt_br_keeps_localized_topic_replacement(self):
-        assets = packaged_assets_dir()
-        if not (assets / "general_open_ended" / "topics" / "base").exists():
-            pytest.skip("Assets directory not found")
-
-        base = load_seeds("en_US", "general_open_ended", "topics", assets)
-        extended = load_seeds("pt_BR", "general_open_ended", "topics", assets)
+        base = load_seeds("en_US", "general_open_ended", "topics")
+        extended = load_seeds("pt_BR", "general_open_ended", "topics")
         assert len(base) == 48
         assert len(extended) == 20
 

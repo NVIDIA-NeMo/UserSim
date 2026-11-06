@@ -10,21 +10,24 @@ from typing import Any
 
 
 def format_tools_for_prompt(tools: list[dict[str, Any]]) -> str:
-    """Format a list of tool definitions into a human-readable prompt block."""
+    """Format a list of tool definitions into a human-readable prompt block.
+
+    A tool entry may declare ``credentials`` beside its function spec, mapping
+    a parameter to the credential it takes, such as ``{"api_key": "SerpApi
+    key"}``. Its line then names those credentials, so a judge reading the
+    block knows that a call needs the user's credential and that asking the
+    user for it is part of making the call.
+    """
     lines = []
     for tool_data in tools:
         tool = tool_data.get("tool", {}) if "tool" in tool_data else tool_data
         name = tool.get("function", {}).get("name", "Unknown")
         description = tool.get("function", {}).get("description", "No description")
-        lines.append(f"- {name}: {description}")
-    return "\n".join(lines)
-
-
-def format_themes_for_prompt(themes: list[dict[str, Any]]) -> str:
-    """Format a list of theme dicts into a human-readable prompt block."""
-    lines = []
-    for theme in themes:
-        lines.append(f"- {theme.get('type', 'Unknown')}: {theme.get('description', 'No description')}")
+        line = f"- {name}: {description}"
+        credentials = tool_data.get("credentials")
+        if isinstance(credentials, dict) and credentials:
+            line += f" (needs the user's {' and '.join(dict.fromkeys(credentials.values()))})"
+        lines.append(line)
     return "\n".join(lines)
 
 

@@ -1,0 +1,7 @@
+# The simulated user's instructions, read with get_prompt. render_prompt fills
+# {persona}, {area} and any column of the row. Replace the text with yours.
+user_system_prompt: |
+  {persona}
+
+  You want an assistant's help with this: {area}
+  Ask in your own words, the way this person would, and follow up on what it says.

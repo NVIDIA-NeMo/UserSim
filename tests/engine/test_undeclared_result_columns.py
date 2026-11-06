@@ -25,9 +25,9 @@ import pytest
 from usersim.engine import generator as generator_module
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.episode_input import ConstructedEpisode
-from usersim.engine.core.probes import _PROBE_REGISTRY, clear_registry, load_builtin_probes, register_probe
+from usersim.engine.core.probes import register_probe
 from usersim.engine.generator import ConversationSimulatorGenerator
-from usersim.engine.probes.general_open_ended.generator import OpenEndedProbe
+from usersim.engine.probes.general_open_ended.probe import OpenEndedProbe
 
 _PROBE = "_extra_column_probe"
 _PERSONA = {"first_name": "Sarah", "last_name": "Johnson", "age": 35, "city": "Seattle", "state": "WA"}
@@ -116,9 +116,7 @@ class _EchoingProbe(OpenEndedProbe):
 
 
 @pytest.fixture
-def extra_column_probe():
-    load_builtin_probes()
-    snapshot = dict(_PROBE_REGISTRY)
+def extra_column_probe(restored_registries):
     for probe in (
         _ExtraColumnProbe,
         _DeclaredColumnProbe,
@@ -127,10 +125,8 @@ def extra_column_probe():
         _FailingConstructorProbe,
         _EchoingProbe,
     ):
-        register_probe(family="general", prompt_version="v1.0", variants=("default",))(probe)
-    yield _PROBE
-    clear_registry()
-    _PROBE_REGISTRY.update(snapshot)
+        register_probe(probe)
+    return _PROBE
 
 
 def _config() -> ConversationSimulatorConfig:
@@ -288,7 +284,12 @@ def _run_pipeline(rows: list[dict[str, Any]], monkeypatch, tmp_path):
     import pandas as pd
     from data_designer.interface import DataDesigner
 
-    from usersim.cli._models import bundled_models_path, load_models_config, to_data_designer_kwargs, to_model_configs
+    from usersim.engine.models_file import (
+        bundled_models_path,
+        load_models_config,
+        to_data_designer_kwargs,
+        to_model_configs,
+    )
 
     monkeypatch.setenv("NVIDIA_API_KEY", "not-used")
     models = load_models_config(bundled_models_path())

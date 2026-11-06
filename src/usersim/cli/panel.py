@@ -23,7 +23,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from usersim.cli._errors import ConfigError
+from usersim.engine.errors import ConfigError
 
 logger = logging.getLogger("usersim.cli.panel")
 
@@ -89,12 +89,6 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
 
 def run(args: argparse.Namespace) -> int:
-    from usersim.cli._models import (
-        default_models_path,
-        load_models_config,
-        to_data_designer_kwargs,
-        to_model_configs,
-    )
     from usersim.cli._persona_language import (
         DEFAULT_PERSONA_DATASETS_DIR,
         log_persona_language_population,
@@ -103,6 +97,12 @@ def run(args: argparse.Namespace) -> int:
         persona_sampler_params,
     )
     from usersim.cli._pipeline import _add_persona_expressions
+    from usersim.engine.models_file import (
+        default_models_path,
+        load_models_config,
+        to_data_designer_kwargs,
+        to_model_configs,
+    )
 
     models_path = args.models or default_models_path()
     models = load_models_config(models_path)
