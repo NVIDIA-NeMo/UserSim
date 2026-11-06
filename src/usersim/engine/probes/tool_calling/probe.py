@@ -207,7 +207,9 @@ async def _simulate_tool_response(
     Returns ``(content, did_reroll)``. ``did_reroll`` is True if the
     first response was invalid JSON and a second call was needed; this
     is structured sim-health signal surfaced as ``n_api_response_rerolls``
-    in ``simulation_outcome``.
+    in ``simulation_outcome``. When the second response is not valid JSON
+    either, such as one cut off at the model's token limit, ``content`` is
+    a 502 error payload, so every tool result a conversation stores parses.
     """
     prior_context = _collect_prior_tool_responses(conversation_messages)
     prompt = tool_simulator_prompt().format(
@@ -233,6 +235,14 @@ async def _simulate_tool_response(
         logger.debug("  |-- api_response_model: invalid JSON, retrying once")
         resp = await acall_llm(models, MODEL_API_RESPONSE, msgs)
         content = resp.get("content", "{}") if isinstance(resp, dict) else "{}"
+        try:
+            json.loads(content)
+        except (json.JSONDecodeError, TypeError):
+            logger.warning(
+                "  |-- api_response_model: invalid JSON again for %s; answering with a 502",
+                tool_call.get("function", {}).get("name", "?"),
+            )
+            content = json.dumps({"error": "The service returned an invalid response.", "status": 502})
 
     return content, did_reroll
 

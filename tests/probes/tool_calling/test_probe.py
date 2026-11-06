@@ -148,6 +148,39 @@ class TestToolHelpers:
         assert "Tokyo" in captured["prompt"]
         assert '"prior_secret":"rain"' in captured["prompt"]
 
+    @pytest.mark.parametrize(
+        ("responses", "expected"),
+        [
+            (['{"temp": 2', '{"temp": 22}'], {"temp": 22}),
+            (
+                ['{"temp": 2', '{"items": [{"name": "Tok'],
+                {"error": "The service returned an invalid response.", "status": 502},
+            ),
+        ],
+        ids=["second-response-valid", "both-cut-off"],
+    )
+    async def test_api_simulator_stores_only_valid_json(self, responses, expected):
+        replies = iter(responses)
+
+        async def fake_call_llm(models, alias, messages):
+            return {"content": next(replies)}
+
+        from unittest.mock import patch
+
+        with patch(
+            "usersim.engine.probes.tool_calling.probe.acall_llm",
+            side_effect=fake_call_llm,
+        ):
+            content, rerolled = await _simulate_tool_response(
+                {},
+                {"name": "get_weather", "parameters": {"type": "object"}},
+                {"function": {"name": "get_weather", "arguments": '{"city":"Tokyo"}'}},
+                [],
+            )
+
+        assert rerolled is True
+        assert json.loads(content) == expected
+
 
 def _with_weather_key(sample_tools):
     """``sample_tools`` with a WeatherCo key that ``get_weather`` requires and declares."""
