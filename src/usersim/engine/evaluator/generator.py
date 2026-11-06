@@ -19,7 +19,7 @@ Cell envelope (the JSON written into ``self.config.name``):
         "judge_families": ["openai", "nvidia_nemotron", ...],
         "axes": ["helpfulness", "accuracy", ...],
         "scorers": ["tool_use", ...],
-        "prompt_version": "v1.1",
+        "prompt_version": "v1.2",
         "evaluator_version": "v1.0",
       },
       "axes": {
