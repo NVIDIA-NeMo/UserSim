@@ -76,8 +76,8 @@ walks through each layer and where it extends.
   grounded in census distributions.
 - **Sovereign-AI builders** with no user base yet. You get an in-language
   evaluation surface from day one, drawn from your country's actual census
-  distribution: USA, Japan, India, Singapore, Brazil, France and Korea ship
-  today.
+  distribution: USA, UK, Germany, France, Brazil, India, Singapore, Japan and
+  Korea ship today.
 - **Agent builders** putting a tool-using system under multi-turn load. Probes
   execute tools against a mock environment that holds state across turns, so a
   run surfaces scope creep, unauthorized calls, prompt-injection susceptibility
