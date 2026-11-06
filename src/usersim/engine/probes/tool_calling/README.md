@@ -27,9 +27,13 @@ the other probes.
   the calls that passed the schema and credential checks. `verifier_results` in
   `conversation_metadata` lists every call and whether it passed.
 
-Two settings, each set with `--probe-option tool_calling.<name>=<value>`:
-`max_tools`, the most tools a conversation offers (default `5`), and
-`tools_column`, the row column holding the toolset's tools (default `tools`).
+Three settings, each set with `--probe-option tool_calling.<name>=<value>`:
+`max_tools`, the most tools a conversation offers (default `5`);
+`tools_column`, the row column holding the toolset's tools (default `tools`);
+and `today`, the date each conversation takes place on (default `2026-11-06`).
+The simulated user and the `api_response_model` both work from that date, so
+the dates in requests and in tool results agree, and each row records it as
+`today` in `conversation_metadata`. The assistant is not told the date.
 
 ## Locales
 

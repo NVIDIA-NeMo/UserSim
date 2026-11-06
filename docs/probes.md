@@ -95,7 +95,7 @@ in notebook 01. The run checks each against the probe's `Options` before any
 model call, so an unknown probe or setting, or a value the probe rejects, stops
 it. Of the probes here, `financial_services` takes `tier_mix`, `tier`,
 `retrieval_mode` and `embedding_model_alias`, and `tool_calling` takes
-`max_tools` and `tools_column`; each README lists what they do. This run gives
+`max_tools`, `tools_column` and `today`; each README lists what they do. This run gives
 `financial_services` its dynamic tier on about 30% of its rows:
 
 ```bash

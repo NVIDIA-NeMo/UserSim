@@ -139,6 +139,7 @@ class TestToolHelpers:
                 tool_spec,
                 tool_call,
                 history,
+                today="Friday, 2026-11-06",
             )
 
         assert content == '{"ok":true}'
@@ -147,6 +148,7 @@ class TestToolHelpers:
         assert "city" in captured["prompt"]
         assert "Tokyo" in captured["prompt"]
         assert '"prior_secret":"rain"' in captured["prompt"]
+        assert "Today is Friday, 2026-11-06." in captured["prompt"]
 
     @pytest.mark.parametrize(
         ("responses", "expected"),
@@ -176,6 +178,7 @@ class TestToolHelpers:
                 {"name": "get_weather", "parameters": {"type": "object"}},
                 {"function": {"name": "get_weather", "arguments": '{"city":"Tokyo"}'}},
                 [],
+                today="Friday, 2026-11-06",
             )
 
         assert rerolled is True
@@ -193,8 +196,11 @@ def _with_weather_key(sample_tools):
     return tools
 
 
-def _concrete_tool_probe(tools) -> tuple[ToolCallingProbe, dict, types.SimpleNamespace]:
-    """A tool_calling probe offered both of ``tools``, with its row and run config."""
+def _concrete_tool_probe(tools, **options) -> tuple[ToolCallingProbe, dict, types.SimpleNamespace]:
+    """A tool_calling probe offered both of ``tools``, with its row and run config.
+
+    ``options`` are further tool_calling settings for the run.
+    """
     from usersim.engine.core.behavioral import compute_behavioral_profile
 
     persona = {"first_name": "A", "last_name": "User", "age": 35}
@@ -207,7 +213,7 @@ def _concrete_tool_probe(tools) -> tuple[ToolCallingProbe, dict, types.SimpleNam
     }
     cfg = types.SimpleNamespace(
         theme_column="theme",
-        probe_options={"tool_calling": {"max_tools": 2}},
+        probe_options={"tool_calling": {"max_tools": 2, **options}},
         max_turns=2,
         max_query_attempts=1,
         context_compression=False,
@@ -520,6 +526,27 @@ class TestThemeFollowsTheToolset:
 
         assert "Calendar" not in prompt
         assert "Book a meeting" not in prompt
+
+
+class TestToday:
+    """The simulated user and the API response simulator share one date; the assistant is not told it."""
+
+    async def test_the_user_and_the_tool_simulator_share_the_runs_date(self, sample_tools):
+        result, assistant_inputs, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
+
+        assert "Today is Friday, 2026-11-06." in user_inputs[0][0]["content"]
+        assert "Today is Friday, 2026-11-06." in api_inputs[0][0]["content"]
+        assert not any("2026-11-06" in (message.get("content") or "") for message in assistant_inputs[0])
+        assert json.loads(result["conversation_metadata"])["today"] == "2026-11-06"
+
+    def test_a_run_sets_the_date_as_a_setting(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools, today="2027-01-15")
+
+        assert "Today is Friday, 2027-01-15." in probe.get_user_system_prompt()
+
+    def test_a_date_that_does_not_exist_is_refused(self):
+        with pytest.raises(ValidationError):
+            ToolCallingProbe.Options(today="2027-02-30")
 
 
 class TestCredentials:

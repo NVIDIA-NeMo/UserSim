@@ -27,6 +27,7 @@ import hashlib
 import json
 import logging
 import random
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -192,19 +193,29 @@ def _collect_prior_tool_responses(conversation_messages: list) -> str:
     )
 
 
+_WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+
+def _format_day(day: date) -> str:
+    """A date with its weekday, such as ``Friday, 2026-11-06``, independent of the process locale."""
+    return f"{_WEEKDAYS[day.weekday()]}, {day.isoformat()}"
+
+
 async def _simulate_tool_response(
     models: dict,
     tool_spec: dict,
     tool_call: dict,
     conversation_messages: list,
     *,
+    today: str,
     credential_parameters: tuple[str, ...] = (),
 ) -> tuple[str, bool]:
     """Use the strong frontier model to simulate a realistic API response.
 
     Includes prior tool responses as context so the simulator maintains
-    internal consistency across calls within a conversation. The probe
-    checks a call's credentials before this runs, so when
+    internal consistency across calls within a conversation, and ``today``,
+    the conversation's date, so the dates it returns agree with the user's.
+    The probe checks a call's credentials before this runs, so when
     ``credential_parameters`` names any, the simulator is told they are
     valid rather than left to judge a random value.
 
@@ -220,6 +231,7 @@ async def _simulate_tool_response(
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=json.dumps(tool_call.get("function", {}).get("arguments", "{}"), default=str),
         conversation_context=format_conversation_history_for_prompt(conversation_messages[-6:]),
+        today=today,
     )
     if credential_parameters:
         prompt += "\n\n" + tool_simulator_credentials().format(
@@ -281,7 +293,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.2"
+    prompt_version = "v1.3"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -307,6 +319,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         max_tools: int = Field(default=5, ge=1)
         #: The row column holding the toolset's tools.
         tools_column: str = "tools"
+        #: The date each conversation takes place on. The simulated user and the
+        #: API response simulator both work from it, so the dates in requests and
+        #: in tool results agree.
+        today: date = date(2026, 11, 6)
 
     @classmethod
     def asset_problems(cls) -> list[str]:
@@ -377,7 +393,12 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             interaction_style_instructions=format_interaction_style_instructions(
                 self._interaction_style,
             ),
+            today=_format_day(self.options.today),
         )
+
+    def seed_state_metadata(self, state: ConversationState) -> None:
+        # The date the conversation is set on, so its dates can be read later.
+        state.metadata.setdefault("today", self.options.today.isoformat())
 
     def get_assistant_system_prompt(self) -> str:
         # Empty as shipped; see the accessor's docstring.
@@ -475,6 +496,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 tool_spec,
                 tc,
                 state.messages,
+                today=_format_day(self.options.today),
                 credential_parameters=tuple(declared),
             )
             if did_reroll:
