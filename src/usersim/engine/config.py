@@ -93,7 +93,8 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # Minimum fraction of letter codepoints that must fall in the
     # locale's expected script. 0.6 (not 1.0) tolerates Latin loanwords /
     # brand names / digits inside an otherwise-native turn while still
-    # rejecting fully-transliterated output.
+    # rejecting fully-transliterated output. Codes (runs of printable ASCII
+    # holding a digit, such as a key or an order number) are left out first.
     user_language_min_script_compliance: float = 0.6
     # Skip the gate for very short turns (letter count below this), where
     # the script signal is too weak to act on (bare numbers, "OK", etc.).

@@ -225,6 +225,11 @@ def _count_letters(text: str) -> int:
     return sum(1 for ch in text if ch.isalpha())
 
 
+#: A run of printable ASCII that holds a digit: a key, a password, an order
+#: number or a flight code, which a user writes the same way in every language.
+_CODE = re.compile(r"[\x21-\x7e]*[0-9][\x21-\x7e]*")
+
+
 def _is_user_script_compliant(
     text: str,
     locale: str,
@@ -240,6 +245,10 @@ def _is_user_script_compliant(
         short for the script signal to be reliable — bare numbers, "OK"), or
       - the fraction of letters in the expected script is >= ``min_script``.
 
+    Codes, runs of printable ASCII that hold a digit (a key, a password, an
+    order number), are left out before counting, so a turn that hands one
+    over is judged by the words around it.
+
     No model call and no lingua dependency: pure Unicode-range arithmetic.
     For Latin-script locales this is a no-op (Latin text scores ~1.0), so
     English / French / Portuguese runs are unaffected; for ``hi_Deva_IN`` it
@@ -248,6 +257,7 @@ def _is_user_script_compliant(
     ranges = expected_script_ranges(locale)
     if not ranges:
         return True
+    text = _CODE.sub(" ", text)
     if _count_letters(text) < min_letters:
         return True
     return script_compliance_fraction(text, ranges) >= min_script

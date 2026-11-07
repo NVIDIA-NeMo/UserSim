@@ -530,7 +530,8 @@ write every message in that language and, for a locale with a script of its
 own or a romanized one, in which script, without transliterating. It is empty
 for English. The loop then checks the script of each user turn itself, with no
 model call, and has the user model write the turn again when too little of it
-is in the locale's script (`enforce_user_language`,
+is in the locale's script, leaving out codes such as a key or an order number
+(`enforce_user_language`,
 `user_language_min_script_compliance`); each retry counts in the outcome's
 `n_user_language_violations`. Whether the assistant answered in the user's
 language is scored after the run, by the `language_compliance` scorer and the
