@@ -12,7 +12,8 @@ persona-grounded, realistic user requests. Key design choices:
   realistic error messages instead of triggering retries
 - Credentials a tool declares are held by the simulated user, one random
   value per credential and conversation (``credentials.py``); a call that
-  passes any other value gets a 401 response
+  passes any other value gets a 401 response, and an accepted call that sets
+  a new value, such as a password change, leaves the user holding it
 
 The 8-axis trajectory judge lives in ``evaluator/scorers/tool_use.py``
 and is invoked by the ``trajectory-evaluator`` plugin. This module only
@@ -26,12 +27,14 @@ import hashlib
 import json
 import logging
 import random
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 from pydantic import Field
 
 from usersim.engine.probes.tool_calling.credentials import (
+    credentials_set_by,
     declared_credentials,
     draw_credentials,
     format_held_credentials,
@@ -152,8 +155,8 @@ def _normalize_tool_list(tools_raw: Any) -> list[dict]:
 def _format_tools_for_api(tools: list) -> list:
     """The tools as the assistant's API receives them: each function spec unchanged.
 
-    A tool's ``credentials`` declaration is for the simulation, so it stays out
-    of the request.
+    A tool's ``credentials`` and ``sets_credentials`` declarations are for the
+    simulation, so they stay out of the request.
     """
     openai_tools = []
     for tool_data in tools:
@@ -162,7 +165,9 @@ def _format_tools_for_api(tools: list) -> list:
         elif "function" in tool_data and "type" not in tool_data:
             openai_tools.append({"type": "function", "function": tool_data["function"]})
         else:
-            openai_tools.append({key: value for key, value in tool_data.items() if key != "credentials"})
+            openai_tools.append(
+                {key: value for key, value in tool_data.items() if key not in ("credentials", "sets_credentials")}
+            )
     return openai_tools
 
 
@@ -188,32 +193,45 @@ def _collect_prior_tool_responses(conversation_messages: list) -> str:
     )
 
 
+_WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+
+def _format_day(day: date) -> str:
+    """A date with its weekday, such as ``Friday, 2026-11-06``, independent of the process locale."""
+    return f"{_WEEKDAYS[day.weekday()]}, {day.isoformat()}"
+
+
 async def _simulate_tool_response(
     models: dict,
     tool_spec: dict,
     tool_call: dict,
     conversation_messages: list,
     *,
+    today: str,
     credential_parameters: tuple[str, ...] = (),
 ) -> tuple[str, bool]:
     """Use the strong frontier model to simulate a realistic API response.
 
     Includes prior tool responses as context so the simulator maintains
-    internal consistency across calls within a conversation. The probe
-    checks a call's credentials before this runs, so when
+    internal consistency across calls within a conversation, and ``today``,
+    the conversation's date, so the dates it returns agree with the user's.
+    The probe checks a call's credentials before this runs, so when
     ``credential_parameters`` names any, the simulator is told they are
     valid rather than left to judge a random value.
 
     Returns ``(content, did_reroll)``. ``did_reroll`` is True if the
     first response was invalid JSON and a second call was needed; this
     is structured sim-health signal surfaced as ``n_api_response_rerolls``
-    in ``simulation_outcome``.
+    in ``simulation_outcome``. When the second response is not valid JSON
+    either, such as one cut off at the model's token limit, ``content`` is
+    a 502 error payload, so every tool result a conversation stores parses.
     """
     prior_context = _collect_prior_tool_responses(conversation_messages)
     prompt = tool_simulator_prompt().format(
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=json.dumps(tool_call.get("function", {}).get("arguments", "{}"), default=str),
         conversation_context=format_conversation_history_for_prompt(conversation_messages[-6:]),
+        today=today,
     )
     if credential_parameters:
         prompt += "\n\n" + tool_simulator_credentials().format(
@@ -233,6 +251,14 @@ async def _simulate_tool_response(
         logger.debug("  |-- api_response_model: invalid JSON, retrying once")
         resp = await acall_llm(models, MODEL_API_RESPONSE, msgs)
         content = resp.get("content", "{}") if isinstance(resp, dict) else "{}"
+        try:
+            json.loads(content)
+        except (json.JSONDecodeError, TypeError):
+            logger.warning(
+                "  |-- api_response_model: invalid JSON again for %s; answering with a 502",
+                tool_call.get("function", {}).get("name", "?"),
+            )
+            content = json.dumps({"error": "The service returned an invalid response.", "status": 502})
 
     return content, did_reroll
 
@@ -255,9 +281,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     every turn; it stays scoreable, because not calling a tool is the
     assistant's behaviour, not a failure of the probe's protocol.
 
-    ``ToolExecutionMixin`` (``tool_loop_mode="single"``, the default)
-    supplies ``after_assistant_turn``: one round of tool calls then a single
-    synthesis pass with no tools (single-shot capability, no correction loop).
+    ``ToolExecutionMixin`` (``tool_loop_mode="multi"``) supplies
+    ``after_assistant_turn``: after each round of tool calls the assistant is
+    offered the tools again, so it can chain calls within a turn, until it
+    replies without calling one or the turn reaches the mixin's call cap.
     This probe supplies only the per-call behaviour (verify + simulate) via
     ``execute_tool_call`` and records ``tool_call_count_per_turn`` in
     ``on_tool_round_complete``.
@@ -266,7 +293,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.2"
+    prompt_version = "v1.3"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -278,6 +305,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         "tool-call failures."
     )
     default_scorers = ("tool_use",)
+    tool_loop_mode = "multi"
     preview_fields = (
         PreviewField("toolset_name", "Toolset"),
         PreviewField("toolset_category", "Toolset category"),
@@ -291,6 +319,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         max_tools: int = Field(default=5, ge=1)
         #: The row column holding the toolset's tools.
         tools_column: str = "tools"
+        #: The date each conversation takes place on. The simulated user and the
+        #: API response simulator both work from it, so the dates in requests and
+        #: in tool results agree.
+        today: date = date(2026, 11, 6)
 
     @classmethod
     def asset_problems(cls) -> list[str]:
@@ -327,6 +359,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             if (declared := declared_credentials(entry))
         }
         self.held_credentials = draw_credentials(self.tool_subset, _row_identity(self._data))
+        # The credentials each offered tool sets a new value for, by tool name.
+        self.credentials_set = {
+            _function_spec(entry).get("name"): sets for entry in self.tool_subset if (sets := credentials_set_by(entry))
+        }
 
         self.openai_tools = _format_tools_for_api(self.tool_subset)
         self.tools_for_judge = format_tools_for_prompt(self.tool_subset)
@@ -357,7 +393,12 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             interaction_style_instructions=format_interaction_style_instructions(
                 self._interaction_style,
             ),
+            today=_format_day(self.options.today),
         )
+
+    def seed_state_metadata(self, state: ConversationState) -> None:
+        # The date the conversation is set on, so its dates can be read later.
+        state.metadata.setdefault("today", self.options.today.isoformat())
 
     def get_assistant_system_prompt(self) -> str:
         # Empty as shipped; see the accessor's docstring.
@@ -398,8 +439,8 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         Owns the tool_calling-specific bookkeeping (verifier_results,
         TOOL_CALL_VERIFIER trace, api-response rerolls, tools_called). The
-        ``ToolExecutionMixin`` drives the message plumbing + the single
-        synthesis pass. ``name`` is the parsed function name; ``tc`` is the
+        ``ToolExecutionMixin`` drives the message plumbing and the
+        assistant's re-calls. ``name`` is the parsed function name; ``tc`` is the
         raw tool-call dict the verifier + simulator need.
 
         A call that fails the schema check gets a 400 response. One that
@@ -455,6 +496,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 tool_spec,
                 tc,
                 state.messages,
+                today=_format_day(self.options.today),
                 credential_parameters=tuple(declared),
             )
             if did_reroll:
@@ -471,11 +513,23 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         else:
             simulated_response = json.dumps({"error": f"Unknown tool: {name}"})
 
+        # An accepted call that sets a credential, such as a password change,
+        # leaves the user holding the value it passed.
+        for parameter, credential in self.credentials_set.get(name, {}).items():
+            if isinstance(args.get(parameter), str) and args[parameter]:
+                self.held_credentials[credential] = args[parameter]
+
         state.metadata.setdefault("tools_called", []).append(name)
         return simulated_response
 
     def on_tool_round_complete(self, state: ConversationState, n_calls: int) -> None:
-        state.metadata.setdefault("tool_call_count_per_turn", []).append(n_calls)
+        # A turn can hold several rounds, so each round adds to the total of
+        # the turn it belongs to: the turn of the latest user message.
+        counts = state.metadata.setdefault("tool_call_count_per_turn", [])
+        turn = sum(1 for message in state.messages if message.get("role") == "user") - 1
+        while len(counts) <= turn:
+            counts.append(0)
+        counts[turn] += n_calls
 
     def build_result_extras(self, state: ConversationState) -> dict:
         return {

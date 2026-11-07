@@ -14,17 +14,27 @@ the other probes.
   up to `max_tools` of its tools, drawn the same way for the same row every
   run. The toolset is the row's theme.
 - The simulated user writes requests the tools can serve, in the row's
-  language, and holds any credential a tool declares.
+  language, and holds any credential a tool declares, API key or password.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
-  gets a response the `api_response_model` writes for that tool.
-- Each turn allows one round of tool calls, then a reply without tools. The
-  conversation does not end early before the assistant has called a tool.
-- Each row records `tool_subset`, the tools it offered, and `num_tool_calls`.
+  gets a response the `api_response_model` writes for that tool. A call that
+  sets a new password leaves the user holding it.
+- Within a turn, the tools stay on offer after each round of calls, so the
+  assistant can chain calls until it replies without calling one. A call past
+  the turn's eighth gets a reply saying it was not run, and the assistant then
+  replies without tools. The conversation does not end early before the
+  assistant has called a tool.
+- Each row records `tool_subset`, the tools it offered, and `num_tool_calls`,
+  the calls that passed the schema and credential checks. `verifier_results` in
+  `conversation_metadata` lists every call and whether it passed.
 
-Two settings, each set with `--probe-option tool_calling.<name>=<value>`:
-`max_tools`, the most tools a conversation offers (default `5`), and
-`tools_column`, the row column holding the toolset's tools (default `tools`).
+Three settings, each set with `--probe-option tool_calling.<name>=<value>`:
+`max_tools`, the most tools a conversation offers (default `5`);
+`tools_column`, the row column holding the toolset's tools (default `tools`);
+and `today`, the date each conversation takes place on (default `2026-11-06`).
+The simulated user and the `api_response_model` both work from that date, so
+the dates in requests and in tool results agree, and each row records it as
+`today` in `conversation_metadata`. The assistant is not told the date.
 
 ## Locales
 

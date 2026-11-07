@@ -268,9 +268,12 @@ async def test_each_assistant_request_states_whether_tools_are_offered() -> None
 async def test_recorded_tool_calls_run_in_the_probes_own_loop() -> None:
     """The native verifier and API-response model produce the payload."""
     runtime = _tool_calling_runtime()
+    issued = False
 
     def respond(activation: ActivationRequest) -> dict[str, object]:
-        if activation.role == "assistant" and activation.tools_enabled:
+        nonlocal issued
+        if activation.role == "assistant" and activation.tools_enabled and not issued:
+            issued = True
             return _tool_call("get_weather", {"location": "Tokyo"}, "call-weather")
         return _text(activation)
 

@@ -17,7 +17,9 @@
 models = [
   { alias = "user_model",         model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8, timeout = 300 },  # simulated user
   { alias = "assistant_model",    model = "google/gemma-4-31b-it",       provider = "openrouter", max_parallel_requests = 8, timeout = 300 },  # model under test
-  { alias = "api_response_model", model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8, timeout = 300 },  # tool-call responses
+  # `api_response_model` writes each simulated API response, often several
+  # thousand tokens of JSON, after its own reasoning, hence max_tokens.
+  { alias = "api_response_model", model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8, timeout = 300, max_tokens = 8192 },  # tool-call responses
   { alias = "judge_model",        model = "nvidia/nemotron-3.5-lightning", provider = "openrouter", max_parallel_requests = 8, timeout = 300 }, # in-sim gates
   { alias = "summary_model",      model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8, timeout = 300 },  # context compression
   { alias = "evaluator_model",    model = "nvidia/nemotron-3.5-lightning", provider = "openrouter", max_parallel_requests = 8, timeout = 300 }, # trajectory rubric

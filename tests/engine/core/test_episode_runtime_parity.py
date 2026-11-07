@@ -462,13 +462,14 @@ async def test_multi_turn_multi_round_tool_use_matches_standalone(case: _Case) -
         assert len({call.turn_idx for call in executed}) == len(set(direct_tool_turns))
 
 
-async def test_recording_tool_calls_when_tools_are_off_is_rejected() -> None:
+async def test_recording_tool_calls_when_tools_are_off_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
     """A record that breaks the probe's loop rules fails at the host-facing call.
 
-    ``tool_calling`` disables tools for its answer step. Keeping them on is a
-    host bug: it must not consume a model retry or be attributed to the model
-    under test.
+    In the single-round tool loop, the answer step after a round of calls
+    offers no tools. Keeping them on is a host bug: it must not consume a
+    model retry or be attributed to the model under test.
     """
+    monkeypatch.setattr(resolve_probe("tool_calling"), "tool_loop_mode", "single")
     runtime, invocations = _runtime(_Case("tool_calling", 3003, {"tools": [_TOOL]}, 1))
 
     event = await runtime.advance()

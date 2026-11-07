@@ -470,7 +470,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `max_query_attempts` | int | `3` | Max retries for the user-LLM query / follow-up + judge gate before declaring `USER_QUERY_GATE_EXHAUSTED` |
 | `max_assistant_attempts` | int | `1` | Assistant-turn resampling budget. `1` (default) keeps the per-turn assistant judge flag-only (evaluation semantics). `>1` discards a judge-rejected assistant candidate and regenerates it within the budget: for SDG-style runs where the assistant is a data generator, not a model under test. Discards are counted in `n_assistant_retries`; probes with side-effectful `after_assistant_turn` opt out via `supports_assistant_resampling = False`. Gate semantics: the judge's `warn` rating passes (only `failure` triggers a resample), and a judge reply with no parseable rating is re-asked once on the same candidate rather than charged against the budget (entries marked `judge_parse_error`). With a budget `>1`, prefer a judge from a different model family than the assistant, so the model never filters its own generations: `models_default.toml` and `models_openrouter.toml` pair the assistant with a judge from another family, and `models_openai.toml` uses a different OpenAI model as judge |
 | `enforce_user_language` | bool | `True` | Regenerate a simulated-user turn written in the wrong script for a non-Latin locale, within `max_query_attempts` |
-| `user_language_min_script_compliance` | float | `0.6` | Share of a turn's letters that must be in the locale's script |
+| `user_language_min_script_compliance` | float | `0.6` | Share of a turn's letters that must be in the locale's script, leaving out codes such as keys, passwords and order numbers (runs of Latin letters and symbols that hold a digit) |
 | `user_language_min_letters` | int | `8` | Shorter turns skip the script check |
 | `incremental_disclosure_ratio` | float | `0.6` | Fraction of users on incremental disclosure (rest go upfront) |
 | `persona_grounding_ratio` | float | `1.0` | Fraction of trajectories whose first user turn incorporates persona-specific details. Lower it for a generic-query control arm |
@@ -508,7 +508,7 @@ what each one carries:
 | `conversation_language` | str | Language used |
 | `user_query` | str | Initial user query |
 | `num_turns` | int | Actual turn count |
-| `num_tool_calls` | int | Total tool calls (0 for non-tool) |
+| `num_tool_calls` | int | Tool calls as the row's probe counts them (0 for a probe without tools): `tool_calling` counts the calls that passed its schema and credential checks (`conversation_metadata.verifier_results` lists every call and whether it passed), `financial_services` the domain actions attempted, and `safety_agentic` every action attempted |
 | `tool_subset` | str? (JSON) | Sampled tools (tool_calling only, None otherwise) |
 | `disclosure_style` | str | `"incremental"` or `"upfront"` (Sim2Real) |
 | `user_interaction_style` | str | OCEAN-derived style: cooperative/neutral/impatient/frustrated/confrontational |
@@ -672,5 +672,5 @@ The tables describe the main files.
 | `health_disclosure/test_e2e.py` | The probe's real columns through the store to the concealment scorer |
 | `tool_calling/test_probe.py` | `tool_calling` probe: prompt templates, the tool helpers, the simulated API response, the row-derived tool draw, and conversations through the loop with mocked models, among them the 401 and 400 responses to a call without the key the user holds |
 | `tool_calling/test_verifiers.py` | Tool-call JSON-schema validator |
-| `tool_calling/test_credentials.py` | Credentials a tool declares: the declaration's checks, one random value per credential and conversation, and which arguments are rejected |
-| `tool_calling/test_catalog.py` | The shipped tool catalog: every spec is valid JSON Schema that providers accept, with typed items, defaults, examples and enums, every tool and parameter described, and every key a tool takes required and declared as a credential |
+| `tool_calling/test_credentials.py` | Credentials a tool declares or sets: the declarations' checks, one random value per credential and conversation, and which arguments are rejected |
+| `tool_calling/test_catalog.py` | The shipped tool catalog: every spec is valid JSON Schema that providers accept, with typed items, defaults, examples and enums, every tool and parameter described, every key a tool takes required and declared as a credential, and every password declared as held, declared as set, or listed as neither |

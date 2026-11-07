@@ -8,6 +8,7 @@ import re
 import pytest
 
 from usersim.engine.probes.tool_calling.credentials import (
+    credentials_set_by,
     declared_credentials,
     draw_credentials,
     format_held_credentials,
@@ -53,6 +54,32 @@ class TestDeclaredCredentials:
     def test_a_credential_for_an_undefined_parameter_is_refused(self) -> None:
         with pytest.raises(ValueError, match=r"does not define: \['token'\]"):
             declared_credentials(_entry("search", {"token": "SerpApi key"}))
+
+
+class TestCredentialsSetBy:
+    def test_a_tool_without_a_declaration_sets_none(self) -> None:
+        assert credentials_set_by(_entry("search", {"api_key": "SerpApi key"})) == {}
+
+    def test_a_declaration_maps_parameters_to_the_credentials_they_replace(self) -> None:
+        entry = _entry("change_password", properties=("old_password", "new_password"))
+        entry["sets_credentials"] = {"new_password": "account password"}
+        assert credentials_set_by(entry) == {"new_password": "account password"}
+
+    @pytest.mark.parametrize(
+        ("sets", "message"),
+        [
+            (["new_password"], "sets_credentials must map parameter names to credential names"),
+            (
+                {"token": "account password"},
+                r"declares sets_credentials for parameters it does not define: \['token'\]",
+            ),
+        ],
+    )
+    def test_a_malformed_declaration_is_refused(self, sets: object, message: str) -> None:
+        entry = _entry("change_password", properties=("new_password",))
+        entry["sets_credentials"] = sets
+        with pytest.raises(ValueError, match=message):
+            credentials_set_by(entry)
 
 
 class TestDrawCredentials:

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Any
@@ -224,6 +225,11 @@ def _count_letters(text: str) -> int:
     return sum(1 for ch in text if ch.isalpha())
 
 
+#: A run of printable ASCII that holds a digit: a key, a password, an order
+#: number or a flight code, which a user writes the same way in every language.
+_CODE = re.compile(r"[\x21-\x7e]*[0-9][\x21-\x7e]*")
+
+
 def _is_user_script_compliant(
     text: str,
     locale: str,
@@ -239,6 +245,10 @@ def _is_user_script_compliant(
         short for the script signal to be reliable — bare numbers, "OK"), or
       - the fraction of letters in the expected script is >= ``min_script``.
 
+    Codes, runs of printable ASCII that hold a digit (a key, a password, an
+    order number), are left out before counting, so a turn that hands one
+    over is judged by the words around it.
+
     No model call and no lingua dependency: pure Unicode-range arithmetic.
     For Latin-script locales this is a no-op (Latin text scores ~1.0), so
     English / French / Portuguese runs are unaffected; for ``hi_Deva_IN`` it
@@ -247,6 +257,7 @@ def _is_user_script_compliant(
     ranges = expected_script_ranges(locale)
     if not ranges:
         return True
+    text = _CODE.sub(" ", text)
     if _count_letters(text) < min_letters:
         return True
     return script_compliance_fraction(text, ranges) >= min_script
@@ -602,32 +613,40 @@ def _is_assistant_refusal_echo(text: str, allowed: frozenset[str] = frozenset())
 MODEL_SUMMARY = "summary_model"
 
 _EARLY_STOP_PROMPT = (
-    "Does this user message signal that the conversation is naturally complete "
-    "and the user is satisfied? Consider the language and cultural context.\n"
+    "Does this user message end the conversation: the user is finished, satisfied "
+    "or not, and the message asks the assistant to do nothing further? A message "
+    "that also makes a request, gives an instruction or asks a question, such as "
+    "asking it to book, change or check something, does not end it. Consider the "
+    "language and cultural context.\n"
     "Reply with ONLY 'yes' or 'no'.\n\n"
     "User message: {follow_up}"
 )
 
 
-def _is_poor_assistant_response(content: str) -> bool:
-    """Lightweight heuristic check for assistant response quality issues.
+# Tool-call syntax that reached the reply as text instead of as a tool call.
+_TOOL_CALL_MARKUP = re.compile(r"<tool_call>|<function=[\w.\-]+>|\[TOOL_CALLS\]")
 
-    Detects excessively verbose, empty, or structurally over-formatted responses
-    that would frustrate a real user. This supplements the existing judge-based
-    failure tracking so frustration reacts to actual assistant behavior.
 
-    Uses CJK-aware word counting so the threshold works correctly for
-    non-Latin scripts (Japanese, Chinese, Korean) where len(str.split())
-    would collapse entire sentences into a single "word".
+def _poor_assistant_response_reason(content: str) -> str | None:
+    """Why a reply would frustrate a real user, or None when nothing stands out.
+
+    Flags a reply that is empty, that is tool-call markup rather than an
+    answer, that runs past 800 words, or that has four or more headings.
+    This supplements the judge-based failure tracking so frustration reacts
+    to actual assistant behavior.
+
+    Words are counted by ``_word_count``, which is comparable across
+    languages, so 800 words means about the same length in every locale.
     """
     if not content or not content.strip():
-        return True
+        return "empty response"
+    if _TOOL_CALL_MARKUP.search(content):
+        return "tool-call markup instead of a reply"
     if _word_count(content) > 800:
-        return True
-    header_count = content.count("\n#")
-    if header_count >= 4:
-        return True
-    return False
+        return "longer than 800 words"
+    if content.count("\n#") >= 4:
+        return "four or more headings"
+    return None
 
 
 async def _check_conversation_complete(models: dict, follow_up: str) -> bool:
@@ -1406,15 +1425,18 @@ class ConversationLoop:
                 summary = ""
 
             # 3e. Check assistant response quality (heuristic: format/length)
-            if _is_poor_assistant_response(synthesis_content):
+            poor_reason = _poor_assistant_response_reason(synthesis_content)
+            if poor_reason is not None:
                 state.assistant_failures += 1
                 state.outcome.inc_assistant_inline_failures()
                 state.outcome.add_warning(
                     kind=WarningKind.POOR_ASSISTANT_RESPONSE,
                     turn_idx=turn_idx,
-                    detail="heuristic flag: empty, verbose, or heavily-formatted response",
+                    detail=f"heuristic flag: {poor_reason}",
                 )
-                logger.debug(f"  |-- {probe.label}: assistant quality flag (failures={state.assistant_failures})")
+                logger.debug(
+                    f"  |-- {probe.label}: assistant quality flag, {poor_reason} (failures={state.assistant_failures})"
+                )
 
             # 3e2. Bookkeeping for the per-turn assistant judge verdict
             # (the judge itself ran inside
@@ -1552,8 +1574,9 @@ class ConversationLoop:
             max_user_retries = getattr(cfg, "max_query_attempts", 3) - 1
             follow_up = ""
             ok = False
+            attempts = 0
             for user_attempt in range(max_user_retries + 1):
-                state.outcome.inc_user_followup_retries()
+                attempts += 1
                 try:
                     user_resp = await acall_llm(models, MODEL_USER, compressed_uh)
                 except ContextWindowError:
@@ -1759,6 +1782,9 @@ class ConversationLoop:
                     f"failed, retrying ({user_attempt + 1}"
                     f"/{max_user_retries})"
                 )
+
+            # Every attempt but an accepted last one was rejected.
+            state.outcome.inc_user_followup_retries(attempts - 1 if ok else attempts)
 
             if not ok:
                 state.metadata.setdefault("user_followup_retries", 0)

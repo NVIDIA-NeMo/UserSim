@@ -367,6 +367,13 @@ class TestLoaderAutofill:
         # custom [[providers]] block is needed.
         assert cfg.providers == ()
 
+    @pytest.mark.parametrize("toml_name", ["models_default.toml", "models_openrouter.toml"])
+    def test_api_response_model_has_room_for_a_long_response(self, toml_name):
+        """A simulated API response is often thousands of tokens of JSON, written
+        after the model's reasoning, so a 4096-token budget cuts the longest off."""
+        cfg = load_models_config(_cli_dir() / toml_name)
+        assert cfg.get("api_response_model").max_tokens >= 8192
+
     def test_judge_is_not_the_model_under_test(self):
         """No shipped config may judge a model with itself.
 

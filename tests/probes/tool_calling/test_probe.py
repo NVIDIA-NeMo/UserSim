@@ -20,7 +20,7 @@ from pydantic import ValidationError
 
 from usersim.engine.core.llm import ContextWindowError
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
-from usersim.engine.core.simulation import ConversationLoop
+from usersim.engine.core.simulation import ConversationLoop, ConversationState
 from usersim.engine.probes.tool_calling.probe import (
     ToolCallingProbe,
     _build_tool_context,
@@ -139,6 +139,7 @@ class TestToolHelpers:
                 tool_spec,
                 tool_call,
                 history,
+                today="Friday, 2026-11-06",
             )
 
         assert content == '{"ok":true}'
@@ -147,6 +148,41 @@ class TestToolHelpers:
         assert "city" in captured["prompt"]
         assert "Tokyo" in captured["prompt"]
         assert '"prior_secret":"rain"' in captured["prompt"]
+        assert "Today is Friday, 2026-11-06." in captured["prompt"]
+
+    @pytest.mark.parametrize(
+        ("responses", "expected"),
+        [
+            (['{"temp": 2', '{"temp": 22}'], {"temp": 22}),
+            (
+                ['{"temp": 2', '{"items": [{"name": "Tok'],
+                {"error": "The service returned an invalid response.", "status": 502},
+            ),
+        ],
+        ids=["second-response-valid", "both-cut-off"],
+    )
+    async def test_api_simulator_stores_only_valid_json(self, responses, expected):
+        replies = iter(responses)
+
+        async def fake_call_llm(models, alias, messages):
+            return {"content": next(replies)}
+
+        from unittest.mock import patch
+
+        with patch(
+            "usersim.engine.probes.tool_calling.probe.acall_llm",
+            side_effect=fake_call_llm,
+        ):
+            content, rerolled = await _simulate_tool_response(
+                {},
+                {"name": "get_weather", "parameters": {"type": "object"}},
+                {"function": {"name": "get_weather", "arguments": '{"city":"Tokyo"}'}},
+                [],
+                today="Friday, 2026-11-06",
+            )
+
+        assert rerolled is True
+        assert json.loads(content) == expected
 
 
 def _with_weather_key(sample_tools):
@@ -160,17 +196,16 @@ def _with_weather_key(sample_tools):
     return tools
 
 
-async def _run_concrete_tool_probe(
-    sample_tools,
-    *,
-    api_context_error=False,
-    arguments: Callable[[ToolCallingProbe], str] = lambda probe: '{"location":"Tokyo"}',
-):
+def _concrete_tool_probe(tools, **options) -> tuple[ToolCallingProbe, dict, types.SimpleNamespace]:
+    """A tool_calling probe offered both of ``tools``, with its row and run config.
+
+    ``options`` are further tool_calling settings for the run.
+    """
     from usersim.engine.core.behavioral import compute_behavioral_profile
 
     persona = {"first_name": "A", "last_name": "User", "age": 35}
     data = {
-        "tools": sample_tools,
+        "tools": tools,
         "theme": "__not_used__",
         "persona_uuid": "persona-1",
         "disclosure_style": "upfront",
@@ -178,14 +213,13 @@ async def _run_concrete_tool_probe(
     }
     cfg = types.SimpleNamespace(
         theme_column="theme",
-        probe_options={"tool_calling": {"max_tools": 2}},
+        probe_options={"tool_calling": {"max_tools": 2, **options}},
         max_turns=2,
         max_query_attempts=1,
         context_compression=False,
         compression_window=1,
         enforce_user_language=False,
     )
-    outcome = OutcomeBuilder(provenance=Provenance())
     probe = ToolCallingProbe(
         persona=persona,
         locale="en_US",
@@ -195,8 +229,26 @@ async def _run_concrete_tool_probe(
         provenance=Provenance(),
         profile=compute_behavioral_profile(persona),
         data=data,
-        outcome_builder=outcome,
+        outcome_builder=OutcomeBuilder(provenance=Provenance()),
     )
+    return probe, data, cfg
+
+
+async def _run_concrete_tool_probe(
+    sample_tools,
+    *,
+    api_context_error=False,
+    arguments: Callable[[ToolCallingProbe], str] = lambda probe: '{"location":"Tokyo"}',
+    second_call_arguments: str | None = None,
+    offered_tools: list[bool] | None = None,
+):
+    """Run one conversation; the assistant calls ``get_weather``, then answers.
+
+    With ``second_call_arguments`` it calls ``get_weather`` again after the
+    first result, before answering. ``offered_tools`` collects, per assistant
+    call, whether the request offered tools.
+    """
+    probe, data, cfg = _concrete_tool_probe(sample_tools)
     assistant_inputs = []
     user_inputs = []
     judge_inputs = []
@@ -216,17 +268,23 @@ async def _run_concrete_tool_probe(
             }
         if alias == "assistant_model":
             assistant_inputs.append(messages)
+            if offered_tools is not None:
+                offered_tools.append(bool(kwargs.get("tools")))
             assistant_call += 1
-            if assistant_call == 1:
+            calls = [("weather-call", arguments(probe))]
+            if second_call_arguments is not None:
+                calls.append(("weather-call-2", second_call_arguments))
+            if assistant_call <= len(calls):
+                call_id, call_arguments = calls[assistant_call - 1]
                 return {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "weather-call",
+                            "id": call_id,
                             "function": {
                                 "name": weather_tool["function"]["name"],
-                                "arguments": arguments(probe),
+                                "arguments": call_arguments,
                             },
                         }
                     ],
@@ -289,6 +347,25 @@ async def test_concrete_tool_probe_keeps_private_and_public_views_separate(sampl
     assert all("raw_secret" not in message.get("content", "") for call in judge_inputs for message in call)
     exported = json.loads(result["conversation_messages"])
     assert any(message.get("role") == "tool" and "raw_secret" in message.get("content", "") for message in exported)
+
+
+async def test_assistant_chains_a_second_call_within_a_turn(sample_tools):
+    offered: list[bool] = []
+    result, _assistant, _user, _judge, api_inputs = await _run_concrete_tool_probe(
+        sample_tools,
+        second_call_arguments='{"location":"Osaka"}',
+        offered_tools=offered,
+    )
+
+    messages = json.loads(result["conversation_messages"])
+    first_turn = messages[: next(i for i, m in enumerate(messages) if i and m["role"] == "user")]
+    assert [m["role"] for m in first_turn] == ["user", "assistant", "tool", "assistant", "tool", "assistant"]
+    assert [m["tool_calls"][0]["id"] for m in first_turn if m.get("tool_calls")] == ["weather-call", "weather-call-2"]
+    assert first_turn[-1]["content"] == "Tokyo is 22 degrees."
+    assert offered[:3] == [True, True, True]  # the tools stay on offer after each round
+    assert len(api_inputs) == 2
+    metadata = json.loads(result["conversation_metadata"])
+    assert metadata["tool_call_count_per_turn"][0] == 2  # both rounds count toward the turn
 
 
 async def test_concrete_tool_probe_attributes_api_context_failure(sample_tools):
@@ -451,6 +528,27 @@ class TestThemeFollowsTheToolset:
         assert "Book a meeting" not in prompt
 
 
+class TestToday:
+    """The simulated user and the API response simulator share one date; the assistant is not told it."""
+
+    async def test_the_user_and_the_tool_simulator_share_the_runs_date(self, sample_tools):
+        result, assistant_inputs, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
+
+        assert "Today is Friday, 2026-11-06." in user_inputs[0][0]["content"]
+        assert "Today is Friday, 2026-11-06." in api_inputs[0][0]["content"]
+        assert not any("2026-11-06" in (message.get("content") or "") for message in assistant_inputs[0])
+        assert json.loads(result["conversation_metadata"])["today"] == "2026-11-06"
+
+    def test_a_run_sets_the_date_as_a_setting(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools, today="2027-01-15")
+
+        assert "Today is Friday, 2027-01-15." in probe.get_user_system_prompt()
+
+    def test_a_date_that_does_not_exist_is_refused(self):
+        with pytest.raises(ValidationError):
+            ToolCallingProbe.Options(today="2027-02-30")
+
+
 class TestCredentials:
     """The user holds the key a tool declares, and only a call carrying it reaches the simulated service."""
 
@@ -513,3 +611,49 @@ class TestCredentials:
 
         assert "<CREDENTIALS>" not in user_inputs[0][0]["content"]
         assert "are valid" not in api_inputs[0][0]["content"]
+
+    @staticmethod
+    def _account_tools() -> list[dict]:
+        """A login and a password change, both on the user's account password."""
+
+        def entry(name: str, properties: tuple[str, ...], **declarations: dict) -> dict:
+            schema = {p: {"type": "string", "description": p} for p in properties}
+            parameters = {"type": "object", "properties": schema, "required": list(properties)}
+            function = {"name": name, "description": f"{name} tool", "parameters": parameters}
+            return {"type": "function", "function": function, **declarations}
+
+        return [
+            entry("account_login", ("username", "password"), credentials={"password": "account password"}),
+            entry(
+                "change_password",
+                ("old_password", "new_password"),
+                credentials={"old_password": "account password"},
+                sets_credentials={"new_password": "account password"},
+            ),
+        ]
+
+    async def test_a_password_the_user_sets_replaces_the_one_they_held(self):
+        probe, _data, _cfg = _concrete_tool_probe(self._account_tools())
+        state = ConversationState()
+        held = probe.held_credentials["account password"]
+
+        async def call(name: str, **arguments: str) -> dict:
+            tool_call = {"id": f"call-{name}", "function": {"name": name, "arguments": json.dumps(arguments)}}
+            return json.loads(
+                await probe.execute_tool_call(name, arguments, tool_call, state, {}, turn_idx=1, call_idx=0)
+            )
+
+        with patch("usersim.engine.probes.tool_calling.probe.acall_llm", return_value={"content": '{"ok": true}'}):
+            # A change that does not carry the held password sets nothing.
+            assert (await call("change_password", old_password="wrong", new_password="N3w-pass"))["status"] == 401
+            assert (await call("account_login", username="a", password="N3w-pass"))["status"] == 401
+            assert await call("change_password", old_password=held, new_password="N3w-pass") == {"ok": True}
+            assert await call("account_login", username="a", password="N3w-pass") == {"ok": True}
+            assert (await call("account_login", username="a", password=held))["status"] == 401
+
+        assert "- account password: N3w-pass" in probe.get_user_system_prompt()
+
+    def test_the_set_declaration_stays_out_of_the_assistants_tools(self):
+        probe, _data, _cfg = _concrete_tool_probe(self._account_tools())
+
+        assert all(set(tool) == {"type", "function"} for tool in probe.openai_tools)

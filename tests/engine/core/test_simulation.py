@@ -613,6 +613,26 @@ class TestIsUserScriptCompliant:
         # Below min_letters: too little signal, so we don't enforce.
         assert _is_user_script_compliant("ok", "hi_Deva_IN", min_script=0.6, min_letters=8) is True
 
+    @pytest.mark.parametrize(
+        ("locale", "turn"),
+        [
+            ("hi_Deva_IN", "यह रही मेरी कुंजी: k3y9q2w8e7r6t5y4u3i2o1p0"),
+            ("hi_Deva_IN", "मेरा नया पासवर्ड Kmm!Secure2025 है।"),
+            ("ja_JP", "キーはこちらです: k3y9q2w8e7r6t5y4u3i2o1p0"),
+            ("ko_KR", "제 키는 k3y9q2w8e7r6t5y4u3i2o1p0 입니다."),
+        ],
+    )
+    def test_a_code_in_a_native_turn_is_left_out(self, locale: str, turn: str) -> None:
+        # A key, password or order number is written in Latin letters and digits in every locale.
+        assert _is_user_script_compliant(turn, locale, min_script=0.6, min_letters=8) is True
+
+    def test_romanized_words_beside_a_number_still_fail(self) -> None:
+        turn = "mujhe kal subah 2 ticket chahiye train 12951 se"
+        assert _is_user_script_compliant(turn, "hi_Deva_IN", min_script=0.6, min_letters=8) is False
+
+    def test_a_turn_that_is_only_a_code_is_too_short_to_judge(self) -> None:
+        assert _is_user_script_compliant("k3y9q2w8e7r6t5y4u3i2o1p0", "ko_KR", min_script=0.6, min_letters=8) is True
+
     def test_unknown_locale_is_noop(self) -> None:
         assert _is_user_script_compliant(_ROMANIZED_TURN, "xx_YY", min_script=0.6, min_letters=8) is True
 

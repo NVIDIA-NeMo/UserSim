@@ -97,8 +97,9 @@ append `role:"tool"` results, re-call the assistant), inherit
 `ToolExecutionMixin` and implement one `async execute_tool_call(name, args, tc,
 state, models, *, turn_idx, call_idx) -> str` hook instead of hand-rolling
 `after_assistant_turn`. It offers two modes via `tool_loop_mode`: `single`
-(one round + synthesis, e.g. `tool_calling`) and `multi` (re-offer tools until
-the assistant stops or a per-turn cap, e.g. `financial_services`). The
+(one round, then a reply without tools; the default) and `multi` (re-offer
+tools until the assistant stops or a per-turn cap, e.g. `tool_calling` and
+`financial_services`). The
 **grounded multi-turn + tool-loop** shape (multi-turn persona user-sim +
 scoped retrieval + discoverable-tool gate + in-memory state, tier-branched) is
 `financial_services`: it rides the shared `ConversationLoop` (no custom
@@ -529,7 +530,8 @@ write every message in that language and, for a locale with a script of its
 own or a romanized one, in which script, without transliterating. It is empty
 for English. The loop then checks the script of each user turn itself, with no
 model call, and has the user model write the turn again when too little of it
-is in the locale's script (`enforce_user_language`,
+is in the locale's script, leaving out codes such as a key or an order number
+(`enforce_user_language`,
 `user_language_min_script_compliance`); each retry counts in the outcome's
 `n_user_language_violations`. Whether the assistant answered in the user's
 language is scored after the run, by the `language_compliance` scorer and the

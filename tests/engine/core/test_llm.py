@@ -830,3 +830,44 @@ def test_the_reasoning_overrides_use_only_settings_acall_llm_routes(monkeypatch,
     monkeypatch.setattr(move_runtime, "_MOVE_REASONING_EFFORT", value)
     for produced in (realized_audit._audit_reasoning_kwargs(), move_runtime._move_reasoning_kwargs()):
         assert produced and set(produced) <= set(llm._EXTRA_BODY_SETTINGS)
+
+
+#: One message, as a person would write it in each language.
+_SAME_MESSAGE = {
+    "en": "I checked the train times for Saturday. The first train leaves at 9:40 and arrives in Osaka at 12:15. "
+    "Tickets cost about 14,000 yen per adult, and children under twelve pay half. If you want, I can book two "
+    "adult seats and one child seat in the quiet car and send the confirmation to your email.",
+    "pt": "Verifiquei os horários dos trens para sábado. O primeiro trem sai às 9h40 e chega a Osaka às 12h15. "
+    "As passagens custam cerca de 14.000 ienes por adulto, e crianças com menos de doze anos pagam metade. Se "
+    "quiser, posso reservar dois assentos de adulto e um de criança no vagão silencioso e enviar a confirmação "
+    "para o seu e-mail.",
+    "de": "Ich habe die Zugzeiten für Samstag geprüft. Der erste Zug fährt um 9:40 Uhr ab und kommt um 12:15 Uhr "
+    "in Osaka an. Die Fahrkarten kosten etwa 14.000 Yen pro Erwachsenem, und Kinder unter zwölf Jahren zahlen die "
+    "Hälfte. Wenn Sie möchten, kann ich zwei Erwachsenenplätze und einen Kinderplatz im Ruhewagen buchen und die "
+    "Bestätigung an Ihre E-Mail senden.",
+    "vi": "Tôi đã kiểm tra giờ tàu cho thứ Bảy. Chuyến tàu đầu tiên khởi hành lúc 9:40 và đến Osaka lúc 12:15. "
+    "Giá vé khoảng 14.000 yên cho mỗi người lớn, và trẻ em dưới mười hai tuổi trả một nửa. Nếu bạn muốn, tôi có "
+    "thể đặt hai ghế người lớn và một ghế trẻ em trong toa yên tĩnh và gửi xác nhận đến email của bạn.",
+    "hi": "मैंने शनिवार के लिए ट्रेन का समय देखा। पहली ट्रेन 9:40 बजे निकलती है और 12:15 बजे ओसाका पहुँचती है। "
+    "टिकट की कीमत प्रति वयस्क लगभग 14,000 येन है, और बारह साल से कम उम्र के बच्चे आधा किराया देते हैं। अगर आप "
+    "चाहें, तो मैं शांत डिब्बे में दो वयस्क सीटें और एक बच्चे की सीट बुक कर सकता हूँ और पुष्टि आपके ईमेल पर भेज "
+    "सकता हूँ।",
+    "ko": "토요일 기차 시간을 확인했어요. 첫 기차는 9시 40분에 출발해서 12시 15분에 오사카에 도착해요. 요금은 "
+    "어른 1인당 약 14,000엔이고, 12세 미만 어린이는 절반만 내요. 원하시면 조용한 객차에 어른 좌석 두 개와 "
+    "어린이 좌석 하나를 예약하고 확인 메일을 보내 드릴게요.",
+    "ja": "土曜日の電車の時刻を確認しました。始発は9時40分に出発し、12時15分に大阪に到着します。料金は大人1人あたり"
+    "約14,000円で、12歳未満の子どもは半額です。よろしければ、静かな車両に大人2席と子ども1席を予約し、確認メールを"
+    "お送りします。",
+    "zh": "我查了星期六的火车时刻。第一班车9点40分出发，12点15分到达大阪。票价每位成人约14,000日元，十二岁以下的儿童"
+    "半价。如果您需要，我可以在安静车厢预订两个成人座位和一个儿童座位，并把确认信息发到您的邮箱。",
+}
+
+
+class TestWordCount:
+    @pytest.mark.parametrize("language", sorted(set(_SAME_MESSAGE) - {"en"}))
+    def test_the_same_message_counts_about_as_many_words_in_each_language(self, language: str) -> None:
+        english = llm._word_count(_SAME_MESSAGE["en"])
+        assert 0.7 * english <= llm._word_count(_SAME_MESSAGE[language]) <= 1.3 * english
+
+    def test_empty_text_has_no_words(self) -> None:
+        assert llm._word_count("") == 0

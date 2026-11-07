@@ -65,6 +65,8 @@ Act as the following character:
 
 {interaction_style_instructions}
 
+Today is {today}. Use this date whenever a date, a day of the week or a year comes up.
+
 The assistant has access to tools in this domain:
 <TOOL_CONTEXT>
 {tool_context}
@@ -91,6 +93,8 @@ _DEFAULT_TOOL_SIMULATOR = """You are simulating a realistic API response for a t
 Given the tool specification and the arguments provided, generate a realistic JSON response
 that the tool would return. The response should be consistent with the tool's description
 and the arguments provided.
+
+Today is {today}. Date everything in the response consistently with it.
 
 Tool specification:
 {tool_spec}

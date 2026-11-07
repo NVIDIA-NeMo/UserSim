@@ -15,12 +15,14 @@ from dataclasses import dataclass
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from usersim.engine.core.outcomes import FailureAttribution, FailureClass, OutcomeStatus
 from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.simulation import (
     ConversationLoop,
     _check_conversation_complete,
-    _is_poor_assistant_response,
+    _poor_assistant_response_reason,
     make_failed,
     make_result,
 )
@@ -161,18 +163,47 @@ class TestEarlyStopping:
 
 class TestAssistantQualityCheck:
     def test_empty_response_flagged(self):
-        assert _is_poor_assistant_response("")
-        assert _is_poor_assistant_response("   ")
+        assert _poor_assistant_response_reason("") == "empty response"
+        assert _poor_assistant_response_reason("   ") == "empty response"
 
     def test_very_long_response_flagged(self):
-        assert _is_poor_assistant_response("word " * 801)
+        assert _poor_assistant_response_reason("word " * 801) == "longer than 800 words"
+
+    @pytest.mark.parametrize(
+        "content",
+        ["조용한 객차에 어른 좌석 두 개를 예약했어요. " * 40, "静かな車両に大人2席を予約しました。" * 50],
+        ids=["korean", "japanese"],
+    )
+    def test_a_reply_of_ordinary_length_in_korean_or_japanese_passes(self, content):
+        assert _poor_assistant_response_reason(content) is None
+
+    def test_a_long_japanese_reply_is_flagged(self):
+        assert _poor_assistant_response_reason("静かな車両に大人2席を予約しました。" * 120) == "longer than 800 words"
 
     def test_over_formatted_response_flagged(self):
         content = "\n# Section 1\ntext\n# Section 2\ntext\n# Section 3\ntext\n# Section 4\ntext"
-        assert _is_poor_assistant_response(content)
+        assert _poor_assistant_response_reason(content) == "four or more headings"
 
-    def test_normal_response_passes(self):
-        assert not _is_poor_assistant_response("Here is your weather forecast for today.")
+    @pytest.mark.parametrize(
+        "content",
+        [
+            "\n<tool_call>\n<function=get_price>\n<parameter=item>\nDVD\n</parameter>\n</function>\n</tool_call>\n",
+            '[TOOL_CALLS][{"name": "get_price", "arguments": {"item": "DVD"}}]',
+        ],
+        ids=["xml-style", "bracket-style"],
+    )
+    def test_tool_call_markup_flagged(self, content):
+        assert _poor_assistant_response_reason(content) == "tool-call markup instead of a reply"
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            "Here is your weather forecast for today.",
+            "I used the get_price function to check: the DVD costs $12.99.",
+        ],
+    )
+    def test_normal_response_passes(self, content):
+        assert _poor_assistant_response_reason(content) is None
 
 
 # ---------------------------------------------------------------------------
@@ -221,6 +252,26 @@ class TestConversationLoopSimple:
 
         assert result["conversation_status"] is False
         assert result["num_turns"] == 0
+
+    @pytest.mark.parametrize(
+        ("followup_gate", "expected_retries"),
+        [([_judge_success()], 0), ([_judge_failure(), _judge_success()], 1)],
+        ids=["accepted-first-time", "rejected-once"],
+    )
+    async def test_followup_retries_count_only_rejected_attempts(self, followup_gate, expected_retries):
+        models = _build_models(
+            user_responses=["What is Python?", "Tell me more about types.", "Tell me more about types."],
+            assistant_responses=["Python is a language.", "Python has dynamic types."],
+            # Turn 1's gate and the assistant judge, then the follow-up's gate.
+            judge_responses=[_judge_success(), _judge_success(), *followup_gate, _judge_success()],
+        )
+        cfg = StubConfig(max_turns=2, max_query_attempts=2)
+
+        result = await ConversationLoop().run(models, {}, cfg, _StubProbe())
+
+        assert result["num_turns"] == 2
+        outcome = json.loads(result["simulation_outcome"])
+        assert outcome["n_user_followup_retries"] == expected_retries
 
     async def test_warn_rating_continues_conversation(self):
         models = _build_models(
