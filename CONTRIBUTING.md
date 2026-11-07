@@ -295,7 +295,10 @@ provider rejects or a file we write but cannot read back.
 Maintainers release from `main`:
 
 1. Merge a pull request that sets `version` in `pyproject.toml` to the release
-   version: `X.Y.Z`, or `X.Y.ZrcN` for a release candidate.
+   version: `X.Y.Z`, or `X.Y.ZrcN` for a release candidate. Before 1.0, a
+   release that holds a breaking change (a commit whose title carries `!`)
+   raises the minor version `Y`, and any other release raises the patch
+   version `Z`.
 2. From an up-to-date `main`, run the checks the release runs, then tag the
    merge commit and push the tag by name:
 
@@ -310,7 +313,10 @@ Maintainers release from `main`:
    tagged commit. After a maintainer approves the `release` environment, it
    creates the GitHub release with the sdist and wheel attached, marked as a
    pre-release for a release candidate, and writes their SHA-256 digests to
-   the run summary.
+   the run summary. Then replace the release's generated notes with written
+   ones: a summary, the highlights, and upgrade guidance that says what each
+   breaking change asks of users. A published release keeps its files and
+   tag, but its notes stay editable.
 4. Merge a pull request that moves `version` to the next development version,
    for example `0.2.0rc2.dev0`.
 
