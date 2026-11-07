@@ -163,16 +163,21 @@ class ActivationResult:
 
     ``response`` is an OpenAI-shaped assistant message. Reasoning belongs in
     ``reasoning_content`` and is retained exactly as a configured model's would
-    be; ``usage`` feeds UserSim's per-model token accounting.
+    be; ``usage`` feeds UserSim's per-model token accounting. ``finish_reason``
+    is the provider's, as on an OpenAI choice (``"length"`` for a cut-off
+    reply); UserSim reports it to the caller exactly as for a configured model.
     """
 
     activation_id: str
     response: dict[str, Any]
     usage: ActivationUsage | None = None
+    finish_reason: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.activation_id, str) or not self.activation_id:
             raise ValueError("activation_id must be a non-empty string")
+        if self.finish_reason is not None and not isinstance(self.finish_reason, str):
+            raise TypeError("activation finish_reason must be a string or None")
         if not isinstance(self.response, Mapping):
             raise TypeError("activation response must be a mapping")
         object.__setattr__(self, "response", _normalize_assistant_response(self.response))
@@ -191,7 +196,9 @@ class ActivationResult:
         usage = None
         if isinstance(raw_usage, ActivationUsage):
             usage = raw_usage
-        elif isinstance(raw_usage, Mapping):
+        elif isinstance(raw_usage, Mapping) and any(
+            raw_usage.get(name) is not None for name in ("input_tokens", "output_tokens")
+        ):
             usage = ActivationUsage(
                 input_tokens=int(raw_usage.get("input_tokens") or 0),
                 output_tokens=int(raw_usage.get("output_tokens") or 0),
@@ -200,6 +207,7 @@ class ActivationResult:
             activation_id=str(value.get("activation_id") or ""),
             response=deepcopy(dict(response)),
             usage=usage,
+            finish_reason=value.get("finish_reason"),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -208,6 +216,7 @@ class ActivationResult:
             "activation_id": self.activation_id,
             "response": deepcopy(self.response),
             "usage": self.usage.to_dict() if self.usage else None,
+            "finish_reason": self.finish_reason,
         }
 
 
@@ -687,6 +696,7 @@ class _ActivationModel:
             usage=(
                 SimpleNamespace(input_tokens=usage.input_tokens, output_tokens=usage.output_tokens) if usage else None
             ),
+            choices=[SimpleNamespace(finish_reason=result.finish_reason)],
         )
 
 

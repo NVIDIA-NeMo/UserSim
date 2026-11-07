@@ -705,7 +705,6 @@ async def hosted_parity_report(
     """
     from usersim.engine.core.episode_runtime import (
         ActivationRequest,
-        ActivationResult,
         EpisodeLifecycleComplete,
     )
 
@@ -729,7 +728,14 @@ async def hosted_parity_report(
             response["reasoning_content"] = reply.message.reasoning_content
         if reply.message.tool_calls:
             response["tool_calls"] = copy.deepcopy(reply.message.tool_calls)
-        event = await hosted_runtime.advance(ActivationResult(activation_id=event.activation_id, response=response))
+        event = await hosted_runtime.advance(
+            {
+                "activation_id": event.activation_id,
+                "response": response,
+                "usage": _reported_usage(reply),
+                "finish_reason": _reported_finish_reason(reply),
+            }
+        )
     if not isinstance(event, EpisodeLifecycleComplete):  # pragma: no cover - defensive
         raise RuntimeError("hosted episode did not complete")
     hosted_row = event.result
@@ -782,6 +788,33 @@ async def hosted_parity_report(
 
 #: Wall-clock fields differ between any two runs and say nothing about parity.
 _PARITY_IGNORED_COLUMNS = frozenset({"wall_clock_s", "wall_clock_s_by_alias"})
+
+
+def _reported_usage(reply: Any) -> dict[str, Any] | None:
+    """The reply's token counts as a host records them, so both runs count the same."""
+    usage = getattr(reply, "usage", None)
+    if usage is None:
+        return None
+    return {
+        "input_tokens": _first_count(usage, "input_tokens", "prompt_tokens"),
+        "output_tokens": _first_count(usage, "output_tokens", "completion_tokens"),
+    }
+
+
+def _first_count(usage: Any, *names: str) -> Any:
+    """The first of ``names`` the usage reports, keeping an explicit zero."""
+    for name in names:
+        value = getattr(usage, name, None)
+        if value is not None:
+            return value
+    return None
+
+
+def _reported_finish_reason(reply: Any) -> str | None:
+    """The reply's finish reason as the provider gave it; the runtime maps it as for a configured model."""
+    choices = getattr(reply, "choices", None) or []
+    reason = getattr(choices[0], "finish_reason", None) if choices else None
+    return reason if isinstance(reason, str) else None
 
 
 def _parity_value(value: Any) -> Any:
