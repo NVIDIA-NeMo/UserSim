@@ -145,7 +145,7 @@ its label.
 | `verbatim_field` | `"verbatim_text"` | `BankVerbatimMixin`: the task field turn 1 reads |
 | `turn1_instruction_template` | `""` | `CustomTurn1InstructionMixin`: the instruction turn 1 is written from |
 | `tool_loop_mode` | `"single"` | `ToolExecutionMixin`: one round of tool calls per turn, or with `"multi"` rounds until the assistant stops calling tools |
-| `tool_max_calls_per_turn` | `8` | `ToolExecutionMixin`: the most tool calls it runs in one turn. A call past it gets a reply saying it was not run, and a turn that reaches it ends with a reply made without tools |
+| `tool_max_calls_per_turn` | `8` | `ToolExecutionMixin`: the most tool calls it runs in one turn. A call past it gets a reply saying it was not run; after such a reply, the turn ends with a reply made without tools |
 
 ## Mixins
 

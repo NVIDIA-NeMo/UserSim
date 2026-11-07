@@ -660,7 +660,7 @@ class TestToolExecutionMixin:
         assert replies["c2"]["status"] == 429
         assert _unanswered_call_ids(state.messages) == set()
 
-    async def test_multi_mode_turn_that_reaches_the_cap_ends_without_tools(self) -> None:
+    async def test_multi_mode_turn_at_the_cap_is_told_before_its_reply_without_tools(self) -> None:
         probe = _ToolExecProbe(mode="multi", cap=2)
         state = _StubState()
         ids = iter(["c2", "c3", "c4"])
@@ -680,9 +680,30 @@ class TestToolExecutionMixin:
             )
         assert probe.executed == ["t", "t"]
         assert out == "synth"
-        assert m.call_count == 2  # one re-call with tools, then the synthesis
-        assert "tools" not in m.call_args.kwargs
+        # Two re-calls with tools (the second's call is refused), then the reply without tools.
+        assert [bool(call.kwargs.get("tools")) for call in m.call_args_list] == [True, True, False]
+        replies = {msg["tool_call_id"]: json.loads(msg["content"]) for msg in state.messages if msg["role"] == "tool"}
+        assert replies["c3"]["status"] == 429
         assert _unanswered_call_ids(state.messages) == set()
+
+    async def test_multi_mode_turn_at_the_cap_can_answer_with_the_tools_still_offered(self) -> None:
+        probe = _ToolExecProbe(mode="multi", cap=1)
+        state = _StubState()
+
+        with patch(
+            "usersim.engine.core.llm.acall_llm",
+            return_value={"content": "here is what I found", "tool_calls": None},
+        ) as m:
+            out = await probe.after_assistant_turn(
+                {},
+                state,
+                {"content": "", "tool_calls": [_tc(cid="c1")]},
+                object(),
+            )
+        assert probe.executed == ["t"]
+        assert out == "here is what I found"
+        assert m.call_count == 1
+        assert m.call_args.kwargs.get("tools")
 
 
 # ---------------------------------------------------------------------------

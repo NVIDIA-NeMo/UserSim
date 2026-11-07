@@ -20,9 +20,10 @@ the other probes.
   gets a response the `api_response_model` writes for that tool. A call that
   sets a new password leaves the user holding it.
 - Within a turn, the tools stay on offer after each round of calls, so the
-  assistant can chain calls, until it replies without calling one or the turn
-  has made 8 calls; a call past that is not run. The conversation does not end
-  early before the assistant has called a tool.
+  assistant can chain calls until it replies without calling one. A call past
+  the turn's eighth gets a reply saying it was not run, and the assistant then
+  replies without tools. The conversation does not end early before the
+  assistant has called a tool.
 - Each row records `tool_subset`, the tools it offered, and `num_tool_calls`,
   the calls that passed the schema and credential checks. `verifier_results` in
   `conversation_metadata` lists every call and whether it passed.
