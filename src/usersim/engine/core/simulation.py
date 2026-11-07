@@ -635,9 +635,8 @@ def _poor_assistant_response_reason(content: str) -> str | None:
     This supplements the judge-based failure tracking so frustration reacts
     to actual assistant behavior.
 
-    Uses CJK-aware word counting so the threshold works correctly for
-    non-Latin scripts (Japanese, Chinese, Korean) where len(str.split())
-    would collapse entire sentences into a single "word".
+    Words are counted by ``_word_count``, which is comparable across
+    languages, so 800 words means about the same length in every locale.
     """
     if not content or not content.strip():
         return "empty response"

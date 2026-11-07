@@ -169,6 +169,17 @@ class TestAssistantQualityCheck:
     def test_very_long_response_flagged(self):
         assert _poor_assistant_response_reason("word " * 801) == "longer than 800 words"
 
+    @pytest.mark.parametrize(
+        "content",
+        ["조용한 객차에 어른 좌석 두 개를 예약했어요. " * 40, "静かな車両に大人2席を予約しました。" * 50],
+        ids=["korean", "japanese"],
+    )
+    def test_a_reply_of_ordinary_length_in_korean_or_japanese_passes(self, content):
+        assert _poor_assistant_response_reason(content) is None
+
+    def test_a_long_japanese_reply_is_flagged(self):
+        assert _poor_assistant_response_reason("静かな車両に大人2席を予約しました。" * 120) == "longer than 800 words"
+
     def test_over_formatted_response_flagged(self):
         content = "\n# Section 1\ntext\n# Section 2\ntext\n# Section 3\ntext\n# Section 4\ntext"
         assert _poor_assistant_response_reason(content) == "four or more headings"
