@@ -73,4 +73,7 @@ its assets in `assets/<label>/` beside it, under
 [Where should a probe live?](../../CONTRIBUTING.md#where-should-a-probe-live)
 says when a probe belongs here, and
 [`AUTHORING_A_PROBE.md`](../../docs/engine/AUTHORING_A_PROBE.md) what else an
-in-tree probe needs.
+in-tree probe needs. The probe's own code keeps its imports. Its tests move to
+`tests/probes/<label>/` and import the package by its full path
+(`usersim.engine.probes.<label>.probe`), and the entry-point test goes, since
+a built-in is registered by its line in `BUILTIN_PACKAGES` instead.

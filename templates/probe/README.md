@@ -198,10 +198,9 @@ When porting one of the templates into a new module:
       pinned episode, the metadata that makes `should_succeed` true, and
       its parity episodes (`tests/_probe_contract.py` describes them).
       The shared tests fail, naming the file, until it is there.
-- [ ] Update `docs/engine/README.md`'s probe table, add a row to the
-      catalog in `docs/probes.md`, and raise the probe counts in the
-      README headline and in `docs/probes.md` (for a `BankBackedProbe`,
-      its curated-bank count too). `tests/test_probe_catalog.py` and
-      `tests/test_security_defaults.py` check them against the registry.
+- [ ] Update `docs/engine/README.md`'s probe table and add a row to the
+      catalog in `docs/probes.md`; `tests/test_probe_catalog.py` checks
+      the catalog against the registry. Leave the probe counts in the docs
+      as they are: maintainers update them at release.
 - [ ] Record the design choices in the probe module docstring
       (variant set, prompt version, what the scorer measures).

@@ -22,11 +22,11 @@ structured verdict rather than a free-form opinion. Three are fully
 deterministic (`language_compliance`, `refusal_basics`, `response_shape`) and
 register with `deterministic=True`, which is what lets `usersim rescore`
 recompute them on a stored evaluation; the
-other nine call a model to reach a judgment the stored columns cannot settle on
+others call a model to reach a judgment the stored columns cannot settle on
 their own, such as whether a retrieved fact is actually supported or what a
 free-form turn actually disclosed (`health_disclosure_concealment`, which falls
 back to deterministic arithmetic over committed intent when no auditor is wired).
-Twelve ship:
+The scorers that ship:
 
 | Scorer | Reads |
 |---|---|

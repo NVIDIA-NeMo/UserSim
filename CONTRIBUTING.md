@@ -253,6 +253,7 @@ packaging or the extension seams:
 ```bash
 make check-dist         # builds and checks the sdist and wheel, installs the wheel clean, runs it from an empty dir
 make check-extensions   # installs an out-of-tree package, asserts all six seams work, tests the template and the guide's example
+make check-new-probe    # adds a built-in probe from the extension template to a scratch copy, and runs the test suite there
 ```
 
 `make update-license-headers` adds the SPDX header to new files.
@@ -298,13 +299,15 @@ Maintainers release from `main`:
    version: `X.Y.Z`, or `X.Y.ZrcN` for a release candidate. Before 1.0, a
    release that holds a breaking change (a commit whose title carries `!`)
    raises the minor version `Y`, and any other release raises the patch
-   version `Z`.
+   version `Z`. The same pull request updates the probe and scorer counts in
+   `README.md`, `docs/probes.md` and `docs/outputs.md`;
+   `make check-doc-counts` says which numbers to change.
 2. From an up-to-date `main`, run the checks the release runs, then tag the
    merge commit and push the tag by name:
 
    ```bash
    git switch main && git pull --ff-only
-   make check-dist && make check-release-tag TAG=v0.2.0rc1
+   make check-dist && make check-doc-counts && make check-release-tag TAG=v0.2.0rc1
    git tag -a v0.2.0rc1 -m "usersim 0.2.0rc1"
    git push origin v0.2.0rc1
    ```
@@ -417,10 +420,11 @@ it does.
 
 If you are adding a probe *in tree*, `templates/probe/` has a copy-and-edit
 gallery and [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md)
-is the end-to-end walkthrough. Besides its own folder, an in-tree probe adds
-its row to the catalog in [`docs/probes.md`](docs/probes.md) and raises the
-probe counts in `README.md` and that page; the tests check both against the
-registry, and the walkthrough lists where else a built-in is registered.
+is the end-to-end walkthrough. Besides its own folders, an in-tree probe adds
+one line to `BUILTIN_PACKAGES` and one row to the catalog in
+[`docs/probes.md`](docs/probes.md), and states its contract with the shared
+tests in `tests/probes/<package>/contract.py`. You don't change the probe
+counts in the docs; maintainers update those at release.
 
 ### Where should a probe live?
 
