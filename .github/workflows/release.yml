@@ -64,6 +64,9 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: make check-release-tag
 
+      - name: The docs state the probe and scorer counts that ship
+        run: make check-doc-counts
+
       - name: Test suite
         # A tag can name a commit on main whose CI failed, or a merge that was
         # never tested as merged; the release does not rely on either.
