@@ -8,6 +8,10 @@
 read a probe's entry with :func:`probe_contract`, which fails, naming the file
 to add it to, when there is none; so a new probe states its contract in its own
 folder, and no shared test file lists the probes.
+
+The contracts also stand in for a roster: :func:`contracted_labels` lists every
+label they name, and a shared test fails when one of those labels is not
+registered.
 """
 
 from __future__ import annotations
@@ -60,6 +64,26 @@ def contract_path(label: str) -> Path:
     return _TESTS / "probes" / _package(label) / "contract.py"
 
 
+def contract_file(label: str) -> str:
+    """``label``'s ``contract.py``, relative to the repository root, for messages."""
+    return str(contract_path(label).relative_to(_TESTS.parent))
+
+
+def contracted_labels() -> dict[str, str]:
+    """Every label a ``tests/probes/<package>/contract.py`` holds a contract for, with that file.
+
+    A package's contracts name the probes it is meant to register, so a label
+    here that is not registered is a probe that a rename or an import failure
+    dropped.
+    """
+    labels: dict[str, str] = {}
+    for path in sorted((_TESTS / "probes").glob("*/contract.py")):
+        module = importlib.import_module(f"probes.{path.parent.name}.contract")
+        for label in module.CONTRACTS:
+            labels[label] = str(path.relative_to(_TESTS.parent))
+    return labels
+
+
 def find_contract(label: str) -> ProbeContract | None:
     """``label``'s contract, or None when its package's ``contract.py`` has none."""
     if not contract_path(label).is_file():
@@ -71,8 +95,9 @@ def probe_contract(label: str) -> ProbeContract:
     """``label``'s contract; fails the test, naming the file to add it to, when there is none."""
     contract = find_contract(label)
     if contract is None:
-        where = contract_path(label).relative_to(_TESTS.parent)
-        pytest.fail(f"{label} has no contract with the shared tests: add CONTRACTS[{label!r}] to {where}")
+        pytest.fail(
+            f"{label} has no contract with the shared tests: add CONTRACTS[{label!r}] to {contract_file(label)}"
+        )
     return contract
 
 

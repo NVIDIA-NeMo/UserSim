@@ -11,10 +11,11 @@ probe-specific behavior.
 
 What is asserted here (vs in per-probe test files):
 
-- **Registry completeness** — the canonical probes are registered
-  with the canonical labels. Catches the regression where a rename
-  drops one or where the bootstrap silently fails to import a
-  module.
+- **Registry completeness** — every probe a ``contract.py`` under
+  ``tests/probes/`` names is registered, and every registered
+  built-in has a contract. A rename that drops a label, or a probe
+  module that silently fails to import, leaves a contract with no
+  probe.
 - **Probe metadata** — every registered probe class carries
   ``family`` / ``prompt_version`` / ``variants`` with the right shapes.
   Mirrors the smoke-check #7 surface as a fast unit test, so a CI-time
@@ -58,38 +59,20 @@ import sys
 from typing import Any, Callable
 
 import pytest
-from _probe_contract import probe_contract
+from _probe_contract import built_in_labels, contract_file, contracted_labels, probe_contract
 
 import usersim.engine.generator  # noqa: F401 — bootstraps the registry
 from usersim.engine.core.outcomes import OutcomeBuilder
 from usersim.engine.core.probes import (
-    _PROBE_REGISTRY,
     BaseProbe,
     known_probes,
     resolve_probe,
 )
 from usersim.engine.core.simulation import ConversationState
 
-# The probe labels the framework ships. A regression test: if any
-# rename drops a label or a new probe is added without updating the
-# canonical roster, this test fails first.
-EXPECTED_PROBES: tuple[str, ...] = (
-    "general_open_ended",
-    "general_educational",
-    "tool_calling",
-    "sov_ai_facts",
-    "sov_ai_dynamic",
-    "sov_ai_multilingual_parity",
-    "safety_chat_pressure",
-    "safety_agentic",
-    "financial_services",
-    # health_disclosure family (shared base, per-client labels)
-    "health_therapy_disclosure",
-    "health_triage_disclosure",
-    "health_decision_support_disclosure",
-    "health_general_disclosure",
-    "identity_disclosure",
-)
+# The probes the packages in ``BUILTIN_PACKAGES`` register. The tests below run
+# for each, so a new built-in is checked without an edit here.
+BUILT_IN_PROBES: tuple[str, ...] = built_in_labels()
 
 
 def _resolve_target_class(probe_label: str) -> type:
@@ -142,22 +125,27 @@ def _resolve_should_succeed(probe_label: str) -> Callable[[ConversationState], b
 
 
 class TestRegistryCompleteness:
-    """Every canonical probe label is registered after the bootstrap."""
+    """The built-in probes and their contracts name the same labels."""
 
-    def test_known_probes_matches_expected_roster(self) -> None:
+    def test_every_contract_names_a_registered_probe(self) -> None:
+        """A contract whose probe is gone means a rename or an import failure dropped the probe."""
         registered = set(known_probes())
-        expected = set(EXPECTED_PROBES)
-        missing = expected - registered
-        extra = registered - expected
-        assert not missing, (
-            f"expected probes missing from registry: {sorted(missing)}; a rename or import failure dropped them"
+        dropped = {label: path for label, path in contracted_labels().items() if label not in registered}
+        assert not dropped, "contracts name probes that are not registered: " + "; ".join(
+            f"{label!r} in {path}" for label, path in sorted(dropped.items())
         )
-        assert not extra, f"unexpected probes in registry: {sorted(extra)}; update EXPECTED_PROBES if intentional"
 
-    def test_registry_is_non_empty(self) -> None:
-        assert len(_PROBE_REGISTRY) >= len(EXPECTED_PROBES)
+    def test_every_built_in_probe_has_a_contract(self) -> None:
+        contracted = contracted_labels()
+        missing = [label for label in BUILT_IN_PROBES if label not in contracted]
+        assert not missing, "built-in probes with no contract: " + "; ".join(
+            f"add CONTRACTS[{label!r}] to {contract_file(label)}" for label in missing
+        )
 
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
+    def test_built_in_probes_are_registered(self) -> None:
+        assert BUILT_IN_PROBES, "no built-in probe registered: the packages in BUILTIN_PACKAGES failed to load"
+
+    @pytest.mark.parametrize("label", BUILT_IN_PROBES)
     def test_each_probe_resolves_to_a_class(self, label: str) -> None:
         cls = resolve_probe(label)
         assert isinstance(cls, type)
@@ -172,12 +160,12 @@ class TestRegistryCompleteness:
 class TestProbeMetadata:
     """Each registered probe class carries well-formed metadata."""
 
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
+    @pytest.mark.parametrize("label", BUILT_IN_PROBES)
     def test_prompt_version_is_non_empty_string(self, label: str) -> None:
         prompt_version = resolve_probe(label).prompt_version
         assert isinstance(prompt_version, str) and prompt_version, f"{label}: prompt_version missing or non-string"
 
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
+    @pytest.mark.parametrize("label", BUILT_IN_PROBES)
     def test_variants_is_non_empty_tuple(self, label: str) -> None:
         variants = resolve_probe(label).variants
         assert isinstance(variants, tuple) and variants, f"{label}: variants missing or empty"
@@ -211,7 +199,7 @@ PROBE_ADAPTER_REQUIRED_METHODS: tuple[str, ...] = (
 class TestProbeAdapterConformance:
     """Every registered probe class satisfies the Protocol surface."""
 
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
+    @pytest.mark.parametrize("label", BUILT_IN_PROBES)
     @pytest.mark.parametrize("method", PROBE_ADAPTER_REQUIRED_METHODS)
     def test_method_present_on_class(self, label: str, method: str) -> None:
         target_cls = _resolve_target_class(label)
@@ -219,7 +207,7 @@ class TestProbeAdapterConformance:
         assert attr is not None, f"{label}: required ProbeAdapter method {method!r} missing on {target_cls.__name__}"
         assert callable(attr), f"{label}: ProbeAdapter method {method!r} is not callable on {target_cls.__name__}"
 
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
+    @pytest.mark.parametrize("label", BUILT_IN_PROBES)
     def test_label_attribute_matches_registry(self, label: str) -> None:
         target_cls = _resolve_target_class(label)
         assert getattr(target_cls, "label", None) == label, (
@@ -254,13 +242,13 @@ class TestShouldSucceedInvariant:
     returns True regardless of metadata.
     """
 
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
+    @pytest.mark.parametrize("label", BUILT_IN_PROBES)
     def test_returns_bool(self, label: str) -> None:
         fn = _resolve_should_succeed(label)
         result = fn(_make_state())
         assert isinstance(result, bool), f"{label}: should_succeed returned {type(result).__name__}; expected bool"
 
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
+    @pytest.mark.parametrize("label", BUILT_IN_PROBES)
     def test_minimal_empty_state_returns_expected(self, label: str) -> None:
         succeeds_on = probe_contract(label).succeeds_on
         fn = _resolve_should_succeed(label)
@@ -276,7 +264,7 @@ class TestShouldSucceedInvariant:
                 f"expected False until metadata[{succeeds_on[0]!r}] is populated"
             )
 
-    @pytest.mark.parametrize("label", EXPECTED_PROBES)
+    @pytest.mark.parametrize("label", BUILT_IN_PROBES)
     def test_populated_side_channel_returns_true(self, label: str) -> None:
         succeeds_on = probe_contract(label).succeeds_on
         if succeeds_on is None:
