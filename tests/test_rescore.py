@@ -231,9 +231,13 @@ class TestRefusesToSpendMoney:
             run(run_on_disk)
         assert "not a known deterministic scorer" in str(excinfo.value)
 
-    def test_only_the_model_free_scorers_are_registered_as_deterministic(self):
-        assert set(scorers_module.deterministic_scorers()) == {
-            "language_compliance",
-            "refusal_basics",
-            "response_shape",
-        }
+    def test_the_rule_based_scorers_are_registered_as_deterministic(self):
+        """rescore can rerun the three rule-based scorers.
+
+        A probe's own scorer may be deterministic too. That a deterministic
+        scorer calls no model is checked for every registered scorer by
+        ``assert_scorer_conforms`` in the conformance suite.
+        """
+        assert {"language_compliance", "refusal_basics", "response_shape"} <= set(
+            scorers_module.deterministic_scorers()
+        )
