@@ -112,3 +112,6 @@ jobs:
 
       - name: An out-of-tree package reaches every extension seam
         run: make check-extensions
+
+      - name: A built-in probe added from the template passes the shared tests
+        run: make check-new-probe
