@@ -35,7 +35,7 @@ def test_the_help_names_every_registered_probe(monkeypatch, capsys) -> None:
     assert exit_.value.code == 0
     listed = capsys.readouterr().out.split("Registered probes:", 1)[1].splitlines()[0]
     assert known_probes(), "no probes registered"
-    missing = [label for label in known_probes() if label not in set(re.findall(r"[a-z_]+", listed))]
+    missing = [label for label in known_probes() if label not in set(re.findall(r"[a-z0-9_]+", listed))]
     assert not missing, f"--probe-mix help does not name: {missing}"
 
 
