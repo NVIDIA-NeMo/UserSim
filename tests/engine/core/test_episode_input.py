@@ -12,7 +12,7 @@ from types import ModuleType, SimpleNamespace
 
 import pandas as pd
 import pytest
-from _probe_contract import built_in_labels, probe_contract
+from _probe_contract import built_in_labels, contract_file, probe_contract
 
 from usersim.cli._pipeline import known_probes
 from usersim.engine.config import ConversationSimulatorConfig
@@ -229,7 +229,11 @@ def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
     # here, which is where a probe-discovered variant could leak into the id.
     episode = construct_probe_episode(data, config=config, models=models)
 
-    assert episode.preamble.trajectory_id == probe_contract(probe_type).trajectory_id
+    produced = episode.preamble.trajectory_id
+    assert produced == probe_contract(probe_type).trajectory_id, (
+        f"{probe_type} produces trajectory_id {produced!r} for the pinned episode. For a new probe, "
+        f"or a deliberate change to its identity, set it as trajectory_id in {contract_file(probe_type)}."
+    )
 
 
 def test_two_probes_in_one_module_record_their_own_metadata(
