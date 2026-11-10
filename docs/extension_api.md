@@ -43,6 +43,7 @@ does not load the conversation loop.
 | `LocalePromptPack` | A probe's prompts by locale; constructing one fails when a locale it is given has no prompt |
 | `BankLoadError` | Raised when a `BankBackedProbe` cannot load its bank |
 | `UserTurnPolicy` | What a probe changes about how the loop writes and checks user turns, returned by its `user_turn_policy` hook |
+| `probe_description` | The `description` of the probe registered under a label, or empty when no installed probe holds it, so a report can describe a stored row's probe |
 
 ### Conversations and outcomes
 
@@ -172,6 +173,16 @@ probe draws a persona's opening from. The file format is in the
 | `JobSpec` | What to run, independent of where |
 | `JobHandle` | A backend's reference to work it accepted |
 | `JobStatus` | Where a submitted job is, and why it stopped if it did |
+
+### Runs
+
+For a tool that reads what `usersim simulate` or `usersim eval` wrote, such as a report or a dashboard.
+
+| Name | What it is |
+|---|---|
+| `list_runs` | The run ids stored under an output folder, oldest first |
+| `latest_run_id` | The most recent run id stored under an output folder, or None when there is none |
+| `read_partitioned_dataset` | The rows stored under an output folder, or in one parquet file, as one table; `run=` reads one run and `columns=` only the columns named |
 
 ## `usersim.testing`
 

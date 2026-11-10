@@ -75,6 +75,7 @@ if TYPE_CHECKING:
         ToolExecutionMixin,
         assistant_message,
         dispatch_episode,
+        probe_description,
         register_probe,
         theme_problems,
     )
@@ -99,6 +100,7 @@ if TYPE_CHECKING:
         make_failed,
         make_result,
     )
+    from usersim.engine.core.storage import latest_run_id, list_runs, read_partitioned_dataset
     from usersim.engine.core.tool_calls import parse_tool_call, recover_tool_call
     from usersim.engine.core.translation import translate_search_query
     from usersim.engine.core.user_turn_policy import UserTurnPolicy
@@ -121,6 +123,7 @@ __all__ = [
     "ToolCallingMixin",
     "ToolExecutionMixin",
     "UserTurnPolicy",
+    "probe_description",
     "register_probe",
     # Conversations and outcomes
     "ConversationState",
@@ -211,6 +214,10 @@ __all__ = [
     "require_aliases",
     "to_data_designer_kwargs",
     "to_model_configs",
+    # Runs
+    "latest_run_id",
+    "list_runs",
+    "read_partitioned_dataset",
 ]
 
 #: The module each public name is defined in, by module.
@@ -269,6 +276,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "ToolExecutionMixin",
         "assistant_message",
         "dispatch_episode",
+        "probe_description",
         "register_probe",
         "theme_problems",
     ),
@@ -285,6 +293,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "usersim.engine.core.prompt_loader": ("get_prompt", "load_prompt_file", "render_prompt"),
     "usersim.engine.core.row_metadata": ("recorded_value",),
     "usersim.engine.core.seeds": ("load_seeds",),
+    "usersim.engine.core.storage": ("latest_run_id", "list_runs", "read_partitioned_dataset"),
     "usersim.engine.core.simulation": (
         "RESERVED_METADATA_KEYS",
         "ConversationState",
