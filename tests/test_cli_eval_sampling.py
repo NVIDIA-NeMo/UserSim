@@ -77,12 +77,17 @@ class TestEvalRecordsItsSampling:
 
 def test_auto_scorers_reach_the_evaluator_resolved_for_the_run(tmp_path, monkeypatch, trajectory_df, capsys):
     """``--scorers auto`` becomes the generic scorers plus the default_scorers of the run's probes."""
-    run = trajectory_df.assign(probe_family=["tool_calling", "financial_services", *["general_open_ended"] * 4])
+    run = trajectory_df.assign(probe_family=["tool_calling", *["general_open_ended"] * 5])
     built: dict = {}
 
-    _evaluate(tmp_path, monkeypatch, run, "--scorers", "tool_use,auto", built=built)
+    _evaluate(tmp_path, monkeypatch, run, "--scorers", "language_compliance,auto", built=built)
 
-    assert built["scorers"] == ["tool_use", *GENERIC_SCORERS, "financial_services"]
+    # A named scorer comes first and is not repeated; tool_calling's default follows the generic ones.
+    assert built["scorers"] == [
+        "language_compliance",
+        *[s for s in GENERIC_SCORERS if s != "language_compliance"],
+        "tool_use",
+    ]
     assert f"scorers:       {', '.join(built['scorers'])}" in capsys.readouterr().out
 
 

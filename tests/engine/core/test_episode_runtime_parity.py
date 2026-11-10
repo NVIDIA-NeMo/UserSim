@@ -22,7 +22,7 @@ from usersim.engine.core.episode_runtime import (
     EpisodeLifecycleComplete,
     ProbeEpisodeRuntime,
 )
-from usersim.engine.core.probes import resolve_probe
+from usersim.engine.core.probes import known_probes, resolve_probe
 from usersim.engine.generator import ConversationSimulatorGenerator
 
 _PERSONA = {
@@ -410,10 +410,16 @@ class _AlwaysToolModel(_ReplayableModel):
         )
 
 
-_MULTI_ROUND_CASES = (
-    _Case("tool_calling", 2003, {"tools": [_TOOL]}, 3),
-    _Case("financial_services", 2009, None, 3),
-    _Case("safety_agentic", 2042, {"user_interaction_style": "direct"}, 3),
+# Probes whose assistant calls tools over several rounds. tool_calling is in the
+# default mix, so the suite always has a case; the others run when they ship.
+_MULTI_ROUND_CASES = tuple(
+    case
+    for case in (
+        _Case("tool_calling", 2003, {"tools": [_TOOL]}, 3),
+        _Case("financial_services", 2009, None, 3),
+        _Case("safety_agentic", 2042, {"user_interaction_style": "direct"}, 3),
+    )
+    if case.probe_type in known_probes()
 )
 
 
@@ -518,7 +524,7 @@ async def test_the_multi_round_suite_actually_spans_more_than_one_round() -> Non
     second round onward, so a suite that silently degraded to one round per
     episode would stop testing the thing it exists to test.
     """
-    runtime, invocations = _runtime(_Case("financial_services", 2009, None, 3), _AlwaysToolModel)
+    runtime, invocations = _runtime(_Case("tool_calling", 2003, {"tools": [_TOOL]}, 3), _AlwaysToolModel)
     await _run_external(
         runtime,
         invocations,
@@ -599,59 +605,3 @@ async def test_tool_calls_are_recorded_only_where_tools_are_offered(role: str) -
     assert isinstance(event, ActivationRequest) and event.role == role
     with pytest.raises(EpisodeContractError, match=f"{role} activation cannot record tool calls"):
         await runtime.advance(ActivationResult(activation_id=event.activation_id, response=_tool_call_response()))
-
-
-async def test_a_vetoed_move_is_committed_again_within_the_same_user_turn(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The guide's veto path, hosted: a rejected call is answered with a tool message and asked again.
-
-    The first proposal is vetoed. The second, made with the veto in view, is the
-    move recorded; the proposal, the re-ask and the utterance are one user turn;
-    and none of the exchange reaches the exported conversation.
-    """
-    from usersim.engine.probes.health_disclosure.moves import Guard
-
-    check, checks = Guard.check, []
-
-    def veto_the_first(self: Guard, move: Any, env: Any) -> tuple[bool, str]:
-        checks.append(move.move)
-        return (False, "forced veto") if len(checks) == 1 else check(self, move, env)
-
-    monkeypatch.setattr(Guard, "check", veto_the_first)
-    case = next(case for case in _GUARDED_CASES if case.probe_type == "health_therapy_disclosure")
-    runtime, invocations = _runtime(case)
-    user_activations: list[tuple[bool, bool, bool]] = []  # (offers tools, continues_turn, tool reply in view)
-    proposals: list[dict[str, Any]] = []
-    event = await runtime.advance()
-    while isinstance(event, ActivationRequest):
-        response = _response_dict(
-            await _ReplayableModel(event.role, invocations).acompletion(
-                list(event.messages), **_activation_kwargs(event)
-            )
-        )
-        if event.role == "user":
-            in_view = any(message.get("role") == "tool" for message in event.messages)
-            user_activations.append((event.tools_enabled, event.continues_turn, in_view))
-            if event.tools_enabled:
-                call = response["tool_calls"][0]["function"]
-                arguments = {**json.loads(call["arguments"]), "reasoning": f"proposal {len(proposals) + 1}"}
-                call["arguments"] = json.dumps(arguments)
-                proposals.append(arguments)
-        event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=response))
-
-    assert isinstance(event, EpisodeLifecycleComplete)
-    first = next(i for i, (offers_tools, _, _) in enumerate(user_activations) if offers_tools)
-    assert user_activations[first : first + 3] == [
-        (True, False, False),  # the proposal opens the user's turn
-        (True, True, True),  # the re-ask, with the veto in view, continues it
-        (False, True, False),  # and so does the utterance, written without the private exchange
-    ]
-    # The vetoed check was the user's first proposal, not the probe's own risk pacing.
-    assert checks[0] == proposals[0]["move"]
-    assert event.result["guard_veto_count"] == 1
-    moves = event.result["moves_detail"]
-    moves = json.loads(moves) if isinstance(moves, str) else moves
-    assert moves[0]["reasoning"] == "proposal 2"
-    assert [veto["move"] for veto in moves[0]["vetoes"]] == [proposals[0]["move"]]
-    messages = event.result["conversation_messages"]
-    messages = json.loads(messages) if isinstance(messages, str) else messages
-    assert not any(message.get("tool_calls") or message.get("role") == "tool" for message in messages)

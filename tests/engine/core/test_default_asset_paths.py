@@ -1,42 +1,20 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Cross-cutting invariant: every shipped probe's default asset path
-resolves to a file that **exists** AND **loads cleanly** through its
-loader.
+"""The default probes' shipped assets are where their loaders look, and load.
 
-This is the test that would have caught the regression where
-``core/probing_taxonomy.py`` returned ``assets/sov_ai_dynamic/<locale>/categories.yaml``
-while the on-disk directory was still ``assets/population_probing/``.
-The per-loader unit-test files all bypass ``default_*_path()`` — they
-either write tmp_path fixtures or hardcode ``(probe_assets_dir(probe) / "...")``
-strings — so a default-path constant could point at ``/nonexistent``
-and every per-loader suite would still be green.
+A loader whose default path points at the wrong folder passes every unit test
+that hands it a ``tmp_path`` file, so these tests read the shipped files
+through the same paths a run uses:
 
-Coverage axes:
+- the topic and subject seeds of ``general_open_ended`` and
+  ``general_educational``, for every shipped locale;
+- the ``prompts.yaml`` of each default probe;
+- the toolset table every ``tool_calling`` row is drawn from.
 
-- **Per-locale loaders** (``fact_bank``, ``probing_taxonomy``,
-  ``seeds`` for ``general_open_ended`` / ``general_educational``):
-  every supported locale × every loader.
-- **Locale-agnostic loaders** (``query_bank``, ``pressure_bank``,
-  ``agentic_bank``, ``action_taxonomy``): one assertion per loader.
-- **Per-probe prompts** (``tool_calling`` / ``general_open_ended`` /
-  ``general_educational``): one assertion per probe.
-
-Each assertion checks two things:
-
-1. ``default_*_path()`` (or its loader-internal equivalent) returns a
-   path that ``Path.exists()``. Catches "loader points at the wrong
-   directory" — the exact bug class above.
-2. The file loads through its loader without raising. Catches "loader
-   points at a path that exists but the file is malformed / fails
-   schema validation" (a different bug class than path mismatch but
-   useful coverage).
-
-``test_assets_discovery.py`` checks that every registered probe resolves
-to an asset folder and that every packaged folder belongs to a registered
-probe; this file checks that each probe's default path holds a file its
-loader accepts. A new probe adds a row here.
+Every other built-in checks its own default paths in
+``tests/probes/<package>/test_default_asset_path.py``, so this file names no
+probe outside the default mix.
 """
 
 from __future__ import annotations
@@ -44,97 +22,8 @@ from __future__ import annotations
 import pytest
 
 from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.probing_taxonomy import load_probing_taxonomy, reset_probing_taxonomy_cache
 from usersim.engine.core.prompt_loader import load_prompt_file
 from usersim.engine.core.seeds import load_seeds
-from usersim.engine.probes.health_disclosure.bank import (
-    CLIENT_PROBE_LABELS,
-    default_clinical_profile_bank_path,
-    load_clinical_profile_bank,
-    reset_clinical_profile_bank_cache,
-)
-from usersim.engine.probes.identity_disclosure.spec import (
-    default_identity_spec_path,
-    load_identity_spec,
-)
-from usersim.engine.probes.safety_agentic.action_taxonomy import (
-    load_action_taxonomy_default,
-    reset_action_taxonomy_cache,
-)
-from usersim.engine.probes.safety_agentic.bank import (
-    default_agentic_bank_path,
-    load_agentic_bank,
-    reset_agentic_bank_cache,
-)
-from usersim.engine.probes.safety_chat_pressure.bank import (
-    default_pressure_bank_path,
-    load_pressure_bank,
-    reset_pressure_bank_cache,
-)
-from usersim.engine.probes.sov_ai_dynamic.taxonomy import default_probing_taxonomy_path
-from usersim.engine.probes.sov_ai_facts.bank import (
-    default_fact_bank_path,
-    load_fact_bank,
-    reset_fact_bank_cache,
-)
-from usersim.engine.probes.sov_ai_multilingual_parity.bank import (
-    default_query_bank_path,
-    load_query_bank,
-    reset_query_bank_cache,
-)
-
-# ---------------------------------------------------------------------------
-# Per-locale loaders: fact_bank + probing_taxonomy
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture(autouse=True)
-def _reset_loader_caches():
-    """Drop every cached loader state so each test reads from disk
-    rather than reusing whatever a sibling test loaded earlier."""
-    reset_fact_bank_cache()
-    reset_probing_taxonomy_cache()
-    reset_pressure_bank_cache()
-    reset_query_bank_cache()
-    reset_agentic_bank_cache()
-    reset_action_taxonomy_cache()
-    reset_clinical_profile_bank_cache()
-    yield
-
-
-@pytest.mark.parametrize("locale", SHIPPED_LOCALES)
-def test_fact_bank_default_path_exists_and_loads(locale: str) -> None:
-    p = default_fact_bank_path(locale)
-    assert p.exists(), (
-        f"fact_bank default path missing for {locale}: {p}\n"
-        "Either ship the file or update default_fact_bank_path() to "
-        "point at the right directory."
-    )
-    bank = load_fact_bank(p)
-    assert bank.bank_version, f"fact_bank for {locale} loaded but bank_version is empty"
-    assert bank.locale == locale, (
-        f"fact_bank at {p} declares locale={bank.locale!r} but the "
-        f"directory it lives in declares {locale!r} — drift between "
-        "directory layout and file content."
-    )
-
-
-@pytest.mark.parametrize("locale", SHIPPED_LOCALES)
-def test_probing_taxonomy_default_path_exists_and_loads(locale: str) -> None:
-    p = default_probing_taxonomy_path(locale)
-    assert p.exists(), (
-        f"probing_taxonomy default path missing for {locale}: {p}\n"
-        "Either ship the file or update default_probing_taxonomy_path() to "
-        "point at the right directory."
-    )
-    tax = load_probing_taxonomy(p)
-    assert tax.taxonomy_version, f"probing_taxonomy for {locale} loaded but taxonomy_version is empty"
-    assert tax.locale == locale, (
-        f"probing_taxonomy at {p} declares locale={tax.locale!r} but the "
-        f"directory it lives in declares {locale!r} — drift between "
-        "directory layout and file content."
-    )
-
 
 # ---------------------------------------------------------------------------
 # Per-probe seed loaders: general_open_ended + general_educational
@@ -169,69 +58,6 @@ def test_seeds_default_path_loads_for_every_locale(
     for s in seeds:
         assert "type" in s, f"{probe}/{kind} for {locale}: missing 'type' in {s}"
         assert "description" in s, f"{probe}/{kind} for {locale}: missing 'description' in {s}"
-
-
-# ---------------------------------------------------------------------------
-# Locale-agnostic loaders
-# ---------------------------------------------------------------------------
-
-
-def test_query_bank_default_path_exists_and_loads() -> None:
-    p = default_query_bank_path()
-    assert p.exists(), f"query_bank default path missing: {p}"
-    bank = load_query_bank(p)
-    assert bank.bank_id, "query_bank loaded but bank_id is empty"
-
-
-def test_pressure_bank_default_path_exists_and_loads() -> None:
-    p = default_pressure_bank_path()
-    assert p.exists(), f"pressure_bank default path missing: {p}"
-    bank = load_pressure_bank(p)
-    assert bank.bank_id, "pressure_bank loaded but bank_id is empty"
-
-
-def test_agentic_bank_default_path_exists_and_loads() -> None:
-    p = default_agentic_bank_path()
-    assert p.exists(), f"agentic_bank default path missing: {p}"
-    bank = load_agentic_bank(p)
-    assert bank.bank_id, "agentic_bank loaded but bank_id is empty"
-
-
-def test_identity_spec_default_path_exists_and_loads() -> None:
-    p = default_identity_spec_path()
-    assert p.exists(), f"identity spec default path missing: {p}"
-    spec = load_identity_spec(p)
-    assert spec.bank_id == "identity_disclosure"
-    assert spec.tactics, "identity spec loaded but has no tactics"
-
-
-@pytest.mark.parametrize("client", CLIENT_PROBE_LABELS)
-def test_clinical_profile_bank_default_path_exists_and_loads(client: str) -> None:
-    # Per-client (locale-independent) bundled synthetic banks.
-    p = default_clinical_profile_bank_path(client)
-    assert p.exists(), (
-        f"clinical_profile_bank default path missing for {client}: {p}\n"
-        "Either ship the file or update default_clinical_profile_bank_path()."
-    )
-    bank = load_clinical_profile_bank(p)
-    assert bank.bank_version, f"clinical_profile_bank for {client} loaded but bank_version is empty"
-    assert bank.client == client, (
-        f"clinical_profile_bank at {p} declares client={bank.client!r} but "
-        f"lives in the {client!r} directory — drift between layout and content."
-    )
-    # Bundled banks ship as placeholders until a customer supplies real ground truth.
-    assert all(prof.placeholder for prof in bank.profiles), (
-        f"bundled clinical_profile_bank for {client} must be all-placeholder"
-    )
-
-
-def test_action_taxonomy_default_path_loads() -> None:
-    """``load_action_taxonomy_default`` resolves the path internally
-    (no public ``default_*_path`` helper); it raises if the file is
-    missing or malformed. We additionally assert non-empty entries
-    so an accidentally empty file doesn't pass."""
-    tax = load_action_taxonomy_default()
-    assert tax.entries, "action_taxonomy loaded but has zero entries"
 
 
 # ---------------------------------------------------------------------------

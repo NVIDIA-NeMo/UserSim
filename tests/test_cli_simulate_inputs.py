@@ -376,19 +376,6 @@ def test_a_probe_outside_the_rows_mix_changes_no_setup(rows, register_test_probe
     assert _fingerprint(rows) == before
 
 
-def test_a_change_in_a_lower_priority_asset_root_is_a_new_setup(monkeypatch, tmp_path):
-    """A spec that ``extends`` its own probe reads the copy below it, so every root counts."""
-    top, below = tmp_path / "top", tmp_path / "below"
-    shutil.copytree(probe_assets_dir("identity_disclosure").parent, top)
-    shutil.copytree(probe_assets_dir("identity_disclosure").parent, below)
-    monkeypatch.setenv("USERSIM_ASSET_PATH", str(below))
-    before = _inputs._probe_assets_digest("identity_disclosure", top)
-    shadowed = next(below.rglob("spec.yaml"))
-    shadowed.write_text(shadowed.read_text() + "\n# edited\n")
-
-    assert _inputs._probe_assets_digest("identity_disclosure", top) != before
-
-
 def test_a_change_under_a_probe_declared_assets_root_is_a_new_setup(register_test_probe, tmp_path):
     """A probe shipped in its own package reads its banks from the root its class declares."""
     bank = tmp_path / "pkg" / "ext_probe" / "sample.yaml"
@@ -644,26 +631,6 @@ def test_values_keep_their_types_across_rows(tmp_path):
             assert got == row[key] and type(got) is type(row[key])
 
 
-def test_an_override_column_on_a_stored_row_reaches_the_probe(tmp_path):
-    """A probe's override column, set on a stored row, picks what the probe runs.
-
-    ``usersim simulate --panel`` reads only a panel's locales, so this is the
-    way to pin an override: materialize rows, set the column, run them.
-    """
-    import yaml
-
-    (stored,) = _materialize({"safety_chat_pressure": 1.0}, num_rows=1)
-    first = _run([stored], tmp_path / "derived")
-    (derived,) = _saved(tmp_path / "derived", first.run_id)["strategy_id"]
-    bank = yaml.safe_load((probe_assets_dir("safety_chat_pressure") / "sample.yaml").read_text(encoding="utf-8"))
-    chosen = next(strategy["id"] for strategy in bank["strategies"] if strategy["id"] != derived)
-
-    stored["pressure_strategy_id"] = chosen
-    second = _run([stored], tmp_path / "chosen")
-
-    assert list(_saved(tmp_path / "chosen", second.run_id)["strategy_id"]) == [chosen]
-
-
 @pytest.mark.parametrize("probe_type", ["general_open_ended", "tool_calling"])
 def test_saved_rows_have_a_plain_runs_columns_plus_input_id(probe_type, tmp_path):
     """The columns of a plain run, and the stored values in them as stored.
@@ -704,36 +671,25 @@ def test_saved_rows_have_a_plain_runs_columns_plus_input_id(probe_type, tmp_path
             assert got == want and type(got) is type(want), key
 
 
-@pytest.mark.parametrize(
-    ("probe_type", "variant"),
-    [("general_open_ended", "default"), ("tool_calling", "default"), ("health_therapy_disclosure", "guarded")],
-)
-def test_only_input_id_holds_the_stored_id(probe_type, variant, tmp_path):
+@pytest.mark.parametrize("probe_type", ["general_open_ended", "tool_calling"])
+def test_only_input_id_holds_the_stored_id(probe_type, tmp_path):
     """No other saved value contains a stored id, JSON columns included.
 
-    The conversation runs under the stored id, and two of these probes read it
-    mid-run: ``tool_calling`` draws its tools from it, and a guarded health
-    variant stamps it on every move it reports to a move hook, which therefore
-    sees the stored id, the saved row's ``input_id``. Moves start on the second
-    turn.
+    The conversation runs under the stored id, and ``tool_calling`` reads it
+    mid-run to draw its tools, so the saved row's ``input_id`` must be the
+    only place it lands.
     """
-    from usersim.engine.probes.health_disclosure.mixin import GuardedMoveMixin
-
     stored = _materialize({probe_type: 1.0}, num_rows=2, max_turns=3)
-    for row in stored:
-        row["probe_variant"] = variant
-    reported: list[dict[str, Any]] = []
-    previous = GuardedMoveMixin.register_move_hook(reported.append)
-    try:
-        result = _run(stored, tmp_path)
-    finally:
-        GuardedMoveMixin.register_move_hook(previous)
+    result = _run(stored, tmp_path)
 
     saved = _saved(tmp_path, result.run_id)
+    assert_only_input_id_holds_the_stored_ids(saved, stored)
+
+
+def assert_only_input_id_holds_the_stored_ids(saved, stored) -> None:
+    """``input_id`` holds the stored ids, and no other saved column contains one."""
     stored_ids = {row["trajectory_id"] for row in stored}
     assert set(saved[INPUT_ID_COLUMN]) == stored_ids
-    if variant == "guarded":
-        assert {payload["trajectory_id"] for payload in reported} == stored_ids
     for column in saved.columns.drop(INPUT_ID_COLUMN):
         text = saved[column].astype(str)
         for row in stored:

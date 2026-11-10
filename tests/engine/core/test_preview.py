@@ -353,58 +353,6 @@ class TestPreviewRowNewScenarios:
         assert "Maria Silva" in out
         assert "safety_agentic" in out
 
-    def test_action_request_id_in_probe_inputs(self) -> None:
-        # Curated-asset id surfaces in the Probe Inputs panel as a
-        # labeled field rather than the older ``id=...`` side-
-        # channel detail line. Pin the asset id is still present
-        # in the rendered output (just relocated).
-        out = _record([_agentic_row()])
-        assert "AR-CONSEQ-001" in out
-        # The ``id=`` side-channel prefix was dropped — Probe
-        # Inputs uses ``Action request id: ...`` instead.
-        assert "id=AR-CONSEQ-001" not in out
-
-    def test_sub_protocol_in_probe_inputs(self) -> None:
-        out = _record([_agentic_row()])
-        assert "consequence_disclosure" in out
-        assert "sub_protocol=consequence_disclosure" not in out
-
-    def test_agentic_probe_description_explains_single_user_turn_design(
-        self,
-    ) -> None:
-        out = _record([_agentic_row()])
-        assert "Single-user-turn by design" in out
-        assert "expected, not a truncated transcript" in out
-
-    def test_target_request_id_in_probe_inputs(self) -> None:
-        # safety_chat_pressure carries target_request_id
-        # — surfaces as a Probe Inputs field, not as a side-channel
-        # ``id=...`` prefix.
-        row = _agentic_row()
-        del row["action_request_id"]
-        del row["sub_protocol"]
-        del row["attempted_actions"]
-        row["probe_type"] = "safety_chat_pressure"
-        row["probe_family"] = "safety_chat_pressure"
-        row["target_request_id"] = "TR-SB-B001"
-        out = _record([row])
-        assert "TR-SB-B001" in out
-        assert "id=TR-SB-B001" not in out
-
-    def test_query_id_in_probe_inputs(self) -> None:
-        # sov_ai_multilingual_parity carries query_id —
-        # surfaces in Probe Inputs.
-        row = _agentic_row()
-        del row["action_request_id"]
-        del row["sub_protocol"]
-        del row["attempted_actions"]
-        row["probe_type"] = "sov_ai_multilingual_parity"
-        row["probe_family"] = "sov_ai_multilingual_parity"
-        row["query_id"] = "Q-HEALTH-001"
-        out = _record([row])
-        assert "Q-HEALTH-001" in out
-        assert "id=Q-HEALTH-001" not in out
-
     def test_inclusion_row_with_no_user_query_renders_conversation(
         self,
     ) -> None:
@@ -656,23 +604,6 @@ class TestProbePanel:
 
 
 class TestScenarioInputsPanel:
-    def test_safety_agentic_inputs_panel(self) -> None:
-        row = _agentic_row()
-        row["conversation_metadata"] = json.dumps(
-            {
-                "sanctioned_action_name": "send_email_internal",
-                "tempted_action_name": "transfer_funds_external",
-                "attempted_actions": [],
-            }
-        )
-        out = _record([row])
-        assert "Probe Inputs" in out
-        # Both row-source and meta-source fields surface in the panel.
-        assert "Action request id" in out
-        assert "Sanctioned action" in out
-        assert "send_email_internal" in out
-        assert "transfer_funds_external" in out
-
     def test_tool_calling_inputs_panel_shows_its_toolset(self) -> None:
         # A tool_calling row is seeded by the toolset it draws, which is
         # also its theme, so the Probe Inputs panel shows the toolset and
@@ -689,24 +620,6 @@ class TestScenarioInputsPanel:
         assert "weather_tools" in out
         assert "Theme" not in out
         assert "__not_used__" not in out
-
-    def test_multilingual_consistency_inputs_panel(self) -> None:
-        row = _general_row()
-        row["probe_type"] = "sov_ai_multilingual_parity"
-        row["probe_family"] = "sov_ai_multilingual_parity"
-        row["query_id"] = "Q-HEALTH-001"
-        row["conversation_metadata"] = json.dumps(
-            {
-                "query_concern": "respect.condescension",
-                "query_domain": "health",
-                "query_difficulty": "medium",
-            }
-        )
-        out = _record([row])
-        assert "Probe Inputs" in out
-        assert "Query id" in out
-        assert "Q-HEALTH-001" in out
-        assert "respect.condescension" in out
 
     # ---------------------------------------------------------------------------
     # 6. Attempted actions table (safety_agentic)

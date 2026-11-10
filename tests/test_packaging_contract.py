@@ -299,87 +299,6 @@ class TestProbeAssetPreflight:
         # A missing probe directory is a wrong assets tree, not a locale to ask for.
         assert "feature request" not in message
 
-    def test_missing_locale_subtree_is_rejected(self) -> None:
-        from usersim.cli._pipeline import verify_probe_assets
-        from usersim.engine.errors import ConfigError
-
-        with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["en_SG"], None)
-        message = str(exc.value)
-        assert "en_SG: no bank" in message
-        # Naming the locales that can run turns a dead end into a next step.
-        assert "en_US" in message.split("Locales that can run: ")[1].splitlines()[0]
-
-    def test_a_locale_whose_bank_does_not_load_is_rejected(self, finance_assets_without_fr_tasks: Path) -> None:
-        """A locale folder that exists is not enough: without tasks, every row aborts."""
-        from usersim.cli._pipeline import verify_probe_assets
-        from usersim.engine.errors import ConfigError
-
-        with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["fr_FR"], finance_assets_without_fr_tasks)
-        message = str(exc.value)
-        assert "fr_FR: its bank does not load" in message and "tasks.yaml" in message
-        assert message.split("Locales that can run: ")[1].splitlines()[0] == "en_US"
-        verify_probe_assets({"financial_services": 1.0}, ["en_US"], finance_assets_without_fr_tasks)
-
-    def test_india_variant_without_its_own_bank_uses_en_in(self) -> None:
-        """A registered variant runs on its base locale's bank, as its probe and scorer resolve it."""
-        from usersim.cli._pipeline import verify_probe_assets
-
-        mix = {"financial_services": 1.0, "sov_ai_facts": 1.0, "sov_ai_dynamic": 1.0}
-        verify_probe_assets(mix, ["bn_Beng_IN"], None)
-
-    def test_india_variant_is_rejected_when_its_base_bank_is_absent(self, tmp_path: Path) -> None:
-        from usersim.cli._pipeline import verify_probe_assets
-        from usersim.engine.errors import ConfigError
-
-        (tmp_path / "financial_services" / "en_US").mkdir(parents=True)
-        (tmp_path / "financial_services" / "en_US" / "bank.yaml").write_text("{}")
-        with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["bn_Beng_IN"], tmp_path)
-        assert "bn_Beng_IN" in str(exc.value)
-
-    def test_the_hindi_locales_run_finance_on_the_en_in_bank(self) -> None:
-        """hi_Deva_IN ships a corpus without tasks and hi_Latn_IN no bank; both run on en_IN's."""
-        from usersim.cli._pipeline import verify_probe_assets
-
-        mix = {"financial_services": 1.0, "sov_ai_facts": 1.0, "sov_ai_dynamic": 1.0}
-        verify_probe_assets(mix, ["hi_Deva_IN", "hi_Latn_IN"], None)
-
-    def test_the_hindi_locales_are_rejected_when_the_en_in_bank_is_absent(self, tmp_path: Path) -> None:
-        from usersim.cli._pipeline import verify_probe_assets
-        from usersim.engine.errors import ConfigError
-
-        (tmp_path / "financial_services" / "en_US").mkdir(parents=True)
-        (tmp_path / "financial_services" / "en_US" / "bank.yaml").write_text("{}")
-        with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["hi_Deva_IN", "hi_Latn_IN"], tmp_path)
-        assert "hi_Deva_IN (through en_IN): no bank; hi_Latn_IN (through en_IN): no bank" in str(exc.value)
-
-    def test_a_refusal_names_the_locales_that_run_on_another_bank(self) -> None:
-        from usersim.cli._pipeline import verify_probe_assets
-        from usersim.engine.errors import ConfigError
-
-        with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["pt_BR"], None)
-        can_run = str(exc.value).split("Locales that can run: ")[1].splitlines()[0]
-        assert "en_US" in can_run
-        assert can_run.endswith(", plus hi_Deva_IN, hi_Latn_IN and the India language variants through en_IN")
-
-    def test_a_locale_without_a_bank_says_how_to_ask_for_one(self) -> None:
-        from usersim.cli._pipeline import verify_probe_assets
-        from usersim.engine.errors import ConfigError
-
-        with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["pt_BR"], None)
-        assert str(exc.value).split("\n\n", 1)[1].splitlines() == [
-            "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them.",
-            "To ask for a locale, open a feature request: "
-            "https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=feature-request.yml",
-            "To build a financial_services bank yourself, see https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
-            "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale",
-        ]
-
     def test_the_refusal_links_point_at_files_in_this_repository(self) -> None:
         """The links are absolute, to work from an installed package; moving a file must not break them quietly."""
         import usersim.engine.generator  # noqa: F401  (populates registry)
@@ -388,8 +307,8 @@ class TestProbeAssetPreflight:
 
         template = _FEATURE_REQUEST_URL.split("?template=", 1)[1]
         assert (_REPO_ROOT / ".github" / "ISSUE_TEMPLATE" / template).is_file()
+        # financial_services' own tests check that it declares a guide, so this loop has one to check.
         guides = [resolve_probe(p).authoring_guide for p in known_probes() if resolve_probe(p).authoring_guide]
-        assert guides, "no built-in probe links a guide, so this test checks nothing"
         for url in guides:
             path, anchor = url.removeprefix("https://github.com/NVIDIA-NeMo/UserSim/blob/main/").split("#")
             lines = (_REPO_ROOT / path).read_text(encoding="utf-8").splitlines()

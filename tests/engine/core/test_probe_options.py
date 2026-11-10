@@ -78,10 +78,9 @@ def _never(*args, **kwargs):
     ("option", "message"),
     [
         ("general_open_ended.tone=warm", "general_open_ended has no setting 'tone'; its settings: none"),
-        ("financial_services.tier_mix=1.5", "financial_services.tier_mix: Input should be less than or equal to 1"),
         ("tool_calling.max_tools=0", "tool_calling.max_tools: Input should be greater than or equal to 1"),
     ],
-    ids=["unknown_setting", "finance_out_of_range", "tools_out_of_range"],
+    ids=["unknown_setting", "tools_out_of_range"],
 )
 def test_a_run_with_a_bad_setting_stops_before_any_model_call(
     tmp_path, caplog, monkeypatch, mode, out, option, message
@@ -99,12 +98,12 @@ def test_the_library_refuses_bad_settings_before_materializing(monkeypatch) -> N
     from usersim.engine.external import materialize_episode_inputs
 
     monkeypatch.setattr("usersim.cli._pipeline.materialize_episode_inputs", _never)
-    with pytest.raises(ValueError, match="financial_services.tier: Input should be 'verifiable' or 'dynamic'"):
+    with pytest.raises(ValueError, match="tool_calling.max_tools: Input should be greater than or equal to 1"):
         materialize_episode_inputs(
             locale="en_US",
             num_rows=1,
-            probe_mix={"financial_services": 1.0},
-            probe_options={"financial_services": {"tier": "both"}},
+            probe_mix={"tool_calling": 1.0},
+            probe_options={"tool_calling": {"max_tools": 0}},
         )
 
 

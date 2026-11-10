@@ -619,17 +619,6 @@ class TestSchema:
         )
         assert "finance_task_id" not in non_finance
 
-    def test_finance_group_matches_probe_contract(self):
-        # Schema-parity guard across the package boundary: the selection
-        # `finance` group must match the probe's canonical column contract, so
-        # a rename/add on either side can't silently drop export columns.
-        from usersim.engine.probes.financial_services.probe import (
-            FINANCE_TRAJECTORY_COLUMNS,
-        )
-        from usersim.selection.schemas import LOGICAL_GROUPS
-
-        assert set(LOGICAL_GROUPS["finance"]) == set(FINANCE_TRAJECTORY_COLUMNS)
-
     def test_explicit_list_and_partition_forced(self):
         cols = resolve_columns(
             ["trajectory_id", "conversation"], ["trajectory_id", "conversation_messages", "locale", "probe_family"]

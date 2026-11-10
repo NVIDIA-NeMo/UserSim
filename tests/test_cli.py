@@ -277,28 +277,28 @@ class TestScenarioMixParser:
         assert pytest.approx(sum(m.values())) == 1.0
         assert all(v == pytest.approx(1 / 3) for v in m.values())
 
-    def test_sovereign_ai_probe_accepted(self):
-        m = _parse_probe_mix("sov_ai_facts=1.0")
+    def test_a_single_probe_is_accepted(self):
+        m = _parse_probe_mix("general_educational=1.0")
         assert pytest.approx(sum(m.values())) == 1.0
-        assert "sov_ai_facts" in m
+        assert "general_educational" in m
 
-    def test_safety_probe_accepted(self):
+    def test_two_probes_are_accepted(self):
         m = _parse_probe_mix(
-            "safety_chat_pressure=0.5,safety_agentic=0.5",
+            "general_open_ended=0.5,general_educational=0.5",
         )
-        assert set(m) == {"safety_chat_pressure", "safety_agentic"}
+        assert set(m) == {"general_open_ended", "general_educational"}
 
-    def test_mixed_general_and_sovereign_ai_accepted(self):
+    def test_uneven_weights_are_kept(self):
         m = _parse_probe_mix(
-            "tool_calling=0.4,sov_ai_dynamic=0.6",
+            "tool_calling=0.4,general_educational=0.6",
         )
         assert pytest.approx(sum(m.values())) == 1.0
-        assert pytest.approx(m["sov_ai_dynamic"]) == 0.6
+        assert pytest.approx(m["general_educational"]) == 0.6
 
     def test_fractions_are_accepted(self):
         """The README and docs/probes.md both document an even three-way
         split as `=1/3`, which is the readable way to write it."""
-        m = _parse_probe_mix("sov_ai_facts=1/3,sov_ai_dynamic=1/3,sov_ai_multilingual_parity=1/3")
+        m = _parse_probe_mix("tool_calling=1/3,general_open_ended=1/3,general_educational=1/3")
         assert pytest.approx(sum(m.values())) == 1.0
         for weight in m.values():
             assert pytest.approx(weight, abs=1e-9) == 1 / 3
@@ -339,19 +339,9 @@ class TestPipelineFactory:
     we just need it to construct without raising.
     """
 
-    def test_known_probes_matches_registry(self):
-        names = set(known_probes())
-        # Sanity-check the canonical probes are present.
-        assert names >= {
-            "tool_calling",
-            "general_open_ended",
-            "general_educational",
-            "sov_ai_facts",
-            "sov_ai_dynamic",
-            "sov_ai_multilingual_parity",
-            "safety_chat_pressure",
-            "safety_agentic",
-        }
+    def test_the_default_probes_are_registered(self):
+        """A run without --probe-mix runs the default mix, so each of its probes must resolve."""
+        assert set(DEFAULT_PROBE_MIX) <= set(known_probes())
 
     def test_default_probe_mix_is_general_family_only(self):
         # Default-surface contract: when no explicit mix is provided
@@ -367,21 +357,7 @@ class TestPipelineFactory:
             "general_educational",
         }
 
-    @pytest.mark.parametrize(
-        "probe",
-        sorted(
-            [
-                "tool_calling",
-                "general_open_ended",
-                "general_educational",
-                "sov_ai_facts",
-                "sov_ai_dynamic",
-                "sov_ai_multilingual_parity",
-                "safety_chat_pressure",
-                "safety_agentic",
-            ]
-        ),
-    )
+    @pytest.mark.parametrize("probe", sorted(known_probes()))
     def test_build_simulator_accepts_each_probe_singly(self, probe):
         models = load_models_config(default_models_path())
         # Should not raise for any registered probe.
@@ -402,15 +378,15 @@ class TestPipelineFactory:
                 probe_mix={"made_up": 1.0},
             )
 
-    def test_build_simulator_accepts_mixed_general_and_inclusion(self):
+    def test_build_simulator_accepts_a_mix_of_probes(self):
         models = load_models_config(default_models_path())
         data_designer, builder = build_simulator_config_builder(
             locale="en_US",
             models=models,
             probe_mix={
                 "tool_calling": 0.4,
-                "safety_agentic": 0.3,
-                "sov_ai_dynamic": 0.3,
+                "general_open_ended": 0.3,
+                "general_educational": 0.3,
             },
         )
         assert data_designer is not None
@@ -689,14 +665,17 @@ class TestUndispatchedScorerWarning:
         return caplog.text
 
     def test_partial_list_names_the_scorer_and_its_capabilities(self, caplog):
-        from usersim.taxonomy.capabilities import scorers_required_by_capabilities
+        from usersim.taxonomy.capabilities import capabilities_missing_scorer, scorers_required_by_capabilities
 
-        partial = [s for s in scorers_required_by_capabilities() if s != "financial_services"]
-        text = self._warn(partial, caplog)
-        assert "financial_services" in text
-        assert "11 capabilities" in text
-        assert "financial_task_success" in text
-        assert "Untested" in text
+        required = scorers_required_by_capabilities()
+        for left_out in required:
+            caplog.clear()
+            ids = capabilities_missing_scorer([s for s in required if s != left_out])[left_out]
+            text = self._warn([s for s in required if s != left_out], caplog)
+            assert repr(left_out) in text
+            assert f"{len(ids)} capabilit" in text
+            assert ids[0] in text
+            assert "Untested" in text
 
     def test_complete_list_is_silent(self, caplog):
         from usersim.taxonomy.capabilities import scorers_required_by_capabilities
@@ -816,23 +795,6 @@ class TestEvalCliJudgesDefault:
 # ---------------------------------------------------------------------------
 
 
-class TestAssetCommandDefaults:
-    """With no ``--dir`` or ``--out``, the asset commands use the bank the domain's probe ships."""
-
-    def test_the_default_folder_is_the_probes_shipped_bank(self):
-        from usersim.cli._bank_dir import default_bank_dir
-
-        default = default_bank_dir("financial_services", "en_US", flag="--dir")
-        assert default.is_dir(), f"the default bank folder is missing: {default}"
-        assert (default / "region_meta.yaml").exists() or any(default.iterdir())
-
-    def test_validate_assets_finds_the_shipped_bank(self, capsys):
-        rc = cli.main(["validate-assets", "--domain", "financial_services", "--locale", "en_US"])
-        out = capsys.readouterr().out
-        assert "bank dir not found" not in out
-        assert rc == 0
-
-
 class TestDryRuns:
     def test_panel_dry_run(self, tmp_path, capsys):
         rc = cli.main(
@@ -944,38 +906,6 @@ class TestDryRuns:
                     str(tmp_path / "traj.parquet"),
                 ]
             )
-
-    @staticmethod
-    def _finance_only(assets: Path, *args: str) -> list[str]:
-        return ["simulate", *args, "--probe-mix", "financial_services=1", "--assets-dir", str(assets)]
-
-    def test_a_dry_run_refuses_a_locale_whose_bank_does_not_load(
-        self, tmp_path, finance_assets_without_fr_tasks, caplog
-    ):
-        argv = self._finance_only(finance_assets_without_fr_tasks, "--dry-run", "--locale", "fr_FR", "--num-rows", "1")
-        with caplog.at_level(logging.ERROR):
-            assert cli.main([*argv, "--out", str(tmp_path / "out")]) == 2
-        assert "financial_services can't run fr_FR: its bank does not load" in caplog.text
-
-    def test_a_panel_dry_run_checks_the_panel_locales(self, tmp_path, finance_assets_without_fr_tasks, caplog):
-        panel = tmp_path / "panel.parquet"
-        pd.DataFrame({"locale": ["en_US", "fr_FR"], "persona": [{"first_name": "A"}, {"first_name": "B"}]}).to_parquet(
-            panel
-        )
-        argv = self._finance_only(finance_assets_without_fr_tasks, "--dry-run", "--panel", str(panel))
-        with caplog.at_level(logging.ERROR):
-            assert cli.main([*argv, "--out", str(tmp_path / "out")]) == 2
-        assert "can't run fr_FR" in caplog.text
-
-    def test_materializing_refuses_a_locale_whose_bank_does_not_load(
-        self, tmp_path, finance_assets_without_fr_tasks, caplog
-    ):
-        out = tmp_path / "rows.jsonl"
-        argv = self._finance_only(finance_assets_without_fr_tasks, "--locale", "fr_FR", "--num-rows", "1")
-        with caplog.at_level(logging.ERROR):
-            assert cli.main([*argv, "--materialize-inputs", "--out", str(out)]) == 2
-        assert "can't run fr_FR" in caplog.text
-        assert not out.exists()
 
     def test_eval_dry_run(self, tmp_path, capsys):
         traj = tmp_path / "trajs.parquet"

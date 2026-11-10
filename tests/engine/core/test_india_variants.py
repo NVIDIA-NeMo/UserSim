@@ -413,21 +413,6 @@ class TestVerbatimTranslation:
 
 
 class TestDontBreak:
-    def test_prompt_pack_available_locales_unchanged(self) -> None:
-        # The variant fallback is a call-time redirect (asset_locale=en_IN),
-        # NOT a dict mutation — so available_locales() must still equal the
-        # shipped set (guards the existing all-shipped-locale suites).
-        from usersim.engine.probes.sov_ai_dynamic import prompts as dyn_p
-        from usersim.engine.probes.sov_ai_facts import prompts as facts_p
-        from usersim.engine.probes.sov_ai_multilingual_parity import (
-            prompts as par_p,
-        )
-
-        shipped = set(L.SHIPPED_LOCALES)
-        assert set(facts_p.available_locales()) == shipped
-        assert set(dyn_p.available_locales()) == shipped
-        assert set(par_p.available_locales()) == shipped
-
     def test_locale_parity_maps_unchanged(self) -> None:
         # Variants live only in INDIA_VARIANT_LOCALES, never in the three
         # exact-parity maps keyed on SHIPPED_LOCALES.

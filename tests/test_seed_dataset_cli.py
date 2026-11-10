@@ -39,13 +39,11 @@ def _assets_root(tmp_path: Path, *seed_names: str) -> Path:
     """An `assets/` root containing `tool_calling/` and the named seeds."""
     probe_dir = tmp_path / "tool_calling"
     probe_dir.mkdir(parents=True)
-    # A real tree carries each probe's bank, not just a seed file; the
-    # pre-flight rejects one that holds only the seed. sov_ai_facts is
-    # locale-scoped, so it needs the run's locale subtree with a bank that loads.
+    # A real tree carries each probe's assets, not just a seed file; the
+    # pre-flight rejects one that holds only the seed. general_open_ended stands
+    # in for a probe that reads no seed table.
     (probe_dir / "prompts.yaml").write_text("prompts: []\n", encoding="utf-8")
-    facts = tmp_path / "sov_ai_facts" / "en_US"
-    facts.mkdir(parents=True)
-    shutil.copy(probe_assets_dir("sov_ai_facts") / "en_US" / "sample.yaml", facts / "sample.yaml")
+    shutil.copytree(probe_assets_dir("general_open_ended"), tmp_path / "general_open_ended")
     for name in seed_names:
         (probe_dir / name).touch()
     return tmp_path
@@ -136,15 +134,15 @@ class TestOneSeedTablePerRun:
     """A run attaches one seed table, so a mix holds at most one probe that reads one."""
 
     def test_the_probe_that_reads_one_is_found(self):
-        assert seed_dataset_probe({"tool_calling": 0.5, "sov_ai_facts": 0.5}) == "tool_calling"
+        assert seed_dataset_probe({"tool_calling": 0.5, "general_open_ended": 0.5}) == "tool_calling"
 
     def test_a_mix_with_none_has_none(self):
-        assert seed_dataset_probe({"sov_ai_facts": 1.0}) is None
+        assert seed_dataset_probe({"general_open_ended": 1.0}) is None
 
     def test_two_probes_that_read_one_are_refused(self, monkeypatch):
-        monkeypatch.setattr(resolve_probe("sov_ai_facts"), "seed_dataset", "facts_seed")
+        monkeypatch.setattr(resolve_probe("general_open_ended"), "seed_dataset", "facts_seed")
         with pytest.raises(ConfigError, match="a run attaches one"):
-            seed_dataset_probe({"tool_calling": 0.5, "sov_ai_facts": 0.5})
+            seed_dataset_probe({"tool_calling": 0.5, "general_open_ended": 0.5})
 
 
 _SEED_COLUMNS = ("toolset_source", "toolset_category", "toolset_name", "num_tools", "tools")
@@ -375,7 +373,7 @@ class TestDryRunResolvesTheSeed:
 
     def test_no_seed_is_not_fatal(self, tmp_path, capsys):
         """A missing default must not block a run that needs no tools."""
-        assert self._run(_assets_root(tmp_path), "--probe-mix", "sov_ai_facts=1.0") == 0
+        assert self._run(_assets_root(tmp_path), "--probe-mix", "general_open_ended=1.0") == 0
         assert "(not used)" in capsys.readouterr().out
 
     def test_non_tool_mix_does_not_inspect_ambiguous_seeds(self, tmp_path, capsys):
@@ -384,7 +382,7 @@ class TestDryRunResolvesTheSeed:
             "toolsets_seed.parquet",
             "toolsets_seed.jsonl",
         )
-        assert self._run(root, "--probe-mix", "sov_ai_facts=1.0") == 0
+        assert self._run(root, "--probe-mix", "general_open_ended=1.0") == 0
         assert "(not used)" in capsys.readouterr().out
 
     def test_tool_mix_without_seed_fails_before_printing(self, tmp_path, capsys):
@@ -400,7 +398,7 @@ class TestDryRunResolvesTheSeed:
             self._run(
                 root,
                 "--probe-mix",
-                "sov_ai_facts=1.0",
+                "general_open_ended=1.0",
                 "--seed-dataset-path",
                 str(custom),
             )
@@ -469,7 +467,7 @@ class TestPipelineRejectsToolCallingWithoutASeed:
 
     def test_other_probes_are_unaffected(self):
         """A mix whose probes read no seed table builds without one."""
-        self._build({"sov_ai_facts": 1.0}, None)
+        self._build({"general_open_ended": 1.0}, None)
 
     def test_other_probes_do_not_inspect_ambiguous_seeds(self, tmp_path):
         root = _assets_root(
@@ -478,7 +476,7 @@ class TestPipelineRejectsToolCallingWithoutASeed:
             "toolsets_seed.jsonl",
         )
         self._build(
-            {"sov_ai_facts": 1.0},
+            {"general_open_ended": 1.0},
             None,
             assets_dir=root,
         )
@@ -487,4 +485,4 @@ class TestPipelineRejectsToolCallingWithoutASeed:
         seed = tmp_path / "custom.jsonl"
         seed.touch()
         with pytest.raises(ConfigError, match="no probe in probe_mix reads a seed table"):
-            self._build({"sov_ai_facts": 1.0}, seed)
+            self._build({"general_open_ended": 1.0}, seed)

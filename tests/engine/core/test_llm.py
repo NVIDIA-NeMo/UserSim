@@ -38,7 +38,6 @@ from usersim.engine.core.llm import (
     replay_reasoning_scope,
 )
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
-from usersim.engine.probes.health_disclosure import move_runtime, realized_audit
 
 
 async def _noop_sleep(_delay):
@@ -822,14 +821,6 @@ def test_every_argument_passed_to_a_model_can_reach_it() -> None:
                     continue
                 offenders.append(f"{path.relative_to(root)}:{node.lineno} {keyword.arg}")
     assert not offenders, f"these arguments never reach the model: {offenders}"
-
-
-@pytest.mark.parametrize("value", ["off", "low", "medium", "high"])
-def test_the_reasoning_overrides_use_only_settings_acall_llm_routes(monkeypatch, value) -> None:
-    monkeypatch.setenv("USERSIM_AUDIT_REASONING_EFFORT", value)
-    monkeypatch.setattr(move_runtime, "_MOVE_REASONING_EFFORT", value)
-    for produced in (realized_audit._audit_reasoning_kwargs(), move_runtime._move_reasoning_kwargs()):
-        assert produced and set(produced) <= set(llm._EXTRA_BODY_SETTINGS)
 
 
 #: One message, as a person would write it in each language.

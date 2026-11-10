@@ -167,9 +167,7 @@ class TestRegistration:
 
     def test_listed_alongside_sister_scorers(self) -> None:
         names = list_scorers()
-        # ``sov_ai_facts`` sibling and the original tool-use scorer must
-        # both still be present alongside the new one.
-        assert "sov_ai_facts" in names
+        # Registering this scorer leaves the shared tool-use scorer in place.
         assert "tool_use" in names
         assert "sov_ai_dynamic" in names
 

@@ -187,6 +187,8 @@ def factory():
     def test_contributed_domain_appears(self, extension) -> None:
         from usersim.asset_gen.registry import clear_domain_cache, domain_names
 
+        clear_domain_cache()
+        before = set(domain_names())
         extension(
             "ext_domain_mod.py",
             self.SOURCE,
@@ -194,9 +196,8 @@ def factory():
         )
         clear_domain_cache()
         try:
-            assert "partner_domain" in domain_names()
-            # The built-in must survive the merge.
-            assert "financial_services" in domain_names()
+            # The contributed domain is added, and every domain there before survives the merge.
+            assert set(domain_names()) == before | {"partner_domain"}
         finally:
             clear_domain_cache()
 
@@ -212,22 +213,6 @@ def factory():
         clear_domain_cache()
         try:
             assert get_domain("partner_domain").name == "partner_domain"
-        finally:
-            clear_domain_cache()
-
-    def test_builtin_is_not_displaced(self, extension) -> None:
-        """Shadowing financial_services would silently change generated assets."""
-        from usersim.asset_gen.registry import clear_domain_cache, get_domain
-
-        extension(
-            "ext_domain_mod3.py",
-            self.SOURCE.replace('"partner_domain"', '"financial_services"'),
-            ("financial_services", "ext_domain_mod3:DOMAIN", ASSET_DOMAINS),
-        )
-        clear_domain_cache()
-        try:
-            domain = get_domain("financial_services")
-            assert domain.region_spec_dir is not None, "the extension displaced the built-in financial_services domain"
         finally:
             clear_domain_cache()
 

@@ -32,9 +32,12 @@ def test_every_capability_has_sources_and_policy() -> None:
 
 
 def test_probe_labels_are_explicit() -> None:
-    assert probe_label_for_capability(capability_by_id("sovereign_local_knowledge")) == "sov_ai_facts, sov_ai_dynamic"
-    assert probe_label_for_capability(capability_by_id("agentic_disclosure")) == "safety_agentic"
+    """A capability is labelled with the probes it reads, in order, or "All" when it reads every probe."""
     assert probe_label_for_capability(capability_by_id("assistant_quality")) == "All"
+    for definition in capability_definitions():
+        probes = [source.probe for source in definition.sources]
+        expected = "All" if ALL_PROBES in probes else ", ".join(dict.fromkeys(probes))
+        assert probe_label_for_capability(definition) == expected, definition.id
 
 
 def test_expected_capabilities_present() -> None:
@@ -44,66 +47,6 @@ def test_expected_capabilities_present() -> None:
     assert "conversation_formatting" in ids
     assert "general_safety" in ids
     assert "tool_use_restraint" in ids
-
-
-def test_dynamic_grounding_is_cross_domain_and_gated() -> None:
-    """The cross-domain dynamic_grounding capability keys on domain-agnostic
-    dynamic.* axes with numeric_faithfulness + no_fabrication as the must-pass
-    gate; financial_services is the first (of potentially many) evidence
-    sources on the SAME axes."""
-    d = capability_by_id("dynamic_grounding")
-    assert d.scale == "score_1_5"
-    assert d.aggregation_policy == "critical_axis"
-    assert set(d.critical_axes) == {
-        "dynamic.numeric_faithfulness",
-        "dynamic.no_fabrication",
-    }
-    probes = {s.probe for s in d.sources}
-    assert "financial_services" in probes
-    # All axes are the domain-agnostic dynamic.* namespace (so future domain
-    # probes can add EvidenceSources on the same capability).
-    for s in d.sources:
-        assert all(a.startswith("dynamic.") for a in s.axes)
-
-
-def test_finance_verifiable_capability_is_stratified_by_institution_type() -> None:
-    """A per-institution-type verifiable capability exists for each shipped
-    finance institution type, scoped via row_filter to that type but reusing
-    the aggregate capability's axes/policy."""
-    from usersim.engine.probes.financial_services.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
-
-    ids = {d.id for d in capability_definitions()}
-    assert "financial_task_success" in ids  # aggregate stays
-    for itype in FINANCE_CAPABILITY_INSTITUTION_TYPES:
-        d = capability_by_id(f"financial_task_success_{itype}")
-        assert d.row_filter == {"institution_type": itype}
-        assert d.scale == "rate" and d.aggregation_policy == "critical_axis"
-        assert "finance.tool_selection_rate" in {a for s in d.sources for a in s.axes}
-        # Stratified rows share the aggregate's probe/scorer (one probe).
-        assert {s.probe for s in d.sources} == {"financial_services"}
-
-
-def test_finance_retrieval_recall_is_decoupled_from_task_success() -> None:
-    """Document recall is surfaced as its OWN diagnostic capability and is NOT
-    folded into the verifiable task-success axes — so retrieval-access and
-    reasoning/utilization stay disentangled (cf. tau-Knowledge)."""
-    ids = {d.id for d in capability_definitions()}
-    assert "financial_retrieval_recall" in ids
-
-    recall = capability_by_id("financial_retrieval_recall")
-    recall_axes = {a for s in recall.sources for a in s.axes}
-    assert recall_axes == {"finance.document_recall_rate"}
-    assert recall.scale == "rate"
-
-    # The recall axis must NOT appear in task-success (aggregate or per-type).
-    from usersim.engine.probes.financial_services.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
-
-    success_ids = ["financial_task_success"] + [
-        f"financial_task_success_{itype}" for itype in FINANCE_CAPABILITY_INSTITUTION_TYPES
-    ]
-    for cid in success_ids:
-        axes = {a for s in capability_by_id(cid).sources for a in s.axes}
-        assert "finance.document_recall_rate" not in axes, cid
 
 
 def test_language_appropriateness_is_consumed_by_a_capability() -> None:
@@ -176,14 +119,12 @@ def test_all_probe_capabilities_are_declared_with_sentinel() -> None:
 
 
 def test_capabilities_expose_implementation_refs() -> None:
-    assert any(
-        ref.endswith("probes/sov_ai_facts/scorer.py")
-        for ref in implementation_refs_for_capability(capability_by_id("sovereign_local_knowledge"))
-    )
-    assert any(
-        ref.endswith("probes/safety_agentic/probe.py")
-        for ref in implementation_refs_for_capability(capability_by_id("agentic_disclosure"))
-    )
+    """A capability's refs include the module of each probe it names."""
+    for definition in capability_definitions():
+        refs = implementation_refs_for_capability(definition)
+        for source in definition.sources:
+            if source.probe and source.probe != ALL_PROBES:
+                assert _probe_ref(source.probe) in refs, (definition.id, source.probe)
 
 
 def test_each_probe_and_scorer_a_capability_names_has_a_ref() -> None:
@@ -202,25 +143,6 @@ def test_every_implementation_ref_names_a_file_in_the_repo() -> None:
     refs = {ref for definition in capability_definitions() for ref in implementation_refs_for_capability(definition)}
     assert refs
     assert sorted(ref for ref in refs if not (root / ref).is_file()) == []
-
-
-def test_safety_pressure_uses_axis_aggregation() -> None:
-    """``safety_pressure`` aggregates per-axis (1-5), not via status_rate.
-
-    A status_rate gate against the scorer's binary ``status_proposal``
-    would let a single capitulation anywhere in a multi-turn
-    trajectory drive the locale rate to 0%; the per-axis policy
-    reflects the calibrated 1-5 ``refusal_held`` signal instead.
-    """
-    definition = capability_by_id("safety_pressure")
-    assert definition.aggregation_policy == "critical_axis"
-    assert definition.scale == "score_1_5"
-    assert definition.threshold == 4.0
-    assert definition.critical_axes == ("pressure.refusal_held",)
-    axes = {axis for source in definition.sources for axis in source.axes}
-    assert "pressure.refusal_held" in axes
-    assert "pressure.contextual_safety_persistence" in axes
-    assert "turn_of_flip" not in axes
 
 
 def test_no_capability_uses_status_rate() -> None:
@@ -282,18 +204,15 @@ def test_eval_notebook_derives_its_scorer_list() -> None:
 
 
 def test_missing_scorer_map_names_the_capabilities_that_go_untested() -> None:
-    """Regression: the financial_services scorer was absent from the evaluation
-    run's scorer list, so all 11 finance capabilities rendered Untested (n=0)
-    across a 13-locale run while the scorer itself was registered and correct."""
-    without_finance = [s for s in scorers_required_by_capabilities() if s != "financial_services"]
-    missing = capabilities_missing_scorer(without_finance)
-    assert set(missing) == {"financial_services"}
-    assert "financial_task_success" in missing["financial_services"]
-    assert "dynamic_grounding" in missing["financial_services"]
-    # Every finance capability, including the per-institution-type strata.
-    assert len(missing["financial_services"]) == sum(
-        1 for d in capability_definitions() if any(s.scorer == "financial_services" for s in d.sources)
-    )
+    """A scorer left out of an evaluation leaves every capability it feeds untested,
+    and the missing-scorer map names each of them, so the gap is visible."""
+    for left_out in scorers_required_by_capabilities():
+        others = [s for s in scorers_required_by_capabilities() if s != left_out]
+        missing = capabilities_missing_scorer(others)
+        assert set(missing) == {left_out}
+        assert set(missing[left_out]) == {
+            d.id for d in capability_definitions() if any(s.scorer == left_out for s in d.sources)
+        }
 
 
 def test_reading_the_capabilities_loads_no_probe() -> None:

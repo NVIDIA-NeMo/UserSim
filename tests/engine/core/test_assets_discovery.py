@@ -39,21 +39,24 @@ from usersim.engine.core.probes import resolve_probe
 
 class TestOwnFolderResolution:
     def test_resolves_inside_the_package(self) -> None:
-        path = probe_assets_dir("sov_ai_facts")
+        path = probe_assets_dir("general_open_ended")
         assert path.is_dir(), f"{path} is not a directory"
         assert path.is_relative_to(Path(usersim.__file__).parent / "engine" / "probes"), path
 
     def test_independent_of_cwd(self, tmp_path: Path, monkeypatch) -> None:
         """Resolution must not depend on where the process was started."""
-        baseline = probe_assets_dir("sov_ai_facts")
+        baseline = probe_assets_dir("general_open_ended")
         monkeypatch.chdir(tmp_path)
-        assert probe_assets_dir("sov_ai_facts") == baseline
+        assert probe_assets_dir("general_open_ended") == baseline
 
     def test_no_cwd_fallback_even_with_a_decoy(self, tmp_path: Path, monkeypatch) -> None:
         """A directory named after the probe in the CWD must not be picked up."""
-        (tmp_path / "sov_ai_facts").mkdir()
+        (tmp_path / "general_open_ended").mkdir()
         monkeypatch.chdir(tmp_path)
-        assert probe_assets_dir("sov_ai_facts") == resolve_probe("sov_ai_facts").assets_root / "sov_ai_facts"
+        assert (
+            probe_assets_dir("general_open_ended")
+            == resolve_probe("general_open_ended").assets_root / "general_open_ended"
+        )
         assert probe_assets_dir("no_such_probe").is_absolute()
 
     def test_the_package_ships_no_shared_assets_folder(self) -> None:
@@ -87,7 +90,7 @@ class TestOverrides:
         assert asset_search_path() == baseline
 
     def test_explicit_root_wins_in_probe_assets_dir(self, tmp_path: Path) -> None:
-        assert probe_assets_dir("sov_ai_facts", assets_root=tmp_path) == (tmp_path / "sov_ai_facts")
+        assert probe_assets_dir("general_open_ended", assets_root=tmp_path) == (tmp_path / "general_open_ended")
 
 
 class TestRegistryAndLayoutInvariants:
@@ -141,7 +144,7 @@ class TestAssetSearchPath:
 
     def test_a_probe_s_own_root_comes_after_the_search_path(self, monkeypatch, tmp_path) -> None:
         monkeypatch.setenv("USERSIM_ASSET_PATH", str(tmp_path))
-        assert probe_asset_roots("sov_ai_facts") == (tmp_path, resolve_probe("sov_ai_facts").assets_root)
+        assert probe_asset_roots("general_open_ended") == (tmp_path, resolve_probe("general_open_ended").assets_root)
 
     def test_entries_are_searched_in_order(self, monkeypatch, tmp_path) -> None:
         from usersim.engine.core._assets import asset_search_path
@@ -307,16 +310,13 @@ class TestBeforeTheProbeIsImported:
             "assert not probes._PROBE_REGISTRY, 'a probe was registered before the lookup'\n"
             "print(len(load_seeds('en_US', 'general_educational', 'subjects')))\n"
             "print(sorted(load_prompt_file('general_open_ended')))\n"
-            "from usersim.engine.core._assets import probe_assets_dir\n"
-            "print(probe_assets_dir('health_triage_disclosure').parent.parent.name)\n"
         )
         result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
 
         assert result.returncode == 0, result.stderr
-        count, keys, health_folder = result.stdout.splitlines()
+        count, keys = result.stdout.splitlines()
         assert int(count) > 0
         assert "user_agent_system_prompt" in keys
-        assert health_folder == "health_disclosure"
 
     def test_a_package_holding_several_probes_is_found_under_each_label(self, monkeypatch, tmp_path):
         import usersim.engine.core._assets as assets
