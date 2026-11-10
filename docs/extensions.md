@@ -627,6 +627,11 @@ uv run pytest
 uv run usersim smoke
 ```
 
+In a workspace that holds several packages, run each package's tests from
+inside its folder. Its `tests/conftest.py` loads the harness through
+`pytest_plugins`, which pytest accepts only in the conftest at the root of the
+run, so one `pytest` over the whole workspace stops before running a test.
+
 Outside the tests, discovery is on, so `usersim smoke` lists each installed
 extension package with its entry points, in a line like this one:
 
@@ -667,15 +672,18 @@ Ask for the hook, attribute or fix in general terms first, through the
 [Extension hook form](https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=extension-hook.yml)
 or an issue, so the change serves other packages too.
 
-To build against the change before it is released, install a User Sim
-checkout into the package's environment without recording it:
+To build against the change before it is released, run the package's
+commands against a User Sim checkout, without recording it:
 
 ```bash
-uv pip install -e ../UserSim
+uv run --with-editable ../UserSim pytest
 ```
 
-Keep it out of `pyproject.toml` and the lock file: a path dependency installs
-only on your machine. Once the change is merged, the package can depend on that
+`uv run` reinstalls the locked `usersim` before each command, so a checkout
+installed once with `uv pip install -e` is replaced by the next `uv run`;
+`--with-editable` adds it for that command. Keep the checkout out of
+`pyproject.toml` and the lock file: a path dependency installs only on your
+machine. Once the change is merged, the package can depend on that
 commit of `main` until a release includes it, then on a range that starts at
 that release:
 

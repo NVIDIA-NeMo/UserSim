@@ -61,6 +61,10 @@ uv run pytest
 uv run usersim smoke
 ```
 
+In a workspace of several packages, run `uv run pytest` from inside this
+folder: `tests/conftest.py` loads the harness in a way pytest accepts only at
+the root of a run.
+
 The tests check the probe and the scorer against the contract, run an episode
 with scripted models and no provider, and check that a host driving the probe
 reproduces a standalone run. `make check-extensions` installs this template next
