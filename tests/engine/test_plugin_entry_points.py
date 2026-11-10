@@ -35,7 +35,6 @@ from test_simulator_pipeline_e2e import (
 from usersim.engine.core.probes import known_probes, resolve_probe
 from usersim.engine.evaluator.generator import TrajectoryEvaluatorGenerator
 from usersim.engine.generator import ConversationSimulatorGenerator
-from usersim.engine.probes.health_disclosure.mixin import GUARDED_RESULT_COLUMNS
 
 PROBE_TYPE = "general_open_ended"
 LOCALE = "en_US"
@@ -207,27 +206,6 @@ class TestSimulatorRunsARow:
         path = tmp_path / "batch.parquet"
         pd.DataFrame([row]).to_parquet(path, index=False)
         assert pd.read_parquet(path)["trajectory_id"].tolist() == [row["trajectory_id"]]
-
-    @pytest.mark.usefixtures("no_moves_override")
-    @pytest.mark.parametrize("probe_type", sorted(p for p, v in _probe_variant_pairs() if v == "guarded"))
-    async def test_the_guarded_variant_adds_exactly_its_result_columns(self, probe_type: str) -> None:
-        """A guarded row carries every name in ``GUARDED_RESULT_COLUMNS`` and nothing else
-        a default row lacks.
-
-        Checking a few of them would let the mixin stop writing, say,
-        ``turn_budget`` while every test stayed green and the scorer reported a
-        null stratum. Comparing against a default row of the same probe also
-        rules out the guarded case passing by silently running as default.
-        """
-        guarded, _, _ = await self._run_one_row(probe_type, "guarded")
-        default, _, _ = await self._run_one_row(probe_type, "default")
-        assert guarded.get("moves_enabled") is True, f"{probe_type} guarded row carries no move/Guard ground truth"
-        assert set(guarded) - set(default) == set(GUARDED_RESULT_COLUMNS)
-
-    def test_the_config_declares_every_guarded_result_column(self) -> None:
-        cfg = _cli_built_simulator_config("health_therapy_disclosure", LOCALE)
-        missing = set(GUARDED_RESULT_COLUMNS) - set(cfg.side_effect_columns)
-        assert not missing, f"guarded columns the engine would drop: {sorted(missing)}"
 
     async def test_carries_the_identity_columns_forward(self) -> None:
         row, _cfg, _ = await self._run_one_row()

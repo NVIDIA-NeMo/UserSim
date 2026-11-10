@@ -47,6 +47,7 @@ all locally with mocked LLMs and the shipped fixture personas.
 from __future__ import annotations
 
 import json
+import sys
 from contextlib import contextmanager
 from typing import Any
 from unittest.mock import patch
@@ -144,40 +145,31 @@ def _mock_call_llm_side_effect(models, alias, msgs, **kwargs):
     raise AssertionError(f"unexpected model alias in mock: {alias!r}")
 
 
+def _acall_llm_bindings() -> list[str]:
+    """Every loaded ``usersim`` module that holds the real ``acall_llm`` under that name."""
+    from usersim.engine.core import llm
+
+    return sorted(
+        f"{name}.acall_llm"
+        for name, module in list(sys.modules.items())
+        # vars(), not getattr(): usersim.extension resolves its names on first
+        # access, and a lookup here must not add a binding.
+        if name.startswith("usersim") and vars(module).get("acall_llm") is llm.acall_llm
+    )
+
+
 @contextmanager
 def _patched_call_llm():
-    """Patch ``acall_llm`` at every simulator-side binding site.
+    """Patch ``acall_llm`` wherever a loaded module holds it.
 
-    ``acall_llm`` is imported by name into multiple modules at module-
-    load time (``from usersim.engine.core.llm import acall_llm``),
-    so a single patch on the source module doesn't propagate to
-    callers — each binding has to be patched explicitly. The
-    simulator-side callers are:
-
-    - ``core/simulation.py`` — the unified ``ConversationLoop``.
-    - ``core/judges.py`` — in-sim user-judge gate + assistant-quality
-      judge + early-stop checker.
-    - ``core/context.py`` — context-compression rolling summary
-      generation.
-    - ``probes/tool_calling/probe.py`` — probe-internal tool
-      arg-generation calls (it doesn't go through ``ConversationLoop``
-      for the tool-call branch).
-    - ``probes/safety_agentic/probe.py`` — mock-environment
-      tool-response synthesis.
-
-    Evaluator-side scorer modules (``evaluator/scorers/*.py``) ALSO
-    import ``acall_llm``, but they aren't exercised by the simulator
-    pipeline this test covers. Leaving them unpatched keeps the
-    surface area focused.
+    Modules import ``acall_llm`` by name (``from usersim.extension import
+    acall_llm``), so a patch on its source module doesn't reach their copies;
+    each binding is patched. They're found rather than listed, so a probe that
+    calls a model itself is covered when it is added and nothing breaks when
+    one is removed. Scorer modules are patched too, which is harmless here,
+    since the simulator never calls them.
     """
-    targets = (
-        "usersim.engine.core.simulation.acall_llm",
-        "usersim.engine.core.judges.acall_llm",
-        "usersim.engine.core.context.acall_llm",
-        "usersim.engine.probes.tool_calling.probe.acall_llm",
-        "usersim.engine.probes.safety_agentic.probe.acall_llm",
-    )
-    patches = [patch(t, side_effect=_mock_call_llm_side_effect) for t in targets]
+    patches = [patch(target, side_effect=_mock_call_llm_side_effect) for target in _acall_llm_bindings()]
     for p in patches:
         p.start()
     try:

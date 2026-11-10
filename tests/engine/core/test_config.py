@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.columns import CORE_RESULT_COLUMNS
+from usersim.engine.core.probes import known_probes, resolve_probe
 
 
 class TestConversationSimulatorConfig:
@@ -53,8 +54,9 @@ class TestConversationSimulatorConfig:
         trajectory as unscoreable rather than failing."""
         cfg = ConversationSimulatorConfig(name="test")
         declared = set(cfg.side_effect_columns)
-        for column in ("query_id", "sovereign_facts_probed", "probing_categories_explored", "finance_task_id"):
-            assert column in declared, f"{column} would be dropped before any scorer could read it"
+        for label in known_probes():
+            for column in resolve_probe(label).output_columns:
+                assert column in declared, f"{label}'s {column} would be dropped before any scorer could read it"
 
     def test_a_run_declares_the_output_columns_of_the_probes_in_its_mix(self, register_test_probe):
         """A probe installed but not in the mix adds no empty columns to the run's rows."""

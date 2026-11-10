@@ -30,6 +30,7 @@ from usersim.cli.smoke import (
     _check_simulator_config,
     _synthetic_smoke_frames,
 )
+from usersim.engine.core.probes import known_probes
 
 # ---------------------------------------------------------------------------
 # End-to-end CLI invocation
@@ -142,19 +143,9 @@ class TestProbeRegistryCheck:
         report = SmokeReport()
         _check_probe_registry(report)
         assert report.all_passed
-        # The detail line should enumerate the registered probes so
-        # a future regression makes the missing one visible immediately.
+        # The detail line names every registered probe, so a missing one is visible at a glance.
         detail = report.results[-1].detail
-        for probe in (
-            "tool_calling",
-            "general_open_ended",
-            "general_educational",
-            "sov_ai_facts",
-            "sov_ai_dynamic",
-            "sov_ai_multilingual_parity",
-            "safety_chat_pressure",
-            "safety_agentic",
-        ):
+        for probe in known_probes():
             assert probe in detail, f"missing {probe!r} in: {detail}"
 
 

@@ -198,14 +198,13 @@ class TestScorerInput:
 
 
 class TestRefusesToSpendMoney:
-    @pytest.mark.parametrize("scorer", ["financial_services", "safety_agentic", "health_disclosure_concealment"])
+    @pytest.mark.parametrize(
+        "scorer", sorted(set(scorers_module.list_scorers()) - set(scorers_module.deterministic_scorers()))
+    )
     def test_hybrid_scorers_are_refused(self, run_on_disk, scorer):
-        """Each looks deterministic but branches into an LLM on some rows:
-        ``financial_services`` and ``safety_agentic`` emit mechanical axes with no
-        ``scorer_kind`` marker yet judge dynamic-tier rows / certain sub-protocols,
-        and ``health_disclosure_concealment`` runs its realized-behavior audit
-        whenever a judge model is wired. Allowing any of them would silently bill
-        an operation that advertises itself as offline.
+        """A scorer not registered as deterministic may call a model on some rows,
+        even one whose axes look mechanical, so rescore refuses it: allowing it
+        would silently bill an operation that advertises itself as offline.
         """
         run_on_disk.scorers = [scorer]
         with pytest.raises(SystemExit) as excinfo:

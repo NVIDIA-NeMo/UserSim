@@ -30,6 +30,7 @@ piece to pick and *how* to wire it.
 12. [Wiring the out-of-sim scorer](#wiring-the-out-of-sim-scorer)
 13. [Adding the capabilities your probe provides evidence for](#adding-the-capabilities-your-probe-provides-evidence-for)
 14. [Judging your probe's rows on axes of their own](#judging-your-probes-rows-on-axes-of-their-own)
+15. [Removing or renaming a built-in](#removing-or-renaming-a-built-in)
 
 ---
 
@@ -1425,6 +1426,34 @@ JUDGE_AXES: dict[str, list[Score]] = {
 The evaluator reads the `axes.py` of every package in `BUILTIN_PACKAGES`. Like
 `capabilities.py`, the module holds definitions only and imports nothing from
 the probe, so judging rows never imports your probe's code.
+
+---
+
+## Removing or renaming a built-in
+
+A built-in's tests live in its own folder, so removing one takes out its
+package folder, its `tests/probes/<package>/` folder, its line in
+`BUILTIN_PACKAGES` and its row in the `docs/probes.md` catalog. The shared
+tests then fail only where code outside the probe still depends on it, and
+each failure names what to change:
+
+- `tests/test_probe_names_in_shared_code.py` lists every place shared code
+  still names the probe. Remove those uses, then the probe's entries in its
+  `_ALLOWED` table.
+- If another probe's capability reads this one, as `sovereign_local_knowledge`
+  in `sov_ai_facts` reads `sov_ai_dynamic`, the capability tests name it.
+  Drop that source from the capability.
+- If the probe was the only code importing a dependency,
+  `tests/test_packaging_contract.py` names it. Remove it from `pyproject.toml`.
+
+Maintainers update the probe and scorer counts in the docs at the next release.
+Renaming a probe is a removal plus an addition, and its label is stored in
+every row, so rows from earlier runs keep the old one.
+
+The three probes in the default mix (`general_open_ended`, `general_educational`
+and `tool_calling`) run when a user picks no probes, and shared tests use them
+as examples, so removing one of them also changes `DEFAULT_PROBE_MIX` and those
+tests.
 
 ---
 
