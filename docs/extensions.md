@@ -77,9 +77,9 @@ build-backend = "setuptools.build_meta"
 name = "my-bookings"
 version = "0.1.0"
 requires-python = ">=3.10"
-# Name the User Sim releases the package works with, such as "usersim>=0.3,<0.4":
-# the first release with every hook it uses, up to the next minor release.
-dependencies = ["usersim", "pyyaml"]
+# The User Sim releases the package works with: from the first release with
+# every hook it uses, up to the next minor release.
+dependencies = ["usersim>=0.3,<0.4", "pyyaml"]
 
 [project.entry-points."usersim.probes"]
 my_bookings = "my_bookings.probe:BookingProbe"

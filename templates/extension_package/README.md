@@ -49,7 +49,9 @@ write areas and their bounds, not messages to send.
 5. Replace the scorer with what your probe measures, and `capabilities.py`
    with the report rows it feeds: without a capability the probe's rows are
    absent from the capability report.
-6. Name the User Sim releases the package works with in `pyproject.toml`.
+6. Set the `usersim` range in `pyproject.toml` to the releases the package
+   works with: from the first release with every hook it uses, up to the next
+   minor release.
 
 ## Test it
 
