@@ -257,6 +257,29 @@ class TestProbeTemplate:
         assert not missing, f"template cites tests that do not exist: {sorted(missing)}"
 
 
+class TestExtensionPackageRange:
+    """The extension template and the guide's example name the User Sim releases they work with.
+
+    A copied package without a range resolves to whatever is newest, including
+    a release that drops a hook it uses. The range must admit the version this
+    tree builds, so it moves with the version: the test fails at the bump that
+    leaves it behind.
+    """
+
+    @pytest.mark.parametrize(
+        "path",
+        ["templates/extension_package/pyproject.toml", "docs/examples/my-bookings/pyproject.toml"],
+    )
+    def test_the_package_names_a_bounded_range_that_admits_this_version(self, path: str) -> None:
+        from packaging.requirements import Requirement
+
+        version = tomllib.loads((_REPO_ROOT / "pyproject.toml").read_text())["project"]["version"]
+        dependencies = tomllib.loads((_REPO_ROOT / path).read_text())["project"]["dependencies"]
+        (usersim,) = [Requirement(d) for d in dependencies if Requirement(d).name == "usersim"]
+        assert any(spec.operator == "<" for spec in usersim.specifier), f"{path}: {usersim} has no upper bound"
+        assert usersim.specifier.contains(version, prereleases=True), f"{path}: {usersim} excludes {version}"
+
+
 class TestTypeMarker:
     """PEP 561. The marker is a single empty file, which makes it easy to lose
     in a build-config change and impossible to notice from the source tree,

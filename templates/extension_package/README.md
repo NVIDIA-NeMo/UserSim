@@ -49,7 +49,9 @@ write areas and their bounds, not messages to send.
 5. Replace the scorer with what your probe measures, and `capabilities.py`
    with the report rows it feeds: without a capability the probe's rows are
    absent from the capability report.
-6. Name the User Sim releases the package works with in `pyproject.toml`.
+6. Set the `usersim` range in `pyproject.toml` to the releases the package
+   works with: from the first release with every hook it uses, up to the next
+   minor release.
 
 ## Test it
 
@@ -58,6 +60,10 @@ uv sync
 uv run pytest
 uv run usersim smoke
 ```
+
+In a workspace of several packages, run `uv run pytest` from inside this
+folder: `tests/conftest.py` loads the harness in a way pytest accepts only at
+the root of a run.
 
 The tests check the probe and the scorer against the contract, run an episode
 with scripted models and no provider, and check that a host driving the probe
