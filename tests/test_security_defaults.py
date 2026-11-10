@@ -267,66 +267,21 @@ class TestProductNaming:
 
 
 class TestDocumentedCounts:
-    """README counts must match the registries they describe.
+    """Superseded counts stay out of the docs.
 
-    A reader checks the headline number, not the code, so a stale count is
-    a false claim about what ships.
+    Whether the current probe and scorer counts match the registries is
+    checked when a release is made (``make check-doc-counts``), so adding a
+    probe never fails a pull request on a number.
     """
 
     @staticmethod
     def _readme() -> str:
-        """README plus the guides it delegates to.
-
-        The counts are split across files: the headline lives in the README,
-        the prose that repeats it lives in the guide for that topic. Both
-        have to agree with the registry, so both are searched.
-        """
+        """README plus the guides it delegates to, with whitespace collapsed."""
         from pathlib import Path
 
         root = Path(__file__).resolve().parents[1]
         parts = [root / "README.md", root / "docs" / "probes.md", root / "docs" / "outputs.md"]
-        joined = "\n".join(p.read_text() for p in parts if p.is_file())
-        # Collapse whitespace: these assertions are about the count being
-        # right, not about where prose happens to wrap.
-        return " ".join(joined.split())
-
-    @staticmethod
-    def _registries() -> tuple[int, int, int]:
-        import usersim.engine.generator  # noqa: F401  (populates the registry)
-        from usersim.engine.core.probes import BankBackedProbe, known_probes, resolve_probe
-        from usersim.engine.evaluator.scorers import list_scorers
-
-        probes = known_probes()
-        bank_backed = [p for p in probes if issubclass(resolve_probe(p), BankBackedProbe)]
-        return len(probes), len(list_scorers()), len(bank_backed)
-
-    #: Spelled-out forms the prose uses.
-    WORDS = {
-        11: "eleven",
-        12: "twelve",
-        13: "thirteen",
-        14: "fourteen",
-        15: "fifteen",
-        9: "nine",
-        10: "ten",
-    }
-
-    def test_probe_count_matches_the_registry(self) -> None:
-        probes, _, _ = self._registries()
-        readme = self._readme()
-        assert f"**{probes} probes ·" in readme, f"README headline does not say {probes} probes"
-        word = self.WORDS[probes].capitalize()
-        assert f"{word} probes ship today" in readme, f"README prose does not say '{word} probes ship today'"
-
-    def test_scorer_count_matches_the_registry(self) -> None:
-        _, scorers, _ = self._registries()
-        readme = self._readme()
-        assert f"· {scorers} evaluator scorers ·" in readme
-        assert f"{self.WORDS[scorers]} ship today" in readme
-
-    def test_bank_backed_probe_count_matches(self) -> None:
-        _, _, bank_backed = self._registries()
-        assert f"{self.WORDS[bank_backed].capitalize()} probes draw on curated banks" in self._readme()
+        return " ".join("\n".join(p.read_text() for p in parts if p.is_file()).split())
 
     def test_no_superseded_counts_remain(self) -> None:
         """Superseded counts do not reappear in the docs."""

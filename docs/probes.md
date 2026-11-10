@@ -6,7 +6,7 @@ catalog: which probe catches which failure mode. For how the probe
 substrate works, see [`architecture/probes.md`](../architecture/probes.md);
 for writing one, [`docs/engine/AUTHORING_A_PROBE.md`](engine/AUTHORING_A_PROBE.md).
 
-Fourteen probes ship today, each aimed at a distinct failure mode. Select them
+User Sim ships 14 probes, each aimed at a distinct failure mode. Select them
 with `--probe-mix` on `usersim simulate`, or `PROBE_MIX = {...}` in
 [`notebooks/01_simulate.ipynb`](../notebooks/01_simulate.ipynb); the registry
 validates the mix at parse time so an unknown probe fails immediately.
@@ -52,7 +52,7 @@ bank's language, with the same marker.
 | `health_*_disclosure` (four clients) | all 11 | yes | one synthetic clinical profile per client; bring your own profile bank |
 | `identity_disclosure` | all 11 | through `en_IN` | 14 worded openings in every locale (the English locales share one wording), plus 7 the simulated user writes |
 
-**Review flags.** Eleven probes draw on curated banks whose entries carry a
+**Review flags.** Of the probes, 11 draw on curated banks whose entries carry a
 review flag: every probe except `tool_calling` and the two `general_*` probes.
 `placeholder: true` marks an entry no native speaker or domain expert has
 verified. Every trajectory that draws on one records a `used_placeholder_*`

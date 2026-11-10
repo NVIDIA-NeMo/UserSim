@@ -58,7 +58,7 @@ COV_FAIL_UNDER ?= 84
 .DEFAULT_GOAL := help
 
 .PHONY: help install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
-        check-all-fix test test-fast coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
+        check-all-fix test test-fast coverage smoke dist check-dist check-release-tag check-doc-counts check-extensions check-new-probe check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 help:  ## Show the available targets
 	@echo "usersim make targets:"
@@ -166,6 +166,11 @@ check-dist: dist  ## Build dist/, check both archives, clean-install the wheel a
 check-release-tag:  ## Fail unless TAG is v + the release version in dist/ and HEAD is on origin/main (TAG=v<version>)
 	@test -n "$$TAG" || { echo "usage: make check-release-tag TAG=v<version>"; exit 1; }
 	@$(UV) run python scripts/check_release_tag.py "$$TAG" dist
+
+# Contributors don't edit the documented probe and scorer counts when they add
+# one; the release workflow runs this, so a release can't ship a stale count.
+check-doc-counts:  ## Fail unless the probe and scorer counts in the docs match the registries
+	@$(UV) run python scripts/check_doc_counts.py
 
 check-dependency-licenses:  ## Check runtime dependency licenses against the policy
 	@$(UV) run --isolated --no-dev --group license-check --locked \
@@ -293,6 +298,9 @@ check-extensions:  ## Install an out-of-tree package, prove all six seams work, 
 	echo "→ installing docs/examples/my-bookings and running its tests"; \
 	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK/example"; \
 	cd "$$WORK/example" && "$$WORK/venv/bin/python" -m pytest -q -p no:cacheprovider
+
+check-new-probe:  ## Add a built-in probe from the extension template to a scratch copy, and run the test suite there
+	@$(UV) run python scripts/check_new_probe.py --workers $(PYTEST_WORKERS)
 
 # --- housekeeping ----------------------------------------------------------
 

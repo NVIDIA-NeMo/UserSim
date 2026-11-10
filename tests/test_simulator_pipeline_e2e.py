@@ -248,7 +248,7 @@ def _synthetic_row_data(
     data: dict[str, Any] = {
         cfg.persona_column: persona,
         cfg.probe_type_column: probe_type,
-        cfg.theme_column: _theme_for(probe_type),
+        cfg.theme_column: _theme_for(probe_type, locale),
     }
     if resolve_probe(probe_type).seed_dataset is not None:
         data["tools"] = _toolset_for_test()
@@ -256,17 +256,14 @@ def _synthetic_row_data(
     return data
 
 
-def _theme_for(probe_type: str) -> str:
-    """Theme-column value the SubcategorySampler would pick.
+def _theme_for(probe_type: str, locale: str) -> str:
+    """The theme-column value a run gives the probe's rows in ``locale``.
 
-    For theme-driven probes the value is JSON; for others it is the
-    sentinel placeholder ``__not_used__`` (matches the value
-    ``cli/_pipeline.py`` uses for non-theme-driven probes)."""
-    if probe_type == "general_open_ended":
-        return '{"type": "general", "description": "casual chat about a topic"}'
-    if probe_type == "general_educational":
-        return '{"type": "math", "description": "elementary math help"}'
-    return "__not_used__"
+    A probe that declares themes gets one of them as JSON, as
+    ``cli/_pipeline.py`` samples them; any other probe gets the sentinel
+    ``__not_used__``, the value the pipeline writes for it."""
+    themes = resolve_probe(probe_type).themes(locale)
+    return json.dumps(themes[0]) if themes else "__not_used__"
 
 
 def _toolset_for_test() -> list[dict[str, Any]]:

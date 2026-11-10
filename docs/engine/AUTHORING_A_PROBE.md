@@ -640,14 +640,11 @@ probe is looked up, and that import is what runs the `@register_probe`
 decorator. The same line registers the package's `scorer.py`,
 `capabilities.py`, `axes.py` and `asset_domain.py`, when it has them.
 
-Add your probe's row to the catalog in [`docs/probes.md`](../probes.md) and
-raise the probe counts: the `N probes` entry in the headline of the root
-`README.md`, the "N probes ship today" sentence in `docs/probes.md` and, for
-a `BankBackedProbe`, the count of probes that draw on curated banks in that
-page's review-flag paragraph. When you add a scorer, raise the scorer counts
-in the README headline and `docs/outputs.md` the same way.
-`tests/test_probe_catalog.py` checks the row, and
-`tests/test_security_defaults.py` each count, against the registries.
+Add your probe's row to the catalog in [`docs/probes.md`](../probes.md);
+`tests/test_probe_catalog.py` checks that every built-in has one. Leave the
+probe and scorer counts in `README.md`, `docs/probes.md` and `docs/outputs.md`
+as they are: maintainers update them when they make a release, and
+`make check-doc-counts` checks them then.
 
 Then state what the shared tests hold your probe to, in
 `tests/probes/<package>/contract.py`: `CONTRACTS` maps your label to a
@@ -655,8 +652,25 @@ Then state what the shared tests hold your probe to, in
 `trajectory_id` of one pinned episode, the metadata key and value that make
 `should_succeed` true (None when you keep the default), and the episodes run
 directly and through a host for parity. Until it is there, the shared tests
-fail and name the file. A wrong `trajectory_id` fails with the id the probe
-produces; pin it once you have checked which fields go into it.
+fail and name the file. The contracts also tell the shared tests which probes
+should exist, so a contract whose probe stops registering fails too.
+
+You can't know the `trajectory_id` before the probe exists, so put any value
+there first. The pin test then fails with the id your probe produces and the
+file to set it in; set it once you have checked which fields go into it.
+
+That is all the tests need from a new built-in: its own two folders (the
+package and `tests/probes/<package>/`), one line in `BUILTIN_PACKAGES` and
+one row in the `docs/probes.md` catalog. On every pull request, CI's
+`make check-new-probe` adds a probe from `templates/extension_package` this
+way to a scratch copy of the repository and runs the test suite there, so a
+change to the shared tests that would break a new probe fails in CI first.
+
+If you start from `templates/extension_package`, two things change in this
+repository. Its tests import the package by its full path
+(`usersim.engine.probes.<package>.probe` instead of `<package>.probe`), and
+its entry-point test goes, because `BUILTIN_PACKAGES` registers a built-in
+instead of entry points.
 
 A built-in imports `usersim` only through `usersim.extension` and
 `usersim.testing`, as an extension does, apart from its own package's modules,

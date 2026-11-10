@@ -29,7 +29,7 @@ scores plus the scorers' outputs. The `trajectory-evaluator` plugin
 configures a judge ensemble (a single judge by default; any ensemble of two or
 more must span at least two architecturally diverse model families, validated
 when the config is built) and a set of
-scorers, of which twelve ship today (`tool_use`, `sov_ai_facts`,
+scorers, of which 12 ship today (`tool_use`, `sov_ai_facts`,
 `sov_ai_dynamic`, `sov_ai_multilingual_parity`, `safety_chat_pressure`,
 `safety_agentic`, `financial_services`, `health_disclosure_concealment`,
 `identity_disclosure`, plus the deterministic `language_compliance` / `response_shape` / `refusal_basics`). Cells carry an
