@@ -20,7 +20,6 @@ port, so a call that slips past the stubs fails at once instead of going out.
 from __future__ import annotations
 
 import copy
-import importlib
 import json
 import logging
 import shutil
@@ -33,7 +32,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-from test_simulator_pipeline_e2e import _mock_call_llm_side_effect
+from test_simulator_pipeline_e2e import _acall_llm_bindings, _mock_call_llm_side_effect
 
 from usersim import cli
 from usersim.cli import _inputs
@@ -55,22 +54,6 @@ from usersim.engine.core.storage import list_runs, read_partitioned_dataset
 from usersim.engine.errors import ConfigError
 from usersim.engine.models_file import ModelsConfig, ProviderSpec, default_models_path, load_models_config
 from usersim.engine.models_file import to_model_configs as _real_to_model_configs
-
-#: Every simulator-side module that holds its own reference to ``acall_llm``,
-#: plus the module itself for the code that imports it at call time.
-_LLM_MODULES = (
-    "usersim.engine.core.llm",
-    "usersim.engine.core.simulation",
-    "usersim.engine.core.judges",
-    "usersim.engine.core.context",
-    "usersim.engine.core.translation",
-    "usersim.engine.probes.health_disclosure.realized_audit",
-    "usersim.engine.probes.health_disclosure.move_runtime",
-    "usersim.engine.probes.safety_agentic.probe",
-    "usersim.engine.probes.safety_chat_pressure.classifier",
-    "usersim.engine.probes.tool_calling.probe",
-)
-_LLM_SITES = tuple(m for m in _LLM_MODULES if hasattr(importlib.import_module(m), "acall_llm"))
 
 
 def _probe_variant_pairs() -> list[tuple[str, str]]:
@@ -104,8 +87,8 @@ def _offline(side_effect=_mock_call_llm_side_effect):
 
     with ExitStack() as stack:
         stack.enter_context(patch("usersim.cli._pipeline.to_model_configs", no_health_checks))
-        for site in _LLM_SITES:
-            stack.enter_context(patch(f"{site}.acall_llm", side_effect=side_effect))
+        for target in _acall_llm_bindings():
+            stack.enter_context(patch(target, side_effect=side_effect))
         yield
 
 
