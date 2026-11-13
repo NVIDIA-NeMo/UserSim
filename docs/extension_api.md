@@ -72,9 +72,10 @@ does not load the conversation loop.
 |---|---|
 | `MODEL_USER` | The alias of the model playing the user |
 | `MODEL_ASSISTANT` | The alias of the assistant under test |
-| `MODEL_JUDGE` | The alias of the model that checks user turns and judges assistant turns during the conversation |
+| `MODEL_JUDGE` | The alias of the model that checks user turns, judges assistant turns and checks tool_calling's simulated tool responses during the conversation |
 | `ConversationSimulatorConfig` | The run's settings, which hooks receive as `cfg` |
 | `acall_llm` | Calls the model behind an alias and returns its reply as a message |
+| `run_inline_judge` | Asks a judge alias for an `<explanation>` and a `<rating>`, reformatting once if needed; returns the explanation, the rating and whether it passed (`success` or `warn`) |
 | `resolve_model_name` | The model id behind an alias, or the alias when its model does not expose one |
 
 ### Prompts

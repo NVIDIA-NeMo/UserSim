@@ -134,7 +134,7 @@ class TestToolHelpers:
             "usersim.engine.probes.tool_calling.probe.acall_llm",
             side_effect=fake_call_llm,
         ):
-            content, rerolled = await _simulate_tool_response(
+            simulated = await _simulate_tool_response(
                 {},
                 tool_spec,
                 tool_call,
@@ -142,8 +142,8 @@ class TestToolHelpers:
                 today="Friday, 2026-11-06",
             )
 
-        assert content == '{"ok":true}'
-        assert rerolled is False
+        assert simulated.content == '{"ok":true}'
+        assert simulated.rerolls == 0
         assert captured["alias"] == "api_response_model"
         assert "city" in captured["prompt"]
         assert "Tokyo" in captured["prompt"]
@@ -173,7 +173,7 @@ class TestToolHelpers:
             "usersim.engine.probes.tool_calling.probe.acall_llm",
             side_effect=fake_call_llm,
         ):
-            content, rerolled = await _simulate_tool_response(
+            simulated = await _simulate_tool_response(
                 {},
                 {"name": "get_weather", "parameters": {"type": "object"}},
                 {"function": {"name": "get_weather", "arguments": '{"city":"Tokyo"}'}},
@@ -181,8 +181,8 @@ class TestToolHelpers:
                 today="Friday, 2026-11-06",
             )
 
-        assert rerolled is True
-        assert json.loads(content) == expected
+        assert simulated.rerolls == 1
+        assert json.loads(simulated.content) == expected
 
 
 def _with_weather_key(sample_tools):
@@ -344,7 +344,11 @@ async def test_concrete_tool_probe_keeps_private_and_public_views_separate(sampl
     assert "Tokyo is 22 degrees." in history
     assert "raw_secret" not in history
     assert "weather-call" not in history
-    assert all("raw_secret" not in message.get("content", "") for call in judge_inputs for message in call)
+    # The response judge checks the raw result; the judges of the conversation never see it.
+    response_checks = [call for call in judge_inputs if "simulated API response" in call[-1]["content"]]
+    assert len(response_checks) == 1 and "raw_secret" in response_checks[0][-1]["content"]
+    conversation_judges = [call for call in judge_inputs if call not in response_checks]
+    assert all("raw_secret" not in message.get("content", "") for call in conversation_judges for message in call)
     exported = json.loads(result["conversation_messages"])
     assert any(message.get("role") == "tool" and "raw_secret" in message.get("content", "") for message in exported)
 

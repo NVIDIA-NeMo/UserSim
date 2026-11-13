@@ -96,6 +96,9 @@ class TraceKind(str, Enum):
     ASSISTANT_QUALITY = "assistant_quality"
     EARLY_STOP = "early_stop"
     API_RESPONSE_REROLL = "api_response_reroll"
+    # The judge's verdict on one simulated tool response (tool_calling):
+    # ``rating`` holds it, ``detail`` the explanation.
+    API_RESPONSE_JUDGE = "api_response_judge"
     TOOL_CALL_VERIFIER = "tool_call_verifier"
     USER_ROLE_VIOLATION = "user_role_violation"
     SUMMARIZATION = "summarization"
@@ -270,6 +273,9 @@ class SimulationOutcome:
     # candidate is flagged in the delivered transcript.
     n_assistant_retries: int = 0
     n_api_response_rerolls: int = 0
+    # Simulated tool responses the judge rejected; each was regenerated
+    # while the probe's attempt budget allowed.
+    n_api_response_rejections: int = 0
     n_fourth_wall_triggers: int = 0
     n_user_role_violations: int = 0
     n_user_language_violations: int = 0
@@ -298,6 +304,7 @@ class SimulationOutcome:
             "n_assistant_inline_failures": self.n_assistant_inline_failures,
             "n_assistant_retries": self.n_assistant_retries,
             "n_api_response_rerolls": self.n_api_response_rerolls,
+            "n_api_response_rejections": self.n_api_response_rejections,
             "n_fourth_wall_triggers": self.n_fourth_wall_triggers,
             "n_user_role_violations": self.n_user_role_violations,
             "n_user_language_violations": self.n_user_language_violations,
@@ -385,6 +392,9 @@ class OutcomeBuilder:
 
     def inc_api_response_rerolls(self) -> None:
         self._outcome.n_api_response_rerolls += 1
+
+    def inc_api_response_rejections(self) -> None:
+        self._outcome.n_api_response_rejections += 1
 
     def inc_fourth_wall_triggers(self) -> None:
         self._outcome.n_fourth_wall_triggers += 1
