@@ -415,6 +415,9 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     )
     default_scorers = ("tool_use",)
     tool_loop_mode = "multi"
+    # A turn changes the transcript, the metadata, the outcome record and
+    # ``held_credentials``, so a rejected turn can be undone and regenerated.
+    supports_assistant_resampling = True
     #: The warning a row carries for each simulated response that stands
     #: without a passing judge verdict.
     unverified_response_warning_kind = "unverified_tool_response"
@@ -522,6 +525,12 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             ),
             today=_format_day(self.options.today),
         )
+
+    def snapshot_turn_state(self) -> dict[str, str]:
+        return dict(self.held_credentials)
+
+    def restore_turn_state(self, snapshot: dict[str, str]) -> None:
+        self.held_credentials = dict(snapshot)
 
     def seed_state_metadata(self, state: ConversationState) -> None:
         # The date the conversation is set on, so its dates can be read later.

@@ -316,6 +316,28 @@ class TestTraces:
         assert parsed[1]["call_idx"] == 2
 
 
+class TestRollback:
+    def test_undoes_counters_warnings_and_traces_but_keeps_usage(self) -> None:
+        b = OutcomeBuilder()
+        b.inc_api_response_rejections()
+        b.add_warning("unverified_tool_response", turn_idx=0)
+        b.add_trace(SimulationTrace(kind=TraceKind.API_RESPONSE_JUDGE, turn_idx=0))
+        checkpoint = b.checkpoint()
+
+        b.inc_api_response_rejections()
+        b.inc_api_response_rerolls()
+        b.add_warning("unverified_tool_response", turn_idx=1)
+        b.add_trace(SimulationTrace(kind=TraceKind.API_RESPONSE_JUDGE, turn_idx=1))
+        b.record_call("api_response_model", input_tokens=10, output_tokens=5, elapsed_s=0.5)
+        b.rollback(checkpoint)
+
+        out = b.finalize(OutcomeStatus.OK)
+        assert (out.n_api_response_rejections, out.n_api_response_rerolls) == (1, 0)
+        assert [w.turn_idx for w in out.warnings] == [0]
+        assert [t.turn_idx for t in b.traces()] == [0]
+        assert out.per_model_calls == {"api_response_model": 1}
+
+
 class TestMakeFailedWithOutcome:
     """make_failed must synthesize a valid outcome when none is supplied."""
 

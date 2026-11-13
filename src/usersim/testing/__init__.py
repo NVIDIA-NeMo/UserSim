@@ -166,6 +166,18 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
                     f"docs/engine/EXTERNAL_PROBE_RUNTIME.md."
                 )
 
+    # The loop hands restore_turn_state whatever snapshot_turn_state returned.
+    turn_state_hooks = [
+        hook
+        for hook in ("snapshot_turn_state", "restore_turn_state")
+        if getattr(cls, hook, None) is not getattr(BaseProbe, hook, None)
+    ]
+    if len(turn_state_hooks) == 1:
+        problems.append(
+            f"{cls.__qualname__} overrides {turn_state_hooks[0]} alone. The loop restores a rejected "
+            f"turn with restore_turn_state(snapshot_turn_state()), so override both or neither."
+        )
+
     declared = getattr(cls, "assets_root", None)
     if declared is not None and not Path(declared).is_absolute():
         problems.append(

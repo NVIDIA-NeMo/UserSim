@@ -32,6 +32,10 @@ What you provide:
   in ``state.metadata["tools_called"]``.
 - ``build_result_extras`` — surface ``num_tool_calls`` and the tool
   subset used.
+- Optionally, ``supports_assistant_resampling = True`` with
+  ``snapshot_turn_state`` / ``restore_turn_state``, when the only state a
+  turn changes beyond the transcript and metadata is on the probe itself,
+  so judge-gated resampling (``max_assistant_attempts > 1``) can undo it.
 
 Total LOC: ~200. ``tool_calling`` is a real example at ~410 LOC
 (extra LOC: tool-name validation, tool-result simulation via API-

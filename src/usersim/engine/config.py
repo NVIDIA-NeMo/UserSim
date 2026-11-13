@@ -71,10 +71,10 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # within this budget; only the final candidate enters the
     # transcript. Intended for SDG-style runs where the assistant is a
     # data generator rather than a model under test — leave at 1 for
-    # pure-capability evaluation. Probes whose ``after_assistant_turn``
-    # has side effects (tool execution) opt out via
-    # ``supports_assistant_resampling = False`` and are capped to one
-    # attempt regardless of this setting. Gate semantics: ``warn``
+    # pure-capability evaluation. A discarded candidate is undone, keeping
+    # only the judge's verdict; probes whose turn changes state the loop
+    # can't undo opt out via ``supports_assistant_resampling = False`` and
+    # are capped to one attempt regardless of this setting. Gate semantics: ``warn``
     # counts as a pass (only ``failure`` triggers a resample), and a
     # judge reply with no parseable rating is re-asked once on the same
     # candidate instead of being charged against the budget. Failure

@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from enum import Enum
 from typing import Any
 
@@ -358,6 +358,15 @@ class SimulationTrace:
         }
 
 
+@dataclass(frozen=True)
+class OutcomeCheckpoint:
+    """An ``OutcomeBuilder``'s counters, warnings and traces at one moment."""
+
+    counters: dict[str, int]
+    n_warnings: int
+    n_traces: int
+
+
 # ---------------------------------------------------------------------------
 # Builder — mutated during simulation; frozen into SimulationOutcome at end
 # ---------------------------------------------------------------------------
@@ -422,6 +431,28 @@ class OutcomeBuilder:
 
     def traces(self) -> list[SimulationTrace]:
         return list(self._traces)
+
+    # ── rollback ──────────────────────────────────────────────────
+
+    def checkpoint(self) -> OutcomeCheckpoint:
+        """The counters, warnings and traces as they stand, for :meth:`rollback`."""
+        return OutcomeCheckpoint(
+            counters={
+                f.name: getattr(self._outcome, f.name) for f in fields(SimulationOutcome) if f.name.startswith("n_")
+            },
+            n_warnings=len(self._outcome.warnings),
+            n_traces=len(self._traces),
+        )
+
+    def rollback(self, checkpoint: OutcomeCheckpoint) -> None:
+        """Undo every counter, warning and trace recorded since ``checkpoint``.
+
+        Model usage (calls, tokens, wall clock) stays: those calls were made.
+        """
+        for name, value in checkpoint.counters.items():
+            setattr(self._outcome, name, value)
+        del self._outcome.warnings[checkpoint.n_warnings :]
+        del self._traces[checkpoint.n_traces :]
 
     # ── per-model aggregation (called from within the LLM layer) ──
 

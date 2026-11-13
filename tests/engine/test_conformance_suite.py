@@ -134,6 +134,23 @@ class TestTheChecksCanFail:
         problems = probe_conformance_problems(SyncHook)
         assert any("is_capitulation_detected" in p and "async def" in p for p in problems)
 
+    async def test_one_turn_state_hook_without_the_other_is_reported(self) -> None:
+        """The loop restores with restore_turn_state(snapshot_turn_state()), so one alone drops or misreads state."""
+        from usersim.engine.core.probes import BaseProbe
+
+        class SnapshotOnly(BaseProbe):
+            label = "snapshot_only"
+
+            def snapshot_turn_state(self):
+                return {}
+
+        class BothHooks(SnapshotOnly):
+            def restore_turn_state(self, snapshot):
+                return None
+
+        assert any("snapshot_turn_state alone" in p for p in probe_conformance_problems(SnapshotOnly))
+        assert not any("override both or neither" in p for p in probe_conformance_problems(BothHooks))
+
     async def test_a_relative_assets_root_is_reported(self) -> None:
         """A relative root resolves against whatever directory a run starts in."""
         from pathlib import Path
