@@ -124,6 +124,12 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   probe's `response_judge_model_alias` setting), so these checks can run on
   another model than the per-turn judges', spreading the load in tool-heavy
   runs; a models file without it uses `judge_model`.
+- Unless a run switches it off (`--no-assistant-judge`), the per-turn
+  assistant judge reads the turn's tool calls and results and also fails a
+  reply that states a result no tool returned or claims an action no call
+  performed. Such failures start with `[UNGROUNDED]` and count in
+  `n_assistant_ungrounded`. With `--max-assistant-attempts` above 1, the
+  rejected turn is undone, tool calls included, and regenerated.
 - A call that breaks its tool's schema gets a `400` response instead of a
   simulated one, and a call without the user's key for a tool that takes one
   gets a `401` (see [Credentials](#credentials)).

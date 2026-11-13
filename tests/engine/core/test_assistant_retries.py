@@ -74,6 +74,7 @@ class _Harness:
         responses: list[str],
         verdicts: list[bool],
         traces: list[str] | None = None,
+        explanations: list[str] | None = None,
     ):
         self.assistant_calls = 0
         self.judge_calls = 0
@@ -94,9 +95,10 @@ class _Harness:
             self.judge_prompts.append(prompt)
             self.judge_calls += 1
             rating = "success" if ok else "failure"
+            explanation = explanations[self.judge_calls - 1] if explanations else f"verdict {self.judge_calls}"
             # parse_ok=True: scripted verdicts are genuine judgments,
             # not parser defaults (judge flakiness is tested separately).
-            return f"verdict {self.judge_calls}", rating, ok, True
+            return explanation, rating, ok, True
 
         monkeypatch.setattr(sim, "acall_llm", fake_call_llm)
         monkeypatch.setattr(sim, "run_inline_judge_ex", fake_judge_ex)
@@ -332,6 +334,34 @@ class TestTheJudgeSeesTheTurnsToolResults:
         assert "Tool response: " + "e" * 1000 + "\n" in h.judge_prompts[0]
         assert "Tool response: result of " + "x" * 1500 + "\n" in h.judge_prompts[0] + "\n"
         assert h.judge_prompts[0].index("User: Q1") < h.judge_prompts[0].index("result of")
+
+
+class TestUngroundedReplies:
+    """A failure the judge marks [UNGROUNDED] is counted, whether its reply is discarded or kept."""
+
+    async def test_a_discarded_ungrounded_reply_is_counted(self, monkeypatch):
+        _Harness(
+            monkeypatch,
+            ["made up", "grounded"],
+            [False, True],
+            explanations=["[UNGROUNDED] No tool returned that price.", "Fine."],
+        )
+        state = _make_state()
+        await _run(state, _StubConfig(2), _StatefulProbe())
+        out = state.outcome.finalize(OutcomeStatus.OK)
+        assert (out.n_assistant_ungrounded, out.n_assistant_retries) == (1, 1)
+
+    async def test_a_kept_ungrounded_reply_is_counted(self, monkeypatch):
+        _Harness(monkeypatch, ["made up"], [False], explanations=["[UNGROUNDED] No tool returned that price."])
+        state = _make_state()
+        await _run(state, _StubConfig(1, assistant_judge=True), _StatefulProbe())
+        assert state.outcome.finalize(OutcomeStatus.OK).n_assistant_ungrounded == 1
+
+    async def test_other_failures_are_not(self, monkeypatch):
+        _Harness(monkeypatch, ["off topic", "fine"], [False, True], explanations=["It ignores the question.", "Fine."])
+        state = _make_state()
+        await _run(state, _StubConfig(2), _StatefulProbe())
+        assert state.outcome.finalize(OutcomeStatus.OK).n_assistant_ungrounded == 0
 
 
 class TestRejectedAttemptIsUndone:

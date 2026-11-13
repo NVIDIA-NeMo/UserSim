@@ -430,7 +430,7 @@ class TestAssistantJudgePrompt:
             probe.format_assistant_judge_prompt("R", "H")
         assert "nosuchkey" in str(e.value)
 
-    @pytest.mark.parametrize("probe", THEME_PROBES)
+    @pytest.mark.parametrize("probe", [p for p in THEME_PROBES if p != "tool_calling"])
     def test_shipped_asset_matches_the_compiled_default(self, probe):
         """The key ships in all three prompts.yaml so it is discoverable.
 
@@ -444,3 +444,19 @@ class TestAssistantJudgePrompt:
 
         shipped = yaml.safe_load((probe_assets_dir(probe) / "prompts.yaml").read_text())
         assert shipped["assistant_judge_prompt"] == ASSISTANT_JUDGE_PROMPT
+
+    def test_tool_callings_override_adds_grounding_to_the_default_criteria(self):
+        """tool_calling's judge also fails a reply the tool results don't
+        support, and marks that failure so the loop can count it."""
+        import yaml
+
+        from usersim.engine.core.judges import UNGROUNDED_TOKEN
+        from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
+
+        shipped = yaml.safe_load((probe_assets_dir("tool_calling") / "prompts.yaml").read_text())
+        prompt = shipped["assistant_judge_prompt"]
+        default_criteria = [line for line in ASSISTANT_JUDGE_PROMPT.splitlines() if line.startswith("- ")]
+        assert default_criteria and all(line in prompt.splitlines() for line in default_criteria)
+        assert f"Start the explanation with {UNGROUNDED_TOKEN} when" in prompt
+        assert f"<explanation>\n{UNGROUNDED_TOKEN} or [GROUNDED]" in prompt
+        assert "no tool response in the conversation contains" in prompt

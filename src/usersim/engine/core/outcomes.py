@@ -276,6 +276,9 @@ class SimulationOutcome:
     # Simulated tool responses the judge rejected; each was regenerated
     # while the probe's attempt budget allowed.
     n_api_response_rejections: int = 0
+    # Assistant replies the per-turn judge failed as unsupported by the tool
+    # results (``judges.UNGROUNDED_TOKEN``), discarded or kept.
+    n_assistant_ungrounded: int = 0
     n_fourth_wall_triggers: int = 0
     n_user_role_violations: int = 0
     n_user_language_violations: int = 0
@@ -305,6 +308,7 @@ class SimulationOutcome:
             "n_assistant_retries": self.n_assistant_retries,
             "n_api_response_rerolls": self.n_api_response_rerolls,
             "n_api_response_rejections": self.n_api_response_rejections,
+            "n_assistant_ungrounded": self.n_assistant_ungrounded,
             "n_fourth_wall_triggers": self.n_fourth_wall_triggers,
             "n_user_role_violations": self.n_user_role_violations,
             "n_user_language_violations": self.n_user_language_violations,
@@ -404,6 +408,9 @@ class OutcomeBuilder:
 
     def inc_api_response_rejections(self) -> None:
         self._outcome.n_api_response_rejections += 1
+
+    def inc_assistant_ungrounded(self) -> None:
+        self._outcome.n_assistant_ungrounded += 1
 
     def inc_fourth_wall_triggers(self) -> None:
         self._outcome.n_fourth_wall_triggers += 1

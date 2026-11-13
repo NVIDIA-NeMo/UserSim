@@ -33,7 +33,9 @@ class _RejectsTheFirstReply(ScriptedModel):
         text = str(last.get("content", "") if isinstance(last, dict) else getattr(last, "content", ""))
         if self.role == "judge" and _ASSISTANT_JUDGE in text and not type(self).rejected:
             type(self).rejected += 1
-            reply.message.content = "<explanation>Wrong city.</explanation><rating>failure</rating>"
+            reply.message.content = (
+                "<explanation>[UNGROUNDED] No tool returned that temperature.</explanation><rating>failure</rating>"
+            )
         return reply
 
 
@@ -57,7 +59,7 @@ async def test_a_rejected_tool_turn_leaves_only_its_verdict() -> None:
     assistant_calls = [p for p in run.prompts if p["role"] == "assistant" and p["tools"]]
 
     assert _RejectsTheFirstReply.rejected == 1
-    assert outcome["n_assistant_retries"] == 1
+    assert outcome["n_assistant_retries"] == outcome["n_assistant_ungrounded"] == 1
     assert len(tool_messages) == len(metadata["tools_called"]) == run.row["num_tool_calls"]
     assert len(assistant_calls) > len(tool_messages)
     assert len([t for t in traces if t["kind"] == "api_response_judge"]) == len(tool_messages)

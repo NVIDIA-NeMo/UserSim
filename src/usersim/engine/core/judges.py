@@ -85,6 +85,12 @@ async def run_inline_judge_ex(
     return explanation, rating, rating in ("success", "warn"), parsed_ok2
 
 
+#: Starts the explanation of an assistant-judge failure for a reply the tool
+#: results don't support. The loop counts such failures in
+#: ``n_assistant_ungrounded``; a probe's ``assistant_judge_prompt`` asks for it.
+UNGROUNDED_TOKEN = "[UNGROUNDED]"
+
+
 def runs_assistant_judge(cfg: Any) -> bool:
     """Whether the loop judges assistant turns: unless switched off (``assistant_judge``), and always above one attempt."""
     return bool(getattr(cfg, "assistant_judge", True)) or int(getattr(cfg, "max_assistant_attempts", 1) or 1) > 1

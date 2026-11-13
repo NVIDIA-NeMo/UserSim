@@ -34,7 +34,7 @@ from usersim.engine.core.context import (
     prepare_assistant_history,
     summarize_response,
 )
-from usersim.engine.core.judges import run_inline_judge, run_inline_judge_ex, runs_assistant_judge
+from usersim.engine.core.judges import UNGROUNDED_TOKEN, run_inline_judge, run_inline_judge_ex, runs_assistant_judge
 from usersim.engine.core.llm import (
     NON_ASCII_TOKEN_SCALE,
     ContextWindowError,
@@ -854,7 +854,9 @@ class ConversationLoop:
         (accepted or last) candidate remains. A rejected attempt leaves
         its verdict in ``conversation_metadata["assistant_judge_ratings"]``
         with its ``attempt`` index, its ``assistant_quality`` trace, and a
-        count in ``n_assistant_retries``.
+        count in ``n_assistant_retries``. A failure whose explanation starts
+        with ``UNGROUNDED_TOKEN`` also counts in ``n_assistant_ungrounded``,
+        whether its reply was discarded or kept.
 
         Probes that declare ``supports_assistant_resampling = False``
         are capped to a single attempt regardless of the configured budget.
@@ -957,20 +959,20 @@ class ConversationLoop:
                 if (asst_expl or not parse_ok)
                 else None,
             )
-            state.metadata.setdefault("assistant_judge_ratings", []).append(entry)
-            state.outcome.add_trace(verdict)
-            if asst_ok:
-                break
-            if snapshot is not None:
+            if not asst_ok and snapshot is not None:
                 restore_turn_snapshot(state, probe, snapshot)
-                state.metadata.setdefault("assistant_judge_ratings", []).append(entry)
-                state.outcome.add_trace(verdict)
                 state.outcome.inc_assistant_retries()
                 logger.debug(
                     f"  |-- {probe.label}: assistant judge rejected turn "
                     f"{turn_idx + 1} candidate (attempt "
                     f"{attempt + 1}/{max_attempts}); resampling"
                 )
+            state.metadata.setdefault("assistant_judge_ratings", []).append(entry)
+            state.outcome.add_trace(verdict)
+            if not asst_ok and UNGROUNDED_TOKEN in (asst_expl or ""):
+                state.outcome.inc_assistant_ungrounded()
+            if asst_ok:
+                break
         return synthesis_content, asst_expl, asst_rating, asst_ok
 
     async def run(

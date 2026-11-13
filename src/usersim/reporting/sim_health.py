@@ -53,6 +53,7 @@ OUTCOME_COUNTERS: tuple[str, ...] = (
     "n_user_language_violations",
     "n_assistant_inline_failures",
     "n_assistant_retries",
+    "n_assistant_ungrounded",
     "n_api_response_rerolls",
     "n_api_response_rejections",
     "n_fourth_wall_triggers",
