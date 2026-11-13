@@ -158,7 +158,7 @@ LOCALE_TO_LANGUAGE_NAME: dict[str, str | None] = {
     # Romanized Hindi: deliberately ``None``. lingua cannot detect romanized
     # Hindi (it reads as English), so the deterministic language scorers
     # ``_noop``/skip on ``None`` rather than emit wrong signals; in-sim
-    # language enforcement uses the LLM judge clause (see core/simulation.py
+    # language enforcement uses the LLM judge clause (see core/user_language.py
     # ROMANIZED_LOCALES) and assistant-side conformance rides the evaluator's
     # ``language_appropriateness`` judge axis.
     "hi_Latn_IN": None,
@@ -373,7 +373,7 @@ def _build_india_variant_locales() -> dict[str, IndiaVariant]:
         )
         # Romanized twin: lingua cannot detect it (reads as English) so
         # lingua_name=None + LATIN_RANGES; language enforcement rides the
-        # romanized directive + user-judge language clause in core/simulation.py.
+        # romanized directive + user-judge language clause in core/user_language.py.
         out[latin] = IndiaVariant(
             base_locale=_INDIA_BASE_LOCALE,
             language_display=language,

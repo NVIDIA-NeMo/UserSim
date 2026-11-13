@@ -96,6 +96,15 @@ class TestBuildSimHealth:
         # n_user_role_violations: 0+0+1+0+0+0 = 1
         assert b.counters_totals["n_user_role_violations"] == 1
 
+    def test_language_violations_are_counted(self, trajectory_df) -> None:
+        df = trajectory_df.copy()
+        for row, violations in ((0, 2), (3, 1)):
+            outcome = json.loads(df.at[row, "simulation_outcome"])
+            outcome["n_user_language_violations"] = violations
+            df.at[row, "simulation_outcome"] = json.dumps(outcome)
+        b = build_sim_health(df)
+        assert b.counters_totals["n_user_language_violations"] == 3
+
     def test_resource_profile_aggregated(self, trajectory_df) -> None:
         b = build_sim_health(trajectory_df)
         assert b.resource_profile.n_trajectories == 6

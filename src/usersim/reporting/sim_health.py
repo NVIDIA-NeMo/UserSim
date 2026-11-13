@@ -43,6 +43,21 @@ from usersim.reporting.resource import (
     aggregate_from_dataframe,
 )
 
+#: The ``simulation_outcome`` counters the bundle summarises, as a mean and a
+#: total each. A row written before a counter existed simply lacks it.
+OUTCOME_COUNTERS: tuple[str, ...] = (
+    "n_turns",
+    "n_tool_calls",
+    "n_user_query_attempts",
+    "n_user_followup_retries",
+    "n_user_language_violations",
+    "n_assistant_inline_failures",
+    "n_assistant_retries",
+    "n_api_response_rerolls",
+    "n_fourth_wall_triggers",
+    "n_user_role_violations",
+)
+
 
 def _decode_outcome(raw: Any) -> dict[str, Any]:
     if raw is None:
@@ -130,18 +145,7 @@ def _explode_outcome_columns(df: Any) -> Any:
     out["_failure_class"] = decoded.apply(lambda d: d.get("failure_class"))
     out["_failure_attribution"] = decoded.apply(lambda d: d.get("failure_attribution"))
     out["_early_stop"] = decoded.apply(lambda d: bool(d.get("early_stop", False)))
-    counter_keys = [
-        "n_turns",
-        "n_tool_calls",
-        "n_user_query_attempts",
-        "n_user_followup_retries",
-        "n_assistant_inline_failures",
-        "n_assistant_retries",
-        "n_api_response_rerolls",
-        "n_fourth_wall_triggers",
-        "n_user_role_violations",
-    ]
-    for k in counter_keys:
+    for k in OUTCOME_COUNTERS:
         out[f"_{k}"] = decoded.apply(lambda d, _k=k: d.get(_k))
     out["_provenance"] = decoded.apply(lambda d: d.get("provenance") or {})
     return out
@@ -287,18 +291,7 @@ def build_sim_health(df: Any) -> SimHealthBundle:
         bundle.failure_taxonomy = _build_failure_taxonomy(df_exp)
         bundle.failure_taxonomy_by_locale = _build_failure_taxonomy_by_locale(df_exp)
         bundle.early_stop_rate = round(float(df_exp["_early_stop"].mean()), 4)
-        counter_keys = [
-            "n_turns",
-            "n_tool_calls",
-            "n_user_query_attempts",
-            "n_user_followup_retries",
-            "n_assistant_inline_failures",
-            "n_assistant_retries",
-            "n_api_response_rerolls",
-            "n_fourth_wall_triggers",
-            "n_user_role_violations",
-        ]
-        for k in counter_keys:
+        for k in OUTCOME_COUNTERS:
             col = f"_{k}"
             if col not in df_exp.columns:
                 continue

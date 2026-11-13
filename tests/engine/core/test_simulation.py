@@ -17,24 +17,27 @@ from usersim.engine.core.outcomes import (
 )
 from usersim.engine.core.simulation import (
     _FOURTH_WALL_PHRASES,
-    ROMANIZED_LOCALES,
     ConversationLoop,
     ConversationState,
     _build_user_followup_messages,
     _is_assistant_refusal_echo,
     _is_fourth_wall_break,
+    make_failed,
+    make_result,
+)
+from usersim.engine.core.user_language import (
+    ROMANIZED_LOCALES,
     _is_user_script_compliant,
     _language_judge_clause,
     _script_directive,
     language_instruction,
-    make_failed,
-    make_result,
 )
 
 
 class TestLanguageInstruction:
-    def test_english_returns_empty(self):
-        assert language_instruction("English") == ""
+    def test_english_gets_a_directive(self):
+        result = language_instruction("English")
+        assert "MUST write your messages in English." in result
 
     def test_non_english_returns_instruction(self):
         result = language_instruction("Portuguese")
@@ -54,9 +57,7 @@ class TestLanguageInstruction:
         # en_IN is Latin-script; no romanization clause should appear.
         result = language_instruction("Indian English", "en_IN")
         assert "romanize" not in result
-
-    def test_english_stays_empty_even_with_locale(self):
-        assert language_instruction("English", "en_US") == ""
+        assert "MUST write your messages in Indian English." in result
 
 
 class TestMakeResult:
@@ -567,11 +568,11 @@ class TestRomanizedLanguageJudgeClause:
         assert "[LANGUAGE]" in clause
         assert "failure" in clause.lower()
 
-    def test_no_clause_for_english_or_non_latin_or_other_latin(self) -> None:
-        # English, non-Latin (handled by deterministic script check), and
-        # fr/pt (real lingua coverage) are deliberately left untouched.
+    def test_other_locales_get_their_own_language_clause(self) -> None:
+        # The script check can't tell two languages in one script apart, so
+        # every registered locale's gate checks the language too.
         for loc in ("en_US", "en_IN", "hi_Deva_IN", "ja_JP", "ko_KR", "fr_FR", "pt_BR"):
-            assert _language_judge_clause(loc) == ""
+            assert "[LANGUAGE]" in _language_judge_clause(loc)
             assert loc not in ROMANIZED_LOCALES
 
 

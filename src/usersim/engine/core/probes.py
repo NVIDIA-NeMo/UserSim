@@ -73,6 +73,7 @@ from usersim.engine.core.outcomes import (
     WarningKind,
     placeholder_warning_kind_problem,
 )
+from usersim.engine.core.user_language import ROMANIZED_LOCALES, _is_non_ascii_locale
 from usersim.engine.core.user_turn_policy import UserTurnPolicy
 
 logger = logging.getLogger("usersim.engine")
@@ -1001,7 +1002,6 @@ class BankBackedProbe(BaseProbe):
         if not text or self._asset_locale == self._locale:
             return text
         from usersim.engine.core.locale import expected_language_display
-        from usersim.engine.core.simulation import ROMANIZED_LOCALES
         from usersim.engine.core.translation import translate_user_turn
 
         language = expected_language_display(self._locale) or self._language
@@ -1411,7 +1411,6 @@ class ToolExecutionMixin:
             acall_llm,
             scaled_max_tokens,
         )
-        from usersim.engine.core.simulation import _is_non_ascii_locale
 
         kwargs: dict[str, Any] = {}
         tools = self.get_tools_for_assistant() if with_tools else None

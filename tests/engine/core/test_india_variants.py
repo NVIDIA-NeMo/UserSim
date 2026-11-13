@@ -24,8 +24,8 @@ from typing import Any
 
 from usersim.engine.core import behavioral as B
 from usersim.engine.core import locale as L
-from usersim.engine.core import simulation as S
 from usersim.engine.core import translation as T
+from usersim.engine.core import user_language as UL
 from usersim.engine.core.identity import trajectory_id
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
@@ -152,29 +152,29 @@ class TestPresenceAwareResolvers:
 
 
 # ---------------------------------------------------------------------------
-# core/simulation.py — directives derived from the registry
+# core/user_language.py — directives derived from the registry
 # ---------------------------------------------------------------------------
 
 
 class TestSimulationDirectives:
     def test_native_scripts_are_token_dense(self) -> None:
-        assert S._is_non_ascii_locale("ta_Taml_IN")
-        assert not S._is_non_ascii_locale("ta_Latn_IN")  # Latin twin is ASCII-ish
+        assert UL._is_non_ascii_locale("ta_Taml_IN")
+        assert not UL._is_non_ascii_locale("ta_Latn_IN")  # Latin twin is ASCII-ish
 
     def test_native_script_directive(self) -> None:
-        d = S._script_directive("ta_Taml_IN")
+        d = UL._script_directive("ta_Taml_IN")
         assert "native Tamil script" in d and "romanize" in d
 
     def test_romanized_directive_and_judge_clause(self) -> None:
-        assert "ta_Latn_IN" in S.ROMANIZED_LOCALES
-        directive = S._script_directive("ta_Latn_IN")
+        assert "ta_Latn_IN" in UL.ROMANIZED_LOCALES
+        directive = UL._script_directive("ta_Latn_IN")
         assert "romanized Tamil" in directive and "Latin" in directive
-        clause = S._language_judge_clause("ta_Latn_IN")
+        clause = UL._language_judge_clause("ta_Latn_IN")
         assert "[LANGUAGE]" in clause and "Tamil" in clause
 
     def test_shipped_locale_directives_unchanged(self) -> None:
-        assert "hi_Latn_IN" in S.ROMANIZED_LOCALES
-        assert S._is_non_ascii_locale("hi_Deva_IN")
+        assert "hi_Latn_IN" in UL.ROMANIZED_LOCALES
+        assert UL._is_non_ascii_locale("hi_Deva_IN")
 
 
 # ---------------------------------------------------------------------------

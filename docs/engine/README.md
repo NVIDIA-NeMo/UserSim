@@ -185,7 +185,7 @@ conversation locales (11 languages × native + romanized) that reuse the
 conversation locale and the reused-asset locale cleanly separate:
 
 - **`self._locale`**: the *conversation* locale (e.g. `ta_Taml_IN`). Drives
-  language + script enforcement (`core/simulation.py`), the trajectory's
+  language + script enforcement (`core/user_language.py`), the trajectory's
   `locale` column + Hive partition, and the `trajectory_id` salt.
 - **`self._asset_locale`**: the locale whose banks / prompt packs / renderings
   are actually resolved. Set by `BankBackedProbe._load_bank_for_locale` and
@@ -469,7 +469,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `max_steps` | int | `10` | Max tool steps per turn |
 | `max_query_attempts` | int | `3` | Max retries for the user-LLM query / follow-up + judge gate before declaring `USER_QUERY_GATE_EXHAUSTED` |
 | `max_assistant_attempts` | int | `1` | Assistant-turn resampling budget. `1` (default) keeps the per-turn assistant judge flag-only (evaluation semantics). `>1` discards a judge-rejected assistant candidate and regenerates it within the budget: for SDG-style runs where the assistant is a data generator, not a model under test. Discards are counted in `n_assistant_retries`; probes with side-effectful `after_assistant_turn` opt out via `supports_assistant_resampling = False`. Gate semantics: the judge's `warn` rating passes (only `failure` triggers a resample), and a judge reply with no parseable rating is re-asked once on the same candidate rather than charged against the budget (entries marked `judge_parse_error`). With a budget `>1`, prefer a judge from a different model family than the assistant, so the model never filters its own generations: `models_default.toml` and `models_openrouter.toml` pair the assistant with a judge from another family, and `models_openai.toml` uses a different OpenAI model as judge |
-| `enforce_user_language` | bool | `True` | Regenerate a simulated-user turn written in the wrong script for a non-Latin locale, within `max_query_attempts` |
+| `enforce_user_language` | bool | `True` | Regenerate a simulated-user turn written in the wrong script (a deterministic check) or the wrong language (a rule in the user-turn judge gate, for every locale), within `max_query_attempts`; each retry counts in `n_user_language_violations` |
 | `user_language_min_script_compliance` | float | `0.6` | Share of a turn's letters that must be in the locale's script, leaving out codes such as keys, passwords and order numbers (runs of Latin letters and symbols that hold a digit) |
 | `user_language_min_letters` | int | `8` | Shorter turns skip the script check |
 | `incremental_disclosure_ratio` | float | `0.6` | Fraction of users on incremental disclosure (rest go upfront) |
@@ -551,6 +551,7 @@ what each one carries:
 | `core/context.py` | Context management: `summarize_response` writes the short summaries, and `compress_history` / `prepare_assistant_history` build each model's view from them (driven by `cfg.context_compression` / `compression_window`) |
 | `core/user_turn_policy.py` | `UserTurnPolicy`, what a probe's `user_turn_policy()` changes about the loop: compression and the wrap-up anchor on or off, filter phrases its users may write, names the script check skips, a check each generated opening must pass before the gate. Defaults change nothing |
 | `core/language_detection.py` | Lazy `lingua` detector + `script_compliance_fraction` + `script_dominance` helpers used by the deterministic mechanical-evals scorers |
+| `core/user_language.py` | What language and script the simulated user writes in: `language_instruction`, the script directive, the per-turn script check and the language clause of the user-turn judge gate |
 
 **Asset bank loaders (per-probe schemas)**
 
