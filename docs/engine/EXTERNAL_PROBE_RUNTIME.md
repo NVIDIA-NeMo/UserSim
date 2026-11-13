@@ -290,9 +290,11 @@ re-encoded; several probes' simulated responses are not JSON.
 A probe caps how many calls it executes per turn. A recorded call beyond that
 cap never runs, and `tool_result()` raises for it; `executed_tool_calls()` is
 the authoritative list of what ran. With `max_assistant_attempts` above 1, a
-turn the assistant judge rejects is undone and requested again; its calls stay
-in `executed_tool_calls()`, since they ran and the host saw their results, while
-the transcript keeps only the accepted attempt's.
+turn the assistant judge rejects is undone and requested again: the new request
+continues the turn (`continues_turn`), and its `messages` no longer hold the
+rejected attempt. Its calls stay in `executed_tool_calls()`, since they ran and
+the host saw their results, while the transcript keeps only the accepted
+attempt's.
 
 A host that cannot record tool calls simply returns one model response per
 request with no `tool_calls`; User Sim runs the tools either way.

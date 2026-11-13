@@ -216,6 +216,42 @@ async def test_recorded_tool_calls_run_in_the_probes_own_loop() -> None:
     assert json.loads(event.result["conversation_metadata"])["tools_called"] == ["get_weather"]
 
 
+async def test_a_rejected_tool_turn_is_requested_again_and_its_calls_stay_listed() -> None:
+    """The host sees the rejected attempt's call run, so executed_tool_calls keeps it; the row keeps only the accepted one."""
+    runtime = _tool_calling_runtime()
+    runtime.config.max_assistant_attempts = 2
+    runtime.config.max_turns = 1
+    calls = 0
+    rejected = False
+
+    def respond(activation: ActivationRequest) -> dict[str, object]:
+        nonlocal calls, rejected
+        last = str(activation.messages[-1].get("content", "")) if activation.messages else ""
+        sees_a_result = any(message.get("role") == "tool" for message in activation.messages)
+        if activation.role == "assistant" and activation.tools_enabled and not sees_a_result:
+            calls += 1
+            return _tool_call("get_weather", {"location": "Tokyo"}, f"call-{calls}")
+        if activation.role == "assistant":
+            return {"role": "assistant", "content": "It is 22 degrees in Tokyo."}
+        if activation.role == "judge" and "Judge the assistant's response" in last and not rejected:
+            rejected = True
+            return {
+                "role": "assistant",
+                "content": "<explanation>[UNGROUNDED] No tool returned that.</explanation><rating>failure</rating>",
+            }
+        return _text(activation)
+
+    event, _seen = await _drive(runtime, respond)
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    executed = await runtime.executed_tool_calls()
+    assert [call.tool_call_id for call in executed] == ["call-1", "call-2"]
+    transcript = json.loads(event.result["conversation_messages"])
+    assert [m["tool_call_id"] for m in transcript if m["role"] == "tool"] == ["call-2"]
+    assert json.loads(event.result["conversation_metadata"])["tools_called"] == ["get_weather"]
+    assert json.loads(event.result["simulation_outcome"])["n_assistant_retries"] == 1
+
+
 async def test_finalized_row_carries_the_loop_written_columns() -> None:
     """The hosted row is the resolved row updated with the result, as standalone."""
     runtime = _open_ended_runtime()
