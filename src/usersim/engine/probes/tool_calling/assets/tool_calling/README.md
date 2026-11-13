@@ -117,10 +117,13 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
 - There is **no real execution**: the `api_response_model` alias (see
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
   tool's response from the schema, so a run needs no live service.
-- `judge_model` checks each synthesized response against the call before the
+- A judge checks each synthesized response against the call before the
   assistant sees it, and a rejected one is rewritten with the judge's reason,
   within `max_response_attempts` (the probe's `judge_responses` setting turns
-  this off).
+  this off). The judge is the models file's `api_response_judge_model` (the
+  probe's `response_judge_model_alias` setting), so these checks can run on
+  another model than the per-turn judges', spreading the load in tool-heavy
+  runs; a models file without it uses `judge_model`.
 - A call that breaks its tool's schema gets a `400` response instead of a
   simulated one, and a call without the user's key for a tool that takes one
   gets a `401` (see [Credentials](#credentials)).

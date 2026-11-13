@@ -78,6 +78,42 @@ async def test_a_judge_outage_leaves_the_response_standing_unverified() -> None:
     assert result.unverified == "the judge gave no verdict (RuntimeError)"
 
 
+async def test_the_judge_runs_on_the_alias_it_is_given() -> None:
+    aliases: list[str] = []
+
+    async def fake_call_llm(models, alias, messages, **_):
+        return {"content": '{"temp": 22}'}
+
+    async def fake_judge(models, alias, prompt):
+        aliases.append(alias)
+        return "Fine.", "success", True
+
+    with (
+        patch(f"{_PROBE}.acall_llm", side_effect=fake_call_llm),
+        patch(f"{_PROBE}.run_inline_judge", side_effect=fake_judge),
+    ):
+        await _simulate_tool_response(
+            {}, _SPEC, _CALL, [], today="Friday, 2026-11-06", judge=True, judge_alias="api_response_judge_model"
+        )
+    assert aliases == ["api_response_judge_model"]
+
+
+def test_the_probe_names_its_response_judge_and_falls_back_to_judge_model() -> None:
+    config = ConversationSimulatorConfig(name="c")
+    assert ToolCallingProbe.model_aliases(config) == ("api_response_judge_model",)
+    renamed = ConversationSimulatorConfig(
+        name="c", probe_options={"tool_calling": {"response_judge_model_alias": "my_judge"}}
+    )
+    assert ToolCallingProbe.model_aliases(renamed) == ("my_judge",)
+
+    probe = ToolCallingProbe.__new__(ToolCallingProbe)
+    probe.options = ToolCallingProbe.Options()
+    assert probe._response_judge_alias({"judge_model": object(), "api_response_judge_model": object()}) == (
+        "api_response_judge_model"
+    )
+    assert probe._response_judge_alias({"judge_model": object()}) == "judge_model"
+
+
 async def test_without_the_judge_the_first_json_reply_stands() -> None:
     result, _, judge_prompts = await _simulate(['{"temp": 22}'], [], judge=False)
     assert (result.content, result.verdicts, judge_prompts) == ('{"temp": 22}', [], [])
@@ -147,6 +183,7 @@ async def test_every_simulated_response_is_judged_and_traced() -> None:
     assert _response_checks(run)
     assert len(traces) == len(_response_checks(run))
     assert all(t["rating"] == "success" for t in traces)
+    assert {t["model_alias"] for t in traces} == {"judge_model"}
     assert outcome["n_api_response_rejections"] == 0
     assert not [w for w in outcome["warnings"] if w["kind"] == ToolCallingProbe.unverified_response_warning_kind]
 

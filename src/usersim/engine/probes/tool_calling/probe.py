@@ -249,8 +249,9 @@ async def _judge_tool_response(
     conversation_messages: list,
     today: str,
     credential_parameters: tuple[str, ...],
+    judge_alias: str = MODEL_JUDGE,
 ) -> tuple[bool, str]:
-    """``judge_model``'s verdict on one simulated response: ``(passed, explanation)``."""
+    """The ``judge_alias`` model's verdict on one simulated response: ``(passed, explanation)``."""
     prompt = tool_simulator_judge_prompt().format(
         today=today,
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
@@ -267,7 +268,7 @@ async def _judge_tool_response(
         earlier_responses=_earlier_responses(conversation_messages),
         response=content,
     )
-    explanation, _rating, passed = await run_inline_judge(models, MODEL_JUDGE, prompt)
+    explanation, _rating, passed = await run_inline_judge(models, judge_alias, prompt)
     return passed, explanation
 
 
@@ -281,6 +282,7 @@ async def _simulate_tool_response(
     credential_parameters: tuple[str, ...] = (),
     judge: bool = False,
     max_attempts: int = 2,
+    judge_alias: str = MODEL_JUDGE,
 ) -> SimulatedResponse:
     """Use the strong frontier model to simulate a realistic API response.
 
@@ -340,9 +342,10 @@ async def _simulate_tool_response(
                 conversation_messages=conversation_messages,
                 today=today,
                 credential_parameters=credential_parameters,
+                judge_alias=judge_alias,
             )
         except Exception as e:  # a judge outage leaves the response standing, flagged
-            logger.warning("  |-- judge_model raised on a simulated response: %s: %s", type(e).__name__, e)
+            logger.warning("  |-- %s raised on a simulated response: %s: %s", judge_alias, type(e).__name__, e)
             result.unverified = f"the judge gave no verdict ({type(e).__name__})"
             break
         result.verdicts.append((passed, explanation))
@@ -425,12 +428,21 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         #: API response simulator both work from it, so the dates in requests and
         #: in tool results agree.
         today: date = date(2026, 11, 6)
-        #: Have ``judge_model`` check each simulated tool response before the
-        #: assistant sees it, regenerating a rejected one.
+        #: Have a judge check each simulated tool response before the assistant
+        #: sees it, regenerating a rejected one.
         judge_responses: bool = True
+        #: The models-file alias of that judge, so the checks can run on another
+        #: model than the per-turn judges'. A models file without it uses
+        #: ``judge_model``.
+        response_judge_model_alias: str = "api_response_judge_model"
         #: The attempts a simulated response gets: a reply that is not JSON, or
         #: that the judge rejects, uses one.
         max_response_attempts: int = Field(default=2, ge=1)
+
+    @classmethod
+    def model_aliases(cls, cfg: Any) -> tuple[str, ...]:
+        """The model that judges simulated tool responses; without it, ``judge_model`` does."""
+        return (cls.options_for(cfg).response_judge_model_alias,)
 
     @classmethod
     def asset_problems(cls) -> list[str]:
@@ -599,6 +611,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         tool_spec = _find_tool_spec(name, self.tool_subset)
         if tool_spec:
+            judge_alias = self._response_judge_alias(models)
             simulated = await _simulate_tool_response(
                 models,
                 tool_spec,
@@ -608,9 +621,12 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 credential_parameters=tuple(declared),
                 judge=self.options.judge_responses,
                 max_attempts=self.options.max_response_attempts,
+                judge_alias=judge_alias,
             )
             simulated_response = simulated.content
-            self._record_simulation(state, simulated, name, turn_idx=turn_idx, call_idx=call_idx)
+            self._record_simulation(
+                state, simulated, name, turn_idx=turn_idx, call_idx=call_idx, judge_alias=judge_alias
+            )
         else:
             simulated_response = json.dumps({"error": f"Unknown tool: {name}"})
 
@@ -623,8 +639,19 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         state.metadata.setdefault("tools_called", []).append(name)
         return simulated_response
 
+    def _response_judge_alias(self, models: dict) -> str:
+        alias = self.options.response_judge_model_alias
+        return alias if alias in models else MODEL_JUDGE
+
     def _record_simulation(
-        self, state: ConversationState, simulated: SimulatedResponse, name: str, *, turn_idx: int, call_idx: int
+        self,
+        state: ConversationState,
+        simulated: SimulatedResponse,
+        name: str,
+        *,
+        turn_idx: int,
+        call_idx: int,
+        judge_alias: str = MODEL_JUDGE,
     ) -> None:
         """Count and trace how one call's simulated response was reached."""
         for _ in range(simulated.rerolls):
@@ -646,7 +673,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                     kind=TraceKind.API_RESPONSE_JUDGE,
                     turn_idx=turn_idx,
                     call_idx=call_idx,
-                    model_alias=MODEL_JUDGE,
+                    model_alias=judge_alias,
                     rating="success" if passed else "failure",
                     detail=(explanation or "")[:500],
                     extra={"tool_name": name},
