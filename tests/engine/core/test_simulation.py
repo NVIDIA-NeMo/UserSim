@@ -35,8 +35,9 @@ from usersim.engine.core.user_language import (
 
 
 class TestLanguageInstruction:
-    def test_english_returns_empty(self):
-        assert language_instruction("English") == ""
+    def test_english_gets_a_directive(self):
+        result = language_instruction("English")
+        assert "MUST write your messages in English." in result
 
     def test_non_english_returns_instruction(self):
         result = language_instruction("Portuguese")
@@ -56,9 +57,7 @@ class TestLanguageInstruction:
         # en_IN is Latin-script; no romanization clause should appear.
         result = language_instruction("Indian English", "en_IN")
         assert "romanize" not in result
-
-    def test_english_stays_empty_even_with_locale(self):
-        assert language_instruction("English", "en_US") == ""
+        assert "MUST write your messages in Indian English." in result
 
 
 class TestMakeResult:

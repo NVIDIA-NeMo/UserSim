@@ -18,6 +18,7 @@ import re
 from usersim.engine.core.language_detection import script_compliance_fraction
 from usersim.engine.core.locale import (
     INDIA_VARIANT_LOCALES,
+    expected_language_name,
     expected_script_ranges,
 )
 
@@ -43,8 +44,7 @@ def _is_non_ascii_locale(locale: str) -> bool:
 # Human-readable native-script labels for the non-Latin shipped locales.
 # Used to make the user-model language instruction script-explicit so the
 # simulator stops accepting romanized / transliterated turns. Latin-script
-# locales are absent here (no directive needed). Bucket 2 generalizes this
-# to all registered locales via ``expected_script_ranges``.
+# locales are absent here (no script directive needed).
 _SCRIPT_LABEL_BY_LOCALE = {
     "hi_Deva_IN": "Devanagari",
     "ja_JP": "Japanese (hiragana, katakana, and kanji)",
@@ -142,15 +142,45 @@ def _language_judge_clause(locale: str) -> str:
     return _ROMANIZED_JUDGE_CLAUSE_BY_LOCALE.get(locale, "")
 
 
+#: What an English-locale user may and may not mix into English. A user in
+#: India or Singapore writes local idioms and borrowed words, but whole phrases
+#: in another language are another locale's conversation (hi_Latn_IN, for one).
+_ENGLISH_ALLOWANCE = (
+    "Local idioms and the occasional borrowed word are fine, but do NOT write "
+    "phrases or sentences in another language, whether in its own script or "
+    "in Latin letters."
+)
+
+
+def _is_english(language: str, locale: str | None) -> bool:
+    """Whether the user writes English: by the locale's registered language, else by the label."""
+    name = expected_language_name(locale) if locale else None
+    if name is not None:
+        return name == "ENGLISH"
+    return language.endswith("English")
+
+
+def _language_requirement(language: str, locale: str | None = None) -> str:
+    """The language a user turn must be in, as words to follow "write" ("in Portuguese.").
+
+    The loop's per-turn instructions end with it, so every locale's user hears
+    the same requirement on every turn as in its system prompt.
+    """
+    if _is_english(language, locale):
+        return f"in {language}. {_ENGLISH_ALLOWANCE}"
+    return f"in {language}.{_script_directive(locale)}"
+
+
 def language_instruction(language: str, locale: str | None = None) -> str:
     """Build the language instruction block for prompts.
 
-    When ``locale`` is supplied and maps to a non-Latin script, the
-    instruction is made script-explicit (forbidding romanization), which
-    reduces wrong-script regenerations from the user-model gate.
+    Every locale gets one. An English locale's says English, with local idioms
+    and borrowed words allowed; another language's says that language, made
+    script-explicit (forbidding romanization) when ``locale`` maps to a
+    non-Latin script or a romanized one.
     """
-    if language == "English":
-        return ""
+    if _is_english(language, locale):
+        return f"IMPORTANT: You MUST write your messages in {language}. {_ENGLISH_ALLOWANCE}"
     return (
         f"IMPORTANT: You MUST write your messages in {language}. "
         f"The entire conversation should be in {language}."

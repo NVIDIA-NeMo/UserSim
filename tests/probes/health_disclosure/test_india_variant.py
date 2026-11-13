@@ -72,7 +72,9 @@ def test_health_disclosure_shipped_locale_unchanged(
     indian_persona,
     cfg,
 ) -> None:
-    # Shipped locales resolve their own pack — no fallback, no directive.
+    # A shipped locale resolves its own pack, with no fallback, and its directive names its own language.
     probe = _health_probe(label, indian_persona, cfg, "en_US", "English")
     assert probe._asset_locale == "en_US"
-    assert "You MUST write your messages in" not in probe.get_user_system_prompt()
+    prompt = probe.get_user_system_prompt()
+    assert "You MUST write your messages in English." in prompt
+    assert "romanized" not in prompt

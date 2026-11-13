@@ -528,8 +528,10 @@ of its locale, which the probe reads as `self._language` (and its locale as
 `self._locale`); `get_conversation_language(locale)` gives it for any locale.
 `language_instruction(language, locale)` is the block the user model reads:
 write every message in that language and, for a locale with a script of its
-own or a romanized one, in which script, without transliterating. It is empty
-for English. The loop then checks the script of each user turn itself, with no
+own or a romanized one, in which script, without transliterating. An English
+locale's says English, allowing local idioms and borrowed words but not phrases
+in another language, romanized or not. The loop repeats the same requirement in
+every follow-up prompt. It then checks the script of each user turn itself, with no
 model call, and has the user model write the turn again when too little of it
 is in the locale's script, leaving out codes such as a key or an order number
 (`enforce_user_language`,
