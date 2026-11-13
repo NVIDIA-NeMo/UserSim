@@ -105,11 +105,14 @@ they move a run away from LLM-as-fake-user homogeneity. See
    and patience scores. The full behavioral profile additionally surfaces
    `patience` / `verbosity` / `cooperativeness` / `tech_literacy` /
    `error_proneness` parameters that the user-agent prompts read.
-3. **Reactive frustration**: During conversation, when the assistant is
-   judged inadequate, the user agent receives escalating frustration prompts
-   (pushing back, repeating requests, threatening to leave). Escalation rate
-   is computed each turn from the persona's `patience` score, the chosen
-   interaction style, and accumulated assistant failures.
+3. **Reactive frustration**: During conversation, the user agent receives
+   escalating frustration prompts (pushing back, repeating requests,
+   threatening to leave). Escalation is computed each turn from the persona's
+   `patience` score, the chosen interaction style, the turn, and accumulated
+   assistant failures: replies the per-turn assistant judge fails, and replies
+   that fail the response-shape check (empty, tool-call markup, over 800
+   words, heading-heavy). A run that switches the judge off counts only the
+   response-shape check.
 4. **D1–D4 + MATTR behavioral diagnostics**: post-hoc realism metrics
    (front-loading ratio, politeness fraction, verbosity coefficient of
    variation, frustration-marker frequency, lexical diversity) computed in
