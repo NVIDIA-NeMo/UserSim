@@ -76,6 +76,7 @@ does not load the conversation loop.
 | `ConversationSimulatorConfig` | The run's settings, which hooks receive as `cfg` |
 | `acall_llm` | Calls the model behind an alias and returns its reply as a message |
 | `run_inline_judge` | Asks a judge alias for an `<explanation>` and a `<rating>`, reformatting once if needed; returns the explanation, the rating and whether it passed (`success` or `warn`) |
+| `run_inline_judge_ex` | `run_inline_judge` plus whether the reply could be read: `False` when even the reformatted reply has no valid `<rating>`, so a caller can tell an unreadable verdict from a rejection |
 | `resolve_model_name` | The model id behind an alias, or the alias when its model does not expose one |
 
 ### Prompts

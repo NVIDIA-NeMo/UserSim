@@ -76,7 +76,7 @@ from usersim.extension import (
     load_prompt_file,
     register_probe,
     render_prompt,
-    run_inline_judge,
+    run_inline_judge_ex,
 )
 from usersim.extension import language_instruction as _language_instruction
 
@@ -232,12 +232,14 @@ class SimulatedResponse:
 
 def _earlier_responses(conversation_messages: list) -> str:
     """The last few tool responses, each cut to what the judge reads, for its consistency check."""
-    responses = [
-        str(msg.get("content", ""))[:_EARLIER_RESPONSE_CHARS]
-        for msg in conversation_messages
-        if msg.get("role") == "tool"
-    ]
-    return "\n---\n".join(responses[-5:]) or "None."
+    responses = [msg for msg in conversation_messages if msg.get("role") == "tool"][-5:]
+    return (
+        "\n---\n".join(
+            format_conversation_history_for_prompt([response], tool_result_chars=_EARLIER_RESPONSE_CHARS)
+            for response in responses
+        )
+        or "None."
+    )
 
 
 async def _judge_tool_response(
@@ -250,8 +252,8 @@ async def _judge_tool_response(
     today: str,
     credential_parameters: tuple[str, ...],
     judge_alias: str = MODEL_JUDGE,
-) -> tuple[bool, str]:
-    """The ``judge_alias`` model's verdict on one simulated response: ``(passed, explanation)``."""
+) -> tuple[bool, str] | None:
+    """The ``judge_alias`` model's verdict on one simulated response, ``(passed, explanation)``; None when it can't be read."""
     prompt = tool_simulator_judge_prompt().format(
         today=today,
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
@@ -268,8 +270,8 @@ async def _judge_tool_response(
         earlier_responses=_earlier_responses(conversation_messages),
         response=content,
     )
-    explanation, _rating, passed = await run_inline_judge(models, judge_alias, prompt)
-    return passed, explanation
+    explanation, _rating, passed, readable = await run_inline_judge_ex(models, judge_alias, prompt)
+    return (passed, explanation) if readable else None
 
 
 async def _simulate_tool_response(
@@ -299,7 +301,8 @@ async def _simulate_tool_response(
     used, the last JSON response stands, marked ``unverified``; when none was
     JSON, a 502 error payload, so every tool result a conversation stores
     parses. A judge that fails to answer leaves the response standing,
-    unverified, rather than stopping the conversation. Nothing is recorded on
+    unverified, rather than stopping the conversation, as does one whose
+    verdict can't be read even after it is asked to reformat. Nothing is recorded on
     the conversation here: the caller appends the result.
     """
     prior_context = _collect_prior_tool_responses(conversation_messages)
@@ -334,7 +337,7 @@ async def _simulate_tool_response(
         if not judge:
             break
         try:
-            passed, explanation = await _judge_tool_response(
+            verdict = await _judge_tool_response(
                 models,
                 content,
                 tool_spec=tool_spec,
@@ -348,6 +351,10 @@ async def _simulate_tool_response(
             logger.warning("  |-- %s raised on a simulated response: %s: %s", judge_alias, type(e).__name__, e)
             result.unverified = f"the judge gave no verdict ({type(e).__name__})"
             break
+        if verdict is None:
+            result.unverified = "the judge's verdict could not be read"
+            break
+        passed, explanation = verdict
         result.verdicts.append((passed, explanation))
         if passed:
             break

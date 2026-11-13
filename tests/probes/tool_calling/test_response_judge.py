@@ -18,7 +18,7 @@ _CALL = {"function": {"name": "get_weather", "arguments": '{"city":"Tokyo"}'}}
 _PROBE = "usersim.engine.probes.tool_calling.probe"
 
 
-async def _simulate(api_replies: list[str], verdicts: list[Any], **kwargs: Any):
+async def _simulate(api_replies: list[str], verdicts: list[Any], earlier: list | None = None, **kwargs: Any):
     """Run the simulator with scripted API replies and judge verdicts; return the result and the calls."""
     api = iter(api_replies)
     judged = iter(verdicts)
@@ -34,14 +34,16 @@ async def _simulate(api_replies: list[str], verdicts: list[Any], **kwargs: Any):
         verdict = next(judged)
         if isinstance(verdict, Exception):
             raise verdict
+        if verdict is None:
+            return "no tags", "failure", False, False
         passed, explanation = verdict
-        return explanation, "success" if passed else "failure", passed
+        return explanation, "success" if passed else "failure", passed, True
 
     with (
         patch(f"{_PROBE}.acall_llm", side_effect=fake_call_llm),
-        patch(f"{_PROBE}.run_inline_judge", side_effect=fake_judge),
+        patch(f"{_PROBE}.run_inline_judge_ex", side_effect=fake_judge),
     ):
-        result = await _simulate_tool_response({}, _SPEC, _CALL, [], today="Friday, 2026-11-06", **kwargs)
+        result = await _simulate_tool_response({}, _SPEC, _CALL, earlier or [], today="Friday, 2026-11-06", **kwargs)
     return result, api_prompts, judge_prompts
 
 
@@ -86,11 +88,11 @@ async def test_the_judge_runs_on_the_alias_it_is_given() -> None:
 
     async def fake_judge(models, alias, prompt):
         aliases.append(alias)
-        return "Fine.", "success", True
+        return "Fine.", "success", True, True
 
     with (
         patch(f"{_PROBE}.acall_llm", side_effect=fake_call_llm),
-        patch(f"{_PROBE}.run_inline_judge", side_effect=fake_judge),
+        patch(f"{_PROBE}.run_inline_judge_ex", side_effect=fake_judge),
     ):
         await _simulate_tool_response(
             {}, _SPEC, _CALL, [], today="Friday, 2026-11-06", judge=True, judge_alias="api_response_judge_model"
@@ -112,6 +114,19 @@ def test_the_probe_names_its_response_judge_and_falls_back_to_judge_model() -> N
         "api_response_judge_model"
     )
     assert probe._response_judge_alias({"judge_model": object()}) == "judge_model"
+
+
+async def test_an_unreadable_verdict_leaves_the_response_standing_unverified() -> None:
+    """A judge reply with no rating, even reformatted, is no verdict, not a rejection to regenerate."""
+    result, api_prompts, _ = await _simulate(['{"temp": 22}'], [None], judge=True)
+    assert (result.content, len(api_prompts), result.verdicts) == ('{"temp": 22}', 1, [])
+    assert result.unverified == "the judge's verdict could not be read"
+
+
+async def test_earlier_responses_are_cut_with_a_marker() -> None:
+    long_earlier = {"role": "tool", "content": '{"items": "' + "x" * 3000 + '"}', "tool_call_id": "0"}
+    _, _, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=[long_earlier])
+    assert "[cut: 1,000 of 3,013 characters shown]" in judge_prompts[0]
 
 
 async def test_without_the_judge_the_first_json_reply_stands() -> None:
