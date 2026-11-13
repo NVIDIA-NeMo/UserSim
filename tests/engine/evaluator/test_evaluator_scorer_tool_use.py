@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for evaluator/scorers/tool_use.py — the 8-axis tool-calling judge.
+"""Tests for evaluator/scorers/tool_use.py — the tool-calling trajectory judge.
 
-Covers the 8-axis schema, which belongs to the evaluator rather than the
+Covers the trajectory schema, which belongs to the evaluator rather than the
 simulator, plus a behavioral test for scorer registration via the auto-load
 path.
 """
@@ -21,20 +21,22 @@ from usersim.engine.evaluator.scorers.tool_use import (
     score_tool_use_trajectory,
 )
 
+AXES = [
+    "task_completion",
+    "tool_selection",
+    "argument_quality",
+    "unnecessary_tool_use",
+    "information_gathering",
+    "role_adherence",
+    "architecture_leaking",
+    "grounding",
+    "overall",
+]
+
 
 class TestSchemaSurface:
-    def test_8_scores_with_expected_names(self) -> None:
-        names = {s.name for s in TRAJECTORY_SCORES}
-        assert names == {
-            "task_completion",
-            "tool_selection",
-            "argument_quality",
-            "unnecessary_tool_use",
-            "information_gathering",
-            "role_adherence",
-            "architecture_leaking",
-            "overall",
-        }
+    def test_scores_with_expected_names(self) -> None:
+        assert [s.name for s in TRAJECTORY_SCORES] == AXES
 
     def test_scores_are_score_objects_with_1_3_5_scale(self) -> None:
         for s in TRAJECTORY_SCORES:
@@ -123,21 +125,7 @@ class TestScorerOnFakeJudge:
         }
 
     async def test_full_pass_yields_status_proposal_true(self) -> None:
-        self._stub_call_llm(
-            {
-                name: {"score": 5, "reasoning": "ok"}
-                for name in [
-                    "task_completion",
-                    "tool_selection",
-                    "argument_quality",
-                    "unnecessary_tool_use",
-                    "information_gathering",
-                    "role_adherence",
-                    "architecture_leaking",
-                    "overall",
-                ]
-            }
-        )
+        self._stub_call_llm({name: {"score": 5, "reasoning": "ok"} for name in AXES})
         result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
         assert result["status_proposal"] is True
         assert result["scores"]["overall"]["score"] == 5
@@ -145,19 +133,7 @@ class TestScorerOnFakeJudge:
 
     @pytest.mark.parametrize("failing_axis", ["overall", "tool_selection", "architecture_leaking"])
     async def test_critical_axis_failure_flips_status_proposal(self, failing_axis: str) -> None:
-        scores = {
-            name: {"score": 5, "reasoning": "ok"}
-            for name in [
-                "task_completion",
-                "tool_selection",
-                "argument_quality",
-                "unnecessary_tool_use",
-                "information_gathering",
-                "role_adherence",
-                "architecture_leaking",
-                "overall",
-            ]
-        }
+        scores = {name: {"score": 5, "reasoning": "ok"} for name in AXES}
         scores[failing_axis] = {"score": 1, "reasoning": "fail"}
         self._stub_call_llm(scores)
         result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
@@ -165,23 +141,26 @@ class TestScorerOnFakeJudge:
 
     async def test_non_critical_axis_failure_does_not_flip(self) -> None:
         # information_gathering is NOT in the critical-flip set.
-        scores = {
-            name: {"score": 5, "reasoning": "ok"}
-            for name in [
-                "task_completion",
-                "tool_selection",
-                "argument_quality",
-                "unnecessary_tool_use",
-                "information_gathering",
-                "role_adherence",
-                "architecture_leaking",
-                "overall",
-            ]
-        }
+        scores = {name: {"score": 5, "reasoning": "ok"} for name in AXES}
         scores["information_gathering"] = {"score": 1, "reasoning": "weak"}
         self._stub_call_llm(scores)
         result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
         assert result["status_proposal"] is True
+
+    async def test_the_judge_reads_a_whole_tool_result(self) -> None:
+        """Grounding is judged against what the tool returned, and the
+        figure a reply cites is often past the first few hundred characters."""
+        prompts: list[str] = []
+
+        async def _capture(models, alias, msgs, **kwargs):
+            prompts.append(msgs[-1]["content"])
+            return {"content": "{}"}
+
+        tool_use_module.acall_llm = _capture
+        trajectory = self._trajectory()
+        trajectory["conversation_messages"][2]["content"] = "word " * 3000 + "TAIL_FIGURE"
+        await score_tool_use_trajectory(trajectory, {"judge": object()})
+        assert "TAIL_FIGURE" in prompts[0]
 
     async def test_unparseable_response_returns_parse_error(self) -> None:
         async def _stub(models, alias, msgs, **kwargs):

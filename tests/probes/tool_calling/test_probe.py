@@ -3,7 +3,7 @@
 
 """Tests for the simulator-side tool_calling module.
 
-The 8-axis trajectory judge lives in
+The trajectory judge lives in
 ``usersim.engine.evaluator.scorers.tool_use`` (out-of-sim assistant
 evaluation), and its tests live in ``test_evaluator_scorer_tool_use.py``.
 """

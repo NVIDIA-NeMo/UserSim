@@ -9,7 +9,7 @@ result. Most use an LLM judge with structured output, some only for
 certain rows; ``language_compliance``, ``response_shape`` and
 ``refusal_basics`` are rule-based. The bundled scorers:
 
-- ``tool_use``: the 8-axis tool-calling judge for the assistant under test.
+- ``tool_use``: the tool-calling trajectory judge for the assistant under test.
 - ``sov_ai_facts``: scores ``sov_ai_facts`` trajectories against the
   curated fact bank's ground truth. Per-fact structured LLM-judge
   output (accuracy / completeness / fabrication for both question
@@ -105,7 +105,7 @@ where ``trajectory`` is a deserialized row dict (``conversation_messages``,
 ``persona``, ``simulation_outcome``, ``ground_truth``, ...) and ``models``
 is the same model registry passed to the LLM evaluator. Scorers may
 call ``acall_llm``; ``tool_use``, for example, uses an LLM judge for
-its 8-axis structured output.
+its structured per-axis output.
 
 Scorers register themselves at import time via ``register_scorer``.
 The evaluator generator dispatches by name based on its config.

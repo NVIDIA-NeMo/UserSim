@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 #: Version of the judge prompt below. Every evaluation cell records it in its
 #: envelope, so bumping it after a prompt change re-judges stored rows on the
 #: next run instead of mixing scores from two prompts.
-EVAL_PROMPT_VERSION = "v1.2"
+EVAL_PROMPT_VERSION = "v1.3"
 
 EVAL_SYSTEM_PROMPT = (
     "You are an expert evaluator of AI assistant conversations. "

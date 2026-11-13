@@ -15,7 +15,7 @@ persona-grounded, realistic user requests. Key design choices:
   passes any other value gets a 401 response, and an accepted call that sets
   a new value, such as a password change, leaves the user holding it
 
-The 8-axis trajectory judge lives in ``evaluator/scorers/tool_use.py``
+The trajectory judge lives in ``evaluator/scorers/tool_use.py``
 and is invoked by the ``trajectory-evaluator`` plugin. This module only
 emits trajectories. A conversation in which the assistant made no tool
 calls is a completed trajectory, and the judge scores it like any other.
@@ -375,7 +375,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """Tool-calling probe.
 
     Tests the assistant model's native tool-calling capabilities using
-    persona-grounded, realistic user requests. The 8-axis trajectory
+    persona-grounded, realistic user requests. The trajectory
     judge lives in ``evaluator/scorers/tool_use.py`` and is invoked
     by the out-of-sim trajectory evaluator. The simulator only emits
     trajectories. ``ToolCallingMixin`` blocks early-stop until at least

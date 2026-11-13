@@ -19,8 +19,9 @@ Cell envelope (the JSON written into ``self.config.name``):
         "judge_families": ["openai", "nvidia_nemotron", ...],
         "axes": ["helpfulness", "accuracy", ...],
         "scorers": ["tool_use", ...],
-        "prompt_version": "v1.2",
+        "prompt_version": "v1.3",
         "evaluator_version": "v1.0",
+        "tool_result_chars": 24000,
       },
       "axes": {
         "helpfulness": {
@@ -220,6 +221,7 @@ class TrajectoryEvaluatorGenerator(
             "scorers": list(cfg.scorers),
             "prompt_version": cfg.prompt_version,
             "evaluator_version": EVALUATOR_VERSION,
+            "tool_result_chars": cfg.tool_result_chars,
         }
 
         simulation_outcome = _decode_json_field(data.get(cfg.simulation_outcome_column), default=None)
@@ -277,7 +279,7 @@ class TrajectoryEvaluatorGenerator(
         language = data.get(cfg.conversation_language_column) or "English"
 
         persona_text = format_persona_for_prompt(persona) if persona else ""
-        conversation_text = format_conversation_history_for_prompt(messages)
+        conversation_text = format_conversation_history_for_prompt(messages, tool_result_chars=cfg.tool_result_chars)
 
         # ── Run each judge across all applicable axes ────────────
         models = self.get_models()

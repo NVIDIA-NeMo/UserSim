@@ -21,6 +21,7 @@ from typing import Literal
 from data_designer.config.base import SingleColumnConfig
 from pydantic import BaseModel, Field, model_validator
 
+from usersim.engine.core.messages import EVALUATOR_TOOL_RESULT_CHARS
 from usersim.engine.evaluator.judges import (
     EnsembleDiversityError,
     JudgeFamily,
@@ -118,6 +119,15 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
         description=(
             "Names of registered scorers to run (see "
             "``usersim.engine.evaluator.scorers``). Empty by default; opt in per probe."
+        ),
+    )
+
+    tool_result_chars: int = Field(
+        default=EVALUATOR_TOOL_RESULT_CHARS,
+        ge=1,
+        description=(
+            "The most characters of each tool result the judges read, a Han, Kana or Hangul "
+            "character counting as three; a longer result is cut and marked as cut."
         ),
     )
 

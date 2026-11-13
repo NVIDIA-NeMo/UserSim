@@ -20,6 +20,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pandas as pd
 import pytest
 
+from usersim.engine.core.messages import EVALUATOR_TOOL_RESULT_CHARS
 from usersim.engine.evaluator import scorers as scorers_module
 from usersim.engine.evaluator.axes import UNIVERSAL_SCORES, select_axes
 from usersim.engine.evaluator.config import (
@@ -135,6 +136,35 @@ class TestJudgePrompt:
             assert all(anchor in prompts[0] for anchor in axis.options.values()), (
                 f"an anchor of {axis.name} is missing from the judge prompt"
             )
+
+    @pytest.mark.parametrize(("tool_result_chars", "sees_tail"), [(None, True), (500, False)])
+    async def test_tool_results_reach_the_judges_up_to_the_configured_length(
+        self, tool_result_chars: int | None, sees_tail: bool
+    ) -> None:
+        overrides = {} if tool_result_chars is None else {"tool_result_chars": tool_result_chars}
+        gen = _build_generator(TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges(), **overrides))
+        prompts: list[str] = []
+
+        async def _capture(models, judge_alias, prompt, schema_model, max_tokens):
+            prompts.append(prompt)
+            return {}
+
+        gen._call_judge = _capture  # type: ignore[method-assign]
+        await gen.agenerate(
+            {
+                "conversation_messages": json.dumps(
+                    [
+                        {"role": "user", "content": "hi"},
+                        {"role": "tool", "content": "word " * 3000 + "TAIL_FIGURE"},
+                        {"role": "assistant", "content": "hello"},
+                    ]
+                ),
+                "persona": json.dumps({"first_name": "A", "last_name": "B"}),
+                "probe_family": "tool_calling",
+            }
+        )
+
+        assert ("TAIL_FIGURE" in prompts[0]) is sees_tail
 
     async def test_a_row_with_no_family_is_judged_on_the_universal_axes_alone(self) -> None:
         gen = _build_generator(TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges()))
@@ -292,6 +322,7 @@ class TestPartialReRunSkip:
                 "scorers": [],
                 "prompt_version": "v1.0",
                 "evaluator_version": EVALUATOR_VERSION,
+                "tool_result_chars": EVALUATOR_TOOL_RESULT_CHARS,
             },
             "axes": {"helpfulness": {"judge_a": {"score": 3, "reasoning": "old"}}},
             "scorers": {},
@@ -329,6 +360,7 @@ class TestPartialReRunSkip:
                 "scorers": [],
                 "prompt_version": "v1.0",
                 "evaluator_version": EVALUATOR_VERSION,
+                "tool_result_chars": EVALUATOR_TOOL_RESULT_CHARS,
             },
             "axes": {"helpfulness": {}},
             "scorers": {},
@@ -366,6 +398,7 @@ class TestPartialReRunSkip:
                 "scorers": [],
                 "prompt_version": "v1.0",  # old
                 "evaluator_version": EVALUATOR_VERSION,
+                "tool_result_chars": EVALUATOR_TOOL_RESULT_CHARS,
             },
             "axes": {"helpfulness": {"judge_a": {"score": 3, "reasoning": "old"}}},
             "scorers": {},
@@ -380,6 +413,37 @@ class TestPartialReRunSkip:
         assert parsed["skipped"] is False
         assert parsed["axes"]["helpfulness"]["judge_a"]["reasoning"] == "fresh"
         assert parsed["envelope"]["prompt_version"] == "v1.1"
+
+    async def test_a_changed_tool_result_cap_invalidates(self) -> None:
+        """Judges reading more or less of each tool result can score differently, so the cell is scored again."""
+        cfg = TrajectoryEvaluatorConfig(
+            name="eval_v2", judges=_ok_judges(), axes=["helpfulness"], prompt_version="v1.0", tool_result_chars=2000
+        )
+        gen = _build_generator(cfg, judge_responses={"judge_a": {"helpfulness": {"score": 5, "reasoning": "fresh"}}})
+        existing = {
+            "envelope": {
+                "judge_aliases": ["judge_a", "judge_b"],
+                "judge_models": ["judge_a-model", "judge_b-model"],
+                "judge_families": ["openai", "nvidia_nemotron"],
+                "axes": ["helpfulness"],
+                "scorers": [],
+                "prompt_version": "v1.0",
+                "evaluator_version": EVALUATOR_VERSION,
+                "tool_result_chars": EVALUATOR_TOOL_RESULT_CHARS,
+            },
+            "axes": {"helpfulness": {"judge_a": {"score": 3, "reasoning": "old"}}},
+            "scorers": {},
+            "skipped": False,
+            "skipped_reason": None,
+        }
+        data = self._trajectory_with_assistant()
+        data["eval_v2"] = json.dumps(existing)
+
+        parsed = json.loads((await gen.agenerate(data))["eval_v2"])
+
+        assert parsed["skipped"] is False
+        assert parsed["axes"]["helpfulness"]["judge_a"]["reasoning"] == "fresh"
+        assert parsed["envelope"]["tool_result_chars"] == 2000
 
     async def test_another_model_behind_the_same_alias_invalidates(self) -> None:
         """A cell scored by a different model under the same judge alias is scored again, not reused."""
@@ -400,6 +464,7 @@ class TestPartialReRunSkip:
                 "scorers": [],
                 "prompt_version": "v1.0",
                 "evaluator_version": EVALUATOR_VERSION,
+                "tool_result_chars": EVALUATOR_TOOL_RESULT_CHARS,
             },
             "axes": {"helpfulness": {"judge_a": {"score": 3, "reasoning": "old"}}},
             "scorers": {},
@@ -436,6 +501,7 @@ class TestPartialReRunSkip:
                 "scorers": [],
                 "prompt_version": "v1.0",
                 "evaluator_version": EVALUATOR_VERSION,
+                "tool_result_chars": EVALUATOR_TOOL_RESULT_CHARS,
             },
             "axes": {"helpfulness": {"judge_a": {"score": 3, "reasoning": "old"}}},
             "scorers": {},

@@ -107,7 +107,7 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
                               tool_use scorer grades the trajectory
                               (task_completion, tool_selection,
                                argument_quality, unnecessary_tool_use,
-                               architecture_leaking, overall, ...)
+                               architecture_leaking, grounding, overall, ...)
 ```
 
 - One toolset is sampled per conversation (`toolset_name` / `tools` columns are

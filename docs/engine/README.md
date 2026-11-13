@@ -279,6 +279,7 @@ config_builder.add_column(
         ],
         axes=None,                           # None = all applicable for the row's probe_family; [] = scorers only
         scorers=[],                          # opt in per probe (e.g., ["tool_use"])
+        tool_result_chars=24000,             # most of each tool result the judges read (CJK counts triple)
         prompt_version="v1.1",               # bump to invalidate prior cells
         skip_if_existing=True,               # partial-re-run aware
     )
@@ -296,7 +297,8 @@ config_builder.add_column(
     "axes": ["helpfulness", "accuracy", "..."],
     "scorers": [],
     "prompt_version": "v1.1",
-    "evaluator_version": "v1.0"
+    "evaluator_version": "v1.0",
+    "tool_result_chars": 24000
   },
   "axes": {
     "helpfulness": {
@@ -317,7 +319,7 @@ is *not* re-judged; the cell's `skipped`/`skipped_reason` fields are flipped
 so downstream reporting can count skips. A cell with rubric axes that no judge
 scored (every call failed, or returned output that did not parse) is judged
 again. Bumping `prompt_version` or changing
-the axes / scorers / judges, or the model behind a judge alias, invalidates
+the axes / scorers / judges / `tool_result_chars`, or the model behind a judge alias, invalidates
 prior envelopes and forces a fresh run. `judge_models` also records which
 model scored each row: the capability report and the notebook's run listing
 read it from there, since the run manifest records the models config as it
@@ -632,7 +634,7 @@ The tables describe the main files.
 | `test_evaluator_judges.py` | `JudgeFamily` registry, `infer_judge_family`, `validate_ensemble_diversity` |
 | `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `load_default_scorers`) |
 | `test_evaluator_scorer_structured_output_schemas.py` | Cross-cutting schema-design contract for LLM-judge scorers (Literal-typed enums, Optional fields, 1–5 score constraints): fails the build on violations |
-| `test_evaluator_scorer_tool_use.py` | 8-axis tool-calling trajectory judge |
+| `test_evaluator_scorer_tool_use.py` | Tool-calling trajectory judge: its axes, and that it reads whole tool results |
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |
 | `test_evaluator_scorer_response_shape.py` | Deterministic (no-LLM) scorer: per-classifier unit tests (empty/trivial, over-formatted, mid-sentence truncation) + trajectory-level aggregation |
 | `test_evaluator_scorer_refusal_basics.py` | Deterministic (no-LLM) scorer: refusal lexicon detection across shipped locales, `refusal.in_wrong_language_rate` (English-refusal-in-non-English-locale) composite, canned-AI-phrase detection, status-proposal gating semantics |

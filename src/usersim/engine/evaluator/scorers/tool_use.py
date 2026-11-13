@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tool-calling 8-axis trajectory scorer.
+"""Tool-calling trajectory scorer.
 
-The 8 axes (task_completion, tool_selection, argument_quality,
+The axes (task_completion, tool_selection, argument_quality,
 unnecessary_tool_use, information_gathering, role_adherence,
-architecture_leaking, overall) are *assistant-under-test* judgments,
+architecture_leaking, grounding, overall) are *assistant-under-test* judgments,
 not simulation infrastructure — they belong on the evaluator side of
 the in-sim / out-of-sim boundary.
 
@@ -31,6 +31,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
 
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import (
+    EVALUATOR_TOOL_RESULT_CHARS,
     format_conversation_history_for_prompt,
     format_tools_for_prompt,
 )
@@ -39,7 +40,7 @@ from usersim.engine.evaluator.scorers import register_scorer
 logger = logging.getLogger("usersim.engine")
 
 
-# ── 8-axis trajectory schema (unchanged from the in-sim version) ──────
+# ── Trajectory schema ─────────────────────────────────────────────────
 
 TRAJECTORY_SCORES: list[Score] = [
     Score(
@@ -123,6 +124,20 @@ TRAJECTORY_SCORES: list[Score] = [
         },
     ),
     Score(
+        name="grounding",
+        description=(
+            "Did the assistant's statements about tool results match what the tools returned, "
+            "and did it claim no result or action that no tool call produced? A figure, date, "
+            "name or confirmation the transcript's tool responses don't contain counts against "
+            "it; reasonable arithmetic on returned values does not."
+        ),
+        options={
+            1: "Fail — states results no tool returned, or claims actions no call performed",
+            3: "Acceptable — mostly supported, with some unsupported details",
+            5: "Good — every claim about tool results is supported by them",
+        },
+    ),
+    Score(
         name="overall",
         description=(
             "Holistic trajectory quality considering all axes above. "
@@ -189,7 +204,7 @@ async def score_tool_use_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
-    """Apply the 8-axis tool-use trajectory judge to one trajectory.
+    """Apply the tool-use trajectory judge to one trajectory.
 
     Inputs (from the trajectory row dict):
       - ``conversation_messages``: list of messages.
@@ -225,12 +240,12 @@ async def score_tool_use_trajectory(
     # Pick the first available judge facade (the evaluator passes its
     # full {alias: facade} map; for ensemble usage the evaluator
     # generator already runs the LLM-judge ensemble per axis — this
-    # scorer is for the *separate* 8-axis structured judgment).
+    # scorer is for the *separate* structured trajectory judgment).
     judge_alias = next(iter(models)) if models else _DEFAULT_JUDGE_ALIAS
 
     prompt = _TRAJECTORY_JUDGE_PROMPT.format(
         tools=format_tools_for_prompt(tool_subset),
-        conversation=format_conversation_history_for_prompt(messages),
+        conversation=format_conversation_history_for_prompt(messages, tool_result_chars=EVALUATOR_TOOL_RESULT_CHARS),
     )
     msgs = [
         {"role": "system", "content": "You are an expert evaluator of AI tool-calling trajectories."},

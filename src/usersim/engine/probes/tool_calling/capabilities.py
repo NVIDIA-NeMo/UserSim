@@ -16,7 +16,14 @@ CAPABILITIES: tuple[CapabilityDefinition, ...] = (
             EvidenceSource(
                 probe="tool_calling",
                 scorer="tool_use",
-                axes=("task_completion", "tool_selection", "argument_quality", "information_gathering", "overall"),
+                axes=(
+                    "task_completion",
+                    "tool_selection",
+                    "argument_quality",
+                    "information_gathering",
+                    "grounding",
+                    "overall",
+                ),
             ),
         ),
         threshold=4.0,
