@@ -344,11 +344,13 @@ async def test_concrete_tool_probe_keeps_private_and_public_views_separate(sampl
     assert "Tokyo is 22 degrees." in history
     assert "raw_secret" not in history
     assert "weather-call" not in history
-    # The response judge checks the raw result; the judges of the conversation never see it.
+    # The response judge and the assistant judge read the raw result; the user-turn gates never see it.
     response_checks = [call for call in judge_inputs if "simulated API response" in call[-1]["content"]]
     assert len(response_checks) == 1 and "raw_secret" in response_checks[0][-1]["content"]
-    conversation_judges = [call for call in judge_inputs if call not in response_checks]
-    assert all("raw_secret" not in message.get("content", "") for call in conversation_judges for message in call)
+    assistant_judged = [call for call in judge_inputs if "Judge the assistant's response" in call[-1]["content"]]
+    assert assistant_judged and all("raw_secret" in call[-1]["content"] for call in assistant_judged)
+    gated = [call for call in judge_inputs if call not in response_checks and call not in assistant_judged]
+    assert gated and all("raw_secret" not in message.get("content", "") for call in gated for message in call)
     exported = json.loads(result["conversation_messages"])
     assert any(message.get("role") == "tool" and "raw_secret" in message.get("content", "") for message in exported)
 

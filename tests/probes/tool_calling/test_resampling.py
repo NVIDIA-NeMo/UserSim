@@ -64,6 +64,26 @@ async def test_a_rejected_tool_turn_leaves_only_its_verdict() -> None:
     assert [r["attempt"] for r in metadata["assistant_judge_ratings"] if r["turn_idx"] == 0] == [0, 1]
 
 
+async def test_the_assistant_judge_reads_the_turns_tool_results() -> None:
+    _RejectsTheFirstReply.rejected = 1
+    run = await run_episode(
+        "tool_calling",
+        config=ConversationSimulatorConfig(
+            name="conversation_messages", locale="en_US", max_turns=1, assistant_judge=True
+        ),
+        persona={"first_name": "Ana", "last_name": "Souza", "age": 35, "city": "Austin"},
+        data={"theme": {"type": "weather", "description": "Check the weather."}, "tools": [_TOOL]},
+        model_factory=_RejectsTheFirstReply,
+    )
+    judged = [
+        p["messages"][-1]["content"]
+        for p in run.prompts
+        if p["role"] == "judge" and _ASSISTANT_JUDGE in p["messages"][-1]["content"]
+    ]
+    assert judged
+    assert all("Assistant [tool calls]: get_weather" in prompt and "Tool response: " in prompt for prompt in judged)
+
+
 def test_the_turn_state_hooks_restore_the_held_credentials() -> None:
     probe = ToolCallingProbe.__new__(ToolCallingProbe)
     probe.held_credentials = {"Account password": "old-password"}

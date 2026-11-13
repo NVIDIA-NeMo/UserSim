@@ -8,6 +8,7 @@ import pytest
 from usersim.engine.core.messages import (
     _parse_theme,
     format_conversation_history_for_prompt,
+    format_judge_dialogue,
     format_tools_for_prompt,
     project_public_dialogue,
 )
@@ -47,6 +48,34 @@ class TestParseTheme:
     def test_list_returns_first(self):
         result = _parse_theme([{"type": "a"}, {"type": "b"}])
         assert result["type"] == "a"
+
+
+class TestFormatJudgeDialogue:
+    """The assistant judge reads every tool result as whole as the evaluator does."""
+
+    def _messages(self):
+        return [
+            {"role": "user", "content": "Weather in Tokyo?"},
+            {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "get_weather"}}]},
+            {"role": "tool", "content": "e" * 1000, "tool_call_id": "1"},
+            {"role": "assistant", "content": "It is sunny.", "reasoning_content": "SECRET_TRACE"},
+            {"role": "user", "content": "And Osaka?"},
+            {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "get_weather"}}]},
+            {"role": "tool", "content": "t" * 30000, "tool_call_id": "2"},
+        ]
+
+    def test_results_are_read_up_to_the_evaluators_cap(self):
+        text = format_judge_dialogue(self._messages())
+        assert "Tool response: " + "e" * 1000 + "\n" in text
+        assert "t" * 24000 + " [cut: 24,000 of 30,000 characters shown]" in text
+
+    def test_it_shows_the_tool_calls_and_never_a_reasoning_trace(self):
+        text = format_judge_dialogue(self._messages())
+        assert text.count("Assistant [tool calls]: get_weather") == 2
+        assert "SECRET_TRACE" not in text
+
+    def test_an_empty_conversation_reads_as_na(self):
+        assert format_judge_dialogue([]) == "N/A"
 
 
 class TestFormatConversationHistory:

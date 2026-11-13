@@ -309,6 +309,31 @@ class _StatefulProbe:
         return f"judge: {assistant_response}"
 
 
+@dataclass
+class _HistoryProbe(_StatefulProbe):
+    """Hands the judge the conversation it is given, so a test can read what the judge saw."""
+
+    def format_assistant_judge_prompt(self, assistant_response, conversation_history):
+        return conversation_history
+
+
+class TestTheJudgeSeesTheTurnsToolResults:
+    async def test_every_turns_results_in_full(self, monkeypatch):
+        h = _Harness(monkeypatch, ["x" * 1500], [True])
+        state = _make_state()
+        state.messages[1:1] = [
+            {"role": "user", "content": "Q0"},
+            {"role": "tool", "content": "e" * 1000, "tool_call_id": "0"},
+            {"role": "assistant", "content": "A0"},
+        ]
+
+        await _run(state, _StubConfig(1, assistant_judge=True), _HistoryProbe())
+
+        assert "Tool response: " + "e" * 1000 + "\n" in h.judge_prompts[0]
+        assert "Tool response: result of " + "x" * 1500 + "\n" in h.judge_prompts[0] + "\n"
+        assert h.judge_prompts[0].index("User: Q1") < h.judge_prompts[0].index("result of")
+
+
 class TestRejectedAttemptIsUndone:
     """A rejected attempt leaves only its verdict; the accepted one keeps everything it did."""
 

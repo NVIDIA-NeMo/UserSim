@@ -571,6 +571,8 @@ class BaseProbe:
         Rendered against the row like every other prompt hook, so the
         rubric may reference a row column and a typo names itself rather
         than raising a bare ``KeyError`` from ``str.format``.
+        ``conversation_history`` is ``format_judge_dialogue``'s: the user and
+        assistant text, and the assistant's tool calls with their results.
 
         Reporting at the default budget; gating above it. The loop always
         records the verdict, and with ``cfg.max_assistant_attempts > 1``

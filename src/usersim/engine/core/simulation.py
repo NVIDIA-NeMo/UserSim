@@ -44,6 +44,7 @@ from usersim.engine.core.llm import (
 )
 from usersim.engine.core.messages import (
     format_conversation_history_for_prompt,
+    format_judge_dialogue,
     project_public_dialogue,
 )
 from usersim.engine.core.outcomes import (
@@ -921,7 +922,7 @@ class ConversationLoop:
                 break
             asst_judge_prompt = probe.format_assistant_judge_prompt(
                 synthesis_content,
-                format_conversation_history_for_prompt(project_public_dialogue(state.messages[:-1])),
+                format_judge_dialogue(state.messages[:-1]),
             )
             asst_expl, asst_rating, asst_ok, parse_ok = await run_inline_judge_ex(
                 models, MODEL_JUDGE, asst_judge_prompt
