@@ -185,7 +185,7 @@ conversation locales (11 languages × native + romanized) that reuse the
 conversation locale and the reused-asset locale cleanly separate:
 
 - **`self._locale`**: the *conversation* locale (e.g. `ta_Taml_IN`). Drives
-  language + script enforcement (`core/simulation.py`), the trajectory's
+  language + script enforcement (`core/user_language.py`), the trajectory's
   `locale` column + Hive partition, and the `trajectory_id` salt.
 - **`self._asset_locale`**: the locale whose banks / prompt packs / renderings
   are actually resolved. Set by `BankBackedProbe._load_bank_for_locale` and
@@ -551,6 +551,7 @@ what each one carries:
 | `core/context.py` | Context management: `summarize_response` writes the short summaries, and `compress_history` / `prepare_assistant_history` build each model's view from them (driven by `cfg.context_compression` / `compression_window`) |
 | `core/user_turn_policy.py` | `UserTurnPolicy`, what a probe's `user_turn_policy()` changes about the loop: compression and the wrap-up anchor on or off, filter phrases its users may write, names the script check skips, a check each generated opening must pass before the gate. Defaults change nothing |
 | `core/language_detection.py` | Lazy `lingua` detector + `script_compliance_fraction` + `script_dominance` helpers used by the deterministic mechanical-evals scorers |
+| `core/user_language.py` | What language and script the simulated user writes in: `language_instruction`, the script directive, the per-turn script check and the language clause of the user-turn judge gate |
 
 **Asset bank loaders (per-probe schemas)**
 

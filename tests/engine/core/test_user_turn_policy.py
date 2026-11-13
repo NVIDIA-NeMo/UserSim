@@ -17,8 +17,8 @@ from usersim.engine.core.simulation import (
     ConversationLoop,
     _is_assistant_refusal_echo,
     _is_fourth_wall_break,
-    _is_user_script_compliant,
 )
+from usersim.engine.core.user_language import _is_user_script_compliant
 from usersim.engine.core.user_turn_policy import UserTurnPolicy, resolve_user_turn_policy
 
 #: Two fourth-wall entries and one refusal-echo entry, as a probe allows them.

@@ -96,13 +96,13 @@ if TYPE_CHECKING:
         RESERVED_METADATA_KEYS,
         ConversationState,
         finalize_completed,
-        language_instruction,
         make_failed,
         make_result,
     )
     from usersim.engine.core.storage import latest_run_id, list_runs, read_partitioned_dataset
     from usersim.engine.core.tool_calls import parse_tool_call, recover_tool_call
     from usersim.engine.core.translation import translate_search_query
+    from usersim.engine.core.user_language import language_instruction
     from usersim.engine.core.user_turn_policy import UserTurnPolicy
     from usersim.engine.evaluator.scorers import ScorerFn, ScorerRegistrationError, register_scorer
     from usersim.engine.models_file import require_aliases, to_data_designer_kwargs, to_model_configs
@@ -298,12 +298,12 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "RESERVED_METADATA_KEYS",
         "ConversationState",
         "finalize_completed",
-        "language_instruction",
         "make_failed",
         "make_result",
     ),
     "usersim.engine.core.tool_calls": ("parse_tool_call", "recover_tool_call"),
     "usersim.engine.core.translation": ("translate_search_query",),
+    "usersim.engine.core.user_language": ("language_instruction",),
     "usersim.engine.core.user_turn_policy": ("UserTurnPolicy",),
     "usersim.engine.evaluator.scorers": ("ScorerFn", "ScorerRegistrationError", "register_scorer"),
     "usersim.taxonomy.capabilities": ("ALL_PROBES", "CapabilityDefinition", "EvidenceSource"),

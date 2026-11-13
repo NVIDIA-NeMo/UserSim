@@ -17,18 +17,20 @@ from usersim.engine.core.outcomes import (
 )
 from usersim.engine.core.simulation import (
     _FOURTH_WALL_PHRASES,
-    ROMANIZED_LOCALES,
     ConversationLoop,
     ConversationState,
     _build_user_followup_messages,
     _is_assistant_refusal_echo,
     _is_fourth_wall_break,
+    make_failed,
+    make_result,
+)
+from usersim.engine.core.user_language import (
+    ROMANIZED_LOCALES,
     _is_user_script_compliant,
     _language_judge_clause,
     _script_directive,
     language_instruction,
-    make_failed,
-    make_result,
 )
 
 
