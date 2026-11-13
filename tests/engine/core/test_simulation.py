@@ -568,11 +568,11 @@ class TestRomanizedLanguageJudgeClause:
         assert "[LANGUAGE]" in clause
         assert "failure" in clause.lower()
 
-    def test_no_clause_for_english_or_non_latin_or_other_latin(self) -> None:
-        # English, non-Latin (handled by deterministic script check), and
-        # fr/pt (real lingua coverage) are deliberately left untouched.
+    def test_other_locales_get_their_own_language_clause(self) -> None:
+        # The script check can't tell two languages in one script apart, so
+        # every registered locale's gate checks the language too.
         for loc in ("en_US", "en_IN", "hi_Deva_IN", "ja_JP", "ko_KR", "fr_FR", "pt_BR"):
-            assert _language_judge_clause(loc) == ""
+            assert "[LANGUAGE]" in _language_judge_clause(loc)
             assert loc not in ROMANIZED_LOCALES
 
 

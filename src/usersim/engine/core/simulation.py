@@ -59,7 +59,6 @@ from usersim.engine.core.outcomes import (
     serialize_traces,
 )
 from usersim.engine.core.user_language import (
-    ROMANIZED_LOCALES,
     _is_non_ascii_locale,
     _is_user_script_compliant,
     _language_judge_clause,
@@ -779,7 +778,7 @@ class ConversationLoop:
                 continue
 
             gate_prompt = probe.format_gate_prompt(user_query, "N/A")
-            language_clause = _language_judge_clause(locale) if enforce_language and locale in ROMANIZED_LOCALES else ""
+            language_clause = _language_judge_clause(locale) if enforce_language else ""
             expl, rating, ok = await run_inline_judge(
                 models,
                 MODEL_JUDGE,
@@ -798,7 +797,7 @@ class ConversationLoop:
             if ok:
                 break
             # When the gate failed specifically because the turn was not in
-            # the expected (romanized) language, attribute it to the language
+            # the locale's language, attribute it to the language
             # gate; otherwise it's a generic user-LLM role violation. Either
             # counter promotes the final outcome to COMPLETED_WITH_WARNINGS at
             # finalize(); the trace makes the individual offence auditable.
@@ -1533,11 +1532,7 @@ class ConversationLoop:
                     follow_up,
                     public_history_text,
                 )
-                language_clause = (
-                    _language_judge_clause(locale)
-                    if getattr(cfg, "enforce_user_language", True) and locale in ROMANIZED_LOCALES
-                    else ""
-                )
+                language_clause = _language_judge_clause(locale) if getattr(cfg, "enforce_user_language", True) else ""
                 expl, rating, ok = await run_inline_judge(models, MODEL_JUDGE, judge_prompt + language_clause)
                 state.metadata["user_judge_ratings"].append(
                     {
@@ -1562,7 +1557,7 @@ class ConversationLoop:
                 if ok:
                     break
 
-                # Attribute a wrong-(romanized-)language follow-up to the
+                # Attribute a wrong-language follow-up to the
                 # language gate; otherwise a generic user-LLM role violation.
                 # Either counter promotes the final outcome to
                 # COMPLETED_WITH_WARNINGS at finalize(); the trace records the

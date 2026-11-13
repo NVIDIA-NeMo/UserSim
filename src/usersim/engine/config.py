@@ -82,13 +82,14 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # assistant call itself are attributed to the assistant model.
     max_assistant_attempts: int = 1
 
-    # User-model language enforcement (script-compliance gate).
-    # The user-LLM is simulation infrastructure; when it emits a turn in
-    # the wrong script (e.g. romanized/Latin Hindi in an hi_Deva_IN run)
-    # the turn is regenerated within the existing ``max_query_attempts``
-    # budget. The check is deterministic (Unicode script ranges) and a
-    # no-op for Latin-script locales, so English / French / Portuguese
-    # runs are unaffected.
+    # User-model language enforcement. The user-LLM is simulation
+    # infrastructure; when it emits a turn in the wrong script (e.g.
+    # romanized/Latin Hindi in an hi_Deva_IN run) or the wrong language
+    # (e.g. romanized Hindi in an en_IN run) the turn is regenerated within
+    # the existing ``max_query_attempts`` budget. The script check is
+    # deterministic (Unicode script ranges) and a no-op for Latin-script
+    # locales; the language check is a rule in the user-turn judge gate,
+    # which every registered locale gets, at no extra model call.
     enforce_user_language: bool = True
     # Minimum fraction of letter codepoints that must fall in the
     # locale's expected script. 0.6 (not 1.0) tolerates Latin loanwords /

@@ -535,8 +535,10 @@ every follow-up prompt. It then checks the script of each user turn itself, with
 model call, and has the user model write the turn again when too little of it
 is in the locale's script, leaving out codes such as a key or an order number
 (`enforce_user_language`,
-`user_language_min_script_compliance`); each retry counts in the outcome's
-`n_user_language_violations`. Whether the assistant answered in the user's
+`user_language_min_script_compliance`). The judge that gates each user turn
+also checks its language, for every locale, which tells apart two languages in
+one script (English and romanized Hindi, Hindi and Marathi). Each retry counts
+in the outcome's `n_user_language_violations`. Whether the assistant answered in the user's
 language is scored after the run, by the `language_compliance` scorer and the
 judges' `language_appropriateness` axis. So instructions written in English
 produce conversations in Japanese or Hindi.

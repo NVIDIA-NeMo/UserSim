@@ -13,7 +13,7 @@ reply, with the probe deciding what each of those steps means.
 The check between generation and acceptance is the part that earns its keep.
 A user turn that breaks character or parrots the assistant back is regenerated
 rather than kept, and so is one in the wrong script for a non-Latin locale, or
-one a romanized locale's judge finds in the wrong language. Without it, a long
+one the judge finds in another language than the locale's. Without it, a long
 conversation degrades into two models agreeing with each other, and the
 resulting trajectory scores well while measuring nothing.
 
