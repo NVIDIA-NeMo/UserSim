@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from enum import Enum
 from typing import Any
 
@@ -276,6 +276,9 @@ class SimulationOutcome:
     # Simulated tool responses the judge rejected; each was regenerated
     # while the probe's attempt budget allowed.
     n_api_response_rejections: int = 0
+    # Assistant replies the per-turn judge failed as unsupported by the tool
+    # results (``judges.UNGROUNDED_TOKEN``), discarded or kept.
+    n_assistant_ungrounded: int = 0
     n_fourth_wall_triggers: int = 0
     n_user_role_violations: int = 0
     n_user_language_violations: int = 0
@@ -305,6 +308,7 @@ class SimulationOutcome:
             "n_assistant_retries": self.n_assistant_retries,
             "n_api_response_rerolls": self.n_api_response_rerolls,
             "n_api_response_rejections": self.n_api_response_rejections,
+            "n_assistant_ungrounded": self.n_assistant_ungrounded,
             "n_fourth_wall_triggers": self.n_fourth_wall_triggers,
             "n_user_role_violations": self.n_user_role_violations,
             "n_user_language_violations": self.n_user_language_violations,
@@ -358,6 +362,15 @@ class SimulationTrace:
         }
 
 
+@dataclass(frozen=True)
+class OutcomeCheckpoint:
+    """An ``OutcomeBuilder``'s counters, warnings and traces at one moment."""
+
+    counters: dict[str, int]
+    n_warnings: int
+    n_traces: int
+
+
 # ---------------------------------------------------------------------------
 # Builder — mutated during simulation; frozen into SimulationOutcome at end
 # ---------------------------------------------------------------------------
@@ -396,6 +409,9 @@ class OutcomeBuilder:
     def inc_api_response_rejections(self) -> None:
         self._outcome.n_api_response_rejections += 1
 
+    def inc_assistant_ungrounded(self) -> None:
+        self._outcome.n_assistant_ungrounded += 1
+
     def inc_fourth_wall_triggers(self) -> None:
         self._outcome.n_fourth_wall_triggers += 1
 
@@ -422,6 +438,28 @@ class OutcomeBuilder:
 
     def traces(self) -> list[SimulationTrace]:
         return list(self._traces)
+
+    # ── rollback ──────────────────────────────────────────────────
+
+    def checkpoint(self) -> OutcomeCheckpoint:
+        """The counters, warnings and traces as they stand, for :meth:`rollback`."""
+        return OutcomeCheckpoint(
+            counters={
+                f.name: getattr(self._outcome, f.name) for f in fields(SimulationOutcome) if f.name.startswith("n_")
+            },
+            n_warnings=len(self._outcome.warnings),
+            n_traces=len(self._traces),
+        )
+
+    def rollback(self, checkpoint: OutcomeCheckpoint) -> None:
+        """Undo every counter, warning and trace recorded since ``checkpoint``.
+
+        Model usage (calls, tokens, wall clock) stays: those calls were made.
+        """
+        for name, value in checkpoint.counters.items():
+            setattr(self._outcome, name, value)
+        del self._outcome.warnings[checkpoint.n_warnings :]
+        del self._traces[checkpoint.n_traces :]
 
     # ── per-model aggregation (called from within the LLM layer) ──
 

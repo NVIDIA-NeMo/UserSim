@@ -15,7 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import usersim.engine.core.simulation as sim
-from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
+from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus, SimulationTrace, TraceKind
 from usersim.engine.core.probes import (
     AgenticMixin,
     BaseProbe,
@@ -26,6 +26,9 @@ from usersim.engine.core.simulation import (
     ConversationLoop,
     ConversationState,
 )
+from usersim.engine.probes.financial_services.probe import FinancialServicesProbe
+from usersim.engine.probes.safety_agentic.probe import SafetyAgenticProbe
+from usersim.engine.probes.tool_calling.probe import ToolCallingProbe
 
 
 @dataclass
@@ -71,6 +74,7 @@ class _Harness:
         responses: list[str],
         verdicts: list[bool],
         traces: list[str] | None = None,
+        explanations: list[str] | None = None,
     ):
         self.assistant_calls = 0
         self.judge_calls = 0
@@ -91,9 +95,10 @@ class _Harness:
             self.judge_prompts.append(prompt)
             self.judge_calls += 1
             rating = "success" if ok else "failure"
+            explanation = explanations[self.judge_calls - 1] if explanations else f"verdict {self.judge_calls}"
             # parse_ok=True: scripted verdicts are genuine judgments,
             # not parser defaults (judge flakiness is tested separately).
-            return f"verdict {self.judge_calls}", rating, ok, True
+            return explanation, rating, ok, True
 
         monkeypatch.setattr(sim, "acall_llm", fake_call_llm)
         monkeypatch.setattr(sim, "run_inline_judge_ex", fake_judge_ex)
@@ -264,6 +269,143 @@ class TestProbeOptOut:
             pass
 
         assert _ToolProbe.supports_assistant_resampling is False
+
+    def test_tool_calling_resamples_and_the_environment_probes_do_not(self):
+        assert ToolCallingProbe.supports_assistant_resampling is True
+        assert FinancialServicesProbe.supports_assistant_resampling is False
+        assert SafetyAgenticProbe.supports_assistant_resampling is False
+
+
+@dataclass
+class _StatefulProbe:
+    """A tool turn's footprint: messages, metadata, counters, a warning, a trace, and state on the probe."""
+
+    label: str = "stateful_probe"
+    supports_assistant_resampling: bool = True
+    held: dict | None = None
+
+    def __post_init__(self):
+        self.held = {"password": "old"}
+
+    async def after_assistant_turn(self, models, state, response, cfg):
+        content = response.get("content", "")
+        state.messages.append({"role": "assistant", "content": "", "tool_calls": [{"id": content}]})
+        state.messages.append({"role": "tool", "content": f"result of {content}", "tool_call_id": content})
+        state.messages.append({"role": "assistant", "content": content})
+        state.metadata.setdefault("tools_called", []).append(content)
+        state.metadata.setdefault("tool_call_count_per_turn", []).append(1)
+        state.outcome.inc_api_response_rejections()
+        state.outcome.add_warning("unverified_tool_response", turn_idx=0, detail=content)
+        state.outcome.add_trace(SimulationTrace(kind=TraceKind.API_RESPONSE_JUDGE, turn_idx=0, detail=content))
+        if content != "no password change":
+            self.held["password"] = content
+        return content
+
+    def snapshot_turn_state(self):
+        return dict(self.held)
+
+    def restore_turn_state(self, snapshot):
+        self.held = dict(snapshot)
+
+    def format_assistant_judge_prompt(self, assistant_response, conversation_history):
+        return f"judge: {assistant_response}"
+
+
+@dataclass
+class _HistoryProbe(_StatefulProbe):
+    """Hands the judge the conversation it is given, so a test can read what the judge saw."""
+
+    def format_assistant_judge_prompt(self, assistant_response, conversation_history):
+        return conversation_history
+
+
+class TestTheJudgeSeesTheTurnsToolResults:
+    async def test_every_turns_results_in_full(self, monkeypatch):
+        h = _Harness(monkeypatch, ["x" * 1500], [True])
+        state = _make_state()
+        state.messages[1:1] = [
+            {"role": "user", "content": "Q0"},
+            {"role": "tool", "content": "e" * 1000, "tool_call_id": "0"},
+            {"role": "assistant", "content": "A0"},
+        ]
+
+        await _run(state, _StubConfig(1, assistant_judge=True), _HistoryProbe())
+
+        assert "Tool response: " + "e" * 1000 + "\n" in h.judge_prompts[0]
+        assert "Tool response: result of " + "x" * 1500 + "\n" in h.judge_prompts[0] + "\n"
+        assert h.judge_prompts[0].index("User: Q1") < h.judge_prompts[0].index("result of")
+
+
+class TestUngroundedReplies:
+    """A failure the judge marks [UNGROUNDED] is counted, whether its reply is discarded or kept."""
+
+    async def test_a_discarded_ungrounded_reply_is_counted(self, monkeypatch):
+        _Harness(
+            monkeypatch,
+            ["made up", "grounded"],
+            [False, True],
+            explanations=["[UNGROUNDED] No tool returned that price.", "Fine."],
+        )
+        state = _make_state()
+        await _run(state, _StubConfig(2), _StatefulProbe())
+        out = state.outcome.finalize(OutcomeStatus.OK)
+        assert (out.n_assistant_ungrounded, out.n_assistant_retries) == (1, 1)
+
+    async def test_a_kept_ungrounded_reply_is_counted(self, monkeypatch):
+        _Harness(monkeypatch, ["made up"], [False], explanations=["[UNGROUNDED] No tool returned that price."])
+        state = _make_state()
+        await _run(state, _StubConfig(1, assistant_judge=True), _StatefulProbe())
+        assert state.outcome.finalize(OutcomeStatus.OK).n_assistant_ungrounded == 1
+
+    async def test_other_failures_are_not(self, monkeypatch):
+        _Harness(monkeypatch, ["off topic", "fine"], [False, True], explanations=["It ignores the question.", "Fine."])
+        state = _make_state()
+        await _run(state, _StubConfig(2), _StatefulProbe())
+        assert state.outcome.finalize(OutcomeStatus.OK).n_assistant_ungrounded == 0
+
+
+class TestRejectedAttemptIsUndone:
+    """A rejected attempt leaves only its verdict; the accepted one keeps everything it did."""
+
+    async def test_only_the_accepted_attempt_remains(self, monkeypatch):
+        _Harness(monkeypatch, ["rejected", "accepted"], [False, True])
+        state = _make_state()
+        state.metadata["tools_called"] = ["earlier"]
+        probe = _StatefulProbe()
+
+        await _run(state, _StubConfig(2), probe)
+
+        assert [m.get("content") for m in state.messages[2:]] == ["", "result of accepted", "accepted"]
+        assert state.metadata["tools_called"] == ["earlier", "accepted"]
+        assert state.metadata["tool_call_count_per_turn"] == [1]
+        assert [r["attempt"] for r in state.metadata["assistant_judge_ratings"]] == [0, 1]
+        assert probe.held == {"password": "accepted"}
+        out = state.outcome.finalize(OutcomeStatus.OK)
+        assert (out.n_api_response_rejections, out.n_assistant_retries) == (1, 1)
+        assert [w.detail for w in out.warnings] == ["accepted"]
+        traces = state.outcome.traces()
+        assert [t.detail for t in traces if t.kind == TraceKind.API_RESPONSE_JUDGE] == ["accepted"]
+        assert [t.call_idx for t in traces if t.kind == TraceKind.ASSISTANT_QUALITY] == [0, 1]
+
+    async def test_a_rejected_attempts_change_to_the_probes_state_is_undone(self, monkeypatch):
+        _Harness(monkeypatch, ["rejected", "no password change"], [False, True])
+        probe = _StatefulProbe()
+        await _run(_make_state(), _StubConfig(2), probe)
+        assert probe.held == {"password": "old"}
+
+    async def test_exhaustion_keeps_the_last_attempt_with_everything_it_did(self, monkeypatch):
+        _Harness(monkeypatch, ["first", "last"], [False, False])
+        state = _make_state()
+        probe = _StatefulProbe()
+
+        _, _, _, ok = await _run(state, _StubConfig(2), probe)
+
+        assert not ok
+        assert state.metadata["tools_called"] == ["last"]
+        assert probe.held == {"password": "last"}
+        out = state.outcome.finalize(OutcomeStatus.OK)
+        assert (out.n_api_response_rejections, out.n_assistant_retries) == (1, 1)
+        assert [r["success"] for r in state.metadata["assistant_judge_ratings"]] == [False, False]
 
 
 class _TracingProbe:

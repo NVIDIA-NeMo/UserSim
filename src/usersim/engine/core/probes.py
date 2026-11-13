@@ -157,6 +157,8 @@ class ProbeAdapter(Protocol):
     allow_early_stop_at_turn(turn_idx, state) -> bool
     is_capitulation_detected(state) -> bool
     user_turn_policy() -> UserTurnPolicy
+    snapshot_turn_state() -> Any
+    restore_turn_state(snapshot) -> None
     """
 
     # ── Required ────────────────────────────────────────────────────
@@ -479,14 +481,13 @@ class BaseProbe:
     output_columns: tuple[str, ...] = ()
 
     # Whether the simulator may discard a judge-rejected assistant
-    # candidate and regenerate it (``max_assistant_attempts > 1``).
-    # Safe by default: ``BaseProbe.after_assistant_turn`` appends
-    # exactly one message and has no side effects, so rolling back the
-    # transcript and re-calling the assistant is a pure resample.
-    # Probes whose ``after_assistant_turn`` executes tools or mutates
-    # environment state must set this to ``False`` (see
-    # ``ToolCallingMixin`` / ``AgenticMixin``) — replaying those side
-    # effects is not safe, so they are capped to one attempt.
+    # candidate and regenerate it (``max_assistant_attempts > 1``). The
+    # loop undoes the candidate's messages, ``state.metadata`` and outcome
+    # record, and the probe's own state through ``snapshot_turn_state`` /
+    # ``restore_turn_state``. A probe whose turn changes anything else, such
+    # as a mock environment, sets this to ``False`` and is capped to one
+    # attempt; the tool mixins do, and a probe on them whose state the hooks
+    # cover turns it back on, as ``tool_calling`` does.
     supports_assistant_resampling: bool = True
     # Set via set_tool_call_observer(); notify-only, never behaviour-changing.
     _tool_call_observer: Callable[..., None] | None = None
@@ -570,6 +571,8 @@ class BaseProbe:
         Rendered against the row like every other prompt hook, so the
         rubric may reference a row column and a typo names itself rather
         than raising a bare ``KeyError`` from ``str.format``.
+        ``conversation_history`` is ``format_judge_dialogue``'s: the user and
+        assistant text, and the assistant's tool calls with their results.
 
         Reporting at the default budget; gating above it. The loop always
         records the verdict, and with ``cfg.max_assistant_attempts > 1``
@@ -640,6 +643,22 @@ class BaseProbe:
         }
 
     # ── Optional hooks — sensible defaults ──────────────────────────
+
+    def snapshot_turn_state(self) -> Any:
+        """What this probe changes on itself during an assistant turn, for :meth:`restore_turn_state`.
+
+        When the judge rejects an assistant turn and the loop regenerates it
+        (``max_assistant_attempts > 1``), the loop restores the transcript,
+        ``state.metadata`` and the outcome record itself. A probe keeping
+        state of its own that a turn can change, such as a credential an
+        accepted call rewrites, returns a copy of it here. The default keeps
+        nothing.
+        """
+        return None
+
+    def restore_turn_state(self, snapshot: Any) -> None:
+        """Put back what :meth:`snapshot_turn_state` returned, discarding a rejected turn's changes."""
+        return None
 
     def seed_state_metadata(self, state: Any) -> None:
         """Probe-specific side-channel metadata to attach before turn 1.
@@ -1194,9 +1213,9 @@ class AgenticMixin(BankVerbatimMixin):
     from the action bank. Used by safety_agentic.
     """
 
-    # The inner tool-interception loop in ``after_assistant_turn`` has
-    # side effects that cannot be rolled back — assistant resampling
-    # is off (see the same attribute on ``ToolCallingMixin``).
+    # The inner tool-interception loop in ``after_assistant_turn`` changes
+    # the mock environment, which a rollback cannot undo, so assistant
+    # resampling is off.
     supports_assistant_resampling: bool = False
 
 
@@ -1210,9 +1229,9 @@ class ToolCallingMixin:
     inherit the same gating).
     """
 
-    # Tool execution inside ``after_assistant_turn`` has side effects
-    # (simulated API calls, multi-message appends) that cannot be
-    # safely rolled back and replayed — assistant resampling is off.
+    # Executing tools can change state a rollback does not cover, so
+    # assistant resampling is off; a probe whose turn state
+    # ``snapshot_turn_state`` / ``restore_turn_state`` cover turns it on.
     supports_assistant_resampling: bool = False
 
     def allow_early_stop_at_turn(self, turn_idx: int, state: Any) -> bool:
@@ -1263,11 +1282,10 @@ class ToolExecutionMixin:
     ``self._locale`` attribute (both present on ``BaseProbe`` subclasses).
     """
 
-    # The inner loop appends multiple messages and executes (mock) tool
-    # calls whose effects cannot be rolled back and replayed — assistant
-    # resampling is off (see the same attribute on ``ToolCallingMixin``
-    # / ``AgenticMixin``). Covers every probe riding this mixin,
-    # including ``financial_services``.
+    # Executed (mock) tool calls can change state a rollback does not
+    # cover, such as ``financial_services``' environment, so assistant
+    # resampling is off; a probe whose turn state ``snapshot_turn_state`` /
+    # ``restore_turn_state`` cover turns it on, as ``tool_calling`` does.
     supports_assistant_resampling: bool = False
 
     tool_loop_mode: str = "single"

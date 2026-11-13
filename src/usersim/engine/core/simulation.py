@@ -34,7 +34,7 @@ from usersim.engine.core.context import (
     prepare_assistant_history,
     summarize_response,
 )
-from usersim.engine.core.judges import run_inline_judge, run_inline_judge_ex, runs_assistant_judge
+from usersim.engine.core.judges import UNGROUNDED_TOKEN, run_inline_judge, run_inline_judge_ex, runs_assistant_judge
 from usersim.engine.core.llm import (
     NON_ASCII_TOKEN_SCALE,
     ContextWindowError,
@@ -44,6 +44,7 @@ from usersim.engine.core.llm import (
 )
 from usersim.engine.core.messages import (
     format_conversation_history_for_prompt,
+    format_judge_dialogue,
     project_public_dialogue,
 )
 from usersim.engine.core.outcomes import (
@@ -58,6 +59,7 @@ from usersim.engine.core.outcomes import (
     WarningKind,
     serialize_traces,
 )
+from usersim.engine.core.turn_snapshot import restore_turn_snapshot, take_turn_snapshot
 from usersim.engine.core.user_language import (
     _is_non_ascii_locale,
     _is_user_script_compliant,
@@ -846,15 +848,18 @@ class ConversationLoop:
         With ``cfg.max_assistant_attempts == 1`` (the default) this is
         the original single-attempt path: one assistant call, one judge
         verdict, flag-only. With a budget > 1, a judge-rejected
-        candidate is rolled back off the transcript and regenerated;
-        only the final (accepted or last) candidate remains in
-        ``state.messages``. Rejected attempts are logged in
-        ``conversation_metadata["assistant_judge_ratings"]`` with their
-        ``attempt`` index and counted in ``n_assistant_retries``.
+        candidate is undone and regenerated: its messages, the metadata
+        and outcome counters, warnings and traces it recorded, and the
+        probe's own state (``snapshot_turn_state``). Only the final
+        (accepted or last) candidate remains. A rejected attempt leaves
+        its verdict in ``conversation_metadata["assistant_judge_ratings"]``
+        with its ``attempt`` index, its ``assistant_quality`` trace, and a
+        count in ``n_assistant_retries``. A failure whose explanation starts
+        with ``UNGROUNDED_TOKEN`` also counts in ``n_assistant_ungrounded``,
+        whether its reply was discarded or kept.
 
         Probes that declare ``supports_assistant_resampling = False``
-        (tool execution / stateful ``after_assistant_turn``) are capped
-        to a single attempt regardless of the configured budget.
+        are capped to a single attempt regardless of the configured budget.
 
         Returns ``(synthesis_content, asst_expl, asst_rating, asst_ok)``.
         Exceptions from the assistant call propagate to ``run()``, which
@@ -871,11 +876,7 @@ class ConversationLoop:
         # Unjudged, a reply stands as delivered: accepted, with no verdict recorded.
         asst_expl, asst_rating, asst_ok = ("", "failure", False) if judging else ("", "not_judged", True)
         for attempt in range(max_attempts):
-            if attempt > 0:
-                # Roll the rejected candidate off the transcript before
-                # regenerating. Safe because resampling-enabled probes
-                # append exactly one message and have no side effects.
-                del state.messages[messages_checkpoint:]
+            snapshot = take_turn_snapshot(state, probe) if attempt < max_attempts - 1 else None
             # Only the assistant call itself is attributed to the
             # assistant model on error; after_assistant_turn keeps
             # main's semantics (ContextWindowError handled by the
@@ -905,7 +906,7 @@ class ConversationLoop:
             # Scoped to the messages THIS attempt appended (everything from
             # ``messages_checkpoint``): an earlier turn's trace says nothing
             # about whether this one was attributed, and a resampled
-            # candidate takes its trace with it when the rollback above
+            # candidate takes its trace with it when the rollback below
             # discards it.
             trace_text = (
                 (assistant_resp.get("reasoning_content") or "").strip()
@@ -923,7 +924,7 @@ class ConversationLoop:
                 break
             asst_judge_prompt = probe.format_assistant_judge_prompt(
                 synthesis_content,
-                format_conversation_history_for_prompt(project_public_dialogue(state.messages[:-1])),
+                format_judge_dialogue(state.messages[:-1]),
             )
             asst_expl, asst_rating, asst_ok, parse_ok = await run_inline_judge_ex(
                 models, MODEL_JUDGE, asst_judge_prompt
@@ -948,28 +949,30 @@ class ConversationLoop:
             }
             if not parse_ok:
                 entry["judge_parse_error"] = True
-            state.metadata.setdefault("assistant_judge_ratings", []).append(entry)
-            state.outcome.add_trace(
-                SimulationTrace(
-                    kind=TraceKind.ASSISTANT_QUALITY,
-                    turn_idx=turn_idx,
-                    call_idx=attempt,
-                    model_alias=MODEL_JUDGE,
-                    rating=asst_rating,
-                    detail=(("[judge-parse-error] " if not parse_ok else "") + asst_expl)[:500]
-                    if (asst_expl or not parse_ok)
-                    else None,
-                )
+            verdict = SimulationTrace(
+                kind=TraceKind.ASSISTANT_QUALITY,
+                turn_idx=turn_idx,
+                call_idx=attempt,
+                model_alias=MODEL_JUDGE,
+                rating=asst_rating,
+                detail=(("[judge-parse-error] " if not parse_ok else "") + asst_expl)[:500]
+                if (asst_expl or not parse_ok)
+                else None,
             )
-            if asst_ok:
-                break
-            if attempt < max_attempts - 1:
+            if not asst_ok and snapshot is not None:
+                restore_turn_snapshot(state, probe, snapshot)
                 state.outcome.inc_assistant_retries()
                 logger.debug(
                     f"  |-- {probe.label}: assistant judge rejected turn "
                     f"{turn_idx + 1} candidate (attempt "
                     f"{attempt + 1}/{max_attempts}); resampling"
                 )
+            state.metadata.setdefault("assistant_judge_ratings", []).append(entry)
+            state.outcome.add_trace(verdict)
+            if not asst_ok and UNGROUNDED_TOKEN in (asst_expl or ""):
+                state.outcome.inc_assistant_ungrounded()
+            if asst_ok:
+                break
         return synthesis_content, asst_expl, asst_rating, asst_ok
 
     async def run(
@@ -1262,9 +1265,12 @@ class ConversationLoop:
             # (the judge itself ran inside
             # _generate_and_judge_assistant_turn; a negative verdict
             # here means the FINAL candidate is flagged — either the
-            # resampling budget is 1, or it was exhausted).
+            # resampling budget is 1, or it was exhausted). A failure for what
+            # the reply says about tool results doesn't frustrate the user,
+            # who never sees the results.
             if not asst_ok:
-                state.assistant_failures += 1
+                if UNGROUNDED_TOKEN not in (asst_expl or ""):
+                    state.assistant_failures += 1
                 state.outcome.inc_assistant_inline_failures()
                 logger.debug(
                     f"  |-- {probe.label}: assistant judge FAIL on turn "

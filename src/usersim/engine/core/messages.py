@@ -89,6 +89,17 @@ def format_conversation_history_for_prompt(messages: list[dict[str, Any]], *, to
     return "\n".join(lines) if lines else "N/A"
 
 
+def format_judge_dialogue(messages: list[dict[str, Any]]) -> str:
+    """The conversation as the per-turn assistant judge reads it.
+
+    User and assistant text, and the assistant's tool calls with their
+    results, each result up to ``EVALUATOR_TOOL_RESULT_CHARS`` as the
+    evaluator's judges read them: a reply that rests on a figure past a cut
+    would read as unsupported. Reasoning traces never appear.
+    """
+    return format_conversation_history_for_prompt(messages, tool_result_chars=EVALUATOR_TOOL_RESULT_CHARS)
+
+
 def project_public_dialogue(
     messages: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:

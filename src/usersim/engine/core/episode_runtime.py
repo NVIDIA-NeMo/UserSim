@@ -459,7 +459,13 @@ class ProbeEpisodeRuntime:
         )
 
     async def executed_tool_calls(self) -> list[ExecutedToolCall]:
-        """Return every tool call UserSim's loop has executed so far, in order."""
+        """Return every tool call UserSim's loop has executed so far, in order.
+
+        When the assistant judge rejects a turn and the loop regenerates it
+        (``max_assistant_attempts > 1``), the rejected attempt's calls stay
+        listed: they ran, and the host saw their results. The transcript keeps
+        only the accepted attempt's.
+        """
         async with self._lock:
             return list(self._executed_tool_calls)
 

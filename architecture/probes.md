@@ -50,6 +50,8 @@ mixin that adds them.
 | `get_tools_for_assistant` | tool-using probes |
 | `transform_assistant_history` | every assistant call: the copy of the history the assistant sees, which may differ from the stored transcript |
 | `after_assistant_turn` | after each assistant reply; may execute tools |
+| `snapshot_turn_state` | before each assistant attempt that may be resampled: a copy of the probe's own state that a turn can change |
+| `restore_turn_state` | the judge rejects an attempt that will be resampled: puts back what `snapshot_turn_state` returned |
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn, unless the run switches the assistant judge off |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
@@ -138,7 +140,7 @@ its label.
 | `model_aliases` | `()` | run setup, which adds each alias the models file defines to every row's models, for the probes in the run's mix |
 | `asset_labels` | its own label | the setup fingerprint of stored rows, which counts the asset folders of each label as the probe's part, so an edit there gives only its rows new ids |
 | `output_columns` | `()` | the run's `side_effect_columns`; a column left out is dropped |
-| `supports_assistant_resampling` | `True`; `False` with the tool mixins | judge-gated assistant resampling (`max_assistant_attempts > 1`) |
+| `supports_assistant_resampling` | `True`; `False` with the tool mixins, `True` again on `tool_calling` | judge-gated assistant resampling (`max_assistant_attempts > 1`) |
 | `bank_loader` | none: required on a `BankBackedProbe` | constructing a `BankBackedProbe`, for the row's locale |
 | `placeholder_warning_kind` | none: required on a `BankBackedProbe` | the warning a row records when its task is a placeholder, which the capability report counts |
 | `bank_version_key` | `None`: one bank per locale | where provenance records the bank's version |
@@ -163,8 +165,14 @@ Six mixins cover the shapes that recur, all in `core/probes.py`:
 
 Mixins that offer or execute tools (`AgenticMixin`, `ToolCallingMixin`,
 `ToolExecutionMixin`) set `supports_assistant_resampling = False`. A resample
-rolls the transcript back and re-calls the assistant, which is only safe when
-the turn had no side effects.
+undoes the rejected attempt and re-calls the assistant: the loop restores the
+transcript, `state.metadata` and the outcome record's counters, warnings and
+traces, keeping only the judge's verdict, and the probe restores its own state
+through `snapshot_turn_state` and `restore_turn_state`. That is only safe when
+nothing else changed, so a probe that changes a mock environment, as
+`financial_services` and `safety_agentic` do, keeps it off. `tool_calling`
+turns it on: its turn changes nothing else but the credentials the user holds,
+which its hooks restore. Model usage stays counted, since the calls were made.
 
 ## Assets
 

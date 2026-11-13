@@ -482,8 +482,12 @@ async def test_user_and_inline_judges_see_only_public_dialogue():
     assert "secret_arg" not in history
     assert "raw_secret_result" not in history
     assert probe.gate_histories == [history.strip()]
-    assert all("raw_secret_result" not in prompt for prompt in judge_prompts)
-    assert all("secret_arg" not in prompt for prompt in judge_prompts)
+    # The assistant judge reads the assistant's tool calls and results; the user-turn gates never do.
+    assistant_judged = [prompt for prompt in judge_prompts if "Judge the assistant's response" in prompt]
+    gated = [prompt for prompt in judge_prompts if prompt not in assistant_judged]
+    assert gated and assistant_judged
+    assert all("raw_secret_result" not in prompt and "secret_arg" not in prompt for prompt in gated)
+    assert all("raw_secret_result" in prompt for prompt in assistant_judged)
 
 
 async def test_tool_hook_context_failure_preserves_model_attribution():

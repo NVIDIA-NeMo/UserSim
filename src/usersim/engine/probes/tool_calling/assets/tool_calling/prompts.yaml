@@ -210,18 +210,23 @@ assistant_judge_prompt: |-
   </ASSISTANT_RESPONSE>
 
   <RUBRIC>
+  The conversation shows each tool call the assistant made, as "Assistant [tool calls]: ...", and what it returned, as "Tool response: ...". A tool response cut short ends with "[cut: N of M characters shown]"; do not count what the cut removed as missing.
+
   Criteria for success:
   - The response addresses what the user asked.
   - The response is a coherent, complete reply relevant to the conversation context.
+  - What the response says about tool results matches the tool responses in the conversation. General knowledge, and reasonable arithmetic on returned values, are fine.
 
   Criteria for failure:
   - The response does not address the user's question or request.
   - The response is unintelligible, empty, or a non-sequitur that ignores the conversation context.
+  - The response states a figure, name, date or other result that no tool response in the conversation contains, contradicts a tool response, or says it performed an action, such as a booking, a change or a lookup, that no tool call in the conversation performed.
+
   </RUBRIC>
 
-  Strictly respond in the following format:
+  Start the explanation with [UNGROUNDED] when the response fails because of what it says about tool results, and with [GROUNDED] otherwise. Strictly respond in the following format:
   <explanation>
-  [Your detailed explanation and justification for the rating.]
+  [UNGROUNDED] or [GROUNDED], then your detailed explanation and justification for the rating.
   </explanation>
   <rating>
   [Must be either 'success' or 'failure' strictly]
