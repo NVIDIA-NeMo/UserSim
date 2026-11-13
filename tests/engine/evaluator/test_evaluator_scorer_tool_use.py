@@ -131,7 +131,7 @@ class TestScorerOnFakeJudge:
         assert result["scores"]["overall"]["score"] == 5
         assert "error" not in result
 
-    @pytest.mark.parametrize("failing_axis", ["overall", "tool_selection", "architecture_leaking"])
+    @pytest.mark.parametrize("failing_axis", ["overall", "tool_selection", "architecture_leaking", "grounding"])
     async def test_critical_axis_failure_flips_status_proposal(self, failing_axis: str) -> None:
         scores = {name: {"score": 5, "reasoning": "ok"} for name in AXES}
         scores[failing_axis] = {"score": 1, "reasoning": "fail"}

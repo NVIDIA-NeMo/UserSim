@@ -229,7 +229,7 @@ async def score_tool_use_trajectory(
 
     ``status_proposal`` is a heuristic single-bit pass/fail derived from
     the raw scores: False if any of ``overall`` / ``tool_selection`` /
-    ``architecture_leaking`` was scored 1. Consumers that need finer
+    ``architecture_leaking`` / ``grounding`` was scored 1. Consumers that need finer
     grain should derive their own pass/fail from ``scores``.
     """
     messages = trajectory.get("conversation_messages") or []
@@ -292,10 +292,10 @@ async def score_tool_use_trajectory(
         else:
             scores[s.name] = {"score": None, "reasoning": ""}
 
-    # Critical-axis heuristic: a 1 on overall, tool_selection, or
-    # architecture_leaking flips the proposed pass/fail bit.
+    # Critical-axis heuristic: a 1 on overall, tool_selection,
+    # architecture_leaking or grounding flips the proposed pass/fail bit.
     status_proposal = True
-    for k in ("overall", "tool_selection", "architecture_leaking"):
+    for k in ("overall", "tool_selection", "architecture_leaking", "grounding"):
         v = scores.get(k, {})
         if v.get("score") == 1:
             status_proposal = False
