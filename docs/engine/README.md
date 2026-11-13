@@ -105,11 +105,14 @@ they move a run away from LLM-as-fake-user homogeneity. See
    and patience scores. The full behavioral profile additionally surfaces
    `patience` / `verbosity` / `cooperativeness` / `tech_literacy` /
    `error_proneness` parameters that the user-agent prompts read.
-3. **Reactive frustration**: During conversation, when the assistant is
-   judged inadequate, the user agent receives escalating frustration prompts
-   (pushing back, repeating requests, threatening to leave). Escalation rate
-   is computed each turn from the persona's `patience` score, the chosen
-   interaction style, and accumulated assistant failures.
+3. **Reactive frustration**: During conversation, the user agent receives
+   escalating frustration prompts (pushing back, repeating requests,
+   threatening to leave). Escalation is computed each turn from the persona's
+   `patience` score, the chosen interaction style, the turn, and accumulated
+   assistant failures: replies the per-turn assistant judge fails, and replies
+   that fail the response-shape check (empty, tool-call markup, over 800
+   words, heading-heavy). A run that switches the judge off counts only the
+   response-shape check.
 4. **D1–D4 + MATTR behavioral diagnostics**: post-hoc realism metrics
    (front-loading ratio, politeness fraction, verbosity coefficient of
    variation, frustration-marker frequency, lexical diversity) computed in
@@ -279,6 +282,7 @@ config_builder.add_column(
         ],
         axes=None,                           # None = all applicable for the row's probe_family; [] = scorers only
         scorers=[],                          # opt in per probe (e.g., ["tool_use"])
+        tool_result_chars=24000,             # most of each tool result the judges read (CJK counts triple)
         prompt_version="v1.1",               # bump to invalidate prior cells
         skip_if_existing=True,               # partial-re-run aware
     )
@@ -296,7 +300,8 @@ config_builder.add_column(
     "axes": ["helpfulness", "accuracy", "..."],
     "scorers": [],
     "prompt_version": "v1.1",
-    "evaluator_version": "v1.0"
+    "evaluator_version": "v1.0",
+    "tool_result_chars": 24000
   },
   "axes": {
     "helpfulness": {
@@ -317,7 +322,7 @@ is *not* re-judged; the cell's `skipped`/`skipped_reason` fields are flipped
 so downstream reporting can count skips. A cell with rubric axes that no judge
 scored (every call failed, or returned output that did not parse) is judged
 again. Bumping `prompt_version` or changing
-the axes / scorers / judges, or the model behind a judge alias, invalidates
+the axes / scorers / judges / `tool_result_chars`, or the model behind a judge alias, invalidates
 prior envelopes and forces a fresh run. `judge_models` also records which
 model scored each row: the capability report and the notebook's run listing
 read it from there, since the run manifest records the models config as it
@@ -468,6 +473,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `max_turns` | int | `5` | Max conversation turns |
 | `max_steps` | int | `10` | Max tool steps per turn |
 | `max_query_attempts` | int | `3` | Max retries for the user-LLM query / follow-up + judge gate before declaring `USER_QUERY_GATE_EXHAUSTED` |
+| `assistant_judge` | bool | `True` | Run the per-turn assistant judge and record its verdict in `assistant_judge_ratings`; a failed verdict also raises the simulated user's frustration. `False` (`--no-assistant-judge`) saves a judge call per turn, as for training runs scored only afterwards, and cannot be combined with a `max_assistant_attempts` above `1` |
 | `max_assistant_attempts` | int | `1` | Assistant-turn resampling budget. `1` (default) keeps the per-turn assistant judge flag-only (evaluation semantics). `>1` discards a judge-rejected assistant candidate and regenerates it within the budget: for SDG-style runs where the assistant is a data generator, not a model under test. Discards are counted in `n_assistant_retries`; probes with side-effectful `after_assistant_turn` opt out via `supports_assistant_resampling = False`. Gate semantics: the judge's `warn` rating passes (only `failure` triggers a resample), and a judge reply with no parseable rating is re-asked once on the same candidate rather than charged against the budget (entries marked `judge_parse_error`). With a budget `>1`, prefer a judge from a different model family than the assistant, so the model never filters its own generations: `models_default.toml` and `models_openrouter.toml` pair the assistant with a judge from another family, and `models_openai.toml` uses a different OpenAI model as judge |
 | `enforce_user_language` | bool | `True` | Regenerate a simulated-user turn written in the wrong script (a deterministic check) or the wrong language (a rule in the user-turn judge gate, for every locale), within `max_query_attempts`; each retry counts in `n_user_language_violations` |
 | `user_language_min_script_compliance` | float | `0.6` | Share of a turn's letters that must be in the locale's script, leaving out codes such as keys, passwords and order numbers (runs of Latin letters and symbols that hold a digit) |
@@ -495,8 +501,8 @@ what each one carries:
 | `persona_uuid` | str | Content-hashed persona identity (16 hex chars) computed at simulation write time. Stable across runs given identical persona content; replay-safe. See `core/identity.py`. |
 | `trajectory_id` | str | Deterministic 16-hex-char identifier composed from `persona_uuid`, `probe_family`, `probe_variant`, probe seed, resolved user/assistant model identities, the probe's `prompt_version` and the row's `locale`, plus `replay_assistant_reasoning` when it is on. The simulator's idempotency key (driver scripts skip rows whose `trajectory_id` is already in the output dataset). See `core/identity.py` and `core/idempotency.py`. |
 | `usersim_provenance` | str (JSON) | What the episode was resolved against: `code_sha`, `nemotron_personas_version`, `scenario_prompt_version` (the probe's `prompt_version`) and `bank_version`. A replayed row (`ProbeEpisodeRuntime.from_resolved_row`) keeps the provenance it was materialized with. It is recorded before the probe loads its banks, so the bank versions a trajectory used are in `simulation_outcome`'s provenance. See `core/episode_input.py`. |
-| `simulation_outcome` | str? (JSON) | Row-level structured outcome: status, failure_class, failure_attribution, counters (n_turns, n_tool_calls, n_user_query_attempts, n_user_followup_retries, n_assistant_inline_failures, n_assistant_retries, n_api_response_rerolls, n_fourth_wall_triggers, n_user_role_violations, n_user_language_violations), warnings, early_stop, per-model tokens / calls / wall-clock-by-alias, provenance. See `core/outcomes.py` for the schema. |
-| `simulation_traces` | str? (JSON) | Per-turn / per-call telemetry (keyed `turn_idx` x `call_idx`) with `kind` discriminator: `user_query_gate`, `user_followup_gate`, `fourth_wall_prefilter`, `assistant_quality`, `early_stop`, `api_response_reroll`, `tool_call_verifier`, etc. The debugging surface: **not** the assistant-evaluation surface. |
+| `simulation_outcome` | str? (JSON) | Row-level structured outcome: status, failure_class, failure_attribution, counters (n_turns, n_tool_calls, n_user_query_attempts, n_user_followup_retries, n_assistant_inline_failures, n_assistant_retries, n_api_response_rerolls, n_api_response_rejections, n_fourth_wall_triggers, n_user_role_violations, n_user_language_violations), warnings, early_stop, per-model tokens / calls / wall-clock-by-alias, provenance. See `core/outcomes.py` for the schema. |
+| `simulation_traces` | str? (JSON) | Per-turn / per-call telemetry (keyed `turn_idx` x `call_idx`) with `kind` discriminator: `user_query_gate`, `user_followup_gate`, `fourth_wall_prefilter`, `assistant_quality`, `early_stop`, `api_response_reroll`, `api_response_judge`, `tool_call_verifier`, etc. The debugging surface: **not** the assistant-evaluation surface. |
 | `probe_family` | str | The probe's label, the same as `probe_type` (e.g., `"general_open_ended"`, `"sov_ai_facts"`). |
 | `probe_variant` | str | Probe-specific discriminator (first entry of the probe class's `variants`, or an explicit row value when provided). Part of `trajectory_id` and the evaluator's stratification key. |
 | `conversation_messages` | str (JSON) | Full message list. Each entry is `{role, content}`; assistant entries add `tool_calls` when the turn called a tool, `tool` entries add `tool_call_id`, and an assistant entry adds **`reasoning_content`** when that model call emitted a thinking trace **and `store_reasoning` is on** (the default; `--no-store-reasoning` suppresses it). The key is absent (not empty) whenever either condition fails; the run manifest's `simulation_config.store_reasoning` records which was requested. Traces are attributed per call, so a tool-calling turn that appends several assistant messages carries each trace on the message that produced it. Stored for analysis: `core/llm.py::_dicts_to_chat_messages` drops it on the way back into a model, so a later turn never sees an earlier turn's thinking, unless the run sets `replay_assistant_reasoning`, which sends the assistant its own earlier traces. |
@@ -631,7 +637,7 @@ The tables describe the main files.
 | `test_evaluator_judges.py` | `JudgeFamily` registry, `infer_judge_family`, `validate_ensemble_diversity` |
 | `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `load_default_scorers`) |
 | `test_evaluator_scorer_structured_output_schemas.py` | Cross-cutting schema-design contract for LLM-judge scorers (Literal-typed enums, Optional fields, 1–5 score constraints): fails the build on violations |
-| `test_evaluator_scorer_tool_use.py` | 8-axis tool-calling trajectory judge |
+| `test_evaluator_scorer_tool_use.py` | Tool-calling trajectory judge: its axes, and that it reads whole tool results |
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |
 | `test_evaluator_scorer_response_shape.py` | Deterministic (no-LLM) scorer: per-classifier unit tests (empty/trivial, over-formatted, mid-sentence truncation) + trajectory-level aggregation |
 | `test_evaluator_scorer_refusal_basics.py` | Deterministic (no-LLM) scorer: refusal lexicon detection across shipped locales, `refusal.in_wrong_language_rate` (English-refusal-in-non-English-locale) composite, canned-AI-phrase detection, status-proposal gating semantics |

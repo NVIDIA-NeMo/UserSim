@@ -104,7 +104,8 @@ See the per-shape generator file in this directory for a copy-pasteable starter.
 
 - **In-sim judges** (kept in this module + `core/simulation.py`): the
   user-query gate, the fourth-wall pre-filter, the per-turn user-judge
-  rubric, the optional assistant-quality flag, the early-stop signal.
+  rubric, the assistant-quality judge (on unless a run switches it off),
+  the early-stop signal.
   Their job is to keep the conversation coherent so the trajectory is
   worth scoring at all.
 - **Out-of-sim judges** (live in the probe's own package, as

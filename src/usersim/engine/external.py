@@ -64,6 +64,7 @@ def materialize_episode_inputs(
     match_persona_language: bool = False,
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
+    assistant_judge: bool = True,
     store_reasoning: bool = True,
     probe_options: Mapping[str, Mapping[str, object]] | None = None,
 ) -> list[dict[str, object]]:
@@ -94,6 +95,7 @@ def materialize_episode_inputs(
         match_persona_language=match_persona_language,
         max_turns=max_turns,
         max_assistant_attempts=max_assistant_attempts,
+        assistant_judge=assistant_judge,
         store_reasoning=store_reasoning,
         probe_options=probe_options,
     )

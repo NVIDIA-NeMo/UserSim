@@ -50,7 +50,7 @@ mixin that adds them.
 | `get_tools_for_assistant` | tool-using probes |
 | `transform_assistant_history` | every assistant call: the copy of the history the assistant sees, which may differ from the stored transcript |
 | `after_assistant_turn` | after each assistant reply; may execute tools |
-| `format_assistant_judge_prompt` | in-sim assessment of the assistant turn |
+| `format_assistant_judge_prompt` | in-sim assessment of the assistant turn, unless the run switches the assistant judge off |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
 | `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |

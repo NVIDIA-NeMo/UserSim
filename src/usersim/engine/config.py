@@ -81,6 +81,13 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # attribution is unchanged at any budget: only errors from the
     # assistant call itself are attributed to the assistant model.
     max_assistant_attempts: int = 1
+    # Whether the per-turn assistant judge runs. On by default: it records a
+    # verdict per turn (``assistant_judge_ratings``), which drives the
+    # simulated user's frustration and, above one attempt, gates resampling.
+    # False saves a judge call per turn, as for training runs that score the
+    # assistant only afterwards; it cannot be combined with
+    # ``max_assistant_attempts`` above 1.
+    assistant_judge: bool = True
 
     # User-model language enforcement. The user-LLM is simulation
     # infrastructure; when it emits a turn in the wrong script (e.g.
@@ -192,6 +199,14 @@ class ConversationSimulatorConfig(SingleColumnConfig):
         # there would be nothing to replay.
         if self.replay_assistant_reasoning and not self.store_reasoning:
             raise ValueError("replay_assistant_reasoning needs store_reasoning: an unstored trace cannot be replayed")
+        return self
+
+    @model_validator(mode="after")
+    def _resampling_needs_the_assistant_judge(self) -> "ConversationSimulatorConfig":
+        if not self.assistant_judge and self.max_assistant_attempts > 1:
+            raise ValueError(
+                "max_assistant_attempts above 1 needs assistant_judge: resampling acts on the judge's verdicts"
+            )
         return self
 
     @property

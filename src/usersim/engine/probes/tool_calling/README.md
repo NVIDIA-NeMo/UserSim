@@ -17,8 +17,13 @@ the other probes.
   language, and holds any credential a tool declares, API key or password.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
-  gets a response the `api_response_model` writes for that tool. A call that
-  sets a new password leaves the user holding it.
+  gets a response the `api_response_model` writes for that tool. Before the
+  assistant sees it, `judge_model` checks that response against the call (the
+  tool's description, the arguments, earlier responses, the date, any computed
+  value) and has a rejected one rewritten with its reason; a response still
+  rejected when the attempts run out stands, and the row carries an
+  `unverified_tool_response` warning. A call that sets a new password leaves
+  the user holding it.
 - Within a turn, the tools stay on offer after each round of calls, so the
   assistant can chain calls until it replies without calling one. A call past
   the turn's eighth gets a reply saying it was not run, and the assistant then
@@ -28,10 +33,13 @@ the other probes.
   the calls that passed the schema and credential checks. `verifier_results` in
   `conversation_metadata` lists every call and whether it passed.
 
-Three settings, each set with `--probe-option tool_calling.<name>=<value>`:
+Five settings, each set with `--probe-option tool_calling.<name>=<value>`:
 `max_tools`, the most tools a conversation offers (default `5`);
 `tools_column`, the row column holding the toolset's tools (default `tools`);
-and `today`, the date each conversation takes place on (default `2026-11-06`).
+`judge_responses`, whether the judge checks each simulated response (default
+`true`); `max_response_attempts`, the attempts a simulated response gets, one
+used by a reply that is not JSON or that the judge rejects (default `2`); and
+`today`, the date each conversation takes place on (default `2026-11-06`).
 The simulated user and the `api_response_model` both work from that date, so
 the dates in requests and in tool results agree, and each row records it as
 `today` in `conversation_metadata`. The assistant is not told the date.

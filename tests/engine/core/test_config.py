@@ -83,6 +83,14 @@ class TestConversationSimulatorConfig:
         cfg = ConversationSimulatorConfig(name="test", random_seed=42)
         assert cfg.random_seed == 42
 
+    def test_the_assistant_judge_is_on_by_default(self):
+        assert ConversationSimulatorConfig(name="test").assistant_judge is True
+
+    def test_resampling_needs_the_assistant_judge(self):
+        with pytest.raises(ValidationError, match="max_assistant_attempts above 1 needs assistant_judge"):
+            ConversationSimulatorConfig(name="test", assistant_judge=False, max_assistant_attempts=2)
+        assert ConversationSimulatorConfig(name="test", assistant_judge=False).max_assistant_attempts == 1
+
     def test_compression_window_must_be_positive(self):
         with pytest.raises(ValidationError):
             ConversationSimulatorConfig(name="test", compression_window=0)

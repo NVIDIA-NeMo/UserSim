@@ -31,8 +31,39 @@ def format_tools_for_prompt(tools: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def format_conversation_history_for_prompt(messages: list[dict[str, Any]]) -> str:
-    """Format conversation messages into a text block for judge prompts."""
+#: The most of each tool result the evaluator's judges read, in characters
+#: weighed as ``_cut_tool_result`` does. They judge whether the assistant's
+#: answers match what the tools returned, so they need the whole result; the
+#: cap only keeps one runaway result from flooding a judge call. Tool results
+#: run 2.6 to 3.8 characters a token, so this is about 8,000 tokens.
+EVALUATOR_TOOL_RESULT_CHARS = 24_000
+
+#: What one Han, Kana or Hangul character weighs against a cap. They count two
+#: to a word (``llm._word_count``), and an English word with its space averages
+#: about six characters, so a cap holds comparable content in every language.
+_DENSE_CHARACTER_WEIGHT = 3
+
+
+def _cut_tool_result(content: str, limit: int) -> str:
+    """``content`` up to ``limit`` characters, each Han, Kana or Hangul one counting as ``_DENSE_CHARACTER_WEIGHT``."""
+    from usersim.engine.core.llm import _CHARACTER_COUNTED  # llm imports this module through engine.config
+
+    used = 0
+    for i, ch in enumerate(content):
+        used += _DENSE_CHARACTER_WEIGHT if _CHARACTER_COUNTED.match(ch) else 1
+        if used > limit:
+            return f"{content[:i]} [cut: {i:,} of {len(content):,} characters shown]"
+    return content
+
+
+def format_conversation_history_for_prompt(messages: list[dict[str, Any]], *, tool_result_chars: int = 500) -> str:
+    """Format conversation messages into a text block for judge prompts.
+
+    Each tool result is cut at ``tool_result_chars`` characters, a Han, Kana
+    or Hangul character counting as three. A cut result says how much of it
+    is shown, so a judge doesn't count what the cut removed as missing from
+    the result.
+    """
     lines = []
     for msg in messages:
         role = msg.get("role", "unknown")
@@ -53,7 +84,7 @@ def format_conversation_history_for_prompt(messages: list[dict[str, Any]]) -> st
             if content:
                 lines.append(f"Assistant: {content}")
         elif role == "tool":
-            lines.append(f"Tool response: {content[:500]}")
+            lines.append(f"Tool response: {_cut_tool_result(content, tool_result_chars)}")
 
     return "\n".join(lines) if lines else "N/A"
 

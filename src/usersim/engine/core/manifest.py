@@ -177,6 +177,10 @@ class SimulationConfigSnapshot:
     random_seed: int | None = None
     store_reasoning: bool = True
     replay_assistant_reasoning: bool = False
+    #: Whether the per-turn assistant judge ran. It ran in every run before a
+    #: run could switch it off, so a manifest without the setting loads as
+    #: ``True``.
+    assistant_judge: bool = True
     #: Each probe's settings for the run, by label, as ``probe_options`` set them.
     probe_options: dict[str, dict[str, Any]] = field(default_factory=dict)
 
@@ -350,6 +354,7 @@ def _sim_config_from_dict(d: Mapping[str, Any]) -> SimulationConfigSnapshot:
         max_steps=int(d.get("max_steps", 10)),
         max_query_attempts=int(d.get("max_query_attempts", 3)),
         max_assistant_attempts=int(d.get("max_assistant_attempts", 1)),
+        assistant_judge=bool(d.get("assistant_judge", True)),
         store_reasoning=bool(d.get("store_reasoning", True)),
         replay_assistant_reasoning=bool(d.get("replay_assistant_reasoning", False)),
         incremental_disclosure_ratio=float(d.get("incremental_disclosure_ratio", 0.6)),
@@ -756,6 +761,8 @@ def build_run_manifest(
     ``trajectories_requested`` is a per-locale-keyed dict of intended row
     counts; used by the report to compute "asked for N, got M".
     """
+    from usersim.engine.core.judges import runs_assistant_judge
+
     finished = finished_at_epoch if finished_at_epoch is not None else int(time.time())
     runtime_s = max(0.0, float(finished - started_at_epoch))
 
@@ -771,6 +778,7 @@ def build_run_manifest(
         max_steps=int(getattr(sim_config, "max_steps", 10)),
         max_query_attempts=int(getattr(sim_config, "max_query_attempts", 3)),
         max_assistant_attempts=int(getattr(sim_config, "max_assistant_attempts", 1)),
+        assistant_judge=runs_assistant_judge(sim_config),
         store_reasoning=bool(getattr(sim_config, "store_reasoning", True)),
         replay_assistant_reasoning=bool(getattr(sim_config, "replay_assistant_reasoning", False)),
         incremental_disclosure_ratio=float(getattr(sim_config, "incremental_disclosure_ratio", 0.6)),

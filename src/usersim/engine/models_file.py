@@ -40,9 +40,11 @@ The simulator + evaluator both expect specific aliases:
 - ``user_model`` (required for simulator) — drives the simulated user
 - ``assistant_model`` (required for simulator) — the model under test
 - ``api_response_model`` (tool-calling only) — synthesizes API responses
-- ``judge_model`` (required for simulator) — in-sim user-query gate /
-  capitulation classifier
-- ``summary_model`` (optional) — context compression
+- ``judge_model`` (required for simulator) — in-sim judge: the user-turn
+  gate, the per-turn assistant check, and tool_calling's simulated tool
+  responses
+- ``summary_model`` (optional) — context compression, early-stop and
+  capitulation checks
 - ``evaluator_model`` (required for evaluator) — rubric LLM for
   post-hoc trajectory evaluation; distinct from ``judge_model`` so the
   two roles can be sized / sourced independently

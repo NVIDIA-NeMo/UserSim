@@ -3,6 +3,8 @@
 
 """Tests for core/messages.py formatting helpers."""
 
+import pytest
+
 from usersim.engine.core.messages import (
     _parse_theme,
     format_conversation_history_for_prompt,
@@ -59,6 +61,29 @@ class TestFormatConversationHistory:
 
     def test_empty_returns_na(self):
         assert format_conversation_history_for_prompt([]) == "N/A"
+
+    def test_tool_results_are_cut_at_the_given_length(self):
+        msgs = [{"role": "tool", "content": "x" * 600 + "TAIL"}]
+        assert "TAIL" not in format_conversation_history_for_prompt(msgs)
+        assert "TAIL" in format_conversation_history_for_prompt(msgs, tool_result_chars=1000)
+
+    def test_a_cut_tool_result_says_how_much_is_shown(self):
+        msgs = [{"role": "tool", "content": "x" * 1200}]
+        assert format_conversation_history_for_prompt(msgs).endswith(" [cut: 500 of 1,200 characters shown]")
+        assert "[cut:" not in format_conversation_history_for_prompt(msgs, tool_result_chars=1200)
+
+    @pytest.mark.parametrize("dense", ["漢", "か", "カ", "한"])
+    def test_han_kana_and_hangul_count_three_to_a_character(self, dense):
+        """A cap holds comparable content in every language: one of these
+        characters carries about as much as three Latin ones."""
+        msgs = [{"role": "tool", "content": '{"note": "' + dense * 400 + '"}'}]
+        result = format_conversation_history_for_prompt(msgs, tool_result_chars=600)
+        assert result.endswith(" [cut: 206 of 412 characters shown]")
+        assert result.count(dense) == 196
+
+    def test_other_scripts_count_one_to_a_character(self):
+        msgs = [{"role": "tool", "content": "नमस्ते" * 100}]
+        assert "[cut:" not in format_conversation_history_for_prompt(msgs, tool_result_chars=600)
 
     def test_reasoning_content_is_never_rendered(self):
         """Judge and user-agent prompts are built from this. A trace

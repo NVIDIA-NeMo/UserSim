@@ -35,6 +35,7 @@ if TYPE_CHECKING:
         get_conversation_language,
     )
     from usersim.engine.core.identity import persona_uuid, resolve_model_name
+    from usersim.engine.core.judges import run_inline_judge, run_inline_judge_ex
     from usersim.engine.core.llm import acall_llm, outcome_builder_scope
     from usersim.engine.core.locale import (
         SCRIPT_BUCKETS,
@@ -148,6 +149,8 @@ __all__ = [
     "MODEL_USER",
     "ConversationSimulatorConfig",
     "acall_llm",
+    "run_inline_judge",
+    "run_inline_judge_ex",
     "resolve_model_name",
     # Prompts
     "ChatRealism",
@@ -236,6 +239,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "get_conversation_language",
     ),
     "usersim.engine.core.identity": ("persona_uuid", "resolve_model_name"),
+    "usersim.engine.core.judges": ("run_inline_judge", "run_inline_judge_ex"),
     "usersim.engine.core.llm": ("acall_llm", "outcome_builder_scope"),
     "usersim.engine.core.locale": (
         "SCRIPT_BUCKETS",
