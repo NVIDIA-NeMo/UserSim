@@ -83,3 +83,8 @@ async def run_inline_judge_ex(
     content2 = resp2.get("content", "") if isinstance(resp2, dict) else ""
     explanation, rating, parsed_ok2 = _parse_judge_response(content2)
     return explanation, rating, rating in ("success", "warn"), parsed_ok2
+
+
+def runs_assistant_judge(cfg: Any) -> bool:
+    """Whether the loop judges assistant turns: unless switched off (``assistant_judge``), and always above one attempt."""
+    return bool(getattr(cfg, "assistant_judge", True)) or int(getattr(cfg, "max_assistant_attempts", 1) or 1) > 1

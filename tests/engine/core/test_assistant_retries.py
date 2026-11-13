@@ -4,7 +4,7 @@
 """Tests for judge-gated assistant-turn resampling.
 
 Covers ``ConversationLoop._generate_and_judge_assistant_turn``:
-the default single-attempt path (behavior preservation), the
+the judge switched off, the judged single-attempt path, the
 resample-on-rejection path, budget exhaustion, transcript rollback,
 the probe-level ``supports_assistant_resampling`` opt-out, and the
 ``n_assistant_retries`` outcome counter.
@@ -50,6 +50,7 @@ class _StubProbe:
 class _StubConfig:
     max_assistant_attempts: int = 1
     store_reasoning: bool = True
+    assistant_judge: bool = True
 
 
 def _make_state() -> ConversationState:
@@ -111,13 +112,33 @@ async def _run(state, cfg, probe):
     )
 
 
-class TestDefaultSingleAttempt:
-    """max_assistant_attempts=1 must reproduce the original behavior."""
+class TestJudgeSwitchedOff:
+    """With the judge switched off the loop makes no judge call and the reply stands as delivered."""
+
+    async def test_no_judge_call_and_no_verdict(self, monkeypatch):
+        h = _Harness(monkeypatch, ["an answer"], [False])
+        state = _make_state()
+        content, expl, rating, ok = await _run(state, _StubConfig(1, assistant_judge=False), _StubProbe())
+        assert (h.assistant_calls, h.judge_calls) == (1, 0)
+        assert (content, expl, rating, ok) == ("an answer", "", "not_judged", True)
+        assert "assistant_judge_ratings" not in state.metadata
+        assert not [t for t in state.outcome.traces() if t.kind.value == "assistant_quality"]
+
+    async def test_a_resampling_budget_keeps_the_judge_on(self, monkeypatch):
+        """The config refuses the combination; a config object that skips that check still gets a judge to resample on."""
+        h = _Harness(monkeypatch, ["bad", "good"], [False, True])
+        state = _make_state()
+        content, _, _, ok = await _run(state, _StubConfig(2, assistant_judge=False), _StubProbe())
+        assert (h.judge_calls, content, ok) == (2, "good", True)
+
+
+class TestJudgedSingleAttempt:
+    """With the judge on and one attempt, the verdict is recorded and the reply stands."""
 
     async def test_one_call_one_judgment_on_pass(self, monkeypatch):
         h = _Harness(monkeypatch, ["good answer"], [True])
         state = _make_state()
-        content, expl, rating, ok = await _run(state, _StubConfig(1), _StubProbe())
+        content, expl, rating, ok = await _run(state, _StubConfig(1, assistant_judge=True), _StubProbe())
         assert (h.assistant_calls, h.judge_calls) == (1, 1)
         assert ok and rating == "success" and content == "good answer"
         assert state.messages[-1]["content"] == "good answer"
@@ -125,7 +146,7 @@ class TestDefaultSingleAttempt:
     async def test_failed_judgment_is_flag_only_no_resample(self, monkeypatch):
         h = _Harness(monkeypatch, ["bad answer"], [False])
         state = _make_state()
-        content, _, rating, ok = await _run(state, _StubConfig(1), _StubProbe())
+        content, _, rating, ok = await _run(state, _StubConfig(1, assistant_judge=True), _StubProbe())
         assert h.assistant_calls == 1
         assert not ok and rating == "failure"
         # The flagged candidate stays in the transcript (flag-only).
@@ -136,7 +157,7 @@ class TestDefaultSingleAttempt:
     async def test_metadata_entry_has_attempt_index(self, monkeypatch):
         _Harness(monkeypatch, ["a"], [True])
         state = _make_state()
-        await _run(state, _StubConfig(1), _StubProbe())
+        await _run(state, _StubConfig(1, assistant_judge=True), _StubProbe())
         ratings = state.metadata["assistant_judge_ratings"]
         assert len(ratings) == 1
         assert ratings[0]["turn_idx"] == 0
@@ -203,7 +224,7 @@ class TestJudgePromptComesFromTheProbe:
     async def test_loop_judges_with_the_probes_prompt(self, monkeypatch):
         h = _Harness(monkeypatch, ["the answer"], [True])
         state = _make_state()
-        await _run(state, _StubConfig(1), _StubProbe())
+        await _run(state, _StubConfig(1, assistant_judge=True), _StubProbe())
 
         # _StubProbe returns f"judge: {assistant_response}" -- a shape no
         # module constant produces, so a match can only come from the hook.

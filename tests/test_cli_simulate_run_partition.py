@@ -466,6 +466,57 @@ def test_the_manifest_records_the_settings_the_rows_were_made_with(tmp_path: Pat
     assert recorded.probe_options == settings
 
 
+@pytest.mark.parametrize(
+    ("assistant_judge", "max_assistant_attempts", "recorded"),
+    [(True, 1, True), (False, 1, False), (True, 2, True)],
+    ids=["on-by-default", "switched-off", "resampling"],
+)
+def test_the_manifest_records_whether_the_assistant_judge_ran(
+    tmp_path: Path, monkeypatch, assistant_judge: bool, max_assistant_attempts: int, recorded: bool
+) -> None:
+    from usersim.cli import simulate
+    from usersim.engine.core.manifest import load_run_manifest
+    from usersim.engine.models_file import default_models_path, load_models_config
+
+    built: list[dict] = []
+
+    class _FakeResult:
+        def load_dataset(self):
+            return _synthetic_trajectory("JUDGE")
+
+    class _FakeDD:
+        def create(self, builder, num_records=None, artifact_path=None):
+            return _FakeResult()
+
+    def fake_builder(**kwargs):
+        built.append(kwargs)
+        return _FakeDD(), object()
+
+    monkeypatch.chdir(tmp_path)
+    out = tmp_path / "trajs"
+    with patch("usersim.cli._pipeline.build_simulator_config_builder", fake_builder):
+        rc = simulate._simulate_to_parquet(
+            models=load_models_config(default_models_path()),
+            models_path=default_models_path(),
+            panel=None,
+            locales=["en_US"],
+            num_rows=1,
+            out=out,
+            assets_dir=None,
+            max_turns=1,
+            max_assistant_attempts=max_assistant_attempts,
+            assistant_judge=assistant_judge,
+            probe_mix={"general_open_ended": 1.0},
+            random_seed=42,
+            skip_existing=False,
+        )
+
+    assert rc == 0
+    assert [kwargs["assistant_judge"] for kwargs in built] == [assistant_judge]
+    (run_id,) = list_runs(out)
+    assert load_run_manifest(run_id, out).simulation_config.assistant_judge is recorded
+
+
 def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path: Path, monkeypatch, caplog) -> None:
     """Shared filesystems such as Lustre are often mounted without ``flock``; a run is written there anyway."""
     fcntl = pytest.importorskip("fcntl")

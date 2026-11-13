@@ -25,7 +25,8 @@ them to go.
 from __future__ import annotations
 
 #: Per-turn assistant quality judge. The loop runs this on every assistant
-#: turn and records the verdict in ``assistant_judge_ratings`` and an
+#: turn, unless the run switches it off (``cfg.assistant_judge``), and
+#: records the verdict in ``assistant_judge_ratings`` and an
 #: ``ASSISTANT_QUALITY`` trace.
 #:
 #: Whether it also GATES depends on ``cfg.max_assistant_attempts``:

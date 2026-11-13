@@ -34,7 +34,7 @@ from usersim.engine.core.context import (
     prepare_assistant_history,
     summarize_response,
 )
-from usersim.engine.core.judges import run_inline_judge, run_inline_judge_ex
+from usersim.engine.core.judges import run_inline_judge, run_inline_judge_ex, runs_assistant_judge
 from usersim.engine.core.llm import (
     NON_ASCII_TOKEN_SCALE,
     ContextWindowError,
@@ -865,9 +865,11 @@ class ConversationLoop:
             logger.debug(f"  |-- {probe.label}: assistant resampling not supported by this probe; capping to 1 attempt")
             max_attempts = 1
 
+        judging = runs_assistant_judge(cfg)
         messages_checkpoint = len(state.messages)
         synthesis_content = ""
-        asst_expl, asst_rating, asst_ok = "", "failure", False
+        # Unjudged, a reply stands as delivered: accepted, with no verdict recorded.
+        asst_expl, asst_rating, asst_ok = ("", "failure", False) if judging else ("", "not_judged", True)
         for attempt in range(max_attempts):
             if attempt > 0:
                 # Roll the rejected candidate off the transcript before
@@ -917,6 +919,8 @@ class ConversationLoop:
                         _m["reasoning_content"] = trace_text
                         break
 
+            if not judging:
+                break
             asst_judge_prompt = probe.format_assistant_judge_prompt(
                 synthesis_content,
                 format_conversation_history_for_prompt(project_public_dialogue(state.messages[:-1])),

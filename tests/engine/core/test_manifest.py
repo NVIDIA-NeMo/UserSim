@@ -219,6 +219,15 @@ class TestRoundTrip:
 # ─── Writer + reader ─────────────────────────────────────────────────────
 
 
+def test_assistant_judge_round_trips_and_is_on_in_an_older_manifest() -> None:
+    """Every run judged assistant turns before a run could switch the judge off."""
+    written = _minimal_manifest().to_dict()
+    written["simulation_config"].pop("assistant_judge")
+    assert RunManifest.from_dict(written).simulation_config.assistant_judge is True
+    written["simulation_config"]["assistant_judge"] = False
+    assert RunManifest.from_dict(json.loads(json.dumps(written))).simulation_config.assistant_judge is False
+
+
 def _minimal_manifest(run_id: str = "1700000000") -> RunManifest:
     return RunManifest(
         manifest_schema_version=MANIFEST_SCHEMA_VERSION,

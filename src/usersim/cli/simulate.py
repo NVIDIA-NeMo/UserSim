@@ -192,13 +192,24 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         help="Maximum conversation turns per trajectory.",
     )
     p.add_argument(
+        "--no-assistant-judge",
+        dest="assistant_judge",
+        action="store_false",
+        help=(
+            "Skip the per-turn assistant judge, saving a judge call per turn, "
+            "as for training runs scored only afterwards. The simulated user's "
+            "frustration then reacts only to the response-shape check. Cannot "
+            "be combined with --max-assistant-attempts above 1."
+        ),
+    )
+    p.add_argument(
         "--max-assistant-attempts",
         type=int,
         default=1,
         help=(
-            "Assistant-turn resampling budget. 1 (default) keeps the "
-            "per-turn assistant judge flag-only; >1 discards a "
-            "judge-rejected assistant candidate and regenerates it "
+            "Assistant-turn resampling budget. 1 (default) is one "
+            "attempt per turn; >1 discards "
+            "a judge-rejected assistant candidate and regenerates it "
             "within the budget (for synthetic-data runs). Probes with "
             "side-effectful after_assistant_turn are capped to 1."
         ),
@@ -290,6 +301,7 @@ _STORED_ROW_FLAGS = {
     "num_rows": "--num-rows",
     "max_turns": "--max-turns",
     "max_assistant_attempts": "--max-assistant-attempts",
+    "assistant_judge": "--no-assistant-judge",
     "probe_mix": "--probe-mix",
     "random_seed": "--random-seed",
     "probe_option": "--probe-option",
@@ -371,6 +383,11 @@ def run(args: argparse.Namespace) -> int:
         warn_if_missing_api_key,
     )
 
+    if not args.assistant_judge and args.max_assistant_attempts > 1:
+        raise SystemExit(
+            "--no-assistant-judge cannot be combined with --max-assistant-attempts above 1: "
+            "resampling acts on the assistant judge's verdicts"
+        )
     models_path = args.models or default_models_path()
     models = load_models_config(models_path)
     require_aliases(models, required=REQUIRED_SIMULATOR_ALIASES, context="`usersim simulate`")
@@ -423,6 +440,7 @@ def run(args: argparse.Namespace) -> int:
         print(f"  probe mix:     {probe_mix}")
         print(f"  max_turns:     {args.max_turns}")
         print(f"  max_assistant_attempts: {args.max_assistant_attempts}")
+        print(f"  assistant_judge: {args.assistant_judge}")
         print(f"  random_seed:   {args.random_seed}")
         print(f"  models config: {models_path}")
         if args.assets_dir is not None:
@@ -456,6 +474,7 @@ def run(args: argparse.Namespace) -> int:
         seed_dataset_path=args.seed_dataset_path,
         max_turns=args.max_turns,
         max_assistant_attempts=args.max_assistant_attempts,
+        assistant_judge=args.assistant_judge,
         probe_mix=probe_mix,
         random_seed=args.random_seed,
         probe_options=probe_options,
@@ -516,6 +535,7 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float], probe_options
                 match_persona_language=args.match_persona_language,
                 max_turns=args.max_turns,
                 max_assistant_attempts=args.max_assistant_attempts,
+                assistant_judge=args.assistant_judge,
                 store_reasoning=not args.no_store_reasoning,
                 probe_options=probe_options,
             )
@@ -568,7 +588,7 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         "  stored with:   "
         + ", ".join(
             f"{key}={config.get(key)!r}"
-            for key in ("max_turns", "max_assistant_attempts", "random_seed", "store_reasoning")
+            for key in ("max_turns", "max_assistant_attempts", "assistant_judge", "random_seed", "store_reasoning")
         )
     )
     print(f"  assets_dir:    {inputs.assets_dir or _OWN_ASSETS}")
@@ -646,6 +666,7 @@ def _simulate_to_parquet(
     probe_options=None,
     skip_existing,
     max_assistant_attempts=1,
+    assistant_judge=True,
     store_reasoning=True,
 ) -> int:
     from usersim.cli._persona_language import (
@@ -716,6 +737,7 @@ def _simulate_to_parquet(
         "assets_dir": assets_dir,
         "max_turns": max_turns,
         "max_assistant_attempts": max_assistant_attempts,
+        "assistant_judge": assistant_judge,
         "store_reasoning": store_reasoning,
         "random_seed": random_seed,
         "probe_options": probe_options,

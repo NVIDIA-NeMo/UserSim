@@ -958,12 +958,36 @@ def _write(rows, path: Path) -> Path:
         ("--random-seed", "4"),
         ("--no-store-reasoning", None),
         ("--probe-option", "general_open_ended.tone=warm"),
+        ("--no-assistant-judge", None),
     ],
 )
 def test_a_flag_the_stored_rows_settle_is_refused(rows, tmp_path, flag, value):
     argv = ["simulate", "--inputs", str(_write(rows, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]
     with pytest.raises(SystemExit, match=flag):
         cli.main([*argv, flag, *([value] if value else []), "--dry-run"])
+
+
+def test_the_assistant_judge_setting_reaches_the_stored_rows(tmp_path):
+    stored = tmp_path / "rows.parquet"
+    argv = [
+        "simulate",
+        "--locale",
+        "en_US",
+        "--num-rows",
+        "1",
+        "--max-turns",
+        "1",
+        "--probe-mix",
+        "general_open_ended=1",
+    ]
+    assert cli.main([*argv, "--no-assistant-judge", "--materialize-inputs", "--out", str(stored)]) == 0
+    assert [row["usersim_config"]["assistant_judge"] for row in load_episode_inputs(stored)] == [False]
+
+
+def test_switching_the_assistant_judge_off_is_refused_with_a_resampling_budget(tmp_path):
+    argv = ["simulate", "--locale", "en_US", "--num-rows", "1", "--probe-mix", "general_open_ended=1"]
+    with pytest.raises(SystemExit, match="--no-assistant-judge cannot be combined with --max-assistant-attempts"):
+        cli.main([*argv, "--no-assistant-judge", "--max-assistant-attempts", "2", "--out", str(tmp_path / "out")])
 
 
 def test_a_run_s_probe_settings_reach_its_stored_rows_and_their_replay(register_test_probe, tmp_path):
