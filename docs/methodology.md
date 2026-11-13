@@ -84,7 +84,7 @@ away from LLM-as-fake-user homogeneity.
 
 - **Incremental disclosure**: 60% of users withhold details and reveal gradually (real-user-like); 40% provide everything upfront. Controlled by `incremental_disclosure_ratio` (default 0.6).
 - **OCEAN-grounded interaction style**: each user receives one of `cooperative` / `neutral` / `impatient` / `frustrated` / `confrontational` derived from their persona's neuroticism / agreeableness / patience scores.
-- **Reactive frustration**: the user agent receives escalating frustration prompts (pushing back, repeating requests, threatening to leave) as the conversation runs long and as assistant replies fail: replies the per-turn assistant judge fails, and replies that fail the response-shape check (empty, tool-call markup, over 800 words or heading-heavy). A run that switches the judge off (`--no-assistant-judge`) counts only the response-shape check.
+- **Reactive frustration**: the user agent receives escalating frustration prompts (pushing back, repeating requests, threatening to leave) as the conversation runs long and as assistant replies fail: replies the per-turn assistant judge fails, except a failure for what a reply says about tool results (`[UNGROUNDED]`), which the user never sees, and replies that fail the response-shape check (empty, tool-call markup, over 800 words or heading-heavy). A run that switches the judge off (`--no-assistant-judge`) counts only the response-shape check.
 - **D1–D4 + MATTR diagnostics**: post-hoc behavioral-realism metrics (front-loading ratio, politeness fraction, verbosity CV, frustration-marker frequency, lexical diversity) surfaced in the dashboard.
 
 ## Conversation context

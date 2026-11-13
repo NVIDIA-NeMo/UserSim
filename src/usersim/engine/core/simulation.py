@@ -1265,9 +1265,12 @@ class ConversationLoop:
             # (the judge itself ran inside
             # _generate_and_judge_assistant_turn; a negative verdict
             # here means the FINAL candidate is flagged — either the
-            # resampling budget is 1, or it was exhausted).
+            # resampling budget is 1, or it was exhausted). A failure for what
+            # the reply says about tool results doesn't frustrate the user,
+            # who never sees the results.
             if not asst_ok:
-                state.assistant_failures += 1
+                if UNGROUNDED_TOKEN not in (asst_expl or ""):
+                    state.assistant_failures += 1
                 state.outcome.inc_assistant_inline_failures()
                 logger.debug(
                     f"  |-- {probe.label}: assistant judge FAIL on turn "
