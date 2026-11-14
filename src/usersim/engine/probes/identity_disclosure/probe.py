@@ -34,8 +34,9 @@ How a row is built:
 
 Columns written, all declared in the class's ``output_columns``:
 ``identity_tactic_id``, ``identity_tactic_kind`` (``neutral`` or ``leading``),
-``identity_pair``, ``identity_competitor``, ``strategy_id``,
+``identity_asks_identity``, ``identity_pair``, ``identity_competitor``, ``strategy_id``,
 ``reframings_used`` (the reframing ids in follow-up order),
+``identity_premises`` (JSON: what each user message claims the assistant is),
 ``expected_identity`` and ``identity_spec`` (both JSON), and
 ``probe_variant = "<tactic>::<strategy>"``.
 
@@ -84,6 +85,7 @@ from usersim.engine.probes.identity_disclosure.spec import (
 from usersim.engine.probes.identity_disclosure.task_derivation import (
     COMPETITOR_PLACEHOLDERS,
     IDENTITY_PLACEHOLDERS,
+    MODEL_OPTIONS,
     IdentityTask,
     IdentityTaskError,
     fill,
@@ -91,7 +93,9 @@ from usersim.engine.probes.identity_disclosure.task_derivation import (
     opening_frame,
     placeholder_values,
     placeholders_in,
+    reframing_placeholders,
     select_competitor,
+    select_model_options,
     select_strategy,
     select_tactic,
     strategy_placeholders,
@@ -149,12 +153,14 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     output_columns = (
         "identity_tactic_id",
         "identity_tactic_kind",
+        "identity_asks_identity",
         "identity_pair",
         "identity_competitor",
         "expected_identity",
         "identity_spec",
         "strategy_id",
         "reframings_used",
+        "identity_premises",
     )
     placeholder_warning_kind = "used_placeholder_identity"
     bank_version_key = PROBE_LABEL
@@ -230,7 +236,14 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
                 f"{label}: tactic {tactic.id!r} or strategy {strategy.id!r} names a competitor, but spec "
                 f"{spec.version} leaves none for locale {self._asset_locale} once {', '.join(excluded)} are excluded"
             )
-        values = placeholder_values(spec, expected, competitor=competitor, pool=pool, language=self._language)
+        model_options = (
+            select_model_options(spec, expected, competitor=competitor, pool=pool, persona_key=persona_key, seed=seed)
+            if MODEL_OPTIONS in placeholders_in(tactic)
+            else ()
+        )
+        values = placeholder_values(
+            spec, expected, competitor=competitor, pool=pool, language=self._language, model_options=model_options
+        )
         return IdentityTask(
             id=tactic.id,
             placeholder=spec.placeholder or tactic.placeholder or strategy.placeholder,
@@ -300,6 +313,8 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         if reframing is None:
             return []
         state.metadata.setdefault("reframings_used", []).append(reframing.id)
+        if claimed := self._claimed(reframing_placeholders(reframing), user_message=turn_idx + 1):
+            state.metadata.setdefault("identity_premises", []).append(claimed)
         messages = getattr(state, "messages", None) or []
         previous = next((m.get("content") or "" for m in reversed(messages) if m.get("role") == "assistant"), "")
         values = {**self._task.values, "previous_assistant_response": previous}
@@ -367,8 +382,8 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         if placeholders & IDENTITY_PLACEHOLDERS and task.expected is not None:
             developers.update(task.expected.developers)
         products = [task.competitor] if placeholders & {"competitor", "competitor_developer"} else []
-        if "competitor_list" in placeholders:
-            products += task.values["competitor_list"].split(", ")
+        for listed in placeholders & {"competitor_list", MODEL_OPTIONS}:
+            products += task.values[listed].split(", ")
         developers.update(dev for dev in map(spec.developer_of, filter(None, products)) if dev)
         return developers
 
@@ -402,10 +417,31 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             return
         state.metadata["identity_tactic_id"] = task.tactic.id
         state.metadata["identity_tactic_kind"] = task.tactic.kind.value
+        state.metadata["identity_asks_identity"] = task.tactic.asks_identity
         state.metadata["identity_pair"] = task.tactic.pair or None
         state.metadata["identity_competitor"] = task.competitor
         state.metadata["strategy_id"] = task.strategy.id
         state.metadata["reframings_used"] = []
+        opening = self._claimed(placeholders_in(task.tactic), user_message=1) if task.tactic.pair else None
+        state.metadata["identity_premises"] = [opening] if opening else []
+
+    def _claimed(self, placeholders: set[str], *, user_message: int) -> dict[str, Any] | None:
+        """What a user message filled from ``placeholders`` claims the assistant is, or None.
+
+        The true developer or model makes a true claim; the row's competitor, or
+        its developer, a false one. ``user_message`` is the message's 1-based
+        position among the user's messages.
+        """
+        task = self._task
+        if placeholders & {"true_developer", "true_model"} and task.expected is not None:
+            developer, true = task.expected.developers[0], True
+            model = task.values["true_model"] if "true_model" in placeholders else None
+        elif placeholders & {"competitor", "competitor_developer"} and task.competitor:
+            developer, true = self._bank.developer_of(task.competitor), False
+            model = task.competitor if "competitor" in placeholders else None
+        else:
+            return None
+        return {"user_message": user_message, "developer": developer, "model": model, "true": true}
 
     async def get_verbatim_first_user_turn(self, state: ConversationState) -> str | None:
         if self._task is None or self._writes_opening:
@@ -452,10 +488,12 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
                 "probe_variant": f"{task.tactic.id}::{task.strategy.id}",
                 "identity_tactic_id": task.tactic.id,
                 "identity_tactic_kind": task.tactic.kind.value,
+                "identity_asks_identity": task.tactic.asks_identity,
                 "identity_pair": task.tactic.pair or None,
                 "identity_competitor": task.competitor,
                 "strategy_id": task.strategy.id,
                 "reframings_used": list(state.metadata.get("reframings_used") or []),
+                "identity_premises": json.dumps(state.metadata.get("identity_premises") or [], ensure_ascii=False),
                 "expected_identity": (
                     json.dumps(asdict(task.expected), ensure_ascii=False) if task.expected is not None else None
                 ),
