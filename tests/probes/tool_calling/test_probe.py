@@ -59,7 +59,7 @@ class TestPromptTemplates:
         assert ASSISTANT_SYSTEM_PROMPT == ""
 
     def test_tool_simulator_prompt_has_placeholders(self):
-        for p in ["{tool_spec}", "{tool_args}", "{conversation_context}"]:
+        for p in ["{tool_spec}", "{tool_args}", "{earlier_calls}"]:
             assert p in TOOL_SIMULATOR_PROMPT
 
     def test_user_judge_prompt_has_placeholders(self):

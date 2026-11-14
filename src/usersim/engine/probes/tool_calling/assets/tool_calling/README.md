@@ -116,7 +116,13 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   decides whether/which to call.
 - There is **no real execution**: the `api_response_model` alias (see
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
-  tool's response from the schema, so a run needs no live service.
+  tool's response from the schema, so a run needs no live service. It sees
+  what the service would: the call, the calls made earlier in the conversation
+  with their responses, which it keeps consistent with, and the date, but none
+  of the conversation's messages. Each response goes in whole until those earlier
+  responses reach 24,000 characters (a Han, Kana or Hangul character counting
+  as three), the same tool's first; past that, a call shows without its
+  response.
 - A judge checks each synthesized response against the call before the
   assistant sees it, and a rejected one is rewritten with the judge's reason,
   within `max_response_attempts` (the probe's `judge_responses` setting turns

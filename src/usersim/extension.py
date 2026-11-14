@@ -47,7 +47,11 @@ if TYPE_CHECKING:
         persona_dataset_locale,
     )
     from usersim.engine.core.localized import LocalizedText, LocalizedTextError
-    from usersim.engine.core.messages import format_conversation_history_for_prompt, format_tools_for_prompt
+    from usersim.engine.core.messages import (
+        format_conversation_history_for_prompt,
+        format_tools_for_prompt,
+        tool_result_weight,
+    )
     from usersim.engine.core.missing import is_missing, none_for_missing
     from usersim.engine.core.outcomes import (
         FailureAttribution,
@@ -165,6 +169,7 @@ __all__ = [
     "persona_full_name",
     "persona_uuid",
     "render_prompt",
+    "tool_result_weight",
     # Banks and assets
     "LocalizedText",
     "LocalizedTextError",
@@ -251,7 +256,11 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "persona_dataset_locale",
     ),
     "usersim.engine.core.localized": ("LocalizedText", "LocalizedTextError"),
-    "usersim.engine.core.messages": ("format_conversation_history_for_prompt", "format_tools_for_prompt"),
+    "usersim.engine.core.messages": (
+        "format_conversation_history_for_prompt",
+        "format_tools_for_prompt",
+        "tool_result_weight",
+    ),
     "usersim.engine.core.missing": ("is_missing", "none_for_missing"),
     "usersim.engine.core.outcomes": (
         "FailureAttribution",

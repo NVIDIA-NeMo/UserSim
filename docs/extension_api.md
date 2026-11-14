@@ -91,6 +91,7 @@ does not load the conversation loop.
 | `format_interaction_style_instructions` | The prompt block for a user's interaction style |
 | `format_disclosure_instructions` | The prompt block for a user's disclosure style |
 | `format_conversation_history_for_prompt` | A conversation as a text block for a judge prompt |
+| `tool_result_weight` | What a tool result weighs against a cap on what a prompt shows of it: its characters, each Han, Kana or Hangul one counting as three |
 | `format_tools_for_prompt` | Tool definitions as a readable prompt block |
 | `render_prompt` | Fills a template's placeholders from given values, then from the row |
 | `load_prompt_file` | A probe's `prompts.yaml` as a mapping, read from the folder its banks resolve to; empty when there is none |

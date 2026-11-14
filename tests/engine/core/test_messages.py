@@ -11,6 +11,7 @@ from usersim.engine.core.messages import (
     format_judge_dialogue,
     format_tools_for_prompt,
     project_public_dialogue,
+    tool_result_weight,
 )
 
 
@@ -113,6 +114,17 @@ class TestFormatConversationHistory:
     def test_other_scripts_count_one_to_a_character(self):
         msgs = [{"role": "tool", "content": "नमस्ते" * 100}]
         assert "[cut:" not in format_conversation_history_for_prompt(msgs, tool_result_chars=600)
+
+    def test_a_result_weighs_what_the_cut_counts(self):
+        """``tool_result_weight`` measures a result as the cut does, so a result of exactly the cap is shown whole."""
+        content = '{"city": "東京", "note": "नमस्ते"}'
+        assert tool_result_weight(content) == len(content) + 2 * 2
+        assert "[cut:" not in format_conversation_history_for_prompt(
+            [{"role": "tool", "content": content}], tool_result_chars=tool_result_weight(content)
+        )
+        assert "[cut:" in format_conversation_history_for_prompt(
+            [{"role": "tool", "content": content}], tool_result_chars=tool_result_weight(content) - 1
+        )
 
     def test_reasoning_content_is_never_rendered(self):
         """Judge and user-agent prompts are built from this. A trace

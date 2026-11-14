@@ -123,10 +123,50 @@ async def test_an_unreadable_verdict_leaves_the_response_standing_unverified() -
     assert result.unverified == "the judge's verdict could not be read"
 
 
-async def test_earlier_responses_are_cut_with_a_marker() -> None:
-    long_earlier = {"role": "tool", "content": '{"items": "' + "x" * 3000 + '"}', "tool_call_id": "0"}
-    _, _, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=[long_earlier])
-    assert "[cut: 1,000 of 3,013 characters shown]" in judge_prompts[0]
+def _call(call_id: str, name: str, arguments: str, response: str) -> list[dict]:
+    """One earlier call as the conversation stores it: the assistant's call and the tool's response."""
+    return [
+        {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [{"id": call_id, "function": {"name": name, "arguments": arguments}}],
+        },
+        {"role": "tool", "tool_call_id": call_id, "content": response},
+    ]
+
+
+async def test_the_simulator_and_its_judge_see_none_of_the_chat() -> None:
+    earlier = [
+        {"role": "user", "content": "I need the Tokyo forecast for my granddaughter's trip."},
+        {"role": "assistant", "content": "Let me look that up for your trip."},
+    ]
+    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    for prompt in (api_prompts[0], judge_prompts[0]):
+        assert "granddaughter" not in prompt and "your trip" not in prompt
+
+
+async def test_each_earlier_response_comes_with_the_call_that_produced_it() -> None:
+    earlier = _call("a", "search_city", '{"q": "Tokyo"}', '{"city_id": 1850147}')
+    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    for prompt in (api_prompts[0], judge_prompts[0]):
+        assert 'search_city({"q": "Tokyo"}) returned:\n{"city_id": 1850147}' in prompt
+
+
+async def test_every_earlier_call_reaches_the_simulator_and_its_judge() -> None:
+    earlier = [m for i in range(7) for m in _call(str(i), "get_weather", f'{{"city": "C{i}"}}', f'{{"record": {i}}}')]
+    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    for prompt in (api_prompts[0], judge_prompts[0]):
+        assert all(f'{{"record": {i}}}' in prompt for i in range(7))
+
+
+async def test_past_the_budget_the_same_tools_responses_come_first_and_the_rest_show_as_calls() -> None:
+    same_tool = '{"forecast": "' + "a" * 15_000 + '"}'
+    other_tool = '{"news": "' + "b" * 15_000 + '"}'
+    earlier = [*_call("1", "get_weather", '{"city": "Kyoto"}', same_tool), *_call("2", "news", "{}", other_tool)]
+    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    for prompt in (api_prompts[0], judge_prompts[0]):
+        assert same_tool in prompt and other_tool not in prompt
+        assert "news({}) returned a response too long to show here." in prompt
 
 
 async def test_without_the_judge_the_first_json_reply_stands() -> None:
