@@ -63,7 +63,7 @@ if TYPE_CHECKING:
         TraceKind,
         WarningKind,
     )
-    from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name
+    from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name, persona_location
     from usersim.engine.core.persona_tags import persona_to_tags
     from usersim.engine.core.probes import (
         AgenticMixin,
@@ -167,6 +167,7 @@ __all__ = [
     "get_prompt",
     "load_prompt_file",
     "persona_full_name",
+    "persona_location",
     "persona_uuid",
     "render_prompt",
     "tool_result_weight",
@@ -272,7 +273,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "TraceKind",
         "WarningKind",
     ),
-    "usersim.engine.core.persona": ("format_persona_for_prompt", "persona_full_name"),
+    "usersim.engine.core.persona": ("format_persona_for_prompt", "persona_full_name", "persona_location"),
     "usersim.engine.core.persona_tags": ("persona_to_tags",),
     "usersim.engine.core.probes": (
         "AgenticMixin",

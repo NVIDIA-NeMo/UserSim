@@ -43,6 +43,7 @@ from usersim.engine.probes.tool_calling.credentials import (
 )
 from usersim.engine.probes.tool_calling.prompts import (
     _SCENARIO,
+    assistant_context,
     assistant_system_prompt,
     tool_relevance_failure,
     tool_relevance_success,
@@ -73,6 +74,7 @@ from usersim.extension import (
     format_persona_for_prompt,
     format_tools_for_prompt,
     load_prompt_file,
+    persona_location,
     register_probe,
     render_prompt,
     run_inline_judge_ex,
@@ -417,7 +419,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.7"
+    prompt_version = "v1.8"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -451,10 +453,13 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         max_tools: int = Field(default=15, ge=1)
         #: The row column holding the toolset's tools.
         tools_column: str = "tools"
-        #: The date each conversation takes place on. The simulated user and the
-        #: API response simulator both work from it, so the dates in requests and
-        #: in tool results agree.
+        #: The date each conversation takes place on. The simulated user, the API
+        #: response simulator and, with ``share_user_context``, the assistant all
+        #: work from it, so the dates in requests and in tool results agree.
         today: date = date(2026, 11, 6)
+        #: Open the first message the assistant sees with the date and where the
+        #: user is, as the assistant's app would attach them.
+        share_user_context: bool = True
         #: Have a judge check each simulated tool response before the assistant
         #: sees it, regenerating a rejected one.
         judge_responses: bool = True
@@ -541,7 +546,20 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 self._interaction_style,
             ),
             today=_format_day(self.options.today),
+            assistant_context=assistant_context() if self.options.share_user_context else "",
         )
+
+    def user_context(self) -> str:
+        """The conversation's date and the persona's location, as ``[2026-11-06 · Austin, Texas, USA]``.
+
+        The same place the persona's prompt states. A persona naming no place
+        gives the date alone, and ``share_user_context`` off gives nothing.
+        """
+        if not self.options.share_user_context:
+            return ""
+        place = persona_location(self._persona)
+        day = self.options.today.isoformat()
+        return f"[{day} · {place}]" if place else f"[{day}]"
 
     def snapshot_turn_state(self) -> dict[str, str]:
         return dict(self.held_credentials)

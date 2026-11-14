@@ -85,6 +85,7 @@ does not load the conversation loop.
 |---|---|
 | `format_persona_for_prompt` | A persona as a text block for the user model's prompt |
 | `persona_full_name` | A persona's name in the order its own script writes it |
+| `persona_location` | Where a persona lives, as its prompt states it: its city, district, region and country, small to large |
 | `persona_uuid` | A persona's content-hashed identifier |
 | `format_behavioral_profile_for_prompt` | A persona's behavioral profile as a prompt block |
 | `ChatRealism` | Which chat-writing rules `format_behavioral_profile_for_prompt` gives the user |

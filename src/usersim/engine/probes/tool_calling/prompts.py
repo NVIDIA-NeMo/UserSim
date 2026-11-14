@@ -68,6 +68,7 @@ Act as the following character:
 {interaction_style_instructions}
 
 Today is {today}. Use this date whenever a date, a day of the week or a year comes up.
+{assistant_context}
 
 The assistant has access to tools in this domain:
 <TOOL_CONTEXT>
@@ -80,6 +81,11 @@ Your request should be about this theme:
 <THEME>
 {theme}
 </THEME>"""
+
+
+# Filled into ``{assistant_context}`` above when the assistant is shown the date and
+# where the user is; empty otherwise.
+_DEFAULT_ASSISTANT_CONTEXT = "The assistant already sees today's date and where you are, so you need not tell it."
 
 
 # Filled into ``{credentials}`` above when the offered tools declare
@@ -307,6 +313,10 @@ def user_agent_system_prompt() -> str:
 
 def assistant_system_prompt() -> str:
     return get_prompt(_SCENARIO, "assistant_system_prompt", "")
+
+
+def assistant_context() -> str:
+    return get_prompt(_SCENARIO, "assistant_context", _DEFAULT_ASSISTANT_CONTEXT)
 
 
 def user_credentials() -> str:

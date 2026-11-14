@@ -41,16 +41,22 @@ the other probes.
   the calls that passed the schema and credential checks. `verifier_results` in
   `conversation_metadata` lists every call and whether it passed.
 
-Five settings, each set with `--probe-option tool_calling.<name>=<value>`:
+Six settings, each set with `--probe-option tool_calling.<name>=<value>`:
 `max_tools`, the most tools a conversation offers (default `15`);
 `tools_column`, the row column holding the toolset's tools (default `tools`);
 `judge_responses`, whether the judge checks each simulated response (default
 `true`); `max_response_attempts`, the attempts a simulated response gets, one
-used by a reply that is not JSON or that the judge rejects (default `2`); and
-`today`, the date each conversation takes place on (default `2026-11-06`).
+used by a reply that is not JSON or that the judge rejects (default `2`);
+`today`, the date each conversation takes place on (default `2026-11-06`); and
+`share_user_context`, whether the assistant sees the date and where the user
+is (default `true`).
 The simulated user and the `api_response_model` both work from that date, so
 the dates in requests and in tool results agree, and each row records it as
-`today` in `conversation_metadata`. The assistant is not told the date.
+`today` in `conversation_metadata`. The first user message the assistant sees
+opens with a line its app would attach, the date and the persona's location,
+such as `[2026-11-06 · Austin, Texas, USA]`; the simulated user is told the
+assistant sees them, and the `api_response_model` gets no location, only what
+a call passes.
 
 ## Locales
 

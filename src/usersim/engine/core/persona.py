@@ -119,6 +119,22 @@ def religion_language_context(persona: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def persona_location(persona: dict[str, Any]) -> str:
+    """Where the persona lives, as its prompt states it, or ``""`` when it names no place.
+
+    The four universal Nemotron-Personas fields (``city``, ``district``,
+    ``region``, ``country``) in small-to-large order, each once, empty ones
+    skipped. ``cli/_pipeline.py::_add_persona_expressions`` audits which
+    fields each locale fills.
+    """
+    parts: list[str] = []
+    for key in ("city", "district", "region", "country"):
+        value = _field_text(persona, key)
+        if value and value not in parts:
+            parts.append(value)
+    return ", ".join(parts)
+
+
 def format_persona_for_prompt(persona: dict[str, Any]) -> str:
     """Build a structured persona text block for user agent prompts.
 
@@ -145,21 +161,9 @@ def format_persona_for_prompt(persona: dict[str, Any]) -> str:
         demographics.append(f"Sex: {f('sex')}")
     if f("marital_status"):
         demographics.append(f"Marital Status: {f('marital_status')}")
-    # Build the Location string from the four universal Nemotron-
-    # Personas fields (``city`` / ``district`` / ``region`` /
-    # ``country``) in small→large order, deduping and skipping
-    # empties. See the matching block in
-    # ``cli/_pipeline.py::_add_persona_expressions`` for the full
-    # per-locale schema audit.
-    loc_parts: list[str] = []
-    seen: set[str] = set()
-    for key in ("city", "district", "region", "country"):
-        v = f(key)
-        if v and v not in seen:
-            loc_parts.append(v)
-            seen.add(v)
-    if loc_parts:
-        demographics.append(f"Location: {', '.join(loc_parts)}")
+    location = persona_location(persona)
+    if location:
+        demographics.append(f"Location: {location}")
     # Religion and spoken languages ship on the India persona dataset only, so
     # these are presence-gated rather than locale-gated: absent everywhere else,
     # they simply do not render, and a locale that adds them later is picked up
