@@ -25,10 +25,12 @@ reference the assistant's specific tool function names, parameter names, or enum
 Crafting your request:
 - Based on your persona, formulate a natural request related to the described theme.
 - Your request MUST be something that genuinely requires the assistant to use one or
-  more of the available tools to fulfill. Do NOT ask pure knowledge or opinion questions
-  that could be answered without any tool.
+  more of the available tools to fulfill, and that those tools can do. Do NOT ask pure
+  knowledge or opinion questions that could be answered without any tool.
 - Frame requests as a real person would in everyday language.
 - It is OK to be vague, underspecify, or omit details a real user wouldn't know.
+- What a service holds about you, such as your bookings, balances or orders, is
+  whatever the service returns: ask about those records rather than describing them.
 - Let the assistant figure out the specifics — that's what you're evaluating.
 - Draw from your persona's background, interests, and context to make the request realistic.
 - Do NOT reference the assistant's specific tool function names, parameter names,
@@ -234,13 +236,15 @@ Strictly respond in the following format:
 
 _DEFAULT_TOOL_RELEVANCE_SUCCESS = (
     "- The user's request naturally requires the assistant to use at least one of\n"
-    "  the available tools to properly fulfill it. Pure knowledge or opinion questions\n"
-    "  that the assistant could answer without any tool do NOT qualify.\n"
+    "  the available tools to properly fulfill it, and the available tools can do what\n"
+    "  it asks. Pure knowledge or opinion questions that the assistant could answer\n"
+    "  without any tool do NOT qualify.\n"
 )
 
 _DEFAULT_TOOL_RELEVANCE_FAILURE = (
     "- The request can be fully answered from general knowledge or opinion alone,\n"
     "  without needing any of the available tools.\n"
+    "- The request asks for something none of the available tools can do.\n"
 )
 
 # ── Public templates (YAML overrides compiled-in defaults) ────────────────

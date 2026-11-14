@@ -402,7 +402,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.5"
+    prompt_version = "v1.6"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -430,8 +430,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     class Options(BaseProbe.Options):
         """The run's settings for this probe, set as ``--probe-option tool_calling.<name>=<value>``."""
 
-        #: The most tools a conversation offers, drawn from its toolset.
-        max_tools: int = Field(default=5, ge=1)
+        #: The most tools a conversation offers. A toolset with no more tools
+        #: than this is offered whole, in its catalog order; a larger one is
+        #: drawn down to it.
+        max_tools: int = Field(default=15, ge=1)
         #: The row column holding the toolset's tools.
         tools_column: str = "tools"
         #: The date each conversation takes place on. The simulated user and the
@@ -469,14 +471,14 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         tools_raw = self._data[tools_column]
         all_tools = _normalize_tool_list(tools_raw)
-        # Drawn from the row's own identity rather than the process RNG. The
-        # subset shapes the entire conversation but is not part of the
-        # trajectory identity, so an identity only means something if the same
-        # row is always handed the same tools.
-        self.tool_subset = random.Random(_tool_subset_seed(self._data)).sample(
-            all_tools,
-            min(self.options.max_tools, len(all_tools)),
-        )
+        if len(all_tools) <= self.options.max_tools:
+            self.tool_subset = list(all_tools)
+        else:
+            # Drawn from the row's own identity rather than the process RNG. The
+            # subset shapes the entire conversation but is not part of the
+            # trajectory identity, so an identity only means something if the
+            # same row is always handed the same tools.
+            self.tool_subset = random.Random(_tool_subset_seed(self._data)).sample(all_tools, self.options.max_tools)
 
         theme = _derive_tool_theme(self._data)
         logger.info(f"  |-- tool_calling: {len(self.tool_subset)} tools, theme={theme.get('type', '?')}")
