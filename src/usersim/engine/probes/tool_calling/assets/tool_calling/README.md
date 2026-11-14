@@ -122,11 +122,16 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   of the conversation's messages. Each response goes in whole until those earlier
   responses reach 24,000 characters (a Han, Kana or Hangul character counting
   as three), the same tool's first; past that, a call shows without its
-  response.
+  response. It writes links on the service's own domain, real entities where
+  the tool covers real things such as places, films or stocks, and a list of
+  the page size the call or the tool's description sets, or about 10 items.
 - A judge checks each synthesized response against the call before the
-  assistant sees it, and a rejected one is rewritten with the judge's reason,
-  within `max_response_attempts` (the probe's `judge_responses` setting turns
-  this off). The judge is the models file's `api_response_judge_model` (the
+  assistant sees it: that it answers the call, agrees with the earlier calls'
+  responses and the date, computes values correctly, and holds no placeholder
+  such as an `example.com` link. It checks real-world facts only where the
+  arguments or the tool's description fix them. A rejected response is
+  rewritten with the judge's reason, within `max_response_attempts` (the
+  probe's `judge_responses` setting turns this off). The judge is the models file's `api_response_judge_model` (the
   probe's `response_judge_model_alias` setting), so these checks can run on
   another model than the per-turn judges', spreading the load in tool-heavy
   runs; a models file without it uses `judge_model`.

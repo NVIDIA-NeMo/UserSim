@@ -169,6 +169,22 @@ async def test_past_the_budget_the_same_tools_responses_come_first_and_the_rest_
         assert "news({}) returned a response too long to show here." in prompt
 
 
+async def test_the_simulator_writes_like_the_real_service() -> None:
+    _, api_prompts, _ = await _simulate(['{"temp": 22}'], [], judge=False)
+    prompt = " ".join(api_prompts[0].split())
+    assert "never example.com, another example.* host or a placeholder" in prompt
+    assert "places, films, companies, players or stocks, use real ones" in prompt
+    assert "the default the tool's description states, or else about 10 items" in prompt
+
+
+async def test_the_judge_fails_example_hosts_and_checks_only_the_facts_the_call_fixes() -> None:
+    _, _, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True)
+    prompt = " ".join(judge_prompts[0].split())
+    assert "no placeholder values (an example.com or other example.* host is one)" in prompt
+    assert "only where the arguments or the tool's description fix them" in prompt
+    assert "a plausible entry the call does not fix is fine" in prompt
+
+
 async def test_without_the_judge_the_first_json_reply_stands() -> None:
     result, _, judge_prompts = await _simulate(['{"temp": 22}'], [], judge=False)
     assert (result.content, result.verdicts, judge_prompts) == ('{"temp": 22}', [], [])

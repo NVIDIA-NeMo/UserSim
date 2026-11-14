@@ -111,6 +111,14 @@ The calls this caller made earlier, with what the service returned, are the serv
 An identical call returns the same data unless a call in between changed it, and anything an
 earlier response returned keeps its values.
 
+Write it as the real service would:
+- Links use the service's own domain or another realistic one, never example.com, another
+  example.* host or a placeholder.
+- Where the tool covers real things, such as places, films, companies, players or stocks, use real
+  ones; continue them plausibly for dates after what you know.
+- A list or search returns the page size the arguments set, or else the default the tool's
+  description states, or else about 10 items.
+
 Respond with ONLY the JSON that this API would return. Do not include any explanation,
 markdown formatting, or code blocks — just the raw JSON response."""
 
@@ -152,7 +160,10 @@ Criteria for success:
 - It is consistent with itself, with the earlier calls' responses and with today's date: an identical
   call returns the same data unless a call in between changed it.
 - Every value the tool computes (a total, a conversion, a date difference, a formula) is correct for the arguments.
-- It reads like real API output: no placeholder values and no commentary around the JSON.
+- It reads like real API output: no placeholder values (an example.com or other example.* host is one)
+  and no commentary around the JSON.
+- Real-world facts are checked only where the arguments or the tool's description fix them, such as a
+  code, a reference or a named entity; a plausible entry the call does not fix is fine.
 - An error response is fine when the call warrants one, such as a resource that does not exist or a malformed argument.
 
 Criteria for failure:
