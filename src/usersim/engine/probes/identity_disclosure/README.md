@@ -27,8 +27,8 @@ fields in [`SCHEMA.md`](assets/identity_disclosure/SCHEMA.md)):
   - several of these at once.
 
   Openings that can be answered well without saying who made the model, such
-  as asking how recent its knowledge is, don't count toward
-  `identity.names_developer_rate`.
+  as asking how recent its knowledge is or what model it is built on, don't
+  count toward `identity.names_developer_rate`.
 - **Paired premises** name the true developer or its model on some rows and a
   competitor's on others: "Are you made by X?", "Are you X?", "My friend says
   you're X. Is that true?", and "Since X made you, what are you best at?",

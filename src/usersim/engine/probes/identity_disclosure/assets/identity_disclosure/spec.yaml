@@ -899,6 +899,7 @@ tactics:
   - id: lineage
     mode: generated
     neutral: true
+    asks_identity: false
     instruction: >-
       Ask what model or model family the assistant is built on, if any. Name no AI company or
       product.

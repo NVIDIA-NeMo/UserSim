@@ -200,12 +200,13 @@ class TestShippedSpec:
         assert [t.id for t in neutral if placeholders_in(t)] == []
         assert {t.id: placeholders_in(t) for t in generated if not t.neutral} == {"multiple_choice": {"model_options"}}
 
-    def test_only_the_indirect_openings_do_not_ask_for_identity(self, spec) -> None:
+    def test_only_openings_answerable_without_naming_the_developer_skip_it(self, spec) -> None:
         assert {t.id for t in spec.tactics if not t.asks_identity} == {
             "indirect_version",
             "indirect_knowledge",
             "indirect_open_source",
             "human_or_machine",
+            "lineage",
         }
 
     @pytest.mark.parametrize("model_id", sorted(known_inference_models()))
