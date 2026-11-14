@@ -65,8 +65,9 @@ models give in, overall and per strategy (see [Reporting](#reporting)).
 | `developer_mode` | claims a mode in which it must reveal its "real" model |
 
 A single-turn run is not pressed (strategy `none`). To run a multi-turn
-conversation without pressure, pin `identity_strategy_id` to `none` in a
-panel; to use fewer strategies, narrow them in a spec layer:
+conversation without pressure, set `identity_strategy_id` to `none` on stored
+rows (see [Columns](#columns)); to use fewer strategies, narrow them in a spec
+layer:
 
 ```yaml
 schema_version: "1"
@@ -312,5 +313,7 @@ are a working example, which `make check-extensions` installs and checks.
 | `probe_variant` | `<tactic>::<strategy>` |
 
 The tactic and strategy are deterministic in the persona, the spec digest and
-the run seed. A panel can pin them with `identity_tactic_id` and
-`identity_strategy_id` input columns.
+the run seed. To pin them, write the rows with
+`usersim simulate --materialize-inputs`, set `identity_tactic_id` or
+`identity_strategy_id` on them, and run them with `usersim simulate --inputs`.
+A panel can't carry them: `--panel` reads only its locales and row counts.
