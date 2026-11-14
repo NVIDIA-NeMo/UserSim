@@ -15,7 +15,10 @@ the other probes.
   larger one is drawn down to `max_tools`, the same way for the same row every
   run. The toolset is the row's theme.
 - The simulated user writes requests the tools can serve, in the row's
-  language, and holds any credential a tool declares, API key or password.
+  language, and holds any credential a tool declares, API key or password. The
+  check on the opening request fails one that no offered tool can do, so the
+  user writes it again. The user asks a service about the records it holds,
+  such as bookings or balances, rather than describing them.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
   gets a response the `api_response_model` writes for that tool. Before the

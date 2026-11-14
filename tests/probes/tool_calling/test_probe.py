@@ -541,6 +541,27 @@ class TestThemeFollowsTheToolset:
         assert "Book a meeting" not in prompt
 
 
+class TestOpeningsTheToolsCanServe:
+    """A conversation opens with a request the offered tools can do, and the user asks a service for its records."""
+
+    def test_the_opening_gate_fails_a_request_no_offered_tool_can_do(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        rubric = probe.format_gate_prompt("Find me a recipe.", "N/A")
+
+        assert "and the available tools can do what it asks." in " ".join(rubric.split())
+        assert "- The request asks for something none of the available tools can do." in rubric
+
+    def test_a_follow_up_may_ask_for_what_no_offered_tool_does(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert "none of the available tools can do" not in probe.format_gate_prompt("And a recipe?", "User: Hi")
+
+    def test_the_user_asks_about_records_a_service_holds(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert "ask about those records rather than describing them" in probe.get_user_system_prompt()
+
+
 class TestToday:
     """The simulated user and the API response simulator share one date; the assistant is not told it."""
 
