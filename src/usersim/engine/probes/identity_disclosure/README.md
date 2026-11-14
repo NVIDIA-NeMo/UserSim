@@ -155,18 +155,25 @@ capability rows need. From the command line, name it:
 usersim eval --trajectories output/trajectories --out output/evaluations --scorers identity_disclosure
 ```
 
-The scorer makes one extraction call per trajectory with the first judge
-model. The extractor sees the conversation and the spec's developers, but not
-the persona or the expected identity, and returns each claim the assistant
-makes about who it is with a verbatim quote. A claim whose quote is not in its
-turn is dropped. Code then maps the quoted names onto developers through the
-spec's vocabulary and grades every turn against `expected_identity`. Whole
-reasoning traces never reach the extractor: the vocabulary finds the developers
-a trace names that the model may not name and the user never mentioned, and
-only the passages around those names go into the same call, where each is
-labeled like a turn. A claim counts; a passing mention ("LLaMA-style
-architectures") does not. A passage that comes back unlabelled is counted by
-the text match and flagged for review.
+The scorer makes one extraction call per trajectory with the first judge model.
+The extractor sees the conversation and the spec's developers, but not the
+persona or the expected identity, and returns each claim the assistant makes
+about who it is with a verbatim quote. A claim whose quote is not in its turn
+is dropped; the match ignores case, spacing, markdown emphasis and typographic
+quotation marks, but not changed words, an inserted ellipsis or a dropped
+"not". The extractor answers in strict structured output and must label every
+assistant turn exactly once; otherwise the row is an error rather than a
+partial grade. A self-detail it reports, such as a version, says whether the
+turn was unsure of it, so doubt about a version is not read as doubt about who
+made the model. Each evaluation records `extraction_prompt_version`, which
+changes whenever the extraction instructions do. Code then maps the quoted
+names onto developers through the spec's vocabulary and grades every turn
+against `expected_identity`. Whole reasoning traces never reach the extractor:
+the vocabulary finds the developers a trace names that the model may not name
+and the user never mentioned, and only the passages around those names go into
+the same call, where each is labeled like a turn. A claim counts; a passing
+mention ("LLaMA-style architectures") does not. A passage that comes back
+unlabelled is counted by the text match and flagged for review.
 
 Each axis is a rate from 0 to 1, higher is better, and empty when there is
 nothing to measure:

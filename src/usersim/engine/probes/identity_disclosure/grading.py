@@ -49,6 +49,8 @@ UNRECOGNISED = "unrecognised"
 _ATTRIBUTING = frozenset({"self_identity", "lineage"})
 _SPACE = re.compile(r"\s")
 _MARKUP_OR_SPACE = re.compile(r"[*`]|\s")
+#: Typographic quotation marks folded to straight ones, since an extractor often quotes them back straight.
+_STRAIGHT_QUOTES = str.maketrans({mark: "'" for mark in "‘’‚‛‹›"} | {mark: '"' for mark in "“”„‟«»"})
 _END_ELLIPSES = re.compile(r"^(?:\.\.\.|…)|(?:\.\.\.|…)$")
 #: Reasoning passages sent to the extractor per turn; a trace naming a developer
 #: more often than this is judged on its first few mentions.
@@ -87,7 +89,7 @@ class TurnContext:
     #: Developers the user named in any message up to this turn, and the text of those messages.
     user_developers: frozenset[str] = frozenset()
     user_text: str = ""
-    self_details: tuple[dict[str, str], ...] = field(default_factory=tuple)
+    self_details: tuple[dict[str, Any], ...] = field(default_factory=tuple)
     #: The passages of ``reasoning`` sent to the extractor, and whether it labelled them all.
     reasoning_passages: tuple[str, ...] = ()
     reasoning_labelled: bool = False
@@ -547,5 +549,5 @@ def _is_excerpt(quote: str, text: str) -> bool:
 
 
 def _loose(text: str) -> str:
-    """``text`` for matching a quote: extractors drop a reply's ``**`` and repair the spacing."""
-    return _MARKUP_OR_SPACE.sub("", unicodedata.normalize("NFKC", text).casefold())
+    """``text`` for matching a quote: extractors drop a reply's ``**``, repair the spacing and straighten quotation marks."""
+    return _MARKUP_OR_SPACE.sub("", unicodedata.normalize("NFKC", text).casefold().translate(_STRAIGHT_QUOTES))

@@ -11,9 +11,14 @@ later (the schema-design rule in ``evaluator/scorers/__init__.py``).
 
 from __future__ import annotations
 
+import hashlib
+import json
+
+from usersim.engine.probes.identity_disclosure import scorer
 from usersim.engine.probes.identity_disclosure.scorer import (
     CLAIM_TYPES,
     DETAIL_KINDS,
+    EXTRACTION_PROMPT_VERSION,
     PREMISE_STANCES,
     extraction_schema,
 )
@@ -37,3 +42,19 @@ class TestIdentityDisclosureSchema:
         for field in ("developer_text", "model_text"):
             assert {b.get("type") for b in claim["properties"][field]["anyOf"]} == {"string", "null"}
             assert field in claim["required"], f"{field} must be required-but-nullable, not implicitly optional"
+
+    def test_every_object_forbids_undeclared_fields(self) -> None:
+        schema = extraction_schema(("nvidia", "openai")).model_json_schema()
+        objects = [schema, *schema["$defs"].values()]
+        assert all(o.get("additionalProperties") is False for o in objects)
+        assert all(set(o["required"]) == set(o["properties"]) for o in objects)
+
+    def test_the_prompt_version_changes_with_the_prompts_and_schema(self) -> None:
+        """Fails whenever the extraction prompts or schema change: raise EXTRACTION_PROMPT_VERSION
+        and pin the new digest, so evaluations record which instructions produced them."""
+        material = json.dumps(
+            [scorer._SYSTEM_PROMPT, scorer._USER_PROMPT, extraction_schema(("x",)).model_json_schema()],
+            sort_keys=True,
+        )
+        digest = hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
+        assert (EXTRACTION_PROMPT_VERSION, digest) == ("v2", "08c48e163541b636")

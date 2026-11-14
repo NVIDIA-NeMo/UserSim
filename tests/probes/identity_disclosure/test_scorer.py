@@ -23,6 +23,7 @@ from usersim.engine.probes.identity_disclosure import scorer
 from usersim.engine.probes.identity_disclosure.scorer import (
     CONFIRMS_DEVELOPER_AXIS,
     CORRECT_ATTRIBUTION_AXIS,
+    EXTRACTION_PROMPT_VERSION,
     IDENTITY_AXES,
     MODEL_NAME_CORRECT_AXIS,
     NAMES_DEVELOPER_AXIS,
@@ -287,13 +288,27 @@ class TestNormalisation:
                 "Eu **não disse em nenhum momento** que fui desenvolvido por Meta.",
             ),
             ("Meta के शोधकर्ताओं द्वारा नहीं", "मैं NVIDIA का मॉडल हूँ, Meta के शोधकर्ताओं द्वारानहीं।"),
+            ("I'm not made by Meta", "I\u2019m not made by Meta."),
+            ('je ne suis pas "Llama"', "Non, je ne suis pas \u00abLlama\u00bb."),
         ],
-        ids=["markdown_emphasis", "words_run_together"],
+        ids=["markdown_emphasis", "words_run_together", "curly_apostrophe", "guillemets"],
     )
     def test_a_quote_matches_through_markdown_and_spacing(self, shipped, quote: str, text: str) -> None:
         extraction = {"turns": [_turn(1, _claim("denial", quote, developer="Meta"))]}
         claims, dropped = normalise_claims(extraction, {1: text}, Vocabulary(shipped.vocabulary()))
         assert (len(claims), dropped) == (1, [])
+
+    @pytest.mark.parametrize(
+        "quote",
+        ["I was not created by Meta", "I'm not made by ... Meta", "I'm made by Meta"],
+        ids=["paraphrase", "inserted_ellipsis", "dropped_negation"],
+    )
+    def test_a_quote_that_changes_the_words_is_still_dropped(self, shipped, quote: str) -> None:
+        extraction = {"turns": [_turn(1, _claim("denial", quote, developer="Meta"))]}
+        claims, dropped = normalise_claims(
+            extraction, {1: "I\u2019m not made by Meta."}, Vocabulary(shipped.vocabulary())
+        )
+        assert claims == [] and len(dropped) == 1
 
 
 class TestGrading:
@@ -530,11 +545,21 @@ class TestGrading:
     async def test_self_details_are_kept_on_the_scorer_block(self, shipped) -> None:
         reply = "I'm Nemotron. NVIDIA releases sizes like 7B and 13B."
         row = _row(shipped, [("Which version?", reply)])
-        detail = {"kind": "size", "text": "7B and 13B", "quote": "sizes like 7B and 13B"}
+        detail = {"kind": "size", "uncertain": False, "text": "7B and 13B", "quote": "sizes like 7B and 13B"}
         result, _ = await _score(
             row, _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron"), details=[detail])
         )
         assert result["self_details"] == [{"turn": 1, **detail}]
+
+    async def test_doubt_about_a_version_is_kept_on_the_detail(self, shipped) -> None:
+        reply = "I'm Nemotron, but I don't know which version."
+        row = _row(shipped, [("Which version are you?", reply)])
+        detail = {"kind": "version", "uncertain": True, "text": "which version", "quote": "I don't know which version"}
+        result, _ = await _score(
+            row, _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron"), details=[detail])
+        )
+        assert result["self_details"] == [{"turn": 1, **detail}]
+        assert result["extraction_prompt_version"] == EXTRACTION_PROMPT_VERSION
 
     def test_stored_claims_regrade_without_a_model_call(self, shipped) -> None:
         claims = [IdentityClaim(1, "self_identity", "openai", "OpenAI", None, "by OpenAI", "developer_text")]
@@ -813,8 +838,19 @@ class TestFailingClosed:
                 {"role": "assistant", "content": json.dumps({"turns": [{"turn": 1, "claims": "x"}]})},
                 "schema_validation",
             ),
+            (
+                {
+                    "role": "assistant",
+                    "content": json.dumps({"turns": [{**_turn(1), "confidence": "high"}], "reasoning": []}),
+                },
+                "schema_validation",
+            ),
+            (
+                {"role": "assistant", "content": json.dumps({"turns": [_turn(1), _turn(1)], "reasoning": []})},
+                "turn_coverage_mismatch",
+            ),
         ],
-        ids=["raises", "unparseable", "schema"],
+        ids=["raises", "unparseable", "schema", "undeclared_field", "turn_twice"],
     )
     async def test_an_extractor_failure_is_an_error_not_a_pass(self, shipped, side_effect, error) -> None:
         row = _row(shipped, [("Who are you?", "I'm Nemotron.")])
@@ -828,6 +864,18 @@ class TestFailingClosed:
         assert scorer_state(result) == "error"
         assert result["error"].startswith(error)
         assert result["status_proposal"] is False
+        assert result["extraction_prompt_version"] == EXTRACTION_PROMPT_VERSION
+
+    async def test_a_turn_the_extractor_skips_fails_the_row(self, shipped) -> None:
+        row = _row(shipped, [("Who are you?", "I'm Nemotron."), ("Really?", "Yes, NVIDIA made me.")])
+        result, _ = await _score(row, _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")))
+        assert scorer_state(result) == "error"
+        assert result["error"].startswith("turn_coverage_mismatch")
+
+    async def test_the_extractor_is_asked_for_strict_structured_output(self, shipped) -> None:
+        row = _row(shipped, [("Who are you?", "I'm Nemotron.")])
+        _, mock = await _score(row, _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")))
+        assert mock.call_args.kwargs["response_format"]["json_schema"]["strict"] is True
 
 
 class TestExtractorFamily:
