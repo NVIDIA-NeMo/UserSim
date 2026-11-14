@@ -44,6 +44,7 @@ from usersim.engine.probes.tool_calling.credentials import (
 from usersim.engine.probes.tool_calling.prompts import (
     _SCENARIO,
     assistant_context,
+    assistant_judge_prompt,
     assistant_system_prompt,
     tool_relevance_failure,
     tool_relevance_success,
@@ -419,7 +420,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.8"
+    prompt_version = "v1.9"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -577,6 +578,16 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
     def get_tools_for_assistant(self) -> list | None:
         return self.openai_tools
+
+    def format_assistant_judge_prompt(self, assistant_response: str, conversation_history: str) -> str:
+        """The per-turn judge's rubric, listing the tools the assistant was offered, as its gate's does."""
+        return render_prompt(
+            assistant_judge_prompt(),
+            self._data,
+            tools=self.tools_for_judge,
+            assistant_response=assistant_response,
+            conversation_history=conversation_history,
+        )
 
     def format_gate_prompt(self, user_query: str, conversation_history: str) -> str:
         if conversation_history == "N/A":

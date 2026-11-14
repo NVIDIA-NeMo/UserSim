@@ -222,6 +222,11 @@ tool_relevance_failure: |
 assistant_judge_prompt: |-
   You are an expert evaluator. Judge the assistant's response in this conversation.
 
+  The assistant has these tools:
+  <TOOLS>
+  {tools}
+  </TOOLS>
+
   Previous conversation:
   <PREV_CONVERSATION>
   {conversation_history}
@@ -235,6 +240,8 @@ assistant_judge_prompt: |-
   <RUBRIC>
   The conversation shows each tool call the assistant made, as "Assistant [tool calls]: ...", and what it returned, as "Tool response: ...". A tool response cut short ends with "[cut: N of M characters shown]"; do not count what the cut removed as missing.
 
+  Judge only what the response to judge says. An error in an earlier reply counts against that reply, so this response fails for it only if it repeats it.
+
   Criteria for success:
   - The response addresses what the user asked.
   - The response is a coherent, complete reply relevant to the conversation context.
@@ -244,6 +251,7 @@ assistant_judge_prompt: |-
   - The response does not address the user's question or request.
   - The response is unintelligible, empty, or a non-sequitur that ignores the conversation context.
   - The response states a figure, name, date or other result that no tool response in the conversation contains, contradicts a tool response, or says it performed an action, such as a booking, a change or a lookup, that no tool call in the conversation performed.
+  - The response says it cannot look up or do something one of the assistant's tools does, or calls results its tool calls returned unreliable without a reason the conversation shows.
 
   </RUBRIC>
 

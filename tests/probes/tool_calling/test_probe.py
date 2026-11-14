@@ -563,6 +563,31 @@ class TestOpeningsTheToolsCanServe:
         assert "ask about those records rather than describing them" in probe.get_user_system_prompt()
 
 
+class TestAssistantJudge:
+    """The per-turn judge sees the tools the assistant had and judges only the reply in front of it."""
+
+    def test_the_judge_lists_exactly_the_tools_the_assistant_was_offered(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools, max_tools=1)
+        offered = probe.tool_subset[0]["tool"]["function"]["name"]
+        other = next(t["tool"]["function"]["name"] for t in sample_tools if t["tool"]["function"]["name"] != offered)
+        prompt = probe.format_assistant_judge_prompt("It is sunny.", "User: Weather?")
+
+        assert f"<TOOLS>\n- {offered}:" in prompt and other not in prompt
+        assert "It is sunny." in prompt and "User: Weather?" in prompt
+
+    def test_the_judge_fails_a_reply_that_says_it_cannot_do_what_a_tool_does(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
+
+        assert "says it cannot look up or do something one of the assistant's tools does" in prompt
+
+    def test_an_earlier_replys_error_counts_against_that_reply(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
+
+        assert "this response fails for it only if it repeats it" in prompt
+
+
 class TestToday:
     """The simulated user, the assistant and the API response simulator share one date; the assistant also sees the user's place."""
 

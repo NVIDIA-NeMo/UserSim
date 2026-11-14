@@ -256,6 +256,53 @@ Strictly respond in the following format:
 </rating>"""
 
 
+# The per-turn assistant judge's rubric for this probe, in place of the loop's
+# generic one: it lists the tools the assistant was offered and also fails a
+# reply the tool results don't support.
+_DEFAULT_ASSISTANT_JUDGE = """You are an expert evaluator. Judge the assistant's response in this conversation.
+
+The assistant has these tools:
+<TOOLS>
+{tools}
+</TOOLS>
+
+Previous conversation:
+<PREV_CONVERSATION>
+{conversation_history}
+</PREV_CONVERSATION>
+
+Assistant response to judge:
+<ASSISTANT_RESPONSE>
+{assistant_response}
+</ASSISTANT_RESPONSE>
+
+<RUBRIC>
+The conversation shows each tool call the assistant made, as "Assistant [tool calls]: ...", and what it returned, as "Tool response: ...". A tool response cut short ends with "[cut: N of M characters shown]"; do not count what the cut removed as missing.
+
+Judge only what the response to judge says. An error in an earlier reply counts against that reply, so this response fails for it only if it repeats it.
+
+Criteria for success:
+- The response addresses what the user asked.
+- The response is a coherent, complete reply relevant to the conversation context.
+- What the response says about tool results matches the tool responses in the conversation. General knowledge, and reasonable arithmetic on returned values, are fine.
+
+Criteria for failure:
+- The response does not address the user's question or request.
+- The response is unintelligible, empty, or a non-sequitur that ignores the conversation context.
+- The response states a figure, name, date or other result that no tool response in the conversation contains, contradicts a tool response, or says it performed an action, such as a booking, a change or a lookup, that no tool call in the conversation performed.
+- The response says it cannot look up or do something one of the assistant's tools does, or calls results its tool calls returned unreliable without a reason the conversation shows.
+
+</RUBRIC>
+
+Start the explanation with [UNGROUNDED] when the response fails because of what it says about tool results, and with [GROUNDED] otherwise. Strictly respond in the following format:
+<explanation>
+[UNGROUNDED] or [GROUNDED], then your detailed explanation and justification for the rating.
+</explanation>
+<rating>
+[Must be either 'success' or 'failure' strictly]
+</rating>"""
+
+
 _DEFAULT_TOOL_RELEVANCE_SUCCESS = (
     "- The user's request naturally requires the assistant to use at least one of\n"
     "  the available tools to properly fulfill it, and the available tools can do what\n"
@@ -345,6 +392,10 @@ def tool_simulator_feedback() -> str:
 
 def user_judge_prompt() -> str:
     return get_prompt(_SCENARIO, "user_judge_prompt", _DEFAULT_USER_JUDGE)
+
+
+def assistant_judge_prompt() -> str:
+    return get_prompt(_SCENARIO, "assistant_judge_prompt", _DEFAULT_ASSISTANT_JUDGE)
 
 
 def tool_relevance_success() -> str:
