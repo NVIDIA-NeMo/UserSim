@@ -11,6 +11,7 @@ from usersim.engine.core.messages import (
     format_judge_dialogue,
     format_tools_for_prompt,
     project_public_dialogue,
+    tool_result_weight,
 )
 
 
@@ -114,6 +115,17 @@ class TestFormatConversationHistory:
         msgs = [{"role": "tool", "content": "नमस्ते" * 100}]
         assert "[cut:" not in format_conversation_history_for_prompt(msgs, tool_result_chars=600)
 
+    def test_a_result_weighs_what_the_cut_counts(self):
+        """``tool_result_weight`` measures a result as the cut does, so a result of exactly the cap is shown whole."""
+        content = '{"city": "東京", "note": "नमस्ते"}'
+        assert tool_result_weight(content) == len(content) + 2 * 2
+        assert "[cut:" not in format_conversation_history_for_prompt(
+            [{"role": "tool", "content": content}], tool_result_chars=tool_result_weight(content)
+        )
+        assert "[cut:" in format_conversation_history_for_prompt(
+            [{"role": "tool", "content": content}], tool_result_chars=tool_result_weight(content) - 1
+        )
+
     def test_reasoning_content_is_never_rendered(self):
         """Judge and user-agent prompts are built from this. A trace
         reaching one would leak the assistant's private thinking into a
@@ -160,6 +172,25 @@ class TestProjectPublicDialogue:
             {"role": "assistant", "content": "Let me check."},
             {"role": "assistant", "content": "It is sunny."},
         ]
+
+    def test_a_reply_after_tool_results_can_be_marked_without_showing_them(self):
+        """A chat app shows that the assistant looked something up, never what it found."""
+        messages = [
+            {"role": "user", "content": "What is the weather?"},
+            {"role": "assistant", "content": "Let me check.", "tool_calls": [{"id": "c1", "function": {"name": "w"}}]},
+            {"role": "tool", "content": '{"secret_payload":"sunny"}', "tool_call_id": "c1"},
+            {"role": "assistant", "content": "It is sunny."},
+            {"role": "user", "content": "And tomorrow?"},
+            {"role": "assistant", "content": "I can't say yet."},
+        ]
+        assert project_public_dialogue(messages, mark_tool_use=True) == [
+            {"role": "user", "content": "What is the weather?"},
+            {"role": "assistant", "content": "Let me check."},
+            {"role": "assistant", "content": "(after using its tools) It is sunny."},
+            {"role": "user", "content": "And tomorrow?"},
+            {"role": "assistant", "content": "I can't say yet."},
+        ]
+        assert "(after using its tools)" not in str(project_public_dialogue(messages))
 
     def test_reasoning_content_is_dropped(self):
         """A thinking trace is not text a real user could observe, so it

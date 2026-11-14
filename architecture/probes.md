@@ -44,6 +44,7 @@ mixin that adds them.
 | `get_assistant_system_prompt` | every assistant turn |
 | `get_verbatim_first_user_turn` | turn 1, when a bank supplies it literally |
 | `get_user_query_instruction` | turn 1, when the user-LLM writes it from the probe's own instruction |
+| `user_context` | turn 1: a line the assistant's app attaches, such as the date and where the user is, opening the first user message the assistant sees |
 | `format_gate_prompt` | judging a generated user turn before accepting it |
 | `format_followup_user_instructions` | turns after the first |
 | `on_followup_failure` | a follow-up turn fails its gate |
@@ -55,7 +56,7 @@ mixin that adds them.
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn, unless the run switches the assistant judge off |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
-| `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
+| `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, a check each generated opening must pass before the gate, and whether the user sees that the assistant used its tools |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
 | `build_result_extras` | adding probe-specific columns to the trajectory, each declared in the class's `output_columns` |
 | `should_succeed` | the end of the conversation: whether the probe completed its protocol; `False` fails the row |

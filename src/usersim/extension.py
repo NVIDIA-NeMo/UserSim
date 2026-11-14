@@ -47,7 +47,11 @@ if TYPE_CHECKING:
         persona_dataset_locale,
     )
     from usersim.engine.core.localized import LocalizedText, LocalizedTextError
-    from usersim.engine.core.messages import format_conversation_history_for_prompt, format_tools_for_prompt
+    from usersim.engine.core.messages import (
+        format_conversation_history_for_prompt,
+        format_tools_for_prompt,
+        tool_result_weight,
+    )
     from usersim.engine.core.missing import is_missing, none_for_missing
     from usersim.engine.core.outcomes import (
         FailureAttribution,
@@ -59,7 +63,7 @@ if TYPE_CHECKING:
         TraceKind,
         WarningKind,
     )
-    from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name
+    from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name, persona_location
     from usersim.engine.core.persona_tags import persona_to_tags
     from usersim.engine.core.probes import (
         AgenticMixin,
@@ -163,8 +167,10 @@ __all__ = [
     "get_prompt",
     "load_prompt_file",
     "persona_full_name",
+    "persona_location",
     "persona_uuid",
     "render_prompt",
+    "tool_result_weight",
     # Banks and assets
     "LocalizedText",
     "LocalizedTextError",
@@ -251,7 +257,11 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "persona_dataset_locale",
     ),
     "usersim.engine.core.localized": ("LocalizedText", "LocalizedTextError"),
-    "usersim.engine.core.messages": ("format_conversation_history_for_prompt", "format_tools_for_prompt"),
+    "usersim.engine.core.messages": (
+        "format_conversation_history_for_prompt",
+        "format_tools_for_prompt",
+        "tool_result_weight",
+    ),
     "usersim.engine.core.missing": ("is_missing", "none_for_missing"),
     "usersim.engine.core.outcomes": (
         "FailureAttribution",
@@ -263,7 +273,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "TraceKind",
         "WarningKind",
     ),
-    "usersim.engine.core.persona": ("format_persona_for_prompt", "persona_full_name"),
+    "usersim.engine.core.persona": ("format_persona_for_prompt", "persona_full_name", "persona_location"),
     "usersim.engine.core.persona_tags": ("persona_to_tags",),
     "usersim.engine.core.probes": (
         "AgenticMixin",

@@ -10,6 +10,7 @@ from jinja2 import Template
 from usersim.engine.core.persona import (
     format_persona_for_prompt,
     persona_full_name,
+    persona_location,
     persona_name_template,
     religion_language_context,
 )
@@ -61,6 +62,18 @@ class TestFormatPersona:
         }
         text = format_persona_for_prompt(persona)
         assert "Location: Bukit Panjang, Singapore" in text
+
+
+class TestPersonaLocation:
+    """The location the persona's prompt states, for anything else that tells it."""
+
+    def test_it_is_the_location_the_persona_prompt_states(self):
+        persona = {"first_name": "Jean", "last_name": "Dupont", "city": "Lyon", "district": "Lyon", "country": "France"}
+        assert persona_location(persona) == "Lyon, France"
+        assert f"Location: {persona_location(persona)}\n" in format_persona_for_prompt(persona) + "\n"
+
+    def test_a_persona_naming_no_place_has_none(self):
+        assert persona_location({"first_name": "A", "city": "-", "country": float("nan")}) == ""
 
 
 class TestReligionAndLanguages:

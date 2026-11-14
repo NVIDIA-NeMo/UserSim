@@ -18,13 +18,19 @@ the other probes.
   language, and holds any credential a tool declares, API key or password. The
   check on the opening request fails one that no offered tool can do, so the
   user writes it again. The user asks a service about the records it holds,
-  such as bookings or balances, rather than describing them.
+  such as bookings or balances, rather than describing them. In the user's
+  view, a reply after tool results opens with `(after using its tools)`, as a
+  chat app shows a lookup; the user never sees what the tools returned.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
-  gets a response the `api_response_model` writes for that tool. Before the
-  assistant sees it, `judge_model` checks that response against the call (the
-  tool's description, the arguments, earlier responses, the date, any computed
-  value) and has a rejected one rewritten with its reason; a response still
+  gets a response the `api_response_model` writes for that tool. It writes from
+  what the service would see: the call, the calls made earlier in the
+  conversation with their responses, and the date, never the conversation's
+  messages, so a detail the user gives reaches it only through the arguments the
+  assistant passes. Before the assistant sees the response, `judge_model`
+  checks it against the call (the tool's description, the arguments, the
+  earlier calls' responses, the date, any computed value) and has a rejected
+  one rewritten with its reason; a response still
   rejected when the attempts run out stands, and the row carries an
   `unverified_tool_response` warning. A call that sets a new password leaves
   the user holding it.
@@ -37,16 +43,22 @@ the other probes.
   the calls that passed the schema and credential checks. `verifier_results` in
   `conversation_metadata` lists every call and whether it passed.
 
-Five settings, each set with `--probe-option tool_calling.<name>=<value>`:
+Six settings, each set with `--probe-option tool_calling.<name>=<value>`:
 `max_tools`, the most tools a conversation offers (default `15`);
 `tools_column`, the row column holding the toolset's tools (default `tools`);
 `judge_responses`, whether the judge checks each simulated response (default
 `true`); `max_response_attempts`, the attempts a simulated response gets, one
-used by a reply that is not JSON or that the judge rejects (default `2`); and
-`today`, the date each conversation takes place on (default `2026-11-06`).
+used by a reply that is not JSON or that the judge rejects (default `2`);
+`today`, the date each conversation takes place on (default `2026-11-06`); and
+`share_user_context`, whether the assistant sees the date and where the user
+is (default `true`).
 The simulated user and the `api_response_model` both work from that date, so
 the dates in requests and in tool results agree, and each row records it as
-`today` in `conversation_metadata`. The assistant is not told the date.
+`today` in `conversation_metadata`. The first user message the assistant sees
+opens with a line its app would attach, the date and the persona's location,
+such as `[2026-11-06 · Austin, Texas, USA]`; the simulated user is told the
+assistant sees them, and the `api_response_model` gets no location, only what
+a call passes.
 
 ## Locales
 

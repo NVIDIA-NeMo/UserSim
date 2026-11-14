@@ -37,6 +37,10 @@ class UserTurnPolicy:
     #: Why a generated opening must be written again, or None to accept it. The loop
     #: runs it on each draft of turn 1 before the gate; a verbatim opening is not checked.
     check_opening: Callable[[str], str | None] | None = None
+    #: Whether the simulated user sees that the assistant used its tools: a reply
+    #: after tool results opens with ``(after using its tools)``, and no tool name,
+    #: argument or result is shown.
+    show_tool_use: bool = False
 
     def without_ignored_names(self, text: str) -> str:
         """``text`` with ``script_check_ignores`` removed, for the script check."""

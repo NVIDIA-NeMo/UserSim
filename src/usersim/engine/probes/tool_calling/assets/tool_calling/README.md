@@ -116,11 +116,22 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   decides whether/which to call.
 - There is **no real execution**: the `api_response_model` alias (see
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
-  tool's response from the schema, so a run needs no live service.
+  tool's response from the schema, so a run needs no live service. It sees
+  what the service would: the call, the calls made earlier in the conversation
+  with their responses, which it keeps consistent with, and the date, but none
+  of the conversation's messages. Each response goes in whole until those earlier
+  responses reach 24,000 characters (a Han, Kana or Hangul character counting
+  as three), the same tool's first; past that, a call shows without its
+  response. It writes links on the service's own domain, real entities where
+  the tool covers real things such as places, films or stocks, and a list of
+  the page size the call or the tool's description sets, or about 10 items.
 - A judge checks each synthesized response against the call before the
-  assistant sees it, and a rejected one is rewritten with the judge's reason,
-  within `max_response_attempts` (the probe's `judge_responses` setting turns
-  this off). The judge is the models file's `api_response_judge_model` (the
+  assistant sees it: that it answers the call, agrees with the earlier calls'
+  responses and the date, computes values correctly, and holds no placeholder
+  such as an `example.com` link. It checks real-world facts only where the
+  arguments or the tool's description fix them. A rejected response is
+  rewritten with the judge's reason, within `max_response_attempts` (the
+  probe's `judge_responses` setting turns this off). The judge is the models file's `api_response_judge_model` (the
   probe's `response_judge_model_alias` setting), so these checks can run on
   another model than the per-turn judges', spreading the load in tool-heavy
   runs; a models file without it uses `judge_model`.
@@ -128,8 +139,12 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   assistant judge reads the turn's tool calls and results and also fails a
   reply that states a result no tool returned or claims an action no call
   performed. Such failures start with `[UNGROUNDED]` and count in
-  `n_assistant_ungrounded`. With `--max-assistant-attempts` above 1, the
-  rejected turn is undone, tool calls included, and regenerated.
+  `n_assistant_ungrounded`. The judge also sees the tools the assistant was
+  offered, and fails a reply that says it can't do what one of them does or
+  calls its tools' results unreliable without a reason. It judges only what
+  the reply in front of it says: an earlier reply's error counts against that
+  reply alone, unless this one repeats it. With `--max-assistant-attempts`
+  above 1, the rejected turn is undone, tool calls included, and regenerated.
 - A call that breaks its tool's schema gets a `400` response instead of a
   simulated one, and a call without the user's key for a tool that takes one
   gets a `401` (see [Credentials](#credentials)).

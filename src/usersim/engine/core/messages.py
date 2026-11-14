@@ -44,13 +44,23 @@ EVALUATOR_TOOL_RESULT_CHARS = 24_000
 _DENSE_CHARACTER_WEIGHT = 3
 
 
-def _cut_tool_result(content: str, limit: int) -> str:
-    """``content`` up to ``limit`` characters, each Han, Kana or Hangul one counting as ``_DENSE_CHARACTER_WEIGHT``."""
+def _character_weights(content: str) -> list[int]:
+    """What each character of ``content`` weighs against a tool-result cap."""
     from usersim.engine.core.llm import _CHARACTER_COUNTED  # llm imports this module through engine.config
 
+    return [_DENSE_CHARACTER_WEIGHT if _CHARACTER_COUNTED.match(ch) else 1 for ch in content]
+
+
+def tool_result_weight(content: str) -> int:
+    """What ``content`` weighs against a tool-result cap: its characters, each Han, Kana or Hangul one counting as three."""
+    return sum(_character_weights(content))
+
+
+def _cut_tool_result(content: str, limit: int) -> str:
+    """``content`` up to ``limit`` characters, weighed as ``tool_result_weight`` does."""
     used = 0
-    for i, ch in enumerate(content):
-        used += _DENSE_CHARACTER_WEIGHT if _CHARACTER_COUNTED.match(ch) else 1
+    for i, weight in enumerate(_character_weights(content)):
+        used += weight
         if used > limit:
             return f"{content[:i]} [cut: {i:,} of {len(content):,} characters shown]"
     return content
@@ -100,21 +110,38 @@ def format_judge_dialogue(messages: list[dict[str, Any]]) -> str:
     return format_conversation_history_for_prompt(messages, tool_result_chars=EVALUATOR_TOOL_RESULT_CHARS)
 
 
+#: What opens an assistant reply in the simulated user's view when the reply
+#: came after tool results and the probe shows tool use.
+TOOL_USE_MARK = "(after using its tools)"
+
+
 def project_public_dialogue(
     messages: list[dict[str, Any]],
+    *,
+    mark_tool_use: bool = False,
 ) -> list[dict[str, Any]]:
     """Return only text a real user could observe.
 
     Assistant text remains public even when its source message also contains a
-    tool call. Protocol envelopes, arguments, and raw tool results do not.
+    tool call. Protocol envelopes, arguments, and raw tool results do not. With
+    ``mark_tool_use``, the first reply after tool results opens with
+    ``TOOL_USE_MARK``, as a chat app shows that the assistant looked
+    something up without showing what it found.
     """
     result: list[dict[str, Any]] = []
+    after_tool_results = False
     for message in messages:
         role = message.get("role")
         content = message.get("content", "")
         if role == "user":
+            after_tool_results = False
             result.append({"role": "user", "content": content})
+        elif role == "tool":
+            after_tool_results = True
         elif role == "assistant" and content:
+            if mark_tool_use and after_tool_results:
+                content = f"{TOOL_USE_MARK} {content}"
+            after_tool_results = False
             result.append({"role": "assistant", "content": content})
     return result
 

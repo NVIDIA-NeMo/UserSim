@@ -395,9 +395,24 @@ class _StubAdapter:
         return {}
 
 
+@dataclass
+class _StubAdapterWithContext(_StubAdapter):
+    """A stub whose app attaches a line of context to the first user message."""
+
+    def user_context(self) -> str:
+        return "[2026-11-06 · Osaka, Japan]"
+
+
 class TestInjectVerbatimFirstTurn:
     def _make_state(self) -> ConversationState:
         return ConversationState(outcome=OutcomeBuilder())
+
+    def test_the_probes_context_line_opens_the_message_the_assistant_sees(self) -> None:
+        loop = ConversationLoop()
+        state = self._make_state()
+        loop._inject_verbatim_first_turn(_StubAdapterWithContext(asst_system=""), state, "verbatim Q1")
+        assert state.messages == [{"role": "user", "content": "[2026-11-06 · Osaka, Japan]\n\nverbatim Q1"}]
+        assert state.user_history[2] == {"role": "assistant", "content": "verbatim Q1"}
 
     def test_messages_seeded_with_assistant_system_then_user_verbatim(self) -> None:
         loop = ConversationLoop()
@@ -745,3 +760,33 @@ class TestUserLanguageGateExhaustedFailureClass:
         out = b.finalize(OutcomeStatus.OK)
         assert out.status == OutcomeStatus.COMPLETED_WITH_WARNINGS
         assert out.n_user_language_violations == 1
+
+
+class TestUserContextOnAGeneratedOpening:
+    """A probe's context line opens the first message the assistant sees; the user's own text stays its own."""
+
+    @staticmethod
+    async def _episode():
+        from usersim.extension import ConversationSimulatorConfig
+        from usersim.testing import run_episode
+
+        run = await run_episode(
+            "general_open_ended",
+            config=ConversationSimulatorConfig(name="conversation_messages", locale="en_US", max_turns=1),
+            persona={"first_name": "Haruto", "last_name": "Sato", "age": 41, "city": "Osaka"},
+            data={"theme": {"type": "travel", "description": "A weekend in Kyoto."}},
+        )
+        first = next(m for m in json.loads(run.row["conversation_messages"]) if m["role"] == "user")
+        to_assistant = next(p["messages"] for p in run.prompts if p["role"] == "assistant")
+        return run.row, first["content"], next(m for m in to_assistant if m["role"] == "user")["content"]
+
+    async def test_the_context_line_reaches_the_assistant_and_the_transcript(self, monkeypatch) -> None:
+        from usersim.engine.probes.general_open_ended.probe import OpenEndedProbe
+
+        monkeypatch.setattr(OpenEndedProbe, "user_context", lambda self: "[2026-11-06 · Osaka, Japan]")
+        row, stored, sent = await self._episode()
+        assert stored == sent == f"[2026-11-06 · Osaka, Japan]\n\n{row['user_query']}"
+
+    async def test_without_context_the_first_message_is_the_users_text(self) -> None:
+        row, stored, sent = await self._episode()
+        assert stored == sent == row["user_query"]
