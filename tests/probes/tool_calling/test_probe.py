@@ -588,6 +588,22 @@ class TestAssistantJudge:
         assert "this response fails for it only if it repeats it" in prompt
 
 
+class TestUserSeesToolUse:
+    """The simulated user sees that the assistant looked something up, never what it found."""
+
+    async def test_a_reply_after_a_lookup_is_marked_in_the_users_view(self, sample_tools):
+        _result, _assistant, user_inputs, _judge, _api = await _run_concrete_tool_probe(sample_tools)
+        history = user_inputs[1][-1]["content"]
+
+        assert "Assistant: (after using its tools) Tokyo is 22 degrees." in history
+        assert "raw_secret" not in history and "get_weather" not in history
+
+    def test_the_user_is_told_what_the_mark_means(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert 'A reply that opens with "(after using its tools)"' in probe.get_user_system_prompt()
+
+
 class TestToday:
     """The simulated user, the assistant and the API response simulator share one date; the assistant also sees the user's place."""
 

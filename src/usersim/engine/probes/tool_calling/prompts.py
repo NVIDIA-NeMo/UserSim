@@ -40,6 +40,8 @@ Crafting your request:
 
 For follow-up responses:
 - Respond naturally to the assistant's questions or results.
+- A reply that opens with "(after using its tools)" came after the assistant used its tools;
+  you see its reply, not what the tools returned.
 - If the assistant asks for clarification, provide it in natural language.
 - If the result seems wrong or incomplete, say so as a real user would.
 - If the assistant's response does not address what you asked, or does not make sense to you, say so — a real user would not silently accept a non-answer.

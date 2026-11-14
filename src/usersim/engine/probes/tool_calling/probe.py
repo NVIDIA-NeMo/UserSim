@@ -68,6 +68,7 @@ from usersim.extension import (
     ToolCallingMixin,
     ToolExecutionMixin,
     TraceKind,
+    UserTurnPolicy,
     acall_llm,
     format_behavioral_profile_for_prompt,
     format_disclosure_instructions,
@@ -578,6 +579,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
     def get_tools_for_assistant(self) -> list | None:
         return self.openai_tools
+
+    def user_turn_policy(self) -> UserTurnPolicy:
+        """The user sees that the assistant used its tools, as a chat app shows it, and never their results."""
+        return UserTurnPolicy(show_tool_use=True)
 
     def format_assistant_judge_prompt(self, assistant_response: str, conversation_history: str) -> str:
         """The per-turn judge's rubric, listing the tools the assistant was offered, as its gate's does."""
