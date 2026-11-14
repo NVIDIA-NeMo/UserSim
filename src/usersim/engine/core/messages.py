@@ -110,21 +110,38 @@ def format_judge_dialogue(messages: list[dict[str, Any]]) -> str:
     return format_conversation_history_for_prompt(messages, tool_result_chars=EVALUATOR_TOOL_RESULT_CHARS)
 
 
+#: What opens an assistant reply in the simulated user's view when the reply
+#: came after tool results and the probe shows tool use.
+TOOL_USE_MARK = "(after using its tools)"
+
+
 def project_public_dialogue(
     messages: list[dict[str, Any]],
+    *,
+    mark_tool_use: bool = False,
 ) -> list[dict[str, Any]]:
     """Return only text a real user could observe.
 
     Assistant text remains public even when its source message also contains a
-    tool call. Protocol envelopes, arguments, and raw tool results do not.
+    tool call. Protocol envelopes, arguments, and raw tool results do not. With
+    ``mark_tool_use``, the first reply after tool results opens with
+    ``TOOL_USE_MARK``, as a chat app shows that the assistant looked
+    something up without showing what it found.
     """
     result: list[dict[str, Any]] = []
+    after_tool_results = False
     for message in messages:
         role = message.get("role")
         content = message.get("content", "")
         if role == "user":
+            after_tool_results = False
             result.append({"role": "user", "content": content})
+        elif role == "tool":
+            after_tool_results = True
         elif role == "assistant" and content:
+            if mark_tool_use and after_tool_results:
+                content = f"{TOOL_USE_MARK} {content}"
+            after_tool_results = False
             result.append({"role": "assistant", "content": content})
     return result
 

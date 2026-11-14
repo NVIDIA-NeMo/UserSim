@@ -173,6 +173,25 @@ class TestProjectPublicDialogue:
             {"role": "assistant", "content": "It is sunny."},
         ]
 
+    def test_a_reply_after_tool_results_can_be_marked_without_showing_them(self):
+        """A chat app shows that the assistant looked something up, never what it found."""
+        messages = [
+            {"role": "user", "content": "What is the weather?"},
+            {"role": "assistant", "content": "Let me check.", "tool_calls": [{"id": "c1", "function": {"name": "w"}}]},
+            {"role": "tool", "content": '{"secret_payload":"sunny"}', "tool_call_id": "c1"},
+            {"role": "assistant", "content": "It is sunny."},
+            {"role": "user", "content": "And tomorrow?"},
+            {"role": "assistant", "content": "I can't say yet."},
+        ]
+        assert project_public_dialogue(messages, mark_tool_use=True) == [
+            {"role": "user", "content": "What is the weather?"},
+            {"role": "assistant", "content": "Let me check."},
+            {"role": "assistant", "content": "(after using its tools) It is sunny."},
+            {"role": "user", "content": "And tomorrow?"},
+            {"role": "assistant", "content": "I can't say yet."},
+        ]
+        assert "(after using its tools)" not in str(project_public_dialogue(messages))
+
     def test_reasoning_content_is_dropped(self):
         """A thinking trace is not text a real user could observe, so it
         must not survive the projection — this is what keeps traces out
