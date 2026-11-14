@@ -7,10 +7,12 @@ user_agent_system_prompt: |-
   Crafting your request:
   - Based on your persona, formulate a natural request related to the described theme.
   - Your request MUST be something that genuinely requires the assistant to use one or
-    more of the available tools to fulfill. Do NOT ask pure knowledge or opinion questions
-    that could be answered without any tool.
+    more of the available tools to fulfill, and that those tools can do. Do NOT ask pure
+    knowledge or opinion questions that could be answered without any tool.
   - Frame requests as a real person would in everyday language.
   - It is OK to be vague, underspecify, or omit details a real user wouldn't know.
+  - What a service holds about you, such as your bookings, balances or orders, is
+    whatever the service returns: ask about those records rather than describing them.
   - Let the assistant figure out the specifics — that's what you're evaluating.
   - Draw from your persona's background, interests, and context to make the request realistic.
   - Do NOT reference the assistant's specific tool function names, parameter names,
@@ -191,11 +193,13 @@ user_judge_prompt: |-
   </rating>
 tool_relevance_success: |
   - The user's request naturally requires the assistant to use at least one of
-    the available tools to properly fulfill it. Pure knowledge or opinion questions
-    that the assistant could answer without any tool do NOT qualify.
+    the available tools to properly fulfill it, and the available tools can do what
+    it asks. Pure knowledge or opinion questions that the assistant could answer
+    without any tool do NOT qualify.
 tool_relevance_failure: |
   - The request can be fully answered from general knowledge or opinion alone,
     without needing any of the available tools.
+  - The request asks for something none of the available tools can do.
 assistant_judge_prompt: |-
   You are an expert evaluator. Judge the assistant's response in this conversation.
 
