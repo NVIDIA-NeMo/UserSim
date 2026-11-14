@@ -44,6 +44,7 @@ mixin that adds them.
 | `get_assistant_system_prompt` | every assistant turn |
 | `get_verbatim_first_user_turn` | turn 1, when a bank supplies it literally |
 | `get_user_query_instruction` | turn 1, when the user-LLM writes it from the probe's own instruction |
+| `user_context` | turn 1: a line the assistant's app attaches, such as the date and where the user is, opening the first user message the assistant sees |
 | `format_gate_prompt` | judging a generated user turn before accepting it |
 | `format_followup_user_instructions` | turns after the first |
 | `on_followup_failure` | a follow-up turn fails its gate |

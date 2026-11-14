@@ -152,6 +152,7 @@ implementations.
 | `derive_task(persona, bank, *, cfg)` | yes (BankBacked only) | raises | Always for bank-backed probes |
 | `async get_verbatim_first_user_turn(state)` | no | `None` | When turn-1 is verbatim from a bank: also seed metadata here |
 | `get_user_query_instruction(turn_idx)` | no | `None` | When turn-1 is generated from an instruction of the probe's own: return it for `turn_idx=0`, and the loop hands it to the user-LLM in place of the standard one. `CustomTurn1InstructionMixin` fills it from a template. The draft still passes the gate |
+| `user_context()` | no | `""` | When the assistant's app would know something about the user that the assistant should see, such as today's date and where the user is: return it as one line. The loop opens the first user message the assistant sees with it, generated or verbatim, and the stored transcript keeps it; the `user_query` column, the gate and the user model's own history keep the user's text alone |
 | `seed_state_metadata(state)` | no | no-op | When you need to seed metadata path-agnostically (works for both verbatim and generate-and-gate) |
 | `async format_followup_user_instructions(turn_idx, state)` | no | `[]` | When follow-up turns get bank-driven nudges (reframings) |
 | `on_followup_failure(state, error_kind)` | no | `"skip"` | When gate exhaustion should ABORT the trajectory (safety_chat_pressure does this via `BankReframingMixin`) |

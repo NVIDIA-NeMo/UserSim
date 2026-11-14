@@ -660,6 +660,16 @@ class BaseProbe:
         """Put back what :meth:`snapshot_turn_state` returned, discarding a rejected turn's changes."""
         return None
 
+    def user_context(self) -> str:
+        """A line the assistant's app attaches to the user's first message, such as the date and where the user is.
+
+        The loop opens the first user message the assistant sees with it,
+        generated or verbatim, on a line of its own; the stored transcript
+        keeps it. The ``user_query`` column, the gate and the user model's own
+        history keep the user's text alone. The default attaches nothing.
+        """
+        return ""
+
     def seed_state_metadata(self, state: Any) -> None:
         """Probe-specific side-channel metadata to attach before turn 1.
 

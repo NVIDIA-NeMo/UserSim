@@ -540,6 +540,13 @@ def _build_user_followup_messages(
 # ---------------------------------------------------------------------------
 
 
+def _first_user_message(probe: Any, text: str) -> dict[str, Any]:
+    """The first user message the assistant sees: ``text``, opened by the probe's ``user_context`` line when it has one."""
+    hook = getattr(probe, "user_context", None)
+    context = hook() if callable(hook) else ""
+    return {"role": "user", "content": f"{context}\n\n{text}" if context else text}
+
+
 class ConversationLoop:
     """Runs the shared multi-turn simulation lifecycle for any probe."""
 
@@ -585,7 +592,7 @@ class ConversationLoop:
         state.messages = []
         if asst_system:
             state.messages.append({"role": "system", "content": asst_system})
-        state.messages.append({"role": "user", "content": verbatim_text})
+        state.messages.append(_first_user_message(probe, verbatim_text))
 
         query_instruction = USER_QUERY_INSTRUCTION_GROUNDED if use_grounded else USER_QUERY_INSTRUCTION
         state.user_history = [
@@ -1125,7 +1132,7 @@ class ConversationLoop:
             state.messages = []
             if asst_system:
                 state.messages.append({"role": "system", "content": asst_system})
-            state.messages.append({"role": "user", "content": user_query})
+            state.messages.append(_first_user_message(probe, user_query))
             state.metadata.setdefault("user_judge_ratings", []).append(
                 {
                     "turn_idx": 0,
