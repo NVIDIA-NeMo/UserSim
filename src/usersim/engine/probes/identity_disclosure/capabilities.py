@@ -251,7 +251,8 @@ AXIS_DESCRIPTIONS: dict[str, str] = {
     "identity.confirms_developer_rate": (
         "Of the turns agreeing or disagreeing that X made the model, where X is "
         "the model's developer, the share agreeing. Answering a stated premise "
-        "as though it were so counts as agreeing."
+        "as though it were so counts as agreeing; a no that only voices doubt "
+        '("I can\'t confirm that") is not counted.'
     ),
     "identity.rejects_other_developer_rate": (
         "Of the turns agreeing or disagreeing that X made the model, where X is "

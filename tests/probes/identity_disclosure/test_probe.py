@@ -621,6 +621,7 @@ class TestColumns:
             "identity_competitor": None,
             "strategy_id": "none",
             "reframings_used": [],
+            "identity_premises": [],
         }
         assert probe_gen.should_succeed(SimpleNamespace(metadata=state.metadata)) is True
 
@@ -648,6 +649,66 @@ class TestPrompts:
     def test_the_model_under_test_gets_no_system_prompt(self) -> None:
         probe, _ = _probe()
         assert probe.get_assistant_system_prompt() == ""
+
+
+class TestRecordedClaims:
+    @pytest.mark.parametrize(
+        ("tactic", "developer", "model", "true"),
+        [
+            ("premise_true", "nvidia", None, True),
+            ("product_true", "nvidia", "Nemotron", True),
+            ("hearsay_true", "nvidia", "Nemotron", True),
+            ("presupposed_true", "nvidia", None, True),
+            ("premise_false", "competitor", None, False),
+            ("product_false", "competitor", "competitor", False),
+            ("hearsay_false", "competitor", "competitor", False),
+            ("presupposed_false", "competitor", None, False),
+        ],
+    )
+    def test_a_paired_opening_records_the_name_it_fills_in(self, tactic, developer, model, true) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": tactic})
+        state = SimpleNamespace(metadata={})
+        probe.seed_state_metadata(state)
+        competitor = probe._task.competitor
+        spec = load_identity_spec_default()
+        expected = {
+            "user_message": 1,
+            "developer": spec.developer_of(competitor) if developer == "competitor" else developer,
+            "model": competitor if model == "competitor" else model,
+            "true": true,
+        }
+        assert state.metadata["identity_premises"] == [expected]
+
+    @pytest.mark.parametrize("tactic", ["canonical_who_are_you", "comparison", "multiple_choice", "lineage"])
+    def test_an_unpaired_opening_records_no_claim(self, tactic) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": tactic})
+        state = SimpleNamespace(metadata={})
+        probe.seed_state_metadata(state)
+        assert state.metadata["identity_premises"] == []
+
+    async def test_a_follow_up_records_the_competitor_only_when_its_reframing_names_it(self) -> None:
+        data = {"identity_tactic_id": "canonical_who_are_you", "identity_strategy_id": "role_play"}
+        probe, _ = _probe(cfg=_cfg(max_turns=3), data=data)
+        state = SimpleNamespace(metadata={}, messages=[])
+        probe.seed_state_metadata(state)
+        for turn in (1, 2):
+            await probe.format_followup_user_instructions(turn, state)
+        competitor = probe._task.competitor
+        developer = load_identity_spec_default().developer_of(competitor)
+        # role_play asks it to play the competitor, then asks the character who made it, naming no one.
+        assert state.metadata["reframings_used"] == ["cast", "in_character"]
+        assert state.metadata["identity_premises"] == [
+            {"user_message": 2, "developer": developer, "model": competitor, "true": False}
+        ]
+
+    async def test_the_claims_reach_the_row(self) -> None:
+        probe, _ = _probe(cfg=_cfg(max_turns=3), data={"identity_tactic_id": "premise_false"})
+        state = SimpleNamespace(metadata={}, messages=[])
+        probe.seed_state_metadata(state)
+        await probe.format_followup_user_instructions(1, state)
+        stored = json.loads(probe.build_result_extras(state)["identity_premises"])
+        assert [p["user_message"] for p in stored] == [1, 2]
+        assert {p["true"] for p in stored} == {False}
 
 
 class TestPressure:

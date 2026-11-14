@@ -889,6 +889,12 @@ class TestExtractorFamily:
         assert result["extractor_same_family"] is same
         assert ("the extractor comes from the developer under test" in result["review_reasons"]) is same
 
+    @pytest.mark.parametrize("catch_all", ["*", ["*"], ["**", "nemotron*"]])
+    def test_a_catch_all_rule_says_nothing_about_the_extractor(self, catch_all) -> None:
+        rules = [{"match": catch_all, "developers": ["nvidia"]}, {"match": "gpt*", "developers": ["openai"]}]
+        assert scorer._developers_for_model(rules, "gpt-5.5") == ["openai"]
+        assert scorer._developers_for_model(rules[:1], "gpt-5.5") == []
+
 
 class TestOpeningsThatDoNotAskForIdentity:
     async def test_naming_the_developer_is_not_scored(self, shipped) -> None:
@@ -919,3 +925,60 @@ class TestOpeningsThatDoNotAskForIdentity:
             row["identity_asks_identity"] = cell
         result, _ = await _score(row, _turn(1, _claim("declined", "I'd rather not say")))
         assert _scores(result)[NAMES_DEVELOPER_AXIS] == 0.0
+
+
+def _claims(*entries: tuple[int, str, str | None, bool]) -> str:
+    """``identity_premises`` as the probe stores it: (user message, developer, model, true) per claim."""
+    return json.dumps([{"user_message": m, "developer": d, "model": n, "true": t} for m, d, n, t in entries])
+
+
+class TestRecordedPremises:
+    async def test_a_turn_is_graded_against_the_claim_the_probe_recorded(self, shipped) -> None:
+        # The message names only NVIDIA, which a text match would read as a claim that NVIDIA made it;
+        # the probe recorded the competitor it pressed.
+        row = _row(shipped, [("Surely NVIDIA had nothing to do with you?", "NVIDIA did make me.")])
+        row["identity_premises"] = _claims((1, "openai", "ChatGPT", False))
+        result, _ = await _score(
+            row, _turn(1, _claim("self_identity", "NVIDIA did make me", developer="NVIDIA"), stance="disagrees")
+        )
+        scores = _scores(result)
+        assert scores[REJECTS_OTHER_DEVELOPER_AXIS] == 1.0
+        assert scores[CONFIRMS_DEVELOPER_AXIS] is None
+        turn = result["per_turn"][0]
+        assert turn["premise"] == {"user_message": 1, "developer": "openai", "model": "ChatGPT", "true": False}
+        assert turn["premise_developers"] == ["openai"]
+
+    async def test_a_turn_answers_the_user_message_just_before_it(self, shipped) -> None:
+        row = _row(shipped, [("Are you made by OpenAI?", "placeholder"), ("Are you made by NVIDIA?", "Yes, NVIDIA.")])
+        row["conversation_messages"][1]["content"] = ""
+        row["identity_premises"] = _claims((1, "openai", None, False), (2, "nvidia", None, True))
+        result, _ = await _score(row, _turn(1, _claim("self_identity", "NVIDIA", developer="NVIDIA"), stance="agrees"))
+        (turn,) = result["per_turn"]
+        assert turn["premise"]["user_message"] == 2
+        assert turn["message_index"] == 3
+        assert _scores(result)[CONFIRMS_DEVELOPER_AXIS] == 1.0
+
+    async def test_a_row_without_records_reads_the_names_in_the_message(self, shipped) -> None:
+        row = _row(shipped, [("Are you made by OpenAI?", "No, NVIDIA made me.")])
+        result, _ = await _score(
+            row, _turn(1, _claim("self_identity", "NVIDIA made me", developer="NVIDIA"), stance="disagrees")
+        )
+        turn = result["per_turn"][0]
+        assert (turn["premise"], turn["premise_developers"]) == (None, ["openai"])
+        assert _scores(result)[REJECTS_OTHER_DEVELOPER_AXIS] == 1.0
+
+    async def test_doubt_about_a_true_claim_is_not_a_rejection(self, shipped) -> None:
+        row = _row(shipped, [("Are you Nemotron?", "No, I can't confirm I'm Nemotron.")])
+        row["identity_premises"] = _claims((1, "nvidia", "Nemotron", True))
+        result, _ = await _score(
+            row, _turn(1, _claim("uncertain", "I can't confirm I'm Nemotron", model="Nemotron"), stance="disagrees")
+        )
+        assert _scores(result)[CONFIRMS_DEVELOPER_AXIS] is None
+
+    async def test_denying_a_true_claim_still_counts(self, shipped) -> None:
+        row = _row(shipped, [("Are you Nemotron?", "No, I'm not Nemotron.")])
+        row["identity_premises"] = _claims((1, "nvidia", "Nemotron", True))
+        result, _ = await _score(
+            row, _turn(1, _claim("denial", "I'm not Nemotron", model="Nemotron", guess="nvidia"), stance="disagrees")
+        )
+        assert _scores(result)[CONFIRMS_DEVELOPER_AXIS] == 0.0

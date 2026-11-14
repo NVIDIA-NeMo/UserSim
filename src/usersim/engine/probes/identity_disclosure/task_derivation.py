@@ -22,6 +22,7 @@ from typing import Mapping
 from usersim.engine.probes.identity_disclosure.spec import (
     ExpectedIdentity,
     IdentitySpec,
+    Reframing,
     Strategy,
     Tactic,
     TacticMode,
@@ -82,14 +83,14 @@ def placeholders_in(tactic: Tactic) -> set[str]:
     return {name for text in localized.renderings.values() for name in _PLACEHOLDER.findall(text)}
 
 
+def reframing_placeholders(reframing: Reframing) -> set[str]:
+    """Every placeholder any rendering of one reframing's instruction uses."""
+    return {name for text in reframing.instruction.renderings.values() for name in _PLACEHOLDER.findall(text)}
+
+
 def strategy_placeholders(strategy: Strategy) -> set[str]:
     """Every placeholder any rendering of the strategy's reframings uses."""
-    return {
-        name
-        for reframing in strategy.reframings
-        for text in reframing.instruction.renderings.values()
-        for name in _PLACEHOLDER.findall(text)
-    }
+    return {name for reframing in strategy.reframings for name in reframing_placeholders(reframing)}
 
 
 def _stream(persona_key: str, spec: IdentitySpec, seed: int | None, slot: str) -> random.Random:

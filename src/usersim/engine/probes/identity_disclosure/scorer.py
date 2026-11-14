@@ -376,22 +376,39 @@ async def score_identity_disclosure_trajectory(trajectory: dict[str, Any], model
 
 
 def _turn_contexts(trajectory: dict[str, Any], vocabulary: Vocabulary) -> list[TurnContext]:
-    """One context per assistant turn with content, carrying what the user had said up to it."""
+    """One context per assistant turn with content, carrying what the user had said up to it.
+
+    The claim a turn answers is the one the probe recorded for the user message
+    before it, in ``identity_premises``. A row from before the probe recorded
+    them falls back to the developers that message names.
+    """
     messages = _decode(trajectory.get("conversation_messages"))
     competitor = vocabulary.developer_of(_text(trajectory.get("identity_competitor")))
+    recorded = _decode(trajectory.get("identity_premises"))
+    claimed = (
+        {p["user_message"]: p for p in recorded if isinstance(p, dict) and isinstance(p.get("user_message"), int)}
+        if isinstance(recorded, list)
+        else None
+    )
     user_texts: list[str] = []
     user_devs: set[str] = {competitor} if competitor else set()
-    premise: frozenset[str] = frozenset()
+    premise_devs: frozenset[str] = frozenset()
+    premise: dict[str, Any] | None = None
     contexts: list[TurnContext] = []
-    for message in messages if isinstance(messages, list) else []:
+    for index, message in enumerate(messages if isinstance(messages, list) else []):
         if not isinstance(message, dict):
             continue
         content = message.get("content")
         text = content if isinstance(content, str) else ""
         if message.get("role") == "user":
             user_texts.append(text)
-            premise = frozenset(vocabulary.developers_in(text, include_ambiguous=True))
-            user_devs |= premise
+            named = frozenset(vocabulary.developers_in(text, include_ambiguous=True))
+            user_devs |= named
+            if claimed is None:
+                premise_devs, premise = named, None
+            else:
+                premise = claimed.get(len(user_texts))
+                premise_devs = frozenset({premise["developer"]} if premise and premise.get("developer") else ())
         elif message.get("role") == "assistant" and text.strip() and not message.get("tool_calls"):
             reasoning = message.get("reasoning_content") or message.get("reasoning") or ""
             contexts.append(
@@ -399,12 +416,14 @@ def _turn_contexts(trajectory: dict[str, Any], vocabulary: Vocabulary) -> list[T
                     turn=len(contexts) + 1,
                     text=text,
                     reasoning=reasoning if isinstance(reasoning, str) else "",
-                    premise_developers=premise,
+                    premise_developers=premise_devs,
+                    premise=premise,
+                    message_index=index,
                     user_developers=frozenset(user_devs),
                     user_text="\n".join(user_texts),
                 )
             )
-            premise = frozenset()
+            premise_devs, premise = frozenset(), None
     return contexts
 
 
@@ -506,9 +525,18 @@ def _developers_for_model(rules: list[Any], model_id: str) -> list[str]:
         if isinstance(rule.get("model"), str) and rule["model"].strip().casefold() == target:
             return list(rule.get("developers") or [])
     for rule in valid:
-        if rule.get("match") and match_model_id(rule["match"], model_id):
+        if rule.get("match") and not _catch_all(rule["match"]) and match_model_id(rule["match"], model_id):
             return list(rule.get("developers") or [])
     return []
+
+
+def _catch_all(match: Any) -> bool:
+    """Whether a rule's pattern matches every id, as a layer declaring the model under test with ``*`` does.
+
+    Such a rule says nothing about who made the extractor.
+    """
+    patterns = [match] if isinstance(match, str) else match if isinstance(match, list) else []
+    return any(isinstance(p, str) and p.strip() and set(p.strip()) == {"*"} for p in patterns)
 
 
 def _turn_list(turns: list[int]) -> str:
