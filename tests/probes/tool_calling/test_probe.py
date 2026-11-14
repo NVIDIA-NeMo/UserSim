@@ -406,7 +406,7 @@ class TestToolSubsetIsRowDerived:
     """
 
     @staticmethod
-    def _subset(*, max_tools: int = 3, **data_overrides: object) -> list[str]:
+    def _subset(*, max_tools: int | None = 3, **data_overrides: object) -> list[str]:
         from usersim.engine.core.behavioral import compute_behavioral_profile
 
         persona = {"first_name": "A", "last_name": "User", "age": 35}
@@ -421,7 +421,7 @@ class TestToolSubsetIsRowDerived:
         data.update(data_overrides)
         cfg = types.SimpleNamespace(
             theme_column="theme",
-            probe_options={"tool_calling": {"max_tools": max_tools}},
+            probe_options={} if max_tools is None else {"tool_calling": {"max_tools": max_tools}},
             max_turns=2,
             max_query_attempts=1,
             context_compression=False,
@@ -443,6 +443,13 @@ class TestToolSubsetIsRowDerived:
 
     def test_a_conversation_offers_as_many_tools_as_the_run_s_max_tools(self) -> None:
         assert [len(self._subset(max_tools=n)) for n in (1, 3, 5)] == [1, 3, 5]
+
+    def test_a_toolset_within_max_tools_is_offered_whole_in_its_catalog_order(self) -> None:
+        assert self._subset(max_tools=12) == [f"tool_{i}" for i in range(12)]
+
+    def test_a_run_offers_up_to_15_tools_by_default(self) -> None:
+        tools = [_tool_entry(i) for i in range(20)]
+        assert (len(self._subset(max_tools=None)), len(self._subset(max_tools=None, tools=tools))) == (12, 15)
 
     def test_a_run_offers_at_least_one_tool(self) -> None:
         with pytest.raises(ValidationError, match="max_tools"):
