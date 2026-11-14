@@ -10,17 +10,25 @@ the other probes.
 
 ## How a row runs
 
-- Each row gets one toolset from the catalog, the probe's `seed_dataset`, and
-  up to `max_tools` of its tools, drawn the same way for the same row every
+- Each row gets one toolset from the catalog, the probe's `seed_dataset`. A
+  toolset of up to `max_tools` tools is offered whole, in its catalog order; a
+  larger one is drawn down to `max_tools`, the same way for the same row every
   run. The toolset is the row's theme.
 - The simulated user writes requests the tools can serve, in the row's
-  language, and holds any credential a tool declares, API key or password.
+  language, and holds any credential a tool declares, API key or password. The
+  check on the opening request fails one that no offered tool can do, so the
+  user writes it again. The user asks a service about the records it holds,
+  such as bookings or balances, rather than describing them.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
-  gets a response the `api_response_model` writes for that tool. Before the
-  assistant sees it, `judge_model` checks that response against the call (the
-  tool's description, the arguments, earlier responses, the date, any computed
-  value) and has a rejected one rewritten with its reason; a response still
+  gets a response the `api_response_model` writes for that tool. It writes from
+  what the service would see: the call, the calls made earlier in the
+  conversation with their responses, and the date, never the conversation's
+  messages, so a detail the user gives reaches it only through the arguments the
+  assistant passes. Before the assistant sees the response, `judge_model`
+  checks it against the call (the tool's description, the arguments, the
+  earlier calls' responses, the date, any computed value) and has a rejected
+  one rewritten with its reason; a response still
   rejected when the attempts run out stands, and the row carries an
   `unverified_tool_response` warning. A call that sets a new password leaves
   the user holding it.
@@ -34,7 +42,7 @@ the other probes.
   `conversation_metadata` lists every call and whether it passed.
 
 Five settings, each set with `--probe-option tool_calling.<name>=<value>`:
-`max_tools`, the most tools a conversation offers (default `5`);
+`max_tools`, the most tools a conversation offers (default `15`);
 `tools_column`, the row column holding the toolset's tools (default `tools`);
 `judge_responses`, whether the judge checks each simulated response (default
 `true`); `max_response_attempts`, the attempts a simulated response gets, one

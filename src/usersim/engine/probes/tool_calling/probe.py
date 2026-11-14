@@ -68,7 +68,6 @@ from usersim.extension import (
     TraceKind,
     acall_llm,
     format_behavioral_profile_for_prompt,
-    format_conversation_history_for_prompt,
     format_disclosure_instructions,
     format_interaction_style_instructions,
     format_persona_for_prompt,
@@ -77,6 +76,7 @@ from usersim.extension import (
     register_probe,
     render_prompt,
     run_inline_judge_ex,
+    tool_result_weight,
 )
 from usersim.extension import language_instruction as _language_instruction
 
@@ -185,17 +185,47 @@ def _find_tool_spec(tool_name: str, tools: list) -> dict | None:
     return None
 
 
-def _collect_prior_tool_responses(conversation_messages: list) -> str:
-    """Extract prior tool responses from the conversation for consistency context."""
-    tool_responses = []
-    for msg in conversation_messages:
-        if msg.get("role") == "tool":
-            tool_responses.append(msg.get("content", ""))
-    if not tool_responses:
-        return ""
-    return (
-        "\n\nPrior tool responses in this conversation (maintain consistency "
-        "with any data already returned):\n" + "\n---\n".join(tool_responses[-5:])
+#: The most of the earlier calls' responses that the simulator and its judge
+#: read, weighed as ``tool_result_weight`` does: as much as the evaluator reads
+#: of one tool result.
+_EARLIER_CALLS_CHARS = 24_000
+
+
+def _earlier_calls(conversation_messages: list, tool_name: str) -> str:
+    """The calls made earlier in the conversation, each with its arguments and response: the service's records.
+
+    Every call is listed, in order. Responses go in whole up to
+    ``_EARLIER_CALLS_CHARS``, those to ``tool_name`` first and then the rest,
+    newest first; a response past that shows as its call alone.
+    """
+    calls: dict[Any, str] = {}
+    records: list[tuple[str, str, str]] = []
+    for message in conversation_messages:
+        if message.get("role") == "assistant":
+            for call in message.get("tool_calls") or []:
+                function = call.get("function", {})
+                arguments = function.get("arguments", "{}")
+                if not isinstance(arguments, str):
+                    arguments = json.dumps(arguments, default=str)
+                calls[call.get("id")] = f"{function.get('name', '?')}({arguments})"
+        elif message.get("role") == "tool":
+            call = calls.get(message.get("tool_call_id"), "?({})")
+            records.append((call, call.split("(", 1)[0], message.get("content") or ""))
+    if not records:
+        return "None."
+    newest_first = range(len(records) - 1, -1, -1)
+    order = [i for i in newest_first if records[i][1] == tool_name]
+    order += [i for i in newest_first if records[i][1] != tool_name]
+    shown: set[int] = set()
+    used = 0
+    for i in order:
+        weight = tool_result_weight(records[i][2])
+        if used + weight <= _EARLIER_CALLS_CHARS:
+            shown.add(i)
+            used += weight
+    return "\n\n".join(
+        f"{call} returned:\n{response}" if i in shown else f"{call} returned a response too long to show here."
+        for i, (call, _name, response) in enumerate(records)
     )
 
 
@@ -206,9 +236,6 @@ def _format_day(day: date) -> str:
     """A date with its weekday, such as ``Friday, 2026-11-06``, independent of the process locale."""
     return f"{_WEEKDAYS[day.weekday()]}, {day.isoformat()}"
 
-
-#: The most of an earlier response the judge reads.
-_EARLIER_RESPONSE_CHARS = 1000
 
 #: What a call answers when no attempt produced JSON.
 _INVALID_RESPONSE = json.dumps({"error": "The service returned an invalid response.", "status": 502})
@@ -230,25 +257,13 @@ class SimulatedResponse:
     unverified: str | None = None
 
 
-def _earlier_responses(conversation_messages: list) -> str:
-    """The last few tool responses, each cut to what the judge reads, for its consistency check."""
-    responses = [msg for msg in conversation_messages if msg.get("role") == "tool"][-5:]
-    return (
-        "\n---\n".join(
-            format_conversation_history_for_prompt([response], tool_result_chars=_EARLIER_RESPONSE_CHARS)
-            for response in responses
-        )
-        or "None."
-    )
-
-
 async def _judge_tool_response(
     models: dict,
     content: str,
     *,
     tool_spec: dict,
     tool_args: str,
-    conversation_messages: list,
+    earlier_calls: str,
     today: str,
     credential_parameters: tuple[str, ...],
     judge_alias: str = MODEL_JUDGE,
@@ -267,7 +282,7 @@ async def _judge_tool_response(
             if credential_parameters
             else ""
         ),
-        earlier_responses=_earlier_responses(conversation_messages),
+        earlier_calls=earlier_calls,
         response=content,
     )
     explanation, _rating, passed, readable = await run_inline_judge_ex(models, judge_alias, prompt)
@@ -288,12 +303,14 @@ async def _simulate_tool_response(
 ) -> SimulatedResponse:
     """Use the strong frontier model to simulate a realistic API response.
 
-    Includes prior tool responses as context so the simulator maintains
-    internal consistency across calls within a conversation, and ``today``,
-    the conversation's date, so the dates it returns agree with the user's.
-    The probe checks a call's credentials before this runs, so when
-    ``credential_parameters`` names any, the simulator is told they are
-    valid rather than left to judge a random value.
+    The simulator sees what the service would: the call, the calls made
+    earlier in the conversation with their responses (``_earlier_calls``),
+    which it keeps consistent with, and ``today``, the conversation's date,
+    so the dates it returns agree with the user's. The conversation's
+    messages reach neither it nor its judge. The probe checks a call's
+    credentials before this runs, so when ``credential_parameters`` names
+    any, the simulator is told they are valid rather than left to judge a
+    random value.
 
     Each of up to ``max_attempts`` attempts must be JSON and, when ``judge`` is
     set, pass ``judge_model``'s check against the call; a rejected attempt is
@@ -305,20 +322,18 @@ async def _simulate_tool_response(
     verdict can't be read even after it is asked to reformat. Nothing is recorded on
     the conversation here: the caller appends the result.
     """
-    prior_context = _collect_prior_tool_responses(conversation_messages)
     tool_args = json.dumps(tool_call.get("function", {}).get("arguments", "{}"), default=str)
+    earlier_calls = _earlier_calls(conversation_messages, tool_spec.get("name", ""))
     prompt = tool_simulator_prompt().format(
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=tool_args,
-        conversation_context=format_conversation_history_for_prompt(conversation_messages[-6:]),
+        earlier_calls=earlier_calls,
         today=today,
     )
     if credential_parameters:
         prompt += "\n\n" + tool_simulator_credentials().format(
             parameters=", ".join(f"`{parameter}`" for parameter in credential_parameters),
         )
-    if prior_context:
-        prompt += prior_context
 
     result = SimulatedResponse(content=_INVALID_RESPONSE)
     accepted: str | None = None
@@ -342,7 +357,7 @@ async def _simulate_tool_response(
                 content,
                 tool_spec=tool_spec,
                 tool_args=tool_args,
-                conversation_messages=conversation_messages,
+                earlier_calls=earlier_calls,
                 today=today,
                 credential_parameters=credential_parameters,
                 judge_alias=judge_alias,
@@ -402,7 +417,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.5"
+    prompt_version = "v1.7"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -430,8 +445,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     class Options(BaseProbe.Options):
         """The run's settings for this probe, set as ``--probe-option tool_calling.<name>=<value>``."""
 
-        #: The most tools a conversation offers, drawn from its toolset.
-        max_tools: int = Field(default=5, ge=1)
+        #: The most tools a conversation offers. A toolset with no more tools
+        #: than this is offered whole, in its catalog order; a larger one is
+        #: drawn down to it.
+        max_tools: int = Field(default=15, ge=1)
         #: The row column holding the toolset's tools.
         tools_column: str = "tools"
         #: The date each conversation takes place on. The simulated user and the
@@ -469,14 +486,14 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         tools_raw = self._data[tools_column]
         all_tools = _normalize_tool_list(tools_raw)
-        # Drawn from the row's own identity rather than the process RNG. The
-        # subset shapes the entire conversation but is not part of the
-        # trajectory identity, so an identity only means something if the same
-        # row is always handed the same tools.
-        self.tool_subset = random.Random(_tool_subset_seed(self._data)).sample(
-            all_tools,
-            min(self.options.max_tools, len(all_tools)),
-        )
+        if len(all_tools) <= self.options.max_tools:
+            self.tool_subset = list(all_tools)
+        else:
+            # Drawn from the row's own identity rather than the process RNG. The
+            # subset shapes the entire conversation but is not part of the
+            # trajectory identity, so an identity only means something if the
+            # same row is always handed the same tools.
+            self.tool_subset = random.Random(_tool_subset_seed(self._data)).sample(all_tools, self.options.max_tools)
 
         theme = _derive_tool_theme(self._data)
         logger.info(f"  |-- tool_calling: {len(self.tool_subset)} tools, theme={theme.get('type', '?')}")

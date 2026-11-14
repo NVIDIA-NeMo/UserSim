@@ -59,7 +59,7 @@ class TestPromptTemplates:
         assert ASSISTANT_SYSTEM_PROMPT == ""
 
     def test_tool_simulator_prompt_has_placeholders(self):
-        for p in ["{tool_spec}", "{tool_args}", "{conversation_context}"]:
+        for p in ["{tool_spec}", "{tool_args}", "{earlier_calls}"]:
             assert p in TOOL_SIMULATOR_PROMPT
 
     def test_user_judge_prompt_has_placeholders(self):
@@ -406,7 +406,7 @@ class TestToolSubsetIsRowDerived:
     """
 
     @staticmethod
-    def _subset(*, max_tools: int = 3, **data_overrides: object) -> list[str]:
+    def _subset(*, max_tools: int | None = 3, **data_overrides: object) -> list[str]:
         from usersim.engine.core.behavioral import compute_behavioral_profile
 
         persona = {"first_name": "A", "last_name": "User", "age": 35}
@@ -421,7 +421,7 @@ class TestToolSubsetIsRowDerived:
         data.update(data_overrides)
         cfg = types.SimpleNamespace(
             theme_column="theme",
-            probe_options={"tool_calling": {"max_tools": max_tools}},
+            probe_options={} if max_tools is None else {"tool_calling": {"max_tools": max_tools}},
             max_turns=2,
             max_query_attempts=1,
             context_compression=False,
@@ -443,6 +443,13 @@ class TestToolSubsetIsRowDerived:
 
     def test_a_conversation_offers_as_many_tools_as_the_run_s_max_tools(self) -> None:
         assert [len(self._subset(max_tools=n)) for n in (1, 3, 5)] == [1, 3, 5]
+
+    def test_a_toolset_within_max_tools_is_offered_whole_in_its_catalog_order(self) -> None:
+        assert self._subset(max_tools=12) == [f"tool_{i}" for i in range(12)]
+
+    def test_a_run_offers_up_to_15_tools_by_default(self) -> None:
+        tools = [_tool_entry(i) for i in range(20)]
+        assert (len(self._subset(max_tools=None)), len(self._subset(max_tools=None, tools=tools))) == (12, 15)
 
     def test_a_run_offers_at_least_one_tool(self) -> None:
         with pytest.raises(ValidationError, match="max_tools"):
@@ -532,6 +539,27 @@ class TestThemeFollowsTheToolset:
 
         assert "Calendar" not in prompt
         assert "Book a meeting" not in prompt
+
+
+class TestOpeningsTheToolsCanServe:
+    """A conversation opens with a request the offered tools can do, and the user asks a service for its records."""
+
+    def test_the_opening_gate_fails_a_request_no_offered_tool_can_do(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        rubric = probe.format_gate_prompt("Find me a recipe.", "N/A")
+
+        assert "and the available tools can do what it asks." in " ".join(rubric.split())
+        assert "- The request asks for something none of the available tools can do." in rubric
+
+    def test_a_follow_up_may_ask_for_what_no_offered_tool_does(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert "none of the available tools can do" not in probe.format_gate_prompt("And a recipe?", "User: Hi")
+
+    def test_the_user_asks_about_records_a_service_holds(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert "ask about those records rather than describing them" in probe.get_user_system_prompt()
 
 
 class TestToday:

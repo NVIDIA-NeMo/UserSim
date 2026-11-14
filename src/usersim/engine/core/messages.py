@@ -44,13 +44,23 @@ EVALUATOR_TOOL_RESULT_CHARS = 24_000
 _DENSE_CHARACTER_WEIGHT = 3
 
 
-def _cut_tool_result(content: str, limit: int) -> str:
-    """``content`` up to ``limit`` characters, each Han, Kana or Hangul one counting as ``_DENSE_CHARACTER_WEIGHT``."""
+def _character_weights(content: str) -> list[int]:
+    """What each character of ``content`` weighs against a tool-result cap."""
     from usersim.engine.core.llm import _CHARACTER_COUNTED  # llm imports this module through engine.config
 
+    return [_DENSE_CHARACTER_WEIGHT if _CHARACTER_COUNTED.match(ch) else 1 for ch in content]
+
+
+def tool_result_weight(content: str) -> int:
+    """What ``content`` weighs against a tool-result cap: its characters, each Han, Kana or Hangul one counting as three."""
+    return sum(_character_weights(content))
+
+
+def _cut_tool_result(content: str, limit: int) -> str:
+    """``content`` up to ``limit`` characters, weighed as ``tool_result_weight`` does."""
     used = 0
-    for i, ch in enumerate(content):
-        used += _DENSE_CHARACTER_WEIGHT if _CHARACTER_COUNTED.match(ch) else 1
+    for i, weight in enumerate(_character_weights(content)):
+        used += weight
         if used > limit:
             return f"{content[:i]} [cut: {i:,} of {len(content):,} characters shown]"
     return content
