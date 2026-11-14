@@ -56,7 +56,7 @@ mixin that adds them.
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn, unless the run switches the assistant judge off |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
-| `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
+| `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, a check each generated opening must pass before the gate, and whether the user sees that the assistant used its tools |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
 | `build_result_extras` | adding probe-specific columns to the trajectory, each declared in the class's `output_columns` |
 | `should_succeed` | the end of the conversation: whether the probe completed its protocol; `False` fails the row |

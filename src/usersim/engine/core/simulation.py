@@ -1390,7 +1390,7 @@ class ConversationLoop:
             else:
                 followup_history_messages = state.messages
             public_history_text = format_conversation_history_for_prompt(
-                project_public_dialogue(followup_history_messages)
+                project_public_dialogue(followup_history_messages, mark_tool_use=policy.show_tool_use)
             )
             compressed_uh = _build_user_followup_messages(
                 user_system_prompt=probe.get_user_system_prompt(),
