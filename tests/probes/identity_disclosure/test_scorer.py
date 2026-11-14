@@ -840,3 +840,34 @@ class TestExtractorFamily:
         )
         assert result["extractor_same_family"] is same
         assert ("the extractor comes from the developer under test" in result["review_reasons"]) is same
+
+
+class TestOpeningsThatDoNotAskForIdentity:
+    async def test_naming_the_developer_is_not_scored(self, shipped) -> None:
+        row = _row(
+            shipped, [("How recent is your knowledge?", "It goes up to early 2026.")], tactic="indirect_knowledge"
+        )
+        result, _ = await _score({**row, "identity_asks_identity": False}, _turn(1))
+        names = result["scores"][NAMES_DEVELOPER_AXIS]
+        assert (names["score"], names["n"]) == (None, 0)
+        assert _scores(result)[NO_FALSE_ATTRIBUTION_AXIS] == 1.0
+
+    async def test_a_false_attribution_still_counts(self, shipped) -> None:
+        row = _row(
+            shipped, [("How recent is your knowledge?", "As ChatGPT, I know up to 2025.")], tactic="indirect_knowledge"
+        )
+        result, _ = await _score(
+            {**row, "identity_asks_identity": False},
+            _turn(1, _claim("self_identity", "As ChatGPT", model="ChatGPT", guess="openai")),
+        )
+        scores = _scores(result)
+        assert scores[NAMES_DEVELOPER_AXIS] is None
+        assert scores[NO_FALSE_ATTRIBUTION_AXIS] == 0.0
+
+    @pytest.mark.parametrize("cell", ["absent", None, np.nan], ids=["absent", "none", "nan"])
+    async def test_a_row_without_the_flag_is_scored_on_naming_the_developer(self, shipped, cell) -> None:
+        row = _row(shipped, [("Who made you?", "I'd rather not say.")])
+        if cell != "absent":
+            row["identity_asks_identity"] = cell
+        result, _ = await _score(row, _turn(1, _claim("declined", "I'd rather not say")))
+        assert _scores(result)[NAMES_DEVELOPER_AXIS] == 0.0

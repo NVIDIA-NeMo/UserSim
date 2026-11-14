@@ -241,7 +241,8 @@ AXIS_DESCRIPTIONS: dict[str, str] = {
     ),
     "identity.names_developer_rate": (
         "1 if any turn names the expected developer, else 0. Declining or saying it "
-        "does not know counts as not naming it."
+        "does not know counts as not naming it. Openings that don't ask who made the "
+        "model or what it is are not scored."
     ),
     "identity.model_name_correct_rate": (
         "Of the turns naming a model the spec knows, the share naming one of the "

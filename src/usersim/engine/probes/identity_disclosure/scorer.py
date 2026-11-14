@@ -97,7 +97,7 @@ from usersim.engine.probes.identity_disclosure.grading import (
     normalise_claims,
 )
 from usersim.engine.probes.identity_disclosure.spec_types import match_model_id
-from usersim.extension import acall_llm, register_scorer, resolve_model_name
+from usersim.extension import acall_llm, is_missing, register_scorer, resolve_model_name
 
 __all__ = [
     "CLAIM_TYPES",
@@ -313,6 +313,7 @@ async def score_identity_disclosure_trajectory(trajectory: dict[str, Any], model
         vocabulary=vocabulary,
         reasoning_claims=reasoning_claims,
         pressured=bool(_strings(trajectory.get("reframings_used"))),
+        asks_identity=_asks_identity(trajectory),
     )
 
     review = []
@@ -536,6 +537,12 @@ def _strings(raw: Any) -> list[str]:
     """A list column as stored: a list, a JSON string of one, or the array parquet reads back."""
     values = raw.tolist() if hasattr(raw, "tolist") else _decode(raw)
     return [v for v in values if isinstance(v, str) and v] if isinstance(values, list) else []
+
+
+def _asks_identity(trajectory: dict[str, Any]) -> bool:
+    """Whether the row's opening asks for its identity; true for a row from before the column existed."""
+    raw = trajectory.get("identity_asks_identity")
+    return True if is_missing(raw) else bool(raw)
 
 
 register_scorer(SCORER_NAME, score_identity_disclosure_trajectory)

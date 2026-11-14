@@ -34,7 +34,7 @@ How a row is built:
 
 Columns written, all declared in the class's ``output_columns``:
 ``identity_tactic_id``, ``identity_tactic_kind`` (``neutral`` or ``leading``),
-``identity_pair``, ``identity_competitor``, ``strategy_id``,
+``identity_asks_identity``, ``identity_pair``, ``identity_competitor``, ``strategy_id``,
 ``reframings_used`` (the reframing ids in follow-up order),
 ``expected_identity`` and ``identity_spec`` (both JSON), and
 ``probe_variant = "<tactic>::<strategy>"``.
@@ -84,6 +84,7 @@ from usersim.engine.probes.identity_disclosure.spec import (
 from usersim.engine.probes.identity_disclosure.task_derivation import (
     COMPETITOR_PLACEHOLDERS,
     IDENTITY_PLACEHOLDERS,
+    MODEL_OPTIONS,
     IdentityTask,
     IdentityTaskError,
     fill,
@@ -92,6 +93,7 @@ from usersim.engine.probes.identity_disclosure.task_derivation import (
     placeholder_values,
     placeholders_in,
     select_competitor,
+    select_model_options,
     select_strategy,
     select_tactic,
     strategy_placeholders,
@@ -149,6 +151,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     output_columns = (
         "identity_tactic_id",
         "identity_tactic_kind",
+        "identity_asks_identity",
         "identity_pair",
         "identity_competitor",
         "expected_identity",
@@ -230,7 +233,14 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
                 f"{label}: tactic {tactic.id!r} or strategy {strategy.id!r} names a competitor, but spec "
                 f"{spec.version} leaves none for locale {self._asset_locale} once {', '.join(excluded)} are excluded"
             )
-        values = placeholder_values(spec, expected, competitor=competitor, pool=pool, language=self._language)
+        model_options = (
+            select_model_options(spec, expected, competitor=competitor, pool=pool, persona_key=persona_key, seed=seed)
+            if MODEL_OPTIONS in placeholders_in(tactic)
+            else ()
+        )
+        values = placeholder_values(
+            spec, expected, competitor=competitor, pool=pool, language=self._language, model_options=model_options
+        )
         return IdentityTask(
             id=tactic.id,
             placeholder=spec.placeholder or tactic.placeholder or strategy.placeholder,
@@ -367,8 +377,8 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         if placeholders & IDENTITY_PLACEHOLDERS and task.expected is not None:
             developers.update(task.expected.developers)
         products = [task.competitor] if placeholders & {"competitor", "competitor_developer"} else []
-        if "competitor_list" in placeholders:
-            products += task.values["competitor_list"].split(", ")
+        for listed in placeholders & {"competitor_list", MODEL_OPTIONS}:
+            products += task.values[listed].split(", ")
         developers.update(dev for dev in map(spec.developer_of, filter(None, products)) if dev)
         return developers
 
@@ -402,6 +412,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             return
         state.metadata["identity_tactic_id"] = task.tactic.id
         state.metadata["identity_tactic_kind"] = task.tactic.kind.value
+        state.metadata["identity_asks_identity"] = task.tactic.asks_identity
         state.metadata["identity_pair"] = task.tactic.pair or None
         state.metadata["identity_competitor"] = task.competitor
         state.metadata["strategy_id"] = task.strategy.id
@@ -452,6 +463,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
                 "probe_variant": f"{task.tactic.id}::{task.strategy.id}",
                 "identity_tactic_id": task.tactic.id,
                 "identity_tactic_kind": task.tactic.kind.value,
+                "identity_asks_identity": task.tactic.asks_identity,
                 "identity_pair": task.tactic.pair or None,
                 "identity_competitor": task.competitor,
                 "strategy_id": task.strategy.id,
