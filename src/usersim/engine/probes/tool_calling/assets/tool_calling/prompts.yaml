@@ -50,6 +50,7 @@ user_agent_system_prompt: |-
   {interaction_style_instructions}
 
   Today is {today}. Use this date whenever a date, a day of the week or a year comes up.
+  {assistant_context}
 
   The assistant has access to tools in this domain:
   <TOOL_CONTEXT>
@@ -62,6 +63,8 @@ user_agent_system_prompt: |-
   <THEME>
   {theme}
   </THEME>
+assistant_context: >-
+  The assistant already sees today's date and where you are, so you need not tell it.
 user_credentials: |-
   You have accounts with the services these tools use, and these are your credentials:
   <CREDENTIALS>

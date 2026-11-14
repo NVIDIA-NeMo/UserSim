@@ -47,6 +47,7 @@ class TestPromptTemplates:
             "{disclosure_instructions}",
             "{interaction_style_instructions}",
             "{credentials}",
+            "{assistant_context}",
         ]
         for placeholder in required:
             assert placeholder in USER_AGENT_SYSTEM_PROMPT, f"Missing: {placeholder}"
@@ -203,7 +204,7 @@ def _concrete_tool_probe(tools, **options) -> tuple[ToolCallingProbe, dict, type
     """
     from usersim.engine.core.behavioral import compute_behavioral_profile
 
-    persona = {"first_name": "A", "last_name": "User", "age": 35}
+    persona = {"first_name": "A", "last_name": "User", "age": 35, "city": "Austin", "region": "Texas", "country": "USA"}
     data = {
         "tools": tools,
         "theme": "__not_used__",
@@ -563,15 +564,38 @@ class TestOpeningsTheToolsCanServe:
 
 
 class TestToday:
-    """The simulated user and the API response simulator share one date; the assistant is not told it."""
+    """The simulated user, the assistant and the API response simulator share one date; the assistant also sees the user's place."""
 
     async def test_the_user_and_the_tool_simulator_share_the_runs_date(self, sample_tools):
-        result, assistant_inputs, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
+        result, _assistant, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
 
         assert "Today is Friday, 2026-11-06." in user_inputs[0][0]["content"]
         assert "Today is Friday, 2026-11-06." in api_inputs[0][0]["content"]
-        assert not any("2026-11-06" in (message.get("content") or "") for message in assistant_inputs[0])
         assert json.loads(result["conversation_metadata"])["today"] == "2026-11-06"
+
+    async def test_the_assistant_sees_the_date_and_the_users_place_on_the_first_message(self, sample_tools):
+        _result, assistant_inputs, _user, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
+
+        first = next(message for message in assistant_inputs[0] if message["role"] == "user")
+        assert first["content"] == "[2026-11-06 · Austin, Texas, USA]\n\nWhat is the weather in Tokyo?"
+        assert "Austin" not in api_inputs[0][0]["content"]
+
+    def test_the_user_knows_the_assistant_already_sees_them(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert "The assistant already sees today's date and where you are" in probe.get_user_system_prompt()
+
+    def test_a_run_can_keep_the_date_and_place_from_the_assistant(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools, share_user_context=False)
+
+        assert probe.user_context() == ""
+        assert "already sees today's date" not in probe.get_user_system_prompt()
+
+    def test_a_persona_naming_no_place_gives_the_date_alone(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools, today="2027-01-15")
+        probe._persona = {"first_name": "A", "last_name": "User"}
+
+        assert probe.user_context() == "[2027-01-15]"
 
     def test_a_run_sets_the_date_as_a_setting(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools, today="2027-01-15")
