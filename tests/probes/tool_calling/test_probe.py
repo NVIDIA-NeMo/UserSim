@@ -140,7 +140,7 @@ class TestToolHelpers:
                 tool_spec,
                 tool_call,
                 history,
-                today="Friday, 2026-11-06",
+                now="Friday, 2026-11-06, 12:00 UTC",
             )
 
         assert simulated.content == '{"ok":true}'
@@ -149,7 +149,7 @@ class TestToolHelpers:
         assert "city" in captured["prompt"]
         assert "Tokyo" in captured["prompt"]
         assert '"prior_secret":"rain"' in captured["prompt"]
-        assert "Today is Friday, 2026-11-06." in captured["prompt"]
+        assert "It is Friday, 2026-11-06, 12:00 UTC." in captured["prompt"]
 
     @pytest.mark.parametrize(
         ("responses", "expected"),
@@ -179,7 +179,7 @@ class TestToolHelpers:
                 {"name": "get_weather", "parameters": {"type": "object"}},
                 {"function": {"name": "get_weather", "arguments": '{"city":"Tokyo"}'}},
                 [],
-                today="Friday, 2026-11-06",
+                now="Friday, 2026-11-06, 12:00 UTC",
             )
 
         assert simulated.rerolls == 1
@@ -605,13 +605,14 @@ class TestUserSeesToolUse:
 
 
 class TestToday:
-    """The simulated user, the assistant and the API response simulator share one date; the assistant also sees the user's place."""
+    """The simulated user, the assistant and the API response simulator share one date, which the simulator's clock
+    reads at noon UTC; the assistant also sees the user's place."""
 
     async def test_the_user_and_the_tool_simulator_share_the_runs_date(self, sample_tools):
         result, _assistant, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
 
         assert "Today is Friday, 2026-11-06." in user_inputs[0][0]["content"]
-        assert "Today is Friday, 2026-11-06." in api_inputs[0][0]["content"]
+        assert "It is Friday, 2026-11-06, 12:00 UTC." in api_inputs[0][0]["content"]
         assert json.loads(result["conversation_metadata"])["today"] == "2026-11-06"
 
     async def test_the_assistant_sees_the_date_and_the_users_place_on_the_first_message(self, sample_tools):

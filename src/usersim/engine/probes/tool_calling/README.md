@@ -25,11 +25,11 @@ the other probes.
   a 400, a call without the user's credential gets a 401, and any other call
   gets a response the `api_response_model` writes for that tool. It writes from
   what the service would see: the call, the calls made earlier in the
-  conversation with their responses, and the date, never the conversation's
+  conversation with their responses, and its clock, never the conversation's
   messages, so a detail the user gives reaches it only through the arguments the
   assistant passes. Before the assistant sees the response, `judge_model`
   checks it against the call (the tool's description, the arguments, the
-  earlier calls' responses, the date, any computed value) and has a rejected
+  earlier calls' responses, the clock, any computed value) and has a rejected
   one rewritten with its reason; a response still
   rejected when the attempts run out stands, and the row carries an
   `unverified_tool_response` warning. A call that sets a new password leaves
@@ -53,8 +53,9 @@ used by a reply that is not JSON or that the judge rejects (default `2`);
 `share_user_context`, whether the assistant sees the date and where the user
 is (default `true`).
 The simulated user and the `api_response_model` both work from that date, so
-the dates in requests and in tool results agree, and each row records it as
-`today` in `conversation_metadata`. The first user message the assistant sees
+the dates in requests and in tool results agree; the `api_response_model`'s
+clock reads noon UTC on it, and nothing later has happened yet. Each row
+records the date as `today` in `conversation_metadata`. The first user message the assistant sees
 opens with a line its app would attach, the date and the persona's location,
 such as `[2026-11-06 · Austin, Texas, USA]`; the simulated user is told the
 assistant sees them, and the `api_response_model` gets no location, only what

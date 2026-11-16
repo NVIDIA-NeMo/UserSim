@@ -118,8 +118,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
   tool's response from the schema, so a run needs no live service. It sees
   what the service would: the call, the calls made earlier in the conversation
-  with their responses, which it keeps consistent with, and the date, but none
-  of the conversation's messages. Each response goes in whole until those earlier
+  with their responses, which it keeps consistent with, and its clock, noon UTC
+  on the conversation's date, before which everything it returns has happened,
+  but none of the conversation's messages. Each response goes in whole until those earlier
   responses reach 24,000 characters (a Han, Kana or Hangul character counting
   as three): first the response to the same call, then those naming one of its
   argument values (such as an ID or a name), then the same tool's, each newest
@@ -132,7 +133,8 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   pages, the field that leads to the rest.
 - A judge checks each synthesized response against the call before the
   assistant sees it: that it answers the call, agrees with the earlier calls'
-  responses and the date, computes values correctly, and holds no placeholder
+  responses and the clock, gives no result for anything later than the clock,
+  computes values correctly, and holds no placeholder
   such as an `example.com` link. It checks real-world facts only where the
   arguments or the tool's description fix them. A rejected response is
   rewritten with the judge's reason, within `max_response_attempts` (the

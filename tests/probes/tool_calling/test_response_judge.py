@@ -45,7 +45,9 @@ async def _simulate(
         patch(f"{_PROBE}.acall_llm", side_effect=fake_call_llm),
         patch(f"{_PROBE}.run_inline_judge_ex", side_effect=fake_judge),
     ):
-        result = await _simulate_tool_response({}, _SPEC, call, earlier or [], today="Friday, 2026-11-06", **kwargs)
+        result = await _simulate_tool_response(
+            {}, _SPEC, call, earlier or [], now="Friday, 2026-11-06, 12:00 UTC", **kwargs
+        )
     return result, api_prompts, judge_prompts
 
 
@@ -109,7 +111,13 @@ async def test_the_judge_runs_on_the_alias_it_is_given() -> None:
         patch(f"{_PROBE}.run_inline_judge_ex", side_effect=fake_judge),
     ):
         await _simulate_tool_response(
-            {}, _SPEC, _CALL, [], today="Friday, 2026-11-06", judge=True, judge_alias="api_response_judge_model"
+            {},
+            _SPEC,
+            _CALL,
+            [],
+            now="Friday, 2026-11-06, 12:00 UTC",
+            judge=True,
+            judge_alias="api_response_judge_model",
         )
     assert aliases == ["api_response_judge_model"]
 
@@ -233,6 +241,15 @@ async def test_the_judge_fails_example_hosts_and_checks_only_the_facts_the_call_
     assert "no placeholder values (an example.com or other example.* host is one)" in prompt
     assert "only where the arguments or the tool's description fix them" in prompt
     assert "a plausible entry the call does not fix is fine" in prompt
+
+
+async def test_the_simulator_and_its_judge_read_the_clock_and_nothing_after_it_has_happened() -> None:
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True)
+    simulator = " ".join(api_prompts[0].split())
+    judge = " ".join(judge_prompts[0].split())
+    assert "It is Friday, 2026-11-06, 12:00 UTC. Nothing after that has happened yet" in simulator
+    assert "It is Friday, 2026-11-06, 12:00 UTC." in judge
+    assert "a result for something after the current time" in judge
 
 
 async def test_without_the_judge_the_first_json_reply_stands() -> None:

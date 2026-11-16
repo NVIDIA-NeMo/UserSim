@@ -270,6 +270,15 @@ def _format_day(day: date) -> str:
     return f"{_WEEKDAYS[day.weekday()]}, {day.isoformat()}"
 
 
+def _format_now(day: date) -> str:
+    """The simulated service's clock on ``day``, such as ``Friday, 2026-11-06, 12:00 UTC``.
+
+    Noon UTC falls on ``day`` in every time zone from UTC-11 to UTC+11, so the
+    clock never disagrees with the date the user and the assistant work from.
+    """
+    return f"{_format_day(day)}, 12:00 UTC"
+
+
 #: What a call answers when no attempt produced JSON.
 _INVALID_RESPONSE = json.dumps({"error": "The service returned an invalid response.", "status": 502})
 
@@ -297,13 +306,13 @@ async def _judge_tool_response(
     tool_spec: dict,
     tool_args: str,
     earlier_calls: str,
-    today: str,
+    now: str,
     credential_parameters: tuple[str, ...],
     judge_alias: str = MODEL_JUDGE,
 ) -> tuple[bool, str] | None:
     """The ``judge_alias`` model's verdict on one simulated response, ``(passed, explanation)``; None when it can't be read."""
     prompt = tool_simulator_judge_prompt().format(
-        today=today,
+        now=now,
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=tool_args,
         credentials=(
@@ -328,7 +337,7 @@ async def _simulate_tool_response(
     tool_call: dict,
     conversation_messages: list,
     *,
-    today: str,
+    now: str,
     credential_parameters: tuple[str, ...] = (),
     judge: bool = False,
     max_attempts: int = 2,
@@ -338,8 +347,8 @@ async def _simulate_tool_response(
 
     The simulator sees what the service would: the call, the calls made
     earlier in the conversation with their responses (``_earlier_calls``),
-    which it keeps consistent with, and ``today``, the conversation's date,
-    so the dates it returns agree with the user's. The conversation's
+    which it keeps consistent with, and ``now``, the service's clock on the
+    conversation's date, before which everything it returns has happened. The conversation's
     messages reach neither it nor its judge. The probe checks a call's
     credentials before this runs, so when ``credential_parameters`` names
     any, the simulator is told they are valid rather than left to judge a
@@ -363,7 +372,7 @@ async def _simulate_tool_response(
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=tool_args,
         earlier_calls=earlier_calls,
-        today=today,
+        now=now,
     )
     if credential_parameters:
         prompt += "\n\n" + tool_simulator_credentials().format(
@@ -394,7 +403,7 @@ async def _simulate_tool_response(
                 tool_spec=tool_spec,
                 tool_args=tool_args,
                 earlier_calls=earlier_calls,
-                today=today,
+                now=now,
                 credential_parameters=credential_parameters,
                 judge_alias=judge_alias,
             )
@@ -716,7 +725,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 tool_spec,
                 tc,
                 state.messages,
-                today=_format_day(self.options.today),
+                now=_format_now(self.options.today),
                 credential_parameters=tuple(declared),
                 judge=self.options.judge_responses,
                 max_attempts=self.options.max_response_attempts,
