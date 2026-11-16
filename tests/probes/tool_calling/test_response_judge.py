@@ -190,6 +190,22 @@ async def test_past_the_budget_the_same_tools_responses_come_first_and_the_rest_
         assert "news({}) returned a response too long to show here." in prompt
 
 
+async def test_past_the_budget_the_identical_call_and_records_naming_the_calls_values_come_first() -> None:
+    """The response to the same call, and an older one naming its argument, win over newer responses."""
+    identical = '{"temp": 19, "pad": "' + "a" * 7_000 + '"}'
+    naming = '{"cities": ["Tokyo"], "pad": "' + "b" * 7_000 + '"}'
+    newer = [m for i in range(3) for m in _call(f"n{i}", "get_weather", f'{{"city": "C{i}"}}', "c" * 7_000)]
+    earlier = [
+        *_call("i", "get_weather", '{ "city": "Tokyo" }', identical),
+        *_call("s", "search_city", '{"q": "Japan"}', naming),
+        *newer,
+    ]
+    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    for prompt in (api_prompts[0], judge_prompts[0]):
+        assert identical in prompt and naming in prompt
+        assert 'get_weather({"city": "C0"}) returned a response too long to show here.' in prompt
+
+
 async def test_the_simulator_writes_like_the_real_service() -> None:
     _, api_prompts, _ = await _simulate(['{"temp": 22}'], [], judge=False)
     prompt = " ".join(api_prompts[0].split())

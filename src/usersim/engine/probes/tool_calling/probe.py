@@ -200,39 +200,64 @@ def _arguments_text(arguments: Any) -> str:
 _EARLIER_CALLS_CHARS = 24_000
 
 
-def _earlier_calls(conversation_messages: list, tool_name: str) -> str:
+def _canonical_arguments(arguments: str) -> str:
+    """Arguments as sorted compact JSON, so one call written two ways compares equal; other text as it is."""
+    try:
+        return json.dumps(json.loads(arguments), sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    except (TypeError, ValueError):
+        return arguments
+
+
+def _argument_values(arguments: str) -> list[str]:
+    """The call's top-level string and number arguments of 3 or more characters, such as an ID or a name."""
+    try:
+        parsed = json.loads(arguments)
+    except (TypeError, ValueError):
+        return []
+    if not isinstance(parsed, dict):
+        return []
+    values = (str(v) for v in parsed.values() if isinstance(v, (str, int, float)) and not isinstance(v, bool))
+    return [v for v in values if len(v) >= 3]
+
+
+def _earlier_calls(conversation_messages: list, tool_name: str, arguments: str) -> str:
     """The calls made earlier in the conversation, each with its arguments and response: the service's records.
 
     Every call is listed, in order. Responses go in whole up to
-    ``_EARLIER_CALLS_CHARS``, those to ``tool_name`` first and then the rest,
-    newest first; a response past that shows as its call alone.
+    ``_EARLIER_CALLS_CHARS``: first the response to the same call
+    (``tool_name`` with ``arguments``), then those naming one of its argument
+    values, then the rest of ``tool_name``'s, then everything else, each
+    newest first. A response past that shows as its call alone.
     """
-    calls: dict[Any, str] = {}
-    records: list[tuple[str, str, str]] = []
+    calls: dict[Any, tuple[str, str]] = {}
+    records: list[tuple[str, str, str, str]] = []
     for message in conversation_messages:
         if message.get("role") == "assistant":
             for call in message.get("tool_calls") or []:
                 function = call.get("function", {})
-                arguments = _arguments_text(function.get("arguments", "{}"))
-                calls[call.get("id")] = f"{function.get('name', '?')}({arguments})"
+                calls[call.get("id")] = (function.get("name", "?"), _arguments_text(function.get("arguments", "{}")))
         elif message.get("role") == "tool":
-            call = calls.get(message.get("tool_call_id"), "?({})")
-            records.append((call, call.split("(", 1)[0], message.get("content") or ""))
+            name, args = calls.get(message.get("tool_call_id"), ("?", "{}"))
+            records.append((f"{name}({args})", name, _canonical_arguments(args), message.get("content") or ""))
     if not records:
         return "None."
-    newest_first = range(len(records) - 1, -1, -1)
-    order = [i for i in newest_first if records[i][1] == tool_name]
-    order += [i for i in newest_first if records[i][1] != tool_name]
+    same_call = (tool_name, _canonical_arguments(arguments))
+    values = _argument_values(arguments)
+
+    def rank(i: int) -> tuple[bool, bool, bool, int]:
+        _call, name, args, response = records[i]
+        return (name, args) != same_call, not any(v in response for v in values), name != tool_name, -i
+
     shown: set[int] = set()
     used = 0
-    for i in order:
-        weight = tool_result_weight(records[i][2])
+    for i in sorted(range(len(records)), key=rank):
+        weight = tool_result_weight(records[i][3])
         if used + weight <= _EARLIER_CALLS_CHARS:
             shown.add(i)
             used += weight
     return "\n\n".join(
         f"{call} returned:\n{response}" if i in shown else f"{call} returned a response too long to show here."
-        for i, (call, _name, response) in enumerate(records)
+        for i, (call, _name, _args, response) in enumerate(records)
     )
 
 
@@ -330,7 +355,7 @@ async def _simulate_tool_response(
     the conversation here: the caller appends the result.
     """
     tool_args = _arguments_text(tool_call.get("function", {}).get("arguments", "{}"))
-    earlier_calls = _earlier_calls(conversation_messages, tool_spec.get("name", ""))
+    earlier_calls = _earlier_calls(conversation_messages, tool_spec.get("name", ""), tool_args)
     prompt = tool_simulator_prompt().format(
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=tool_args,

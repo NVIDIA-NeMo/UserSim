@@ -121,10 +121,12 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   with their responses, which it keeps consistent with, and the date, but none
   of the conversation's messages. Each response goes in whole until those earlier
   responses reach 24,000 characters (a Han, Kana or Hangul character counting
-  as three), the same tool's first; past that, a call shows without its
-  response. It writes links on the service's own domain, real entities where
-  the tool covers real things such as places, films or stocks, and a list of
-  the page size the call or the tool's description sets, or about 10 items.
+  as three): first the response to the same call, then those naming one of its
+  argument values (such as an ID or a name), then the same tool's, each newest
+  first; past that, a call shows without its response. It writes links on the
+  service's own domain, real entities where the tool covers real things such
+  as places, films or stocks, and a list of the page size the call or the
+  tool's description sets, or about 10 items.
 - A judge checks each synthesized response against the call before the
   assistant sees it: that it answers the call, agrees with the earlier calls'
   responses and the date, computes values correctly, and holds no placeholder
