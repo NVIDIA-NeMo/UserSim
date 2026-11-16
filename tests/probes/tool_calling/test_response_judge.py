@@ -51,34 +51,46 @@ async def _simulate(
 
 async def test_a_rejected_response_is_regenerated_with_the_judges_reason() -> None:
     result, api_prompts, judge_prompts = await _simulate(
-        ['{"temp_f": 70}', '{"temp_c": 21}'],
+        ['{"temp_f":70}', '{"temp_c":21}'],
         [(False, "Tokyo reports Celsius."), (True, "Fine.")],
         judge=True,
     )
-    assert result.content == '{"temp_c": 21}'
+    assert result.content == '{"temp_c":21}'
     assert result.verdicts == [(False, "Tokyo reports Celsius."), (True, "Fine.")]
     assert result.unverified is None
-    assert "Tokyo reports Celsius." in api_prompts[1] and '{"temp_f": 70}' in api_prompts[1]
+    assert "Tokyo reports Celsius." in api_prompts[1] and '{"temp_f":70}' in api_prompts[1]
     assert "Tokyo reports Celsius." not in api_prompts[0]
-    assert '{"temp_c": 21}' in judge_prompts[1] and "Tokyo" in judge_prompts[1]
+    assert '{"temp_c":21}' in judge_prompts[1] and "Tokyo" in judge_prompts[1]
 
 
 async def test_when_every_attempt_is_rejected_the_last_stands_unverified() -> None:
     result, _, _ = await _simulate(
-        ['{"temp": 1}', '{"temp": 2}'], [(False, "Wrong city."), (False, "Still wrong.")], judge=True
+        ['{"temp":1}', '{"temp":2}'], [(False, "Wrong city."), (False, "Still wrong.")], judge=True
     )
-    assert result.content == '{"temp": 2}'
+    assert result.content == '{"temp":2}'
     assert result.unverified == "the judge rejected all 2 attempts it saw"
 
 
 async def test_a_reply_that_is_not_json_uses_an_attempt_before_the_judge_sees_any() -> None:
-    result, _, judge_prompts = await _simulate(['{"temp": 2', '{"temp": 22}'], [(True, "Fine.")], judge=True)
-    assert (result.content, result.rerolls, len(judge_prompts)) == ('{"temp": 22}', 1, 1)
+    result, _, judge_prompts = await _simulate(['{"temp": 2', '{"temp":22}'], [(True, "Fine.")], judge=True)
+    assert (result.content, result.rerolls, len(judge_prompts)) == ('{"temp":22}', 1, 1)
+
+
+async def test_a_reply_cut_off_before_its_json_ends_is_retried_asking_for_a_shorter_one() -> None:
+    _, api_prompts, _ = await _simulate(['{"items": [{"id": 1}, {"id"', '{"items": [{"id": 1}]}'], [], judge=False)
+    assert "cut off before the JSON ended" not in api_prompts[0]
+    assert "cut off before the JSON ended" in api_prompts[1] and "fewer items" in api_prompts[1]
+
+
+async def test_a_response_is_stored_and_judged_as_compact_json() -> None:
+    result, _, judge_prompts = await _simulate(['{\n  "temp": 22,\n  "city": "東京"\n}'], [(True, "Fine.")], judge=True)
+    assert result.content == '{"temp":22,"city":"東京"}'
+    assert '<RESPONSE>\n{"temp":22,"city":"東京"}\n</RESPONSE>' in judge_prompts[0]
 
 
 async def test_a_judge_outage_leaves_the_response_standing_unverified() -> None:
-    result, _, _ = await _simulate(['{"temp": 22}'], [RuntimeError("rate limited")], judge=True)
-    assert result.content == '{"temp": 22}'
+    result, _, _ = await _simulate(['{"temp":22}'], [RuntimeError("rate limited")], judge=True)
+    assert result.content == '{"temp":22}'
     assert result.unverified == "the judge gave no verdict (RuntimeError)"
 
 
@@ -86,7 +98,7 @@ async def test_the_judge_runs_on_the_alias_it_is_given() -> None:
     aliases: list[str] = []
 
     async def fake_call_llm(models, alias, messages, **_):
-        return {"content": '{"temp": 22}'}
+        return {"content": '{"temp":22}'}
 
     async def fake_judge(models, alias, prompt):
         aliases.append(alias)
@@ -120,8 +132,8 @@ def test_the_probe_names_its_response_judge_and_falls_back_to_judge_model() -> N
 
 async def test_an_unreadable_verdict_leaves_the_response_standing_unverified() -> None:
     """A judge reply with no rating, even reformatted, is no verdict, not a rejection to regenerate."""
-    result, api_prompts, _ = await _simulate(['{"temp": 22}'], [None], judge=True)
-    assert (result.content, len(api_prompts), result.verdicts) == ('{"temp": 22}', 1, [])
+    result, api_prompts, _ = await _simulate(['{"temp":22}'], [None], judge=True)
+    assert (result.content, len(api_prompts), result.verdicts) == ('{"temp":22}', 1, [])
     assert result.unverified == "the judge's verdict could not be read"
 
 
@@ -142,14 +154,14 @@ async def test_the_simulator_and_its_judge_see_none_of_the_chat() -> None:
         {"role": "user", "content": "I need the Tokyo forecast for my granddaughter's trip."},
         {"role": "assistant", "content": "Let me look that up for your trip."},
     ]
-    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert "granddaughter" not in prompt and "your trip" not in prompt
 
 
 async def test_each_earlier_response_comes_with_the_call_that_produced_it() -> None:
     earlier = _call("a", "search_city", '{"q": "Tokyo"}', '{"city_id": 1850147}')
-    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert 'search_city({"q": "Tokyo"}) returned:\n{"city_id": 1850147}' in prompt
 
@@ -166,7 +178,7 @@ async def test_arguments_reach_the_simulator_and_its_judge_as_the_assistant_sent
         {"role": "tool", "tool_call_id": "a", "content": '{"city_id": 7}'},
     ]
     _, api_prompts, judge_prompts = await _simulate(
-        ['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier, call=call
+        ['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier, call=call
     )
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert '{"city": "渋谷"}' in prompt
@@ -175,7 +187,7 @@ async def test_arguments_reach_the_simulator_and_its_judge_as_the_assistant_sent
 
 async def test_every_earlier_call_reaches_the_simulator_and_its_judge() -> None:
     earlier = [m for i in range(7) for m in _call(str(i), "get_weather", f'{{"city": "C{i}"}}', f'{{"record": {i}}}')]
-    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert all(f'{{"record": {i}}}' in prompt for i in range(7))
 
@@ -184,7 +196,7 @@ async def test_past_the_budget_the_same_tools_responses_come_first_and_the_rest_
     same_tool = '{"forecast": "' + "a" * 15_000 + '"}'
     other_tool = '{"news": "' + "b" * 15_000 + '"}'
     earlier = [*_call("1", "get_weather", '{"city": "Kyoto"}', same_tool), *_call("2", "news", "{}", other_tool)]
-    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert same_tool in prompt and other_tool not in prompt
         assert "news({}) returned a response too long to show here." in prompt
@@ -200,22 +212,23 @@ async def test_past_the_budget_the_identical_call_and_records_naming_the_calls_v
         *_call("s", "search_city", '{"q": "Japan"}', naming),
         *newer,
     ]
-    _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert identical in prompt and naming in prompt
         assert 'get_weather({"city": "C0"}) returned a response too long to show here.' in prompt
 
 
 async def test_the_simulator_writes_like_the_real_service() -> None:
-    _, api_prompts, _ = await _simulate(['{"temp": 22}'], [], judge=False)
+    _, api_prompts, _ = await _simulate(['{"temp":22}'], [], judge=False)
     prompt = " ".join(api_prompts[0].split())
     assert "never example.com, another example.* host or a placeholder" in prompt
     assert "places, films, companies, players or stocks, use real ones" in prompt
     assert "the default the tool's description states, or else about 10 items" in prompt
+    assert "compact, on one line, as the service sends it" in prompt
 
 
 async def test_the_judge_fails_example_hosts_and_checks_only_the_facts_the_call_fixes() -> None:
-    _, _, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True)
+    _, _, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True)
     prompt = " ".join(judge_prompts[0].split())
     assert "no placeholder values (an example.com or other example.* host is one)" in prompt
     assert "only where the arguments or the tool's description fix them" in prompt
@@ -223,13 +236,13 @@ async def test_the_judge_fails_example_hosts_and_checks_only_the_facts_the_call_
 
 
 async def test_without_the_judge_the_first_json_reply_stands() -> None:
-    result, _, judge_prompts = await _simulate(['{"temp": 22}'], [], judge=False)
-    assert (result.content, result.verdicts, judge_prompts) == ('{"temp": 22}', [], [])
+    result, _, judge_prompts = await _simulate(['{"temp":22}'], [], judge=False)
+    assert (result.content, result.verdicts, judge_prompts) == ('{"temp":22}', [], [])
 
 
 async def test_the_judge_knows_the_credentials_were_checked() -> None:
     _, _, judge_prompts = await _simulate(
-        ['{"temp": 22}'], [(True, "Fine.")], judge=True, credential_parameters=("api_key",)
+        ['{"temp":22}'], [(True, "Fine.")], judge=True, credential_parameters=("api_key",)
     )
     assert "credentials (`api_key`) are valid" in judge_prompts[0]
 

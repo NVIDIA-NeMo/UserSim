@@ -103,8 +103,11 @@ tool_simulator_prompt: |-
   - A list or search returns the page size the arguments set, or else the default the tool's
     description states, or else about 10 items.
 
-  Respond with ONLY the JSON that this API would return. Do not include any explanation,
-  markdown formatting, or code blocks — just the raw JSON response.
+  Respond with ONLY the JSON that this API would return, compact, on one line, as the service sends it.
+  Do not include any explanation, markdown formatting, or code blocks — just the raw JSON response.
+tool_simulator_cut_off: |-
+  That reply was cut off before the JSON ended. Write the response again so it fits: fewer items, and
+  where the tool pages, the field that leads to the rest.
 tool_simulator_credentials: >-
   The credentials in this call ({parameters}) belong to the caller and are valid,
   so respond as the service responds to an authorized request.

@@ -127,6 +127,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   service's own domain, real entities where the tool covers real things such
   as places, films or stocks, and a list of the page size the call or the
   tool's description sets, or about 10 items.
+  Its JSON is kept compact, as a service sends it, and a reply cut off before
+  its JSON ends is written again, asked for fewer items and, where the tool
+  pages, the field that leads to the rest.
 - A judge checks each synthesized response against the call before the
   assistant sees it: that it answers the call, agrees with the earlier calls'
   responses and the date, computes values correctly, and holds no placeholder

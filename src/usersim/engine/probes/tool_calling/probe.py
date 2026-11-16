@@ -49,6 +49,7 @@ from usersim.engine.probes.tool_calling.prompts import (
     tool_relevance_failure,
     tool_relevance_success,
     tool_simulator_credentials,
+    tool_simulator_cut_off,
     tool_simulator_feedback,
     tool_simulator_judge_credentials,
     tool_simulator_judge_prompt,
@@ -346,7 +347,9 @@ async def _simulate_tool_response(
 
     Each of up to ``max_attempts`` attempts must be JSON and, when ``judge`` is
     set, pass ``judge_model``'s check against the call; a rejected attempt is
-    regenerated with the judge's reason as feedback. When every attempt is
+    regenerated with the judge's reason as feedback, and a reply that is not
+    JSON, which is output cut off at the token cap, with a request for a
+    shorter one. A JSON reply is kept compact, as a service sends it. When every attempt is
     used, the last JSON response stands, marked ``unverified``; when none was
     JSON, a 502 error payload, so every tool result a conversation stores
     parses. A judge that fails to answer leaves the response standing,
@@ -374,11 +377,12 @@ async def _simulate_tool_response(
         resp = await acall_llm(models, MODEL_API_RESPONSE, [{"role": "user", "content": prompt + feedback}])
         content = resp.get("content", "{}") if isinstance(resp, dict) else "{}"
         try:
-            json.loads(content)
+            content = json.dumps(json.loads(content), ensure_ascii=False, separators=(",", ":"))
         except (json.JSONDecodeError, TypeError):
             if attempt < max_attempts - 1:
                 result.rerolls += 1
                 logger.debug("  |-- api_response_model: invalid JSON, retrying")
+            feedback = "\n\n" + tool_simulator_cut_off()
             continue
         accepted = content
         if not judge:
@@ -449,7 +453,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.9"
+    prompt_version = "v1.10"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe

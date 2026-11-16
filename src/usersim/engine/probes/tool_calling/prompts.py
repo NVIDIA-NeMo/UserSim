@@ -127,8 +127,14 @@ Write it as the real service would:
 - A list or search returns the page size the arguments set, or else the default the tool's
   description states, or else about 10 items.
 
-Respond with ONLY the JSON that this API would return. Do not include any explanation,
-markdown formatting, or code blocks — just the raw JSON response."""
+Respond with ONLY the JSON that this API would return, compact, on one line, as the service sends it.
+Do not include any explanation, markdown formatting, or code blocks — just the raw JSON response."""
+
+
+# Appended to the tool simulator prompt for the next attempt after a reply that
+# was not JSON, which is almost always output cut off at the token cap.
+_DEFAULT_TOOL_SIMULATOR_CUT_OFF = """That reply was cut off before the JSON ended. Write the response again so it fits: fewer items, and
+where the tool pages, the field that leads to the rest."""
 
 
 # Appended to the tool simulator prompt when the called tool declares
@@ -374,6 +380,10 @@ def user_credentials() -> str:
 
 def tool_simulator_prompt() -> str:
     return get_prompt(_SCENARIO, "tool_simulator_prompt", _DEFAULT_TOOL_SIMULATOR)
+
+
+def tool_simulator_cut_off() -> str:
+    return get_prompt(_SCENARIO, "tool_simulator_cut_off", _DEFAULT_TOOL_SIMULATOR_CUT_OFF)
 
 
 def tool_simulator_credentials() -> str:
