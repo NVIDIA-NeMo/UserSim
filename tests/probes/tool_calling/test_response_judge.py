@@ -18,7 +18,9 @@ _CALL = {"function": {"name": "get_weather", "arguments": '{"city":"Tokyo"}'}}
 _PROBE = "usersim.engine.probes.tool_calling.probe"
 
 
-async def _simulate(api_replies: list[str], verdicts: list[Any], earlier: list | None = None, **kwargs: Any):
+async def _simulate(
+    api_replies: list[str], verdicts: list[Any], earlier: list | None = None, call: dict = _CALL, **kwargs: Any
+):
     """Run the simulator with scripted API replies and judge verdicts; return the result and the calls."""
     api = iter(api_replies)
     judged = iter(verdicts)
@@ -43,7 +45,7 @@ async def _simulate(api_replies: list[str], verdicts: list[Any], earlier: list |
         patch(f"{_PROBE}.acall_llm", side_effect=fake_call_llm),
         patch(f"{_PROBE}.run_inline_judge_ex", side_effect=fake_judge),
     ):
-        result = await _simulate_tool_response({}, _SPEC, _CALL, earlier or [], today="Friday, 2026-11-06", **kwargs)
+        result = await _simulate_tool_response({}, _SPEC, call, earlier or [], today="Friday, 2026-11-06", **kwargs)
     return result, api_prompts, judge_prompts
 
 
@@ -150,6 +152,25 @@ async def test_each_earlier_response_comes_with_the_call_that_produced_it() -> N
     _, api_prompts, judge_prompts = await _simulate(['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert 'search_city({"q": "Tokyo"}) returned:\n{"city_id": 1850147}' in prompt
+
+
+async def test_arguments_reach_the_simulator_and_its_judge_as_the_assistant_sent_them() -> None:
+    """Non-ASCII text in a call's arguments, a string or a mapping, arrives as written, not escaped."""
+    call = {"function": {"name": "get_weather", "arguments": '{"city": "渋谷"}'}}
+    earlier = [
+        {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [{"id": "a", "function": {"name": "search_city", "arguments": {"q": "下北沢"}}}],
+        },
+        {"role": "tool", "tool_call_id": "a", "content": '{"city_id": 7}'},
+    ]
+    _, api_prompts, judge_prompts = await _simulate(
+        ['{"temp": 22}'], [(True, "Fine.")], judge=True, earlier=earlier, call=call
+    )
+    for prompt in (api_prompts[0], judge_prompts[0]):
+        assert '{"city": "渋谷"}' in prompt
+        assert 'search_city({"q": "下北沢"}) returned:' in prompt
 
 
 async def test_every_earlier_call_reaches_the_simulator_and_its_judge() -> None:

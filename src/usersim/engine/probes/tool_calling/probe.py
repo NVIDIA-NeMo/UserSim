@@ -189,6 +189,11 @@ def _find_tool_spec(tool_name: str, tools: list) -> dict | None:
     return None
 
 
+def _arguments_text(arguments: Any) -> str:
+    """A call's arguments as text: a string as the assistant sent it, anything else as JSON, unescaped."""
+    return arguments if isinstance(arguments, str) else json.dumps(arguments, ensure_ascii=False, default=str)
+
+
 #: The most of the earlier calls' responses that the simulator and its judge
 #: read, weighed as ``tool_result_weight`` does: as much as the evaluator reads
 #: of one tool result.
@@ -208,9 +213,7 @@ def _earlier_calls(conversation_messages: list, tool_name: str) -> str:
         if message.get("role") == "assistant":
             for call in message.get("tool_calls") or []:
                 function = call.get("function", {})
-                arguments = function.get("arguments", "{}")
-                if not isinstance(arguments, str):
-                    arguments = json.dumps(arguments, default=str)
+                arguments = _arguments_text(function.get("arguments", "{}"))
                 calls[call.get("id")] = f"{function.get('name', '?')}({arguments})"
         elif message.get("role") == "tool":
             call = calls.get(message.get("tool_call_id"), "?({})")
@@ -326,7 +329,7 @@ async def _simulate_tool_response(
     verdict can't be read even after it is asked to reformat. Nothing is recorded on
     the conversation here: the caller appends the result.
     """
-    tool_args = json.dumps(tool_call.get("function", {}).get("arguments", "{}"), default=str)
+    tool_args = _arguments_text(tool_call.get("function", {}).get("arguments", "{}"))
     earlier_calls = _earlier_calls(conversation_messages, tool_spec.get("name", ""))
     prompt = tool_simulator_prompt().format(
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
