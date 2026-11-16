@@ -58,7 +58,19 @@ def test_a_locale_with_a_script_rule_repeats_it_on_every_turn(locale: str, direc
 
 
 def test_a_latin_script_language_gets_no_script_rule() -> None:
-    assert _language_requirement("Portuguese", "pt_BR") == "in Portuguese."
+    requirement = _language_requirement("Portuguese", "pt_BR")
+    assert requirement.startswith("in Portuguese.")
+    assert "script" not in requirement
+
+
+@pytest.mark.parametrize("locale", ALL_LOCALES)
+def test_every_language_rule_leaves_text_asked_about_alone(locale: str) -> None:
+    # A user asking for a translation, or for corrections while practising a
+    # language, has to write the phrase in question in that language.
+    language = get_conversation_language(locale)
+    assert "a phrase to translate" in language_instruction(language, locale)
+    assert "a phrase to translate" in _language_requirement(language, locale)
+    assert "the rule applies to the words around it" in _language_judge_clause(locale)
 
 
 class _AsksAgain(ScriptedModel):

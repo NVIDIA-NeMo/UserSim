@@ -790,3 +790,30 @@ class TestUserContextOnAGeneratedOpening:
     async def test_without_context_the_first_message_is_the_users_text(self) -> None:
         row, stored, sent = await self._episode()
         assert stored == sent == row["user_query"]
+
+    async def test_the_users_view_and_its_gates_leave_the_context_line_out(self, monkeypatch) -> None:
+        from usersim.engine.probes.general_open_ended.probe import OpenEndedProbe
+        from usersim.extension import ConversationSimulatorConfig
+        from usersim.testing import ScriptedModel, run_episode
+
+        class _AsksAgain(ScriptedModel):
+            CONTENT = {**ScriptedModel.CONTENT, "summary": "no"}
+
+        context = "[2026-11-06 · Osaka, Japan]"
+        monkeypatch.setattr(OpenEndedProbe, "user_context", lambda self: context)
+        run = await run_episode(
+            "general_open_ended",
+            config=ConversationSimulatorConfig(name="conversation_messages", locale="en_US", max_turns=3),
+            persona={"first_name": "Haruto", "last_name": "Sato", "age": 41, "city": "Osaka"},
+            data={"theme": {"type": "travel", "description": "A weekend in Kyoto."}},
+            model_factory=_AsksAgain,
+        )
+        follow_ups = [p["messages"][-1]["content"] for p in run.prompts if p["role"] == "user"][1:]
+        gates = [
+            p["messages"][-1]["content"]
+            for p in run.prompts
+            if p["role"] == "judge" and "ADDITIONALLY: the USER message" in p["messages"][-1]["content"]
+        ]
+        assert follow_ups and len(gates) > 1
+        assert all(f"User: {run.row['user_query']}" in text for text in follow_ups)
+        assert not any(context in text for text in follow_ups + gates)

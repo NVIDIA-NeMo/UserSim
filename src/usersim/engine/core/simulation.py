@@ -547,6 +547,18 @@ def _first_user_message(probe: Any, text: str) -> dict[str, Any]:
     return {"role": "user", "content": f"{context}\n\n{text}" if context else text}
 
 
+def _as_the_user_wrote_it(messages: list[dict[str, Any]], first_turn: str) -> list[dict[str, Any]]:
+    """``messages`` with the first user message as the user wrote it, ``first_turn``.
+
+    The probe's ``user_context`` line is what the assistant's app attaches; the
+    simulated user never typed it, so its own view and its gate leave it out.
+    """
+    i = next((i for i, message in enumerate(messages) if message.get("role") == "user"), None)
+    if i is None or messages[i].get("content") == first_turn:
+        return messages
+    return [*messages[:i], {**messages[i], "content": first_turn}, *messages[i + 1 :]]
+
+
 class ConversationLoop:
     """Runs the shared multi-turn simulation lifecycle for any probe."""
 
@@ -1390,7 +1402,10 @@ class ConversationLoop:
             else:
                 followup_history_messages = state.messages
             public_history_text = format_conversation_history_for_prompt(
-                project_public_dialogue(followup_history_messages, mark_tool_use=policy.show_tool_use)
+                project_public_dialogue(
+                    _as_the_user_wrote_it(followup_history_messages, user_query),
+                    mark_tool_use=policy.show_tool_use,
+                )
             )
             compressed_uh = _build_user_followup_messages(
                 user_system_prompt=probe.get_user_system_prompt(),
