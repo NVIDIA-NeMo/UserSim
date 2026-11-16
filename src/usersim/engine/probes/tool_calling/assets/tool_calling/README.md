@@ -120,7 +120,14 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   what the service would: the call, the calls made earlier in the conversation
   with their responses, which it keeps consistent with, and its clock, noon UTC
   on the conversation's date, before which everything it returns has happened,
-  but none of the conversation's messages. Each response goes in whole until those earlier
+  but none of the conversation's messages. A tool with a parameter naming one
+  of the user's own things (a tracking, order, booking or reservation number,
+  an invoice or a receipt) also gets the service's records on the person,
+  their name and where they live, which that thing carries, while an argument
+  the call leaves out is not filled in from them; one that also takes a place
+  (a city, an address, a postal code, coordinates) gets the name alone. Any
+  other tool, such as a profile, a search or a lookup, gets no records, so
+  public data stays the same for any caller. Each response goes in whole until those earlier
   responses reach 24,000 characters (a Han, Kana or Hangul character counting
   as three): first the response to the same call, then those naming one of its
   argument values (such as an ID or a name), then the same tool's, each newest

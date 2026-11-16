@@ -27,6 +27,7 @@ import hashlib
 import json
 import logging
 import random
+import re
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -48,9 +49,11 @@ from usersim.engine.probes.tool_calling.prompts import (
     assistant_system_prompt,
     tool_relevance_failure,
     tool_relevance_success,
+    tool_simulator_caller,
     tool_simulator_credentials,
     tool_simulator_cut_off,
     tool_simulator_feedback,
+    tool_simulator_judge_caller,
     tool_simulator_judge_credentials,
     tool_simulator_judge_prompt,
     tool_simulator_prompt,
@@ -77,6 +80,7 @@ from usersim.extension import (
     format_persona_for_prompt,
     format_tools_for_prompt,
     load_prompt_file,
+    persona_full_name,
     persona_location,
     register_probe,
     render_prompt,
@@ -180,6 +184,37 @@ def _format_tools_for_api(tools: list) -> list:
                 {key: value for key, value in tool_data.items() if key not in ("credentials", "sets_credentials")}
             )
     return openai_tools
+
+
+#: A parameter name, split into words, holding one of these takes a place: a city, an address, coordinates.
+_PLACE_WORD = re.compile(
+    r"(^|_)(location|city|town|address|place|region|state|province|country|countrycode|zip|zipcode|postal|"
+    r"postcode|lat|latitude|lon|lng|longitude|coordinates|geo)(_|$)"
+)
+
+
+#: A parameter name, split into words, holding one of these refers to one of the person's own things: a parcel's
+#: tracking number, an order or booking ID, an invoice.
+_OWN_THING_WORD = re.compile(
+    r"(^|_)(tracking|trackingnumber|shipment|parcel|waybill|awb|consignment|pnr|invoice|receipt)(_|$)"
+    r"|(^|_)(order|booking|reservation|confirmation)_?(id|number|no|ref|reference|code)(_|$)"
+)
+
+
+def _parameter_names(tool_spec: dict) -> list[str]:
+    """The tool's parameter names in lowercase snake case, so ``trackingNumber`` reads ``tracking_number``."""
+    properties = (tool_spec.get("parameters") or {}).get("properties") or {}
+    return [re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", name).lower() for name in properties]
+
+
+def _takes_place(tool_spec: dict) -> bool:
+    """Whether the tool takes a place among its arguments, so a call is where its place comes from."""
+    return any(_PLACE_WORD.search(name) for name in _parameter_names(tool_spec))
+
+
+def _names_own_thing(tool_spec: dict) -> bool:
+    """Whether the tool takes the reference of one of the person's own things, such as a tracking or order number."""
+    return any(_OWN_THING_WORD.search(name) for name in _parameter_names(tool_spec))
 
 
 def _find_tool_spec(tool_name: str, tools: list) -> dict | None:
@@ -308,6 +343,7 @@ async def _judge_tool_response(
     earlier_calls: str,
     now: str,
     credential_parameters: tuple[str, ...],
+    caller: str = "",
     judge_alias: str = MODEL_JUDGE,
 ) -> tuple[bool, str] | None:
     """The ``judge_alias`` model's verdict on one simulated response, ``(passed, explanation)``; None when it can't be read."""
@@ -324,6 +360,7 @@ async def _judge_tool_response(
             if credential_parameters
             else ""
         ),
+        caller="\n" + tool_simulator_judge_caller().format(caller=caller) + "\n" if caller else "",
         earlier_calls=earlier_calls,
         response=content,
     )
@@ -339,6 +376,7 @@ async def _simulate_tool_response(
     *,
     now: str,
     credential_parameters: tuple[str, ...] = (),
+    caller: str = "",
     judge: bool = False,
     max_attempts: int = 2,
     judge_alias: str = MODEL_JUDGE,
@@ -347,8 +385,10 @@ async def _simulate_tool_response(
 
     The simulator sees what the service would: the call, the calls made
     earlier in the conversation with their responses (``_earlier_calls``),
-    which it keeps consistent with, and ``now``, the service's clock on the
-    conversation's date, before which everything it returns has happened. The conversation's
+    which it keeps consistent with, ``now``, the service's clock on the
+    conversation's date, before which everything it returns has happened,
+    and ``caller``, the service's records on the person, which the user's
+    own things carry and nothing else does. The conversation's
     messages reach neither it nor its judge. The probe checks a call's
     credentials before this runs, so when ``credential_parameters`` names
     any, the simulator is told they are valid rather than left to judge a
@@ -378,6 +418,8 @@ async def _simulate_tool_response(
         prompt += "\n\n" + tool_simulator_credentials().format(
             parameters=", ".join(f"`{parameter}`" for parameter in credential_parameters),
         )
+    if caller:
+        prompt += "\n\n" + tool_simulator_caller().format(caller=caller)
 
     result = SimulatedResponse(content=_INVALID_RESPONSE)
     accepted: str | None = None
@@ -405,6 +447,7 @@ async def _simulate_tool_response(
                 earlier_calls=earlier_calls,
                 now=now,
                 credential_parameters=credential_parameters,
+                caller=caller,
                 judge_alias=judge_alias,
             )
         except Exception as e:  # a judge outage leaves the response standing, flagged
@@ -604,6 +647,23 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         day = self.options.today.isoformat()
         return f"[{day} · {place}]" if place else f"[{day}]"
 
+    def _caller_records(self, tool_spec: dict) -> str:
+        """What the service holds on the person: their name and where they live, as ``Ana Souza, who lives in Austin``.
+
+        Only a tool that takes the reference of one of the person's own
+        things, such as a parcel's tracking number, gets them; a profile,
+        a search or a lookup of anything public gets ``""``. A tool that takes
+        a place gets the name alone, so its place comes only from the call.
+        A persona naming neither gives ``""``.
+        """
+        if not _names_own_thing(tool_spec):
+            return ""
+        name = persona_full_name(self._persona)
+        place = "" if _takes_place(tool_spec) else persona_location(self._persona)
+        if name and place:
+            return f"{name}, who lives in {place}"
+        return name or (f"a person who lives in {place}" if place else "")
+
     def snapshot_turn_state(self) -> dict[str, str]:
         return dict(self.held_credentials)
 
@@ -727,6 +787,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 state.messages,
                 now=_format_now(self.options.today),
                 credential_parameters=tuple(declared),
+                caller=self._caller_records(tool_spec),
                 judge=self.options.judge_responses,
                 max_attempts=self.options.max_response_attempts,
                 judge_alias=judge_alias,

@@ -252,6 +252,20 @@ async def test_the_simulator_and_its_judge_read_the_clock_and_nothing_after_it_h
     assert "a result for something after the current time" in judge
 
 
+async def test_the_simulator_and_its_judge_hold_the_services_records_on_the_caller() -> None:
+    caller = "Ana Souza, who lives in Austin, Texas, USA"
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, caller=caller)
+    simulator = " ".join(api_prompts[0].split())
+    judge = " ".join(judge_prompts[0].split())
+    assert f"The service's records on the person this call is made for: {caller}." in simulator
+    assert "an argument the call leaves out is not filled in from them" in simulator
+    assert f"The service's records on the person the call is made for: {caller}." in judge
+    assert "or in place of an argument the call left out, is wrong" in judge
+
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True)
+    assert all("The service's records on the person" not in p for p in (api_prompts[0], judge_prompts[0]))
+
+
 async def test_without_the_judge_the_first_json_reply_stands() -> None:
     result, _, judge_prompts = await _simulate(['{"temp":22}'], [], judge=False)
     assert (result.content, result.verdicts, judge_prompts) == ('{"temp":22}', [], [])

@@ -60,8 +60,13 @@ clock reads noon UTC on it, and nothing later has happened yet. Each row
 records the date as `today` in `conversation_metadata`. The first user message the assistant sees
 opens with a line its app would attach, the date and the persona's location,
 such as `[2026-11-06 · Austin, Texas, USA]`; the simulated user is told the
-assistant sees them, and the `api_response_model` gets no location, only what
-a call passes.
+assistant sees them. For a tool that takes the reference of one of the user's
+own things, such as a tracking, order or booking number, the
+`api_response_model` holds what the service's records hold on the person,
+their name and where they live, which that thing carries and nothing else
+does; a tool that also takes a place gets the name alone, so its place comes
+only from the call. Any other tool, such as a profile, a search or a lookup,
+gets no records.
 
 ## Locales
 

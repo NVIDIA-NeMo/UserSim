@@ -663,6 +663,61 @@ class TestToday:
             ToolCallingProbe.Options(today="2027-02-30")
 
 
+def _spec(*parameters: str) -> dict:
+    return {"name": "t", "parameters": {"type": "object", "properties": {p: {"type": "string"} for p in parameters}}}
+
+
+class TestCallerRecords:
+    """A tool that takes the reference of one of the user's own things gets the service's records on them, their
+    name and place; a tool that takes a place gets the name alone, and any other tool gets none."""
+
+    @pytest.mark.parametrize(
+        "parameter",
+        [
+            "tracking_number",
+            "trackingNumber",
+            "order_id",
+            "orderNumber",
+            "booking_reference",
+            "reservationId",
+            "confirmation_code",
+            "pnr",
+        ],
+    )
+    def test_a_tool_naming_the_users_own_thing_gets_their_name_and_place(self, sample_tools, parameter):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert probe._caller_records(_spec(parameter)) == "A User, who lives in Austin, Texas, USA"
+
+    @pytest.mark.parametrize(
+        "parameter",
+        ["username", "user_name", "ig", "ip", "query", "order_direction", "sort_order", "reservation_time", "booking"],
+    )
+    def test_a_profile_search_or_lookup_gets_no_records(self, sample_tools, parameter):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert probe._caller_records(_spec(parameter)) == ""
+
+    @pytest.mark.parametrize("parameter", ["location", "city", "postalCode", "lat", "ship_to_country"])
+    def test_a_tool_that_also_takes_a_place_gets_the_name_alone(self, sample_tools, parameter):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert probe._caller_records(_spec("tracking_number", parameter)) == "A User"
+
+    def test_a_persona_naming_no_one_and_no_place_gives_no_records(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        probe._persona = {"age": 35}
+
+        assert probe._caller_records(_spec("tracking_number")) == ""
+
+    async def test_the_simulator_reads_no_records_for_a_lookup(self, sample_tools):
+        _result, _assistant, _user, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
+        prompt = " ".join(api_inputs[0][0]["content"].split())
+
+        assert "records on the person" not in prompt
+        assert "A User" not in prompt
+
+
 class TestCredentials:
     """The user holds the key a tool declares, and only a call carrying it reaches the simulated service."""
 

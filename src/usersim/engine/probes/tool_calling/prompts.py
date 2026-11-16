@@ -141,6 +141,17 @@ _DEFAULT_TOOL_SIMULATOR_CUT_OFF = """That reply was cut off before the JSON ende
 where the tool pages, the field that leads to the rest."""
 
 
+# Appended to the tool simulator prompt when the called tool takes the
+# reference of one of the person's own things and the persona gives a name or
+# a place: what the service holds on the person, for their own things only.
+_DEFAULT_TOOL_SIMULATOR_CALLER = (
+    "The service's records on the person this call is made for: {caller}. Their own things that the call "
+    "concerns, such as their parcels, orders and bookings, carry these details. Nothing else comes from "
+    "these records: a public listing, search or forecast is the same for any caller, and an argument the "
+    "call leaves out is not filled in from them."
+)
+
+
 # Appended to the tool simulator prompt when the called tool declares
 # credentials, which the probe has already checked.
 _DEFAULT_TOOL_SIMULATOR_CREDENTIALS = (
@@ -151,7 +162,8 @@ _DEFAULT_TOOL_SIMULATOR_CREDENTIALS = (
 
 # The judge's rubric for one simulated tool response, which runs before the
 # assistant sees it. ``{credentials}`` is empty unless the call carries
-# credentials the probe has already checked.
+# credentials the probe has already checked, and ``{caller}`` unless the
+# service holds records on the person.
 _DEFAULT_TOOL_SIMULATOR_JUDGE = """You are checking a simulated API response before an AI assistant sees it.
 
 It is {now}.
@@ -161,7 +173,7 @@ Tool specification:
 
 Tool call arguments:
 {tool_args}
-{credentials}
+{credentials}{caller}
 The calls this caller made earlier, with what the service returned:
 <EARLIER_CALLS>
 {earlier_calls}
@@ -203,6 +215,13 @@ Strictly respond in the following format:
 # Fills ``{credentials}`` in the judge's rubric when the call declares credentials.
 _DEFAULT_TOOL_SIMULATOR_JUDGE_CREDENTIALS = (
     "The call's credentials ({parameters}) are valid, so a response that rejects them is wrong."
+)
+
+# Fills ``{caller}`` in the judge's rubric when the service holds records on the person.
+_DEFAULT_TOOL_SIMULATOR_JUDGE_CALLER = (
+    "The service's records on the person the call is made for: {caller}. Their own things that the call "
+    "concerns carry these details; a response that puts them anywhere else, or in place of an argument the "
+    "call left out, is wrong."
 )
 
 # Appended to the tool simulator prompt when the judge rejected the previous
@@ -390,6 +409,10 @@ def tool_simulator_cut_off() -> str:
     return get_prompt(_SCENARIO, "tool_simulator_cut_off", _DEFAULT_TOOL_SIMULATOR_CUT_OFF)
 
 
+def tool_simulator_caller() -> str:
+    return get_prompt(_SCENARIO, "tool_simulator_caller", _DEFAULT_TOOL_SIMULATOR_CALLER)
+
+
 def tool_simulator_credentials() -> str:
     return get_prompt(_SCENARIO, "tool_simulator_credentials", _DEFAULT_TOOL_SIMULATOR_CREDENTIALS)
 
@@ -400,6 +423,10 @@ def tool_simulator_judge_prompt() -> str:
 
 def tool_simulator_judge_credentials() -> str:
     return get_prompt(_SCENARIO, "tool_simulator_judge_credentials", _DEFAULT_TOOL_SIMULATOR_JUDGE_CREDENTIALS)
+
+
+def tool_simulator_judge_caller() -> str:
+    return get_prompt(_SCENARIO, "tool_simulator_judge_caller", _DEFAULT_TOOL_SIMULATOR_JUDGE_CALLER)
 
 
 def tool_simulator_feedback() -> str:
