@@ -532,14 +532,17 @@ of its locale, which the probe reads as `self._language` (and its locale as
 write every message in that language and, for a locale with a script of its
 own or a romanized one, in which script, without transliterating. An English
 locale's says English, allowing local idioms and borrowed words but not phrases
-in another language, romanized or not. The loop repeats the same requirement in
+in another language, romanized or not. In every locale, text the user asks
+about, such as a phrase to translate or a sentence to have corrected, may stay
+in its own language. The loop repeats the same requirement in
 every follow-up prompt. It then checks the script of each user turn itself, with no
 model call, and has the user model write the turn again when too little of it
 is in the locale's script, leaving out codes such as a key or an order number
 (`enforce_user_language`,
 `user_language_min_script_compliance`). The judge that gates each user turn
 also checks its language, for every locale, which tells apart two languages in
-one script (English and romanized Hindi, Hindi and Marathi). Each retry counts
+one script (English and romanized Hindi, Hindi and Marathi), and holds only the
+words around text the turn asks about to the locale's language. Each retry counts
 in the outcome's `n_user_language_violations`. Whether the assistant answered in the user's
 language is scored after the run, by the `language_compliance` scorer and the
 judges' `language_appropriateness` axis. So instructions written in English
