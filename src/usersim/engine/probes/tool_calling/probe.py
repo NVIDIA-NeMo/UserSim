@@ -257,9 +257,10 @@ def _argument_values(arguments: str) -> list[str]:
 
 
 def _earlier_calls(conversation_messages: list, tool_name: str, arguments: str) -> str:
-    """The calls made earlier in the conversation, each with its arguments and response: the service's records.
+    """The calls made earlier in the conversation, each with its arguments, time and response: the service's records.
 
-    Every call is listed, in order. Responses go in whole up to
+    Every call is listed, in order, with the clock it was made at
+    (``_clock``). Responses go in whole up to
     ``_EARLIER_CALLS_CHARS``: first the response to the same call
     (``tool_name`` with ``arguments``), then those naming one of its argument
     values, then the rest of ``tool_name``'s, then everything else, each
@@ -267,14 +268,18 @@ def _earlier_calls(conversation_messages: list, tool_name: str, arguments: str) 
     """
     calls: dict[Any, tuple[str, str]] = {}
     records: list[tuple[str, str, str, str]] = []
+    user_messages = 0
     for message in conversation_messages:
-        if message.get("role") == "assistant":
+        if message.get("role") == "user":
+            user_messages += 1
+        elif message.get("role") == "assistant":
             for call in message.get("tool_calls") or []:
                 function = call.get("function", {})
                 calls[call.get("id")] = (function.get("name", "?"), _arguments_text(function.get("arguments", "{}")))
         elif message.get("role") == "tool":
             name, args = calls.get(message.get("tool_call_id"), ("?", "{}"))
-            records.append((f"{name}({args})", name, _canonical_arguments(args), message.get("content") or ""))
+            call = f"{name}({args}) at {_clock(user_messages)} UTC"
+            records.append((call, name, _canonical_arguments(args), message.get("content") or ""))
     if not records:
         return "None."
     same_call = (tool_name, _canonical_arguments(arguments))
@@ -305,13 +310,29 @@ def _format_day(day: date) -> str:
     return f"{_WEEKDAYS[day.weekday()]}, {day.isoformat()}"
 
 
-def _format_now(day: date) -> str:
-    """The simulated service's clock on ``day``, such as ``Friday, 2026-11-06, 12:00 UTC``.
+#: How far the simulated service's clock moves with each user message after the first: the time a person takes
+#: to read a reply and write back.
+_MINUTES_PER_USER_MESSAGE = 2
 
-    Noon UTC falls on ``day`` in every time zone from UTC-11 to UTC+11, so the
-    clock never disagrees with the date the user and the assistant work from.
+
+def _user_messages(conversation_messages: list) -> int:
+    return sum(1 for message in conversation_messages if message.get("role") == "user")
+
+
+def _clock(user_messages: int) -> str:
+    """The simulated service's clock, as ``12:04``, once the user has sent ``user_messages`` messages.
+
+    Noon UTC at the first, moving ``_MINUTES_PER_USER_MESSAGE`` with each one
+    after it and stopping at 12:59, so the clock stays on the conversation's
+    date in every time zone from UTC-11 to UTC+11, the date the user and the
+    assistant work from.
     """
-    return f"{_format_day(day)}, 12:00 UTC"
+    return f"12:{min(_MINUTES_PER_USER_MESSAGE * max(user_messages - 1, 0), 59):02d}"
+
+
+def _format_now(day: date, user_messages: int = 1) -> str:
+    """The simulated service's date and clock, such as ``Friday, 2026-11-06, 12:02 UTC``."""
+    return f"{_format_day(day)}, {_clock(user_messages)} UTC"
 
 
 #: What a call answers when no attempt produced JSON.
@@ -385,8 +406,9 @@ async def _simulate_tool_response(
 
     The simulator sees what the service would: the call, the calls made
     earlier in the conversation with their responses (``_earlier_calls``),
-    which it keeps consistent with, ``now``, the service's clock on the
-    conversation's date, before which everything it returns has happened,
+    which it keeps consistent with, ``now``, the service's clock, which moves
+    as the conversation goes on, after which no event has a result yet though
+    what is planned for later, such as a schedule, already exists,
     and ``caller``, the service's records on the person, which the user's
     own things carry and nothing else does. The conversation's
     messages reach neither it nor its judge. The probe checks a call's
@@ -505,7 +527,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.10"
+    prompt_version = "v1.11"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -785,7 +807,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 tool_spec,
                 tc,
                 state.messages,
-                now=_format_now(self.options.today),
+                now=_format_now(self.options.today, _user_messages(state.messages)),
                 credential_parameters=tuple(declared),
                 caller=self._caller_records(tool_spec),
                 judge=self.options.judge_responses,

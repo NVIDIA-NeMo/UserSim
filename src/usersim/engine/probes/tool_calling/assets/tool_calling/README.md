@@ -118,9 +118,14 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
   tool's response from the schema, so a run needs no live service. It sees
   what the service would: the call, the calls made earlier in the conversation
-  with their responses, which it keeps consistent with, and its clock, noon UTC
-  on the conversation's date, before which everything it returns has happened,
-  but none of the conversation's messages. A tool with a parameter naming one
+  with their responses and the time each was made, which it keeps consistent
+  with, and its clock, noon UTC on the conversation's date at the user's first
+  message and two minutes later with each one after, up to 12:59, but none of
+  the conversation's messages. An event after the clock has no result yet,
+  while what is planned for later, such as a schedule, a listing or a
+  forecast, already exists; an identical call returns the same data, except
+  that what moves with time, such as a live score, a job's progress, stock or
+  a price, may have moved since it was made. A tool with a parameter naming one
   of the user's own things (a tracking, order, booking or reservation number,
   an invoice or a receipt) also gets the service's records on the person,
   their name and where they live, which that thing carries, while an argument
@@ -140,7 +145,8 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   pages, the field that leads to the rest.
 - A judge checks each synthesized response against the call before the
   assistant sees it: that it answers the call, agrees with the earlier calls'
-  responses and the clock, gives no result for anything later than the clock,
+  responses and the clock, gives no result for an event later than the clock
+  while letting a schedule or forecast for later stand,
   computes values correctly, and holds no placeholder
   such as an `example.com` link. It checks real-world facts only where the
   arguments or the tool's description fix them. A rejected response is

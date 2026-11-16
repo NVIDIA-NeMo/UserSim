@@ -13,6 +13,7 @@ import json
 import types
 from collections.abc import Callable
 from contextlib import ExitStack
+from datetime import date
 from unittest.mock import patch
 
 import pytest
@@ -25,6 +26,7 @@ from usersim.engine.probes.tool_calling.probe import (
     ToolCallingProbe,
     _build_tool_context,
     _find_tool_spec,
+    _format_now,
     _format_tools_for_api,
     _simulate_tool_response,
 )
@@ -620,7 +622,36 @@ class TestUserSeesToolUse:
 
 class TestToday:
     """The simulated user, the assistant and the API response simulator share one date, which the simulator's clock
-    reads at noon UTC; the assistant also sees the user's place."""
+    reads at noon UTC at the user's first message and later with each one after; the assistant also sees the user's
+    place."""
+
+    @pytest.mark.parametrize(
+        ("user_messages", "clock"), [(0, "12:00"), (1, "12:00"), (2, "12:02"), (4, "12:06"), (100, "12:59")]
+    )
+    def test_the_clock_moves_two_minutes_with_each_user_message_and_stays_on_the_date(self, user_messages, clock):
+        assert _format_now(date(2026, 11, 6), user_messages) == f"Friday, 2026-11-06, {clock} UTC"
+
+    async def test_a_call_after_the_users_second_message_reads_the_moved_clock(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools, judge_responses=False)
+        state = ConversationState()
+        state.messages += [
+            {"role": "user", "content": "Weather?"},
+            {"role": "assistant", "content": "Where are you?"},
+            {"role": "user", "content": "Tokyo."},
+        ]
+        prompts = []
+
+        async def fake_call_llm(models, alias, messages, **kwargs):
+            prompts.append(messages[0]["content"])
+            return {"content": '{"temp": 22}'}
+
+        tool_call = {"id": "c", "function": {"name": "get_weather", "arguments": '{"location": "Tokyo"}'}}
+        with patch("usersim.engine.probes.tool_calling.probe.acall_llm", side_effect=fake_call_llm):
+            await probe.execute_tool_call(
+                "get_weather", {"location": "Tokyo"}, tool_call, state, {}, turn_idx=1, call_idx=0
+            )
+
+        assert "It is Friday, 2026-11-06, 12:02 UTC." in prompts[0]
 
     async def test_the_user_and_the_tool_simulator_share_the_runs_date(self, sample_tools):
         result, _assistant, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)

@@ -171,7 +171,7 @@ async def test_each_earlier_response_comes_with_the_call_that_produced_it() -> N
     earlier = _call("a", "search_city", '{"q": "Tokyo"}', '{"city_id": 1850147}')
     _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
-        assert 'search_city({"q": "Tokyo"}) returned:\n{"city_id": 1850147}' in prompt
+        assert 'search_city({"q": "Tokyo"}) at 12:00 UTC returned:\n{"city_id": 1850147}' in prompt
 
 
 async def test_arguments_reach_the_simulator_and_its_judge_as_the_assistant_sent_them() -> None:
@@ -190,7 +190,7 @@ async def test_arguments_reach_the_simulator_and_its_judge_as_the_assistant_sent
     )
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert '{"city": "渋谷"}' in prompt
-        assert 'search_city({"q": "下北沢"}) returned:' in prompt
+        assert 'search_city({"q": "下北沢"}) at 12:00 UTC returned:' in prompt
 
 
 async def test_every_earlier_call_reaches_the_simulator_and_its_judge() -> None:
@@ -207,7 +207,7 @@ async def test_past_the_budget_the_same_tools_responses_come_first_and_the_rest_
     _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert same_tool in prompt and other_tool not in prompt
-        assert "news({}) returned a response too long to show here." in prompt
+        assert "news({}) at 12:00 UTC returned a response too long to show here." in prompt
 
 
 async def test_past_the_budget_the_identical_call_and_records_naming_the_calls_values_come_first() -> None:
@@ -223,7 +223,7 @@ async def test_past_the_budget_the_identical_call_and_records_naming_the_calls_v
     _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
     for prompt in (api_prompts[0], judge_prompts[0]):
         assert identical in prompt and naming in prompt
-        assert 'get_weather({"city": "C0"}) returned a response too long to show here.' in prompt
+        assert 'get_weather({"city": "C0"}) at 12:00 UTC returned a response too long to show here.' in prompt
 
 
 async def test_the_simulator_writes_like_the_real_service() -> None:
@@ -243,13 +243,38 @@ async def test_the_judge_fails_example_hosts_and_checks_only_the_facts_the_call_
     assert "a plausible entry the call does not fix is fine" in prompt
 
 
-async def test_the_simulator_and_its_judge_read_the_clock_and_nothing_after_it_has_happened() -> None:
+async def test_the_simulator_and_its_judge_read_the_clock_and_later_events_have_no_result() -> None:
     _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True)
     simulator = " ".join(api_prompts[0].split())
     judge = " ".join(judge_prompts[0].split())
-    assert "It is Friday, 2026-11-06, 12:00 UTC. Nothing after that has happened yet" in simulator
+    assert "It is Friday, 2026-11-06, 12:00 UTC. An event later than that has not happened" in simulator
     assert "It is Friday, 2026-11-06, 12:00 UTC." in judge
-    assert "a result for something after the current time" in judge
+    assert "a result, score or reading for an event after the current time" in judge
+
+
+async def test_what_is_planned_for_later_already_exists() -> None:
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True)
+    simulator = " ".join(api_prompts[0].split())
+    judge = " ".join(judge_prompts[0].split())
+    assert "what is planned for later, such as a schedule, showtime, listing, forecast, booking or price" in simulator
+    assert "Anything planned for after the current time, such as a schedule, a listing" in judge
+
+
+async def test_each_earlier_call_shows_the_time_it_was_made_and_what_moves_with_time_may_move() -> None:
+    earlier = [
+        {"role": "user", "content": "Is my report done?"},
+        *_call("1", "job_status", '{"job": "J1"}', '{"progress": 41}'),
+        {"role": "user", "content": "And now?"},
+        *_call("2", "job_status", '{"job": "J1"}', '{"progress": 90}'),
+    ]
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier)
+    for prompt in (api_prompts[0], judge_prompts[0]):
+        assert 'job_status({"job": "J1"}) at 12:00 UTC returned:\n{"progress": 41}' in prompt
+        assert 'job_status({"job": "J1"}) at 12:02 UTC returned:\n{"progress": 90}' in prompt
+    assert "such as a live score, a job's progress, stock or a price, may have moved since then" in " ".join(
+        api_prompts[0].split()
+    )
+    assert "or time has passed and the data is the kind that moves with it" in " ".join(judge_prompts[0].split())
 
 
 async def test_the_simulator_and_its_judge_hold_the_services_records_on_the_caller() -> None:
