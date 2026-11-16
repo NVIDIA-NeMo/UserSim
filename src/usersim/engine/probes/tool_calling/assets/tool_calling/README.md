@@ -118,16 +118,36 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
   tool's response from the schema, so a run needs no live service. It sees
   what the service would: the call, the calls made earlier in the conversation
-  with their responses, which it keeps consistent with, and the date, but none
-  of the conversation's messages. Each response goes in whole until those earlier
+  with their responses and the time each was made, which it keeps consistent
+  with, and its clock, noon UTC on the conversation's date at the user's first
+  message and two minutes later with each one after, up to 12:59, but none of
+  the conversation's messages. An event after the clock has no result yet,
+  while what is planned for later, such as a schedule, a listing or a
+  forecast, already exists; an identical call returns the same data, except
+  that what moves with time, such as a live score, a job's progress, stock or
+  a price, may have moved since it was made. A tool with a parameter naming one
+  of the user's own things (a tracking, order, booking or reservation number,
+  an invoice or a receipt) also gets the service's records on the person,
+  their name and where they live, which that thing carries, while an argument
+  the call leaves out is not filled in from them; one that also takes a place
+  (a city, an address, a postal code, coordinates) gets the name alone. Any
+  other tool, such as a profile, a search or a lookup, gets no records, so
+  public data stays the same for any caller. Each response goes in whole until those earlier
   responses reach 24,000 characters (a Han, Kana or Hangul character counting
-  as three), the same tool's first; past that, a call shows without its
-  response. It writes links on the service's own domain, real entities where
-  the tool covers real things such as places, films or stocks, and a list of
-  the page size the call or the tool's description sets, or about 10 items.
+  as three): first the response to the same call, then those naming one of its
+  argument values (such as an ID or a name), then the same tool's, each newest
+  first; past that, a call shows without its response. It writes links on the
+  service's own domain, real entities where the tool covers real things such
+  as places, films or stocks, and a list of the page size the call or the
+  tool's description sets, or about 10 items.
+  Its JSON is kept compact, as a service sends it, and a reply cut off before
+  its JSON ends is written again, asked for fewer items and, where the tool
+  pages, the field that leads to the rest.
 - A judge checks each synthesized response against the call before the
   assistant sees it: that it answers the call, agrees with the earlier calls'
-  responses and the date, computes values correctly, and holds no placeholder
+  responses and the clock, gives no result for an event later than the clock
+  while letting a schedule or forecast for later stand,
+  computes values correctly, and holds no placeholder
   such as an `example.com` link. It checks real-world facts only where the
   arguments or the tool's description fix them. A rejected response is
   rewritten with the judge's reason, within `max_response_attempts` (the
@@ -140,8 +160,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   reply that states a result no tool returned or claims an action no call
   performed. Such failures start with `[UNGROUNDED]` and count in
   `n_assistant_ungrounded`. The judge also sees the tools the assistant was
-  offered, and fails a reply that says it can't do what one of them does or
-  calls its tools' results unreliable without a reason. It judges only what
+  offered, and fails a reply that says it can't do what one of them does,
+  rather than asking the user for what the call is missing, or calls its
+  tools' results unreliable without a reason. It judges only what
   the reply in front of it says: an earlier reply's error counts against that
   reply alone, unless this one repeats it. With `--max-assistant-attempts`
   above 1, the rejected turn is undone, tool calls included, and regenerated.

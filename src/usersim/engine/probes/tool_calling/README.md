@@ -18,18 +18,20 @@ the other probes.
   language, and holds any credential a tool declares, API key or password. The
   check on the opening request fails one that no offered tool can do, so the
   user writes it again. The user asks a service about the records it holds,
-  such as bookings or balances, rather than describing them. In the user's
+  such as bookings or balances, rather than describing them, and gives what
+  the assistant asks for that a real user would have, such as a link or a
+  number, written as a real one. In the user's
   view, a reply after tool results opens with `(after using its tools)`, as a
   chat app shows a lookup; the user never sees what the tools returned.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
   gets a response the `api_response_model` writes for that tool. It writes from
   what the service would see: the call, the calls made earlier in the
-  conversation with their responses, and the date, never the conversation's
+  conversation with their responses, and its clock, never the conversation's
   messages, so a detail the user gives reaches it only through the arguments the
   assistant passes. Before the assistant sees the response, `judge_model`
   checks it against the call (the tool's description, the arguments, the
-  earlier calls' responses, the date, any computed value) and has a rejected
+  earlier calls' responses, the clock, any computed value) and has a rejected
   one rewritten with its reason; a response still
   rejected when the attempts run out stands, and the row carries an
   `unverified_tool_response` warning. A call that sets a new password leaves
@@ -53,12 +55,21 @@ used by a reply that is not JSON or that the judge rejects (default `2`);
 `share_user_context`, whether the assistant sees the date and where the user
 is (default `true`).
 The simulated user and the `api_response_model` both work from that date, so
-the dates in requests and in tool results agree, and each row records it as
-`today` in `conversation_metadata`. The first user message the assistant sees
+the dates in requests and in tool results agree. The `api_response_model`'s
+clock reads noon UTC on it at the user's first message and moves two minutes
+with each one after, so a live score or a job's progress can move between
+turns; an event after the clock has no result yet, while what is planned for
+later, such as a schedule or a forecast, already exists. Each row
+records the date as `today` in `conversation_metadata`. The first user message the assistant sees
 opens with a line its app would attach, the date and the persona's location,
 such as `[2026-11-06 · Austin, Texas, USA]`; the simulated user is told the
-assistant sees them, and the `api_response_model` gets no location, only what
-a call passes.
+assistant sees them. For a tool that takes the reference of one of the user's
+own things, such as a tracking, order or booking number, the
+`api_response_model` holds what the service's records hold on the person,
+their name and where they live, which that thing carries and nothing else
+does; a tool that also takes a place gets the name alone, so its place comes
+only from the call. Any other tool, such as a profile, a search or a lookup,
+gets no records.
 
 ## Locales
 

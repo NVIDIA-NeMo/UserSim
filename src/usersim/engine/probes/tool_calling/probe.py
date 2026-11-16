@@ -27,6 +27,7 @@ import hashlib
 import json
 import logging
 import random
+import re
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -48,8 +49,11 @@ from usersim.engine.probes.tool_calling.prompts import (
     assistant_system_prompt,
     tool_relevance_failure,
     tool_relevance_success,
+    tool_simulator_caller,
     tool_simulator_credentials,
+    tool_simulator_cut_off,
     tool_simulator_feedback,
+    tool_simulator_judge_caller,
     tool_simulator_judge_credentials,
     tool_simulator_judge_prompt,
     tool_simulator_prompt,
@@ -76,6 +80,7 @@ from usersim.extension import (
     format_persona_for_prompt,
     format_tools_for_prompt,
     load_prompt_file,
+    persona_full_name,
     persona_location,
     register_probe,
     render_prompt,
@@ -181,6 +186,37 @@ def _format_tools_for_api(tools: list) -> list:
     return openai_tools
 
 
+#: A parameter name, split into words, holding one of these takes a place: a city, an address, coordinates.
+_PLACE_WORD = re.compile(
+    r"(^|_)(location|city|town|address|place|region|state|province|country|countrycode|zip|zipcode|postal|"
+    r"postcode|lat|latitude|lon|lng|longitude|coordinates|geo)(_|$)"
+)
+
+
+#: A parameter name, split into words, holding one of these refers to one of the person's own things: a parcel's
+#: tracking number, an order or booking ID, an invoice.
+_OWN_THING_WORD = re.compile(
+    r"(^|_)(tracking|trackingnumber|shipment|parcel|waybill|awb|consignment|pnr|invoice|receipt)(_|$)"
+    r"|(^|_)(order|booking|reservation|confirmation)_?(id|number|no|ref|reference|code)(_|$)"
+)
+
+
+def _parameter_names(tool_spec: dict) -> list[str]:
+    """The tool's parameter names in lowercase snake case, so ``trackingNumber`` reads ``tracking_number``."""
+    properties = (tool_spec.get("parameters") or {}).get("properties") or {}
+    return [re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", name).lower() for name in properties]
+
+
+def _takes_place(tool_spec: dict) -> bool:
+    """Whether the tool takes a place among its arguments, so a call is where its place comes from."""
+    return any(_PLACE_WORD.search(name) for name in _parameter_names(tool_spec))
+
+
+def _names_own_thing(tool_spec: dict) -> bool:
+    """Whether the tool takes the reference of one of the person's own things, such as a tracking or order number."""
+    return any(_OWN_THING_WORD.search(name) for name in _parameter_names(tool_spec))
+
+
 def _find_tool_spec(tool_name: str, tools: list) -> dict | None:
     for t in tools:
         spec = _function_spec(t)
@@ -189,47 +225,80 @@ def _find_tool_spec(tool_name: str, tools: list) -> dict | None:
     return None
 
 
+def _arguments_text(arguments: Any) -> str:
+    """A call's arguments as text: a string as the assistant sent it, anything else as JSON, unescaped."""
+    return arguments if isinstance(arguments, str) else json.dumps(arguments, ensure_ascii=False, default=str)
+
+
 #: The most of the earlier calls' responses that the simulator and its judge
 #: read, weighed as ``tool_result_weight`` does: as much as the evaluator reads
 #: of one tool result.
 _EARLIER_CALLS_CHARS = 24_000
 
 
-def _earlier_calls(conversation_messages: list, tool_name: str) -> str:
-    """The calls made earlier in the conversation, each with its arguments and response: the service's records.
+def _canonical_arguments(arguments: str) -> str:
+    """Arguments as sorted compact JSON, so one call written two ways compares equal; other text as it is."""
+    try:
+        return json.dumps(json.loads(arguments), sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    except (TypeError, ValueError):
+        return arguments
 
-    Every call is listed, in order. Responses go in whole up to
-    ``_EARLIER_CALLS_CHARS``, those to ``tool_name`` first and then the rest,
-    newest first; a response past that shows as its call alone.
+
+def _argument_values(arguments: str) -> list[str]:
+    """The call's top-level string and number arguments of 3 or more characters, such as an ID or a name."""
+    try:
+        parsed = json.loads(arguments)
+    except (TypeError, ValueError):
+        return []
+    if not isinstance(parsed, dict):
+        return []
+    values = (str(v) for v in parsed.values() if isinstance(v, (str, int, float)) and not isinstance(v, bool))
+    return [v for v in values if len(v) >= 3]
+
+
+def _earlier_calls(conversation_messages: list, tool_name: str, arguments: str) -> str:
+    """The calls made earlier in the conversation, each with its arguments, time and response: the service's records.
+
+    Every call is listed, in order, with the clock it was made at
+    (``_clock``). Responses go in whole up to
+    ``_EARLIER_CALLS_CHARS``: first the response to the same call
+    (``tool_name`` with ``arguments``), then those naming one of its argument
+    values, then the rest of ``tool_name``'s, then everything else, each
+    newest first. A response past that shows as its call alone.
     """
-    calls: dict[Any, str] = {}
-    records: list[tuple[str, str, str]] = []
+    calls: dict[Any, tuple[str, str]] = {}
+    records: list[tuple[str, str, str, str]] = []
+    user_messages = 0
     for message in conversation_messages:
-        if message.get("role") == "assistant":
+        if message.get("role") == "user":
+            user_messages += 1
+        elif message.get("role") == "assistant":
             for call in message.get("tool_calls") or []:
                 function = call.get("function", {})
-                arguments = function.get("arguments", "{}")
-                if not isinstance(arguments, str):
-                    arguments = json.dumps(arguments, default=str)
-                calls[call.get("id")] = f"{function.get('name', '?')}({arguments})"
+                calls[call.get("id")] = (function.get("name", "?"), _arguments_text(function.get("arguments", "{}")))
         elif message.get("role") == "tool":
-            call = calls.get(message.get("tool_call_id"), "?({})")
-            records.append((call, call.split("(", 1)[0], message.get("content") or ""))
+            name, args = calls.get(message.get("tool_call_id"), ("?", "{}"))
+            call = f"{name}({args}) at {_clock(user_messages)} UTC"
+            records.append((call, name, _canonical_arguments(args), message.get("content") or ""))
     if not records:
         return "None."
-    newest_first = range(len(records) - 1, -1, -1)
-    order = [i for i in newest_first if records[i][1] == tool_name]
-    order += [i for i in newest_first if records[i][1] != tool_name]
+    same_call = (tool_name, _canonical_arguments(arguments))
+    values = _argument_values(arguments)
+
+    def rank(i: int) -> tuple[bool, bool, bool, int]:
+        _call, name, args, response = records[i]
+        return (name, args) != same_call, not any(v in response for v in values), name != tool_name, -i
+
     shown: set[int] = set()
     used = 0
-    for i in order:
-        weight = tool_result_weight(records[i][2])
+    for i in sorted(range(len(records)), key=rank):
+        weight = tool_result_weight(records[i][3])
         if used + weight <= _EARLIER_CALLS_CHARS:
             shown.add(i)
             used += weight
     return "\n\n".join(
         f"{call} returned:\n{response}" if i in shown else f"{call} returned a response too long to show here."
-        for i, (call, _name, response) in enumerate(records)
+        for i, (call, _name, _args, response) in enumerate(records)
     )
 
 
@@ -239,6 +308,31 @@ _WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
 def _format_day(day: date) -> str:
     """A date with its weekday, such as ``Friday, 2026-11-06``, independent of the process locale."""
     return f"{_WEEKDAYS[day.weekday()]}, {day.isoformat()}"
+
+
+#: How far the simulated service's clock moves with each user message after the first: the time a person takes
+#: to read a reply and write back.
+_MINUTES_PER_USER_MESSAGE = 2
+
+
+def _user_messages(conversation_messages: list) -> int:
+    return sum(1 for message in conversation_messages if message.get("role") == "user")
+
+
+def _clock(user_messages: int) -> str:
+    """The simulated service's clock, as ``12:04``, once the user has sent ``user_messages`` messages.
+
+    Noon UTC at the first, moving ``_MINUTES_PER_USER_MESSAGE`` with each one
+    after it and stopping at 12:59, so the clock stays on the conversation's
+    date in every time zone from UTC-11 to UTC+11, the date the user and the
+    assistant work from.
+    """
+    return f"12:{min(_MINUTES_PER_USER_MESSAGE * max(user_messages - 1, 0), 59):02d}"
+
+
+def _format_now(day: date, user_messages: int = 1) -> str:
+    """The simulated service's date and clock, such as ``Friday, 2026-11-06, 12:02 UTC``."""
+    return f"{_format_day(day)}, {_clock(user_messages)} UTC"
 
 
 #: What a call answers when no attempt produced JSON.
@@ -268,13 +362,14 @@ async def _judge_tool_response(
     tool_spec: dict,
     tool_args: str,
     earlier_calls: str,
-    today: str,
+    now: str,
     credential_parameters: tuple[str, ...],
+    caller: str = "",
     judge_alias: str = MODEL_JUDGE,
 ) -> tuple[bool, str] | None:
     """The ``judge_alias`` model's verdict on one simulated response, ``(passed, explanation)``; None when it can't be read."""
     prompt = tool_simulator_judge_prompt().format(
-        today=today,
+        now=now,
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=tool_args,
         credentials=(
@@ -286,6 +381,7 @@ async def _judge_tool_response(
             if credential_parameters
             else ""
         ),
+        caller="\n" + tool_simulator_judge_caller().format(caller=caller) + "\n" if caller else "",
         earlier_calls=earlier_calls,
         response=content,
     )
@@ -299,8 +395,9 @@ async def _simulate_tool_response(
     tool_call: dict,
     conversation_messages: list,
     *,
-    today: str,
+    now: str,
     credential_parameters: tuple[str, ...] = (),
+    caller: str = "",
     judge: bool = False,
     max_attempts: int = 2,
     judge_alias: str = MODEL_JUDGE,
@@ -309,8 +406,11 @@ async def _simulate_tool_response(
 
     The simulator sees what the service would: the call, the calls made
     earlier in the conversation with their responses (``_earlier_calls``),
-    which it keeps consistent with, and ``today``, the conversation's date,
-    so the dates it returns agree with the user's. The conversation's
+    which it keeps consistent with, ``now``, the service's clock, which moves
+    as the conversation goes on, after which no event has a result yet though
+    what is planned for later, such as a schedule, already exists,
+    and ``caller``, the service's records on the person, which the user's
+    own things carry and nothing else does. The conversation's
     messages reach neither it nor its judge. The probe checks a call's
     credentials before this runs, so when ``credential_parameters`` names
     any, the simulator is told they are valid rather than left to judge a
@@ -318,7 +418,9 @@ async def _simulate_tool_response(
 
     Each of up to ``max_attempts`` attempts must be JSON and, when ``judge`` is
     set, pass ``judge_model``'s check against the call; a rejected attempt is
-    regenerated with the judge's reason as feedback. When every attempt is
+    regenerated with the judge's reason as feedback, and a reply that is not
+    JSON, which is output cut off at the token cap, with a request for a
+    shorter one. A JSON reply is kept compact, as a service sends it. When every attempt is
     used, the last JSON response stands, marked ``unverified``; when none was
     JSON, a 502 error payload, so every tool result a conversation stores
     parses. A judge that fails to answer leaves the response standing,
@@ -326,18 +428,20 @@ async def _simulate_tool_response(
     verdict can't be read even after it is asked to reformat. Nothing is recorded on
     the conversation here: the caller appends the result.
     """
-    tool_args = json.dumps(tool_call.get("function", {}).get("arguments", "{}"), default=str)
-    earlier_calls = _earlier_calls(conversation_messages, tool_spec.get("name", ""))
+    tool_args = _arguments_text(tool_call.get("function", {}).get("arguments", "{}"))
+    earlier_calls = _earlier_calls(conversation_messages, tool_spec.get("name", ""), tool_args)
     prompt = tool_simulator_prompt().format(
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=tool_args,
         earlier_calls=earlier_calls,
-        today=today,
+        now=now,
     )
     if credential_parameters:
         prompt += "\n\n" + tool_simulator_credentials().format(
             parameters=", ".join(f"`{parameter}`" for parameter in credential_parameters),
         )
+    if caller:
+        prompt += "\n\n" + tool_simulator_caller().format(caller=caller)
 
     result = SimulatedResponse(content=_INVALID_RESPONSE)
     accepted: str | None = None
@@ -346,11 +450,12 @@ async def _simulate_tool_response(
         resp = await acall_llm(models, MODEL_API_RESPONSE, [{"role": "user", "content": prompt + feedback}])
         content = resp.get("content", "{}") if isinstance(resp, dict) else "{}"
         try:
-            json.loads(content)
+            content = json.dumps(json.loads(content), ensure_ascii=False, separators=(",", ":"))
         except (json.JSONDecodeError, TypeError):
             if attempt < max_attempts - 1:
                 result.rerolls += 1
                 logger.debug("  |-- api_response_model: invalid JSON, retrying")
+            feedback = "\n\n" + tool_simulator_cut_off()
             continue
         accepted = content
         if not judge:
@@ -362,8 +467,9 @@ async def _simulate_tool_response(
                 tool_spec=tool_spec,
                 tool_args=tool_args,
                 earlier_calls=earlier_calls,
-                today=today,
+                now=now,
                 credential_parameters=credential_parameters,
+                caller=caller,
                 judge_alias=judge_alias,
             )
         except Exception as e:  # a judge outage leaves the response standing, flagged
@@ -421,7 +527,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.9"
+    prompt_version = "v1.11"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -563,6 +669,23 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         day = self.options.today.isoformat()
         return f"[{day} · {place}]" if place else f"[{day}]"
 
+    def _caller_records(self, tool_spec: dict) -> str:
+        """What the service holds on the person: their name and where they live, as ``Ana Souza, who lives in Austin``.
+
+        Only a tool that takes the reference of one of the person's own
+        things, such as a parcel's tracking number, gets them; a profile,
+        a search or a lookup of anything public gets ``""``. A tool that takes
+        a place gets the name alone, so its place comes only from the call.
+        A persona naming neither gives ``""``.
+        """
+        if not _names_own_thing(tool_spec):
+            return ""
+        name = persona_full_name(self._persona)
+        place = "" if _takes_place(tool_spec) else persona_location(self._persona)
+        if name and place:
+            return f"{name}, who lives in {place}"
+        return name or (f"a person who lives in {place}" if place else "")
+
     def snapshot_turn_state(self) -> dict[str, str]:
         return dict(self.held_credentials)
 
@@ -684,8 +807,9 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 tool_spec,
                 tc,
                 state.messages,
-                today=_format_day(self.options.today),
+                now=_format_now(self.options.today, _user_messages(state.messages)),
                 credential_parameters=tuple(declared),
+                caller=self._caller_records(tool_spec),
                 judge=self.options.judge_responses,
                 max_attempts=self.options.max_response_attempts,
                 judge_alias=judge_alias,

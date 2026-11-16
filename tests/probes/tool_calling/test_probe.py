@@ -13,6 +13,7 @@ import json
 import types
 from collections.abc import Callable
 from contextlib import ExitStack
+from datetime import date
 from unittest.mock import patch
 
 import pytest
@@ -25,6 +26,7 @@ from usersim.engine.probes.tool_calling.probe import (
     ToolCallingProbe,
     _build_tool_context,
     _find_tool_spec,
+    _format_now,
     _format_tools_for_api,
     _simulate_tool_response,
 )
@@ -140,7 +142,7 @@ class TestToolHelpers:
                 tool_spec,
                 tool_call,
                 history,
-                today="Friday, 2026-11-06",
+                now="Friday, 2026-11-06, 12:00 UTC",
             )
 
         assert simulated.content == '{"ok":true}'
@@ -149,7 +151,7 @@ class TestToolHelpers:
         assert "city" in captured["prompt"]
         assert "Tokyo" in captured["prompt"]
         assert '"prior_secret":"rain"' in captured["prompt"]
-        assert "Today is Friday, 2026-11-06." in captured["prompt"]
+        assert "It is Friday, 2026-11-06, 12:00 UTC." in captured["prompt"]
 
     @pytest.mark.parametrize(
         ("responses", "expected"),
@@ -179,7 +181,7 @@ class TestToolHelpers:
                 {"name": "get_weather", "parameters": {"type": "object"}},
                 {"function": {"name": "get_weather", "arguments": '{"city":"Tokyo"}'}},
                 [],
-                today="Friday, 2026-11-06",
+                now="Friday, 2026-11-06, 12:00 UTC",
             )
 
         assert simulated.rerolls == 1
@@ -562,6 +564,14 @@ class TestOpeningsTheToolsCanServe:
 
         assert "ask about those records rather than describing them" in probe.get_user_system_prompt()
 
+    def test_the_user_gives_what_the_assistant_asks_for_and_it_looks_real(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompt = " ".join(probe.get_user_system_prompt().split())
+
+        assert "When the assistant asks for something you would have or could look up" in prompt
+        assert "or a photo or file (as a link), give it, and make it look real" in prompt
+        assert 'never example.com, "sample" or a run like 123456' in prompt
+
 
 class TestAssistantJudge:
     """The per-turn judge sees the tools the assistant had and judges only the reply in front of it."""
@@ -580,6 +590,12 @@ class TestAssistantJudge:
         prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
 
         assert "says it cannot look up or do something one of the assistant's tools does" in prompt
+
+    def test_the_judge_expects_a_reply_to_ask_for_what_a_call_is_missing(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
+
+        assert "tools does, rather than asking the user for what the call is missing, or calls results" in prompt
 
     def test_an_earlier_replys_error_counts_against_that_reply(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools)
@@ -605,13 +621,43 @@ class TestUserSeesToolUse:
 
 
 class TestToday:
-    """The simulated user, the assistant and the API response simulator share one date; the assistant also sees the user's place."""
+    """The simulated user, the assistant and the API response simulator share one date, which the simulator's clock
+    reads at noon UTC at the user's first message and later with each one after; the assistant also sees the user's
+    place."""
+
+    @pytest.mark.parametrize(
+        ("user_messages", "clock"), [(0, "12:00"), (1, "12:00"), (2, "12:02"), (4, "12:06"), (100, "12:59")]
+    )
+    def test_the_clock_moves_two_minutes_with_each_user_message_and_stays_on_the_date(self, user_messages, clock):
+        assert _format_now(date(2026, 11, 6), user_messages) == f"Friday, 2026-11-06, {clock} UTC"
+
+    async def test_a_call_after_the_users_second_message_reads_the_moved_clock(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools, judge_responses=False)
+        state = ConversationState()
+        state.messages += [
+            {"role": "user", "content": "Weather?"},
+            {"role": "assistant", "content": "Where are you?"},
+            {"role": "user", "content": "Tokyo."},
+        ]
+        prompts = []
+
+        async def fake_call_llm(models, alias, messages, **kwargs):
+            prompts.append(messages[0]["content"])
+            return {"content": '{"temp": 22}'}
+
+        tool_call = {"id": "c", "function": {"name": "get_weather", "arguments": '{"location": "Tokyo"}'}}
+        with patch("usersim.engine.probes.tool_calling.probe.acall_llm", side_effect=fake_call_llm):
+            await probe.execute_tool_call(
+                "get_weather", {"location": "Tokyo"}, tool_call, state, {}, turn_idx=1, call_idx=0
+            )
+
+        assert "It is Friday, 2026-11-06, 12:02 UTC." in prompts[0]
 
     async def test_the_user_and_the_tool_simulator_share_the_runs_date(self, sample_tools):
         result, _assistant, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
 
         assert "Today is Friday, 2026-11-06." in user_inputs[0][0]["content"]
-        assert "Today is Friday, 2026-11-06." in api_inputs[0][0]["content"]
+        assert "It is Friday, 2026-11-06, 12:00 UTC." in api_inputs[0][0]["content"]
         assert json.loads(result["conversation_metadata"])["today"] == "2026-11-06"
 
     async def test_the_assistant_sees_the_date_and_the_users_place_on_the_first_message(self, sample_tools):
@@ -646,6 +692,61 @@ class TestToday:
     def test_a_date_that_does_not_exist_is_refused(self):
         with pytest.raises(ValidationError):
             ToolCallingProbe.Options(today="2027-02-30")
+
+
+def _spec(*parameters: str) -> dict:
+    return {"name": "t", "parameters": {"type": "object", "properties": {p: {"type": "string"} for p in parameters}}}
+
+
+class TestCallerRecords:
+    """A tool that takes the reference of one of the user's own things gets the service's records on them, their
+    name and place; a tool that takes a place gets the name alone, and any other tool gets none."""
+
+    @pytest.mark.parametrize(
+        "parameter",
+        [
+            "tracking_number",
+            "trackingNumber",
+            "order_id",
+            "orderNumber",
+            "booking_reference",
+            "reservationId",
+            "confirmation_code",
+            "pnr",
+        ],
+    )
+    def test_a_tool_naming_the_users_own_thing_gets_their_name_and_place(self, sample_tools, parameter):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert probe._caller_records(_spec(parameter)) == "A User, who lives in Austin, Texas, USA"
+
+    @pytest.mark.parametrize(
+        "parameter",
+        ["username", "user_name", "ig", "ip", "query", "order_direction", "sort_order", "reservation_time", "booking"],
+    )
+    def test_a_profile_search_or_lookup_gets_no_records(self, sample_tools, parameter):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert probe._caller_records(_spec(parameter)) == ""
+
+    @pytest.mark.parametrize("parameter", ["location", "city", "postalCode", "lat", "ship_to_country"])
+    def test_a_tool_that_also_takes_a_place_gets_the_name_alone(self, sample_tools, parameter):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+
+        assert probe._caller_records(_spec("tracking_number", parameter)) == "A User"
+
+    def test_a_persona_naming_no_one_and_no_place_gives_no_records(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        probe._persona = {"age": 35}
+
+        assert probe._caller_records(_spec("tracking_number")) == ""
+
+    async def test_the_simulator_reads_no_records_for_a_lookup(self, sample_tools):
+        _result, _assistant, _user, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
+        prompt = " ".join(api_inputs[0][0]["content"].split())
+
+        assert "records on the person" not in prompt
+        assert "A User" not in prompt
 
 
 class TestCredentials:
