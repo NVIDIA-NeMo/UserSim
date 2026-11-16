@@ -562,6 +562,14 @@ class TestOpeningsTheToolsCanServe:
 
         assert "ask about those records rather than describing them" in probe.get_user_system_prompt()
 
+    def test_the_user_gives_what_the_assistant_asks_for_and_it_looks_real(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompt = " ".join(probe.get_user_system_prompt().split())
+
+        assert "When the assistant asks for something you would have or could look up" in prompt
+        assert "or a photo or file (as a link), give it, and make it look real" in prompt
+        assert 'never example.com, "sample" or a run like 123456' in prompt
+
 
 class TestAssistantJudge:
     """The per-turn judge sees the tools the assistant had and judges only the reply in front of it."""
@@ -580,6 +588,12 @@ class TestAssistantJudge:
         prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
 
         assert "says it cannot look up or do something one of the assistant's tools does" in prompt
+
+    def test_the_judge_expects_a_reply_to_ask_for_what_a_call_is_missing(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
+
+        assert "tools does, rather than asking the user for what the call is missing, or calls results" in prompt
 
     def test_an_earlier_replys_error_counts_against_that_reply(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools)

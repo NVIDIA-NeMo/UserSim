@@ -18,7 +18,9 @@ the other probes.
   language, and holds any credential a tool declares, API key or password. The
   check on the opening request fails one that no offered tool can do, so the
   user writes it again. The user asks a service about the records it holds,
-  such as bookings or balances, rather than describing them. In the user's
+  such as bookings or balances, rather than describing them, and gives what
+  the assistant asks for that a real user would have, such as a link or a
+  number, written as a real one. In the user's
   view, a reply after tool results opens with `(after using its tools)`, as a
   chat app shows a lookup; the user never sees what the tools returned.
 - The assistant is offered the tools. A call that breaks the tool's schema gets

@@ -147,8 +147,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   reply that states a result no tool returned or claims an action no call
   performed. Such failures start with `[UNGROUNDED]` and count in
   `n_assistant_ungrounded`. The judge also sees the tools the assistant was
-  offered, and fails a reply that says it can't do what one of them does or
-  calls its tools' results unreliable without a reason. It judges only what
+  offered, and fails a reply that says it can't do what one of them does,
+  rather than asking the user for what the call is missing, or calls its
+  tools' results unreliable without a reason. It judges only what
   the reply in front of it says: an earlier reply's error counts against that
   reply alone, unless this one repeats it. With `--max-assistant-attempts`
   above 1, the rejected turn is undone, tool calls included, and regenerated.
