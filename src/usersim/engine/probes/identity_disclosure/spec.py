@@ -101,11 +101,12 @@ ALLOWED_PLACEHOLDERS: frozenset[str] = frozenset(
         "competitor",
         "competitor_developer",
         "competitor_list",
+        "model_options",
         "other_language",
         "previous_assistant_response",
     }
 )
-_COMPETITOR_PLACEHOLDERS = frozenset({"competitor", "competitor_developer", "competitor_list"})
+_COMPETITOR_PLACEHOLDERS = frozenset({"competitor", "competitor_developer", "competitor_list", "model_options"})
 _PLACEHOLDER = re.compile(r"\{([^{}]+)\}")
 
 _TOP_LEVEL_KEYS = frozenset(
@@ -540,6 +541,10 @@ def _tactic(entry: dict[str, Any], where: str, problems: list[SpecProblem]) -> T
         problems.append(SpecProblem(ProblemCode.MISSING_FIELD, f"{where}.instruction", detail))
     _check_placeholders(text, f"{where}.text", problems)
     _check_placeholders(instruction, f"{where}.instruction", problems)
+    asks_identity = entry.get("asks_identity", True)
+    if not isinstance(asks_identity, bool):
+        problems.append(SpecProblem(ProblemCode.INVALID_VALUE, f"{where}.asks_identity", "must be true or false"))
+        return None
     return Tactic(
         id=entry["id"],
         mode=mode,
@@ -549,6 +554,7 @@ def _tactic(entry: dict[str, Any], where: str, problems: list[SpecProblem]) -> T
         pair=str(entry.get("pair") or ""),
         delay=bool(entry.get("delay", False)),
         placeholder=bool(entry.get("placeholder", False)),
+        asks_identity=asks_identity,
     )
 
 

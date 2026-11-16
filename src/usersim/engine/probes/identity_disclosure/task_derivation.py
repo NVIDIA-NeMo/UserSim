@@ -22,15 +22,20 @@ from typing import Mapping
 from usersim.engine.probes.identity_disclosure.spec import (
     ExpectedIdentity,
     IdentitySpec,
+    Reframing,
     Strategy,
     Tactic,
     TacticMode,
 )
 
+#: The answer options of a multiple-choice opening: the true model among competitors.
+MODEL_OPTIONS = "model_options"
+#: How many answer options ``{model_options}`` offers, the true model included.
+MODEL_OPTION_COUNT = 4
 #: Placeholders that need the expected identity of the model under test.
-IDENTITY_PLACEHOLDERS = frozenset({"true_developer", "true_model"})
+IDENTITY_PLACEHOLDERS = frozenset({"true_developer", "true_model", MODEL_OPTIONS})
 #: Placeholders that need a competitor.
-COMPETITOR_PLACEHOLDERS = frozenset({"competitor", "competitor_developer", "competitor_list"})
+COMPETITOR_PLACEHOLDERS = frozenset({"competitor", "competitor_developer", "competitor_list", MODEL_OPTIONS})
 
 _PLACEHOLDER = re.compile(r"\{([a-z_]+)\}")
 
@@ -78,14 +83,14 @@ def placeholders_in(tactic: Tactic) -> set[str]:
     return {name for text in localized.renderings.values() for name in _PLACEHOLDER.findall(text)}
 
 
+def reframing_placeholders(reframing: Reframing) -> set[str]:
+    """Every placeholder any rendering of one reframing's instruction uses."""
+    return {name for text in reframing.instruction.renderings.values() for name in _PLACEHOLDER.findall(text)}
+
+
 def strategy_placeholders(strategy: Strategy) -> set[str]:
     """Every placeholder any rendering of the strategy's reframings uses."""
-    return {
-        name
-        for reframing in strategy.reframings
-        for text in reframing.instruction.renderings.values()
-        for name in _PLACEHOLDER.findall(text)
-    }
+    return {name for reframing in strategy.reframings for name in reframing_placeholders(reframing)}
 
 
 def _stream(persona_key: str, spec: IdentitySpec, seed: int | None, slot: str) -> random.Random:
@@ -168,6 +173,40 @@ def select_competitor(
     return _stream(persona_key, spec, seed, "competitor").choice(pool)
 
 
+def _true_model(spec: IdentitySpec, expected: ExpectedIdentity) -> str:
+    """The first expected model name, else the expected developer's display name."""
+    return expected.model_names[0] if expected.model_names else spec.developers[expected.developers[0]].display_name
+
+
+def select_model_options(
+    spec: IdentitySpec,
+    expected: ExpectedIdentity | None,
+    *,
+    competitor: str | None,
+    pool: tuple[str, ...],
+    persona_key: str,
+    seed: int | None,
+) -> tuple[str, ...]:
+    """The answer options of a multiple-choice opening, in the order the user offers them.
+
+    The true model, the row's competitor and other products from the pool, up
+    to ``MODEL_OPTION_COUNT`` in all, shuffled on the row's own stream, so the
+    true model's position carries no hint and the same row always offers the
+    same options.
+    """
+    if expected is None or competitor is None:
+        return ()
+    stream = _stream(persona_key, spec, seed, "options")
+    others = [product for product in pool if product != competitor]
+    options = [
+        _true_model(spec, expected),
+        competitor,
+        *stream.sample(others, min(len(others), MODEL_OPTION_COUNT - 2)),
+    ]
+    stream.shuffle(options)
+    return tuple(options)
+
+
 def placeholder_values(
     spec: IdentitySpec,
     expected: ExpectedIdentity | None,
@@ -175,6 +214,7 @@ def placeholder_values(
     competitor: str | None,
     pool: tuple[str, ...],
     language: str,
+    model_options: tuple[str, ...] = (),
 ) -> dict[str, str]:
     """The values a row's text placeholders take."""
     true_developer = spec.developers[expected.developers[0]].display_name if expected else ""
@@ -184,10 +224,11 @@ def placeholder_values(
         competitor_developer = spec.developers[dev_id].display_name if dev_id else competitor
     return {
         "true_developer": true_developer,
-        "true_model": expected.model_names[0] if expected and expected.model_names else true_developer,
+        "true_model": _true_model(spec, expected) if expected else true_developer,
         "competitor": competitor or "",
         "competitor_developer": competitor_developer,
         "competitor_list": ", ".join(pool),
+        MODEL_OPTIONS: ", ".join(model_options),
         "other_language": "French" if language == "English" else "English",
         "previous_assistant_response": "",
     }

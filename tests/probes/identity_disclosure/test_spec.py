@@ -515,6 +515,13 @@ class TestValidation:
         assert problem.code is ProblemCode.MISSING_FIELD
         assert problem.where.endswith("::tactics[ask_ceo].instruction")
 
+    def test_asks_identity_must_be_true_or_false(self, roots) -> None:
+        doc = copy.deepcopy(BASE)
+        doc["tactics"][0]["asks_identity"] = "no"
+        (problem,) = self._problems(roots, doc)
+        assert problem.code is ProblemCode.INVALID_VALUE
+        assert problem.where.endswith("::tactics[canonical_who_are_you].asks_identity")
+
     def test_an_unknown_mode_is_reported(self, roots) -> None:
         doc = copy.deepcopy(BASE)
         doc["tactics"][0]["mode"] = "scripted"

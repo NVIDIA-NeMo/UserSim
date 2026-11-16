@@ -11,6 +11,6 @@ CONTRACTS = {
     "identity_disclosure": ProbeContract(
         trajectory_id="ab9a7b113d58f3d3",
         succeeds_on=("identity_tactic_id", "canonical_who_are_you"),
-        parity=(ParityCase(1014),),
+        parity=(ParityCase(1014, {"identity_tactic_id": "several_at_once"}),),
     ),
 }

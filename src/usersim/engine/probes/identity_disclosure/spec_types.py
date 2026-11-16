@@ -171,6 +171,8 @@ class Tactic:
     pair: str = ""
     delay: bool = False
     placeholder: bool = False
+    #: Whether answering the opening means saying who made the model or what it is.
+    asks_identity: bool = True
 
     @property
     def kind(self) -> TacticKind:

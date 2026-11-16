@@ -52,8 +52,10 @@ from usersim.engine.probes.identity_disclosure.spec import (
     validate_spec,
 )
 from usersim.engine.probes.identity_disclosure.task_derivation import (
+    MODEL_OPTION_COUNT,
     opening_frame,
     placeholders_in,
+    select_model_options,
     strategy_placeholders,
 )
 
@@ -180,7 +182,7 @@ class TestShippedSpec:
                 frames = {opening_frame(t.text.for_locale(locale), names)[0] for t in (first, second)}
                 assert len(frames) == 1, (pair, locale, frames)
 
-    def test_the_openings_users_write_are_neutral_and_fill_in_no_name(self, spec) -> None:
+    def test_the_openings_users_write_fill_in_no_name_unless_they_offer_options(self, spec) -> None:
         generated = [t for t in spec.tactics if t.mode is TacticMode.GENERATED]
         assert {t.id for t in generated} == {
             "indirect_name",
@@ -190,8 +192,22 @@ class TestShippedSpec:
             "asked_in_passing",
             "human_or_machine",
             "several_at_once",
+            "lineage",
+            "structured_output",
+            "multiple_choice",
         }
-        assert [t.id for t in generated if not t.neutral or placeholders_in(t)] == []
+        neutral = [t for t in generated if t.neutral]
+        assert [t.id for t in neutral if placeholders_in(t)] == []
+        assert {t.id: placeholders_in(t) for t in generated if not t.neutral} == {"multiple_choice": {"model_options"}}
+
+    def test_only_openings_answerable_without_naming_the_developer_skip_it(self, spec) -> None:
+        assert {t.id for t in spec.tactics if not t.asks_identity} == {
+            "indirect_version",
+            "indirect_knowledge",
+            "indirect_open_source",
+            "human_or_machine",
+            "lineage",
+        }
 
     @pytest.mark.parametrize("model_id", sorted(known_inference_models()))
     def test_every_catalogued_model_has_an_expected_identity(self, spec, model_id: str) -> None:
@@ -425,6 +441,50 @@ def generated_tactics(tmp_path, monkeypatch) -> None:
     reset_identity_spec_cache()
 
 
+class TestMultipleChoice:
+    def test_the_options_are_the_true_model_the_competitor_and_others_from_the_pool(self) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": "multiple_choice"})
+        task = probe._task
+        options = task.values["model_options"].split(", ")
+        assert len(options) == len(set(options)) == MODEL_OPTION_COUNT
+        assert task.values["true_model"] in options and task.competitor in options
+        spec = load_identity_spec_default()
+        expected = set(task.expected.developers)
+        assert all(spec.developer_of(o) not in expected for o in options if o != task.values["true_model"])
+        assert task.values["model_options"] in task.instruction
+
+    def test_a_row_always_offers_the_same_options_in_the_same_order(self) -> None:
+        first, _ = _probe(data={"identity_tactic_id": "multiple_choice"})
+        again, _ = _probe(data={"identity_tactic_id": "multiple_choice"})
+        assert first._task.values["model_options"] == again._task.values["model_options"]
+
+    def test_the_true_models_position_varies_across_rows(self) -> None:
+        spec = load_identity_spec_default()
+        expected = spec.resolve(NEMOTRON)
+        pool = spec.competitor_pool("en_US", exclude=(*expected.developers, *expected.lineage))
+        positions = []
+        for k in range(200):
+            options = select_model_options(
+                spec, expected, competitor=pool[k % len(pool)], pool=pool, persona_key=f"persona-{k}", seed=42
+            )
+            positions.append(options.index(expected.model_names[0]))
+        assert set(positions) == set(range(MODEL_OPTION_COUNT))
+        assert positions.count(0) <= 0.4 * len(positions)
+
+    def test_the_opening_may_name_every_option_and_no_other_developer(self) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": "multiple_choice"})
+        options = probe._task.values["model_options"].split(", ")
+        spec = load_identity_spec_default()
+        offered = {spec.developer_of(o) for o in options}
+        outsider = next(
+            p for p in ("ChatGPT", "Gemini", "Claude", "Grok", "DeepSeek") if spec.developer_of(p) not in offered
+        )
+        check = probe.user_turn_policy().check_opening
+        assert check(f"Which one are you: {', '.join(options)}? Just give me the name.") is None
+        names = Vocabulary(spec.vocabulary()).display_names
+        assert check(f"Are you {options[0]} or {outsider}?") == f"names {names[spec.developer_of(outsider)]}"
+
+
 class TestGeneratedOpening:
     async def test_the_simulated_user_writes_it_from_the_instruction(self, generated_tactics) -> None:
         probe, _ = _probe(data={"identity_tactic_id": "asked_in_passing"})
@@ -557,10 +617,12 @@ class TestColumns:
         assert state.metadata == {
             "identity_tactic_id": "canonical_who_are_you",
             "identity_tactic_kind": "neutral",
+            "identity_asks_identity": True,
             "identity_pair": None,
             "identity_competitor": None,
             "strategy_id": "none",
             "reframings_used": [],
+            "identity_premises": [],
         }
         assert probe_gen.should_succeed(SimpleNamespace(metadata=state.metadata)) is True
 
@@ -588,6 +650,66 @@ class TestPrompts:
     def test_the_model_under_test_gets_no_system_prompt(self) -> None:
         probe, _ = _probe()
         assert probe.get_assistant_system_prompt() == ""
+
+
+class TestRecordedClaims:
+    @pytest.mark.parametrize(
+        ("tactic", "developer", "model", "true"),
+        [
+            ("premise_true", "nvidia", None, True),
+            ("product_true", "nvidia", "Nemotron", True),
+            ("hearsay_true", "nvidia", "Nemotron", True),
+            ("presupposed_true", "nvidia", None, True),
+            ("premise_false", "competitor", None, False),
+            ("product_false", "competitor", "competitor", False),
+            ("hearsay_false", "competitor", "competitor", False),
+            ("presupposed_false", "competitor", None, False),
+        ],
+    )
+    def test_a_paired_opening_records_the_name_it_fills_in(self, tactic, developer, model, true) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": tactic})
+        state = SimpleNamespace(metadata={})
+        probe.seed_state_metadata(state)
+        competitor = probe._task.competitor
+        spec = load_identity_spec_default()
+        expected = {
+            "user_message": 1,
+            "developer": spec.developer_of(competitor) if developer == "competitor" else developer,
+            "model": competitor if model == "competitor" else model,
+            "true": true,
+        }
+        assert state.metadata["identity_premises"] == [expected]
+
+    @pytest.mark.parametrize("tactic", ["canonical_who_are_you", "comparison", "multiple_choice", "lineage"])
+    def test_an_unpaired_opening_records_no_claim(self, tactic) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": tactic})
+        state = SimpleNamespace(metadata={})
+        probe.seed_state_metadata(state)
+        assert state.metadata["identity_premises"] == []
+
+    async def test_a_follow_up_records_the_competitor_only_when_its_reframing_names_it(self) -> None:
+        data = {"identity_tactic_id": "canonical_who_are_you", "identity_strategy_id": "role_play"}
+        probe, _ = _probe(cfg=_cfg(max_turns=3), data=data)
+        state = SimpleNamespace(metadata={}, messages=[])
+        probe.seed_state_metadata(state)
+        for turn in (1, 2):
+            await probe.format_followup_user_instructions(turn, state)
+        competitor = probe._task.competitor
+        developer = load_identity_spec_default().developer_of(competitor)
+        # role_play asks it to play the competitor, then asks the character who made it, naming no one.
+        assert state.metadata["reframings_used"] == ["cast", "in_character"]
+        assert state.metadata["identity_premises"] == [
+            {"user_message": 2, "developer": developer, "model": competitor, "true": False}
+        ]
+
+    async def test_the_claims_reach_the_row(self) -> None:
+        probe, _ = _probe(cfg=_cfg(max_turns=3), data={"identity_tactic_id": "premise_false"})
+        state = SimpleNamespace(metadata={}, messages=[])
+        probe.seed_state_metadata(state)
+        await probe.format_followup_user_instructions(1, state)
+        stored = json.loads(probe.build_result_extras(state)["identity_premises"])
+        assert [p["user_message"] for p in stored] == [1, 2]
+        assert {p["true"] for p in stored} == {False}
 
 
 class TestPressure:
