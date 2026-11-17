@@ -130,6 +130,26 @@ def _build_tool_context(tool_subset: list) -> str:
     return "\n".join(lines) if lines else "No tools available."
 
 
+def _other_endpoints(tool_subset: list, tool_name: str) -> str:
+    """The offered tools other than ``tool_name``, one per line as ``- name(parameter: type, ...)``, or ``None.``.
+
+    The tool simulator and its judge read them as the service's other endpoints, so an ID or other value a
+    response returns has the type and form the endpoints that take it accept.
+    """
+    lines = []
+    for tool_data in tool_subset:
+        spec = _function_spec(tool_data)
+        name = spec.get("name")
+        if not name or name == tool_name:
+            continue
+        properties = (spec.get("parameters") or {}).get("properties") or {}
+        parameters = ", ".join(
+            f"{parameter}: {(schema or {}).get('type', 'any')}" for parameter, schema in properties.items()
+        )
+        lines.append(f"- {name}({parameters})")
+    return "\n".join(lines) if lines else "None."
+
+
 def _row_identity(data: dict) -> str:
     """The row's identity, which seeds its tool draw and the credentials its user holds.
 
@@ -366,12 +386,14 @@ async def _judge_tool_response(
     credential_parameters: tuple[str, ...],
     caller: str = "",
     judge_alias: str = MODEL_JUDGE,
+    other_endpoints: str = "None.",
 ) -> tuple[bool, str] | None:
     """The ``judge_alias`` model's verdict on one simulated response, ``(passed, explanation)``; None when it can't be read."""
     prompt = tool_simulator_judge_prompt().format(
         now=now,
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=tool_args,
+        other_endpoints=other_endpoints,
         credentials=(
             "\n"
             + tool_simulator_judge_credentials().format(
@@ -401,10 +423,13 @@ async def _simulate_tool_response(
     judge: bool = False,
     max_attempts: int = 2,
     judge_alias: str = MODEL_JUDGE,
+    other_endpoints: str = "None.",
 ) -> SimulatedResponse:
     """Use the strong frontier model to simulate a realistic API response.
 
-    The simulator sees what the service would: the call, the calls made
+    The simulator sees what the service would: the call, the service's other
+    endpoints (``other_endpoints``, from ``_other_endpoints``), whose
+    parameters the IDs and values it returns fit, the calls made
     earlier in the conversation with their responses (``_earlier_calls``),
     which it keeps consistent with, ``now``, the service's clock, which moves
     as the conversation goes on, after which no event has a result yet though
@@ -433,6 +458,7 @@ async def _simulate_tool_response(
     prompt = tool_simulator_prompt().format(
         tool_spec=json.dumps(tool_spec, indent=2, default=str),
         tool_args=tool_args,
+        other_endpoints=other_endpoints,
         earlier_calls=earlier_calls,
         now=now,
     )
@@ -471,6 +497,7 @@ async def _simulate_tool_response(
                 credential_parameters=credential_parameters,
                 caller=caller,
                 judge_alias=judge_alias,
+                other_endpoints=other_endpoints,
             )
         except Exception as e:  # a judge outage leaves the response standing, flagged
             logger.warning("  |-- %s raised on a simulated response: %s: %s", judge_alias, type(e).__name__, e)
@@ -527,7 +554,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.11"
+    prompt_version = "v1.12"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe
@@ -813,6 +840,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
                 judge=self.options.judge_responses,
                 max_attempts=self.options.max_response_attempts,
                 judge_alias=judge_alias,
+                other_endpoints=_other_endpoints(self.tool_subset, name),
             )
             simulated_response = simulated.content
             self._record_simulation(

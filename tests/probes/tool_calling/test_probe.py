@@ -28,6 +28,7 @@ from usersim.engine.probes.tool_calling.probe import (
     _find_tool_spec,
     _format_now,
     _format_tools_for_api,
+    _other_endpoints,
     _simulate_tool_response,
 )
 from usersim.engine.probes.tool_calling.prompts import (
@@ -62,7 +63,7 @@ class TestPromptTemplates:
         assert ASSISTANT_SYSTEM_PROMPT == ""
 
     def test_tool_simulator_prompt_has_placeholders(self):
-        for p in ["{tool_spec}", "{tool_args}", "{earlier_calls}"]:
+        for p in ["{tool_spec}", "{tool_args}", "{other_endpoints}", "{earlier_calls}"]:
             assert p in TOOL_SIMULATOR_PROMPT
 
     def test_user_judge_prompt_has_placeholders(self):
@@ -747,6 +748,51 @@ class TestCallerRecords:
 
         assert "records on the person" not in prompt
         assert "A User" not in prompt
+
+
+def _tool(tool_name: str, **parameter_types: str) -> dict:
+    properties = {parameter: {"type": kind} for parameter, kind in parameter_types.items()}
+    return {"tool": {"type": "function", "function": {"name": tool_name, "parameters": {"properties": properties}}}}
+
+
+class TestOtherEndpoints:
+    """The simulated service and its judge see the service's other endpoints, so an ID a response returns has the
+    type the endpoints that take it accept."""
+
+    def test_each_other_offered_tool_is_listed_with_its_parameter_types(self):
+        tools = [_tool("add_pet", name="string"), _tool("get_pet", pet_id="integer"), _tool("list_pets")]
+
+        assert _other_endpoints(tools, "add_pet") == "- get_pet(pet_id: integer)\n- list_pets()"
+
+    def test_a_tool_offered_alone_has_no_other_endpoints(self):
+        assert _other_endpoints([_tool("add_pet", name="string")], "add_pet") == "None."
+
+    async def test_the_simulator_and_its_judge_read_the_probes_other_tools(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompts = []
+
+        async def fake_call_llm(models, alias, messages, **kwargs):
+            prompts.append(messages[0]["content"])
+            return {"content": '{"temp": 22}'}
+
+        async def fake_judge(models, alias, prompt):
+            prompts.append(prompt)
+            return "Fine.", "success", True, True
+
+        tool_call = {"id": "c", "function": {"name": "get_weather", "arguments": '{"location": "Tokyo"}'}}
+        with (
+            patch("usersim.engine.probes.tool_calling.probe.acall_llm", side_effect=fake_call_llm),
+            patch("usersim.engine.probes.tool_calling.probe.run_inline_judge_ex", side_effect=fake_judge),
+        ):
+            await probe.execute_tool_call(
+                "get_weather", {"location": "Tokyo"}, tool_call, ConversationState(), {}, turn_idx=0, call_idx=0
+            )
+
+        expected = _other_endpoints(probe.tool_subset, "get_weather")
+        assert "- search_recipes(ingredient: string, cuisine: string)" in expected
+        assert len(prompts) == 2
+        assert all(f"<OTHER_ENDPOINTS>\n{expected}\n</OTHER_ENDPOINTS>" in prompt for prompt in prompts)
+        assert all("- get_weather(" not in prompt for prompt in prompts)
 
 
 class TestCredentials:

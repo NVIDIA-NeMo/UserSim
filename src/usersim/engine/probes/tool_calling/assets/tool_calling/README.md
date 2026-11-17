@@ -117,10 +117,13 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
 - There is **no real execution**: the `api_response_model` alias (see
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
   tool's response from the schema, so a run needs no live service. It sees
-  what the service would: the call, the calls made earlier in the conversation
-  with their responses and the time each was made, which it keeps consistent
-  with, and its clock, noon UTC on the conversation's date at the user's first
-  message and two minutes later with each one after, up to 12:59, but none of
+  what the service would: the call, the service's other endpoints (the other
+  offered tools' names and parameter types), whose parameters an ID or other
+  value it returns fits, such as an integer ID where they take an integer, the
+  calls made earlier in the conversation with their responses and the time
+  each was made, which it keeps consistent with, and its clock, noon UTC on
+  the conversation's date at the user's first message and two minutes later
+  with each one after, up to 12:59, but none of
   the conversation's messages. An event after the clock has no result yet,
   while what is planned for later, such as a schedule, a listing or a
   forecast, already exists; an identical call returns the same data, except
@@ -147,8 +150,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   assistant sees it: that it answers the call, agrees with the earlier calls'
   responses and the clock, gives no result for an event later than the clock
   while letting a schedule or forecast for later stand,
-  computes values correctly, and holds no placeholder
-  such as an `example.com` link. It checks real-world facts only where the
+  computes values correctly, returns IDs and values of the type and form the
+  service's other endpoints take, and holds no placeholder such as an
+  `example.com` link. It checks real-world facts only where the
   arguments or the tool's description fix them. A rejected response is
   rewritten with the judge's reason, within `max_response_attempts` (the
   probe's `judge_responses` setting turns this off). The judge is the models file's `api_response_judge_model` (the

@@ -117,6 +117,13 @@ Tool specification:
 Tool call arguments:
 {tool_args}
 
+The service's other endpoints:
+<OTHER_ENDPOINTS>
+{other_endpoints}
+</OTHER_ENDPOINTS>
+An ID or other value the response returns has the type and form these endpoints take for it, such as an
+integer ID where they take an integer.
+
 The calls this caller made earlier, each with the time it was made and what the service returned, are
 the service's own records:
 <EARLIER_CALLS>
@@ -177,6 +184,11 @@ Tool specification:
 Tool call arguments:
 {tool_args}
 {credentials}{caller}
+The service's other endpoints:
+<OTHER_ENDPOINTS>
+{other_endpoints}
+</OTHER_ENDPOINTS>
+
 The calls this caller made earlier, each with the time it was made and what the service returned:
 <EARLIER_CALLS>
 {earlier_calls}
@@ -195,6 +207,7 @@ Criteria for success:
   kind that moves with it, such as a live score, a job's progress, stock or a price. Anything planned for
   after the current time, such as a schedule, a listing, a forecast or a booking, is fine.
 - Every value the tool computes (a total, a conversion, a date difference, a formula) is correct for the arguments.
+- An ID or other value it returns that the service's other endpoints take has the type and form they take for it.
 - It reads like real API output: no placeholder values (an example.com or other example.* host is one)
   and no commentary around the JSON.
 - Real-world facts are checked only where the arguments or the tool's description fix them, such as a
@@ -205,6 +218,7 @@ Criteria for failure:
 - It answers a different request than the arguments make, or contradicts the tool's description.
 - It contradicts itself, an earlier response or the current time, or gives a result, score or reading for an event after the current time.
 - A computed value is wrong.
+- It returns an ID or other value in a type or form the service's other endpoints don't take for it.
 - It holds placeholder values or commentary.
 - It is an error the call does not warrant.
 </RUBRIC>
