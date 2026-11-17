@@ -372,6 +372,8 @@ _DEFAULT_TOOL_RELEVANCE_FAILURE = (
     "- The request can be fully answered from general knowledge or opinion alone,\n"
     "  without needing any of the available tools.\n"
     "- The request asks for something none of the available tools can do.\n"
+    "- The request can't be acted on yet, because it waits on something that hasn't\n"
+    "  happened, or it needs a file or photo the user can't give as a link.\n"
 )
 
 # ── Public templates (YAML overrides compiled-in defaults) ────────────────

@@ -16,7 +16,9 @@ the other probes.
   run. The toolset is the row's theme.
 - The simulated user writes requests the tools can serve, in the row's
   language, and holds any credential a tool declares, API key or password. The
-  check on the opening request fails one that no offered tool can do, so the
+  check on the opening request fails one that no offered tool can do, one that
+  can't be acted on yet because it waits on something that hasn't happened,
+  and one that needs a file or photo the user can't give as a link, so the
   user writes it again. The user asks a service about the records it holds,
   such as bookings or balances, rather than describing them, and gives what
   the assistant asks for that a real user would have, such as a link or a

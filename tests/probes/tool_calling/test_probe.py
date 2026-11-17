@@ -555,10 +555,21 @@ class TestOpeningsTheToolsCanServe:
         assert "and the available tools can do what it asks." in " ".join(rubric.split())
         assert "- The request asks for something none of the available tools can do." in rubric
 
+    def test_the_opening_gate_fails_a_request_that_waits_on_something_or_needs_a_file(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        rubric = " ".join(probe.format_gate_prompt("Remind me once my interview is set.", "N/A").split())
+
+        assert (
+            "- The request can't be acted on yet, because it waits on something that hasn't happened, or it needs a "
+            "file or photo the user can't give as a link." in rubric
+        )
+
     def test_a_follow_up_may_ask_for_what_no_offered_tool_does(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        rubric = probe.format_gate_prompt("And a recipe?", "User: Hi")
 
-        assert "none of the available tools can do" not in probe.format_gate_prompt("And a recipe?", "User: Hi")
+        assert "none of the available tools can do" not in rubric
+        assert "can't be acted on yet" not in rubric
 
     def test_the_user_asks_about_records_a_service_holds(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools)
