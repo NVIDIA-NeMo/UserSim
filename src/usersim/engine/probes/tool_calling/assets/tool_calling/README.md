@@ -129,7 +129,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   result yet, while what is planned for later, such as a schedule, a listing
   or a forecast, already exists; an identical call returns the same data, except
   that what moves with time, such as a live score, a job's progress, stock or
-  a price, may have moved since it was made. A tool with a parameter naming one
+  a price, may have moved since it was made, and a tool that returns random or
+  newly generated items by design, such as a random image or a generated
+  password, returns new ones each time. A tool with a parameter naming one
   of the user's own things (a tracking, order, booking or reservation number,
   an invoice or a receipt) also gets the service's records on the person,
   their name and where they live, which that thing carries, while an argument

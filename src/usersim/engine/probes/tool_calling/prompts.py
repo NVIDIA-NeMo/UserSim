@@ -133,7 +133,8 @@ the service's own records:
 </EARLIER_CALLS>
 An identical call returns the same data unless a call in between changed it, and anything an
 earlier response returned keeps its values; only what moves with time, such as a live score, a job's
-progress, stock or a price, may have moved since then.
+progress, stock or a price, may have moved since then. A tool that returns random or newly generated
+items by design, such as a random image or a generated password, returns new ones each time.
 
 Write it as the real service would:
 - Links use the service's own domain or another realistic one, never example.com, another
@@ -208,7 +209,8 @@ Criteria for success:
 - The response is what this tool returns for these arguments: it concerns the entity, place, dates, units and ranges the arguments ask for, and its fields fit the tool's description.
 - It is consistent with itself, with the earlier calls' responses and with the current time: an identical
   call returns the same data unless a call in between changed it, or time has passed and the data is the
-  kind that moves with it, such as a live score, a job's progress, stock or a price. Anything planned for
+  kind that moves with it, such as a live score, a job's progress, stock or a price. A tool that returns
+  random or newly generated items by design returns new ones each time. Anything planned for
   after the current time, such as a schedule, a listing, a forecast or a booking, is fine.
 - Every value the tool computes (a total, a conversion, a date difference, a formula) is correct for the arguments.
 - An ID or other value it returns that the service's other endpoints take has the type and form they take for it.

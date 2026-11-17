@@ -791,6 +791,13 @@ def _tool(tool_name: str, **parameter_types: str) -> dict:
     return {"tool": {"type": "function", "function": {"name": tool_name, "parameters": {"properties": properties}}}}
 
 
+async def test_a_tool_that_returns_random_or_generated_items_returns_new_ones_each_time():
+    _result, api_prompts, judge_prompts = await _simulate_with_judge()
+
+    assert "A tool that returns random or newly generated items by design" in " ".join(api_prompts[0].split())
+    assert "random or newly generated items by design returns new ones each time" in " ".join(judge_prompts[0].split())
+
+
 class TestOtherEndpoints:
     """The simulated service and its judge see the service's other endpoints, so an ID a response returns has the
     type the endpoints that take it accept."""
