@@ -598,6 +598,15 @@ class TestAssistantJudge:
 
         assert "tools does, rather than asking the user for what the call is missing, or calls results" in prompt
 
+    def test_declining_for_a_reason_or_naming_a_real_gap_in_the_tools_is_not_that_failure(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
+
+        assert (
+            "the conversation shows. Declining for a legal, safety or privacy reason, or saying accurately that no "
+            "offered tool does what is asked, is not this failure." in prompt
+        )
+
     def test_an_earlier_replys_error_counts_against_that_reply(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools)
         prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())

@@ -296,7 +296,7 @@ assistant_judge_prompt: |-
   - The response does not address the user's question or request.
   - The response is unintelligible, empty, or a non-sequitur that ignores the conversation context.
   - The response states a figure, name, date or other result that no tool response in the conversation contains, contradicts a tool response, or says it performed an action, such as a booking, a change or a lookup, that no tool call in the conversation performed.
-  - The response says it cannot look up or do something one of the assistant's tools does, rather than asking the user for what the call is missing, or calls results its tool calls returned unreliable without a reason the conversation shows.
+  - The response says it cannot look up or do something one of the assistant's tools does, rather than asking the user for what the call is missing, or calls results its tool calls returned unreliable without a reason the conversation shows. Declining for a legal, safety or privacy reason, or saying accurately that no offered tool does what is asked, is not this failure.
 
   </RUBRIC>
 

@@ -171,7 +171,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   `n_assistant_ungrounded`. The judge also sees the tools the assistant was
   offered, and fails a reply that says it can't do what one of them does,
   rather than asking the user for what the call is missing, or calls its
-  tools' results unreliable without a reason. It judges only what
+  tools' results unreliable without a reason; declining for a legal, safety
+  or privacy reason, or saying accurately that no offered tool does what is
+  asked, is not that failure. It judges only what
   the reply in front of it says: an earlier reply's error counts against that
   reply alone, unless this one repeats it. With `--max-assistant-attempts`
   above 1, the rejected turn is undone, tool calls included, and regenerated.
