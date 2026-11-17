@@ -798,6 +798,17 @@ async def test_a_tool_that_returns_random_or_generated_items_returns_new_ones_ea
     assert "random or newly generated items by design returns new ones each time" in " ".join(judge_prompts[0].split())
 
 
+async def test_the_response_judge_checks_computed_values_but_not_fields_describing_the_response():
+    _result, _api_prompts, judge_prompts = await _simulate_with_judge()
+    rubric = " ".join(judge_prompts[0].split())
+
+    assert "Every value the tool computes (a total, a conversion, a date difference, a formula) is correct" in rubric
+    assert (
+        "A field that only describes the response itself, such as a count of the items it lists or an offset derived "
+        "from its other fields, is not grounds for failure." in rubric
+    )
+
+
 class TestOtherEndpoints:
     """The simulated service and its judge see the service's other endpoints, so an ID a response returns has the
     type the endpoints that take it accept."""

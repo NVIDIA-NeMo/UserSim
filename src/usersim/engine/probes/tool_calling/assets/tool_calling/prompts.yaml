@@ -170,6 +170,8 @@ tool_simulator_judge_prompt: |-
     random or newly generated items by design returns new ones each time. Anything planned for
     after the current time, such as a schedule, a listing, a forecast or a booking, is fine.
   - Every value the tool computes (a total, a conversion, a date difference, a formula) is correct for the arguments.
+  - A field that only describes the response itself, such as a count of the items it lists or an offset
+    derived from its other fields, is not grounds for failure.
   - An ID or other value it returns that the service's other endpoints take has the type and form they take for it.
   - It reads like real API output: no placeholder values (an example.com or other example.* host is one)
     and no commentary around the JSON.

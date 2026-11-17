@@ -153,10 +153,12 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   assistant sees it: that it answers the call, agrees with the earlier calls'
   responses and the clock, gives no result for an event later than the clock
   while letting a schedule or forecast for later stand,
-  computes values correctly, returns IDs and values of the type and form the
-  service's other endpoints take, and holds no placeholder such as an
-  `example.com` link. It checks real-world facts only where the
-  arguments or the tool's description fix them. A rejected response is
+  computes values correctly (a field that only describes the response, such
+  as a count of the items it lists, is not grounds for rejecting it), returns
+  IDs and values of the type and form the service's other endpoints take, and
+  holds no placeholder such as an `example.com` link. It checks real-world
+  facts only where the arguments or the tool's description fix them. A
+  rejected response is
   rewritten with the judge's reason, within `max_response_attempts` (the
   probe's `judge_responses` setting turns this off). The judge is the models file's `api_response_judge_model` (the
   probe's `response_judge_model_alias` setting), so these checks can run on
