@@ -110,12 +110,21 @@ and the arguments provided.
 It is {now}. An event later than that has not happened, so it has no result, score or reading yet;
 what is planned for later, such as a schedule, showtime, listing, forecast, booking or price, already
 exists.
+Opening hours, market sessions and other times tied to a place follow the local time there, converted
+from that UTC time.
 
 Tool specification:
 {tool_spec}
 
 Tool call arguments:
 {tool_args}
+
+The service's other endpoints:
+<OTHER_ENDPOINTS>
+{other_endpoints}
+</OTHER_ENDPOINTS>
+An ID or other value the response returns has the type and form these endpoints take for it, such as an
+integer ID where they take an integer.
 
 The calls this caller made earlier, each with the time it was made and what the service returned, are
 the service's own records:
@@ -124,7 +133,8 @@ the service's own records:
 </EARLIER_CALLS>
 An identical call returns the same data unless a call in between changed it, and anything an
 earlier response returned keeps its values; only what moves with time, such as a live score, a job's
-progress, stock or a price, may have moved since then.
+progress, stock or a price, may have moved since then. A tool that returns random or newly generated
+items by design, such as a random image or a generated password, returns new ones each time.
 
 Write it as the real service would:
 - Links use the service's own domain or another realistic one, never example.com, another
@@ -170,6 +180,8 @@ _DEFAULT_TOOL_SIMULATOR_CREDENTIALS = (
 _DEFAULT_TOOL_SIMULATOR_JUDGE = """You are checking a simulated API response before an AI assistant sees it.
 
 It is {now}.
+Opening hours, market sessions and other times tied to a place follow the local time there, converted
+from that UTC time.
 
 Tool specification:
 {tool_spec}
@@ -177,6 +189,11 @@ Tool specification:
 Tool call arguments:
 {tool_args}
 {credentials}{caller}
+The service's other endpoints:
+<OTHER_ENDPOINTS>
+{other_endpoints}
+</OTHER_ENDPOINTS>
+
 The calls this caller made earlier, each with the time it was made and what the service returned:
 <EARLIER_CALLS>
 {earlier_calls}
@@ -192,9 +209,13 @@ Criteria for success:
 - The response is what this tool returns for these arguments: it concerns the entity, place, dates, units and ranges the arguments ask for, and its fields fit the tool's description.
 - It is consistent with itself, with the earlier calls' responses and with the current time: an identical
   call returns the same data unless a call in between changed it, or time has passed and the data is the
-  kind that moves with it, such as a live score, a job's progress, stock or a price. Anything planned for
+  kind that moves with it, such as a live score, a job's progress, stock or a price. A tool that returns
+  random or newly generated items by design returns new ones each time. Anything planned for
   after the current time, such as a schedule, a listing, a forecast or a booking, is fine.
 - Every value the tool computes (a total, a conversion, a date difference, a formula) is correct for the arguments.
+- A field that only describes the response itself, such as a count of the items it lists or an offset
+  derived from its other fields, is not grounds for failure.
+- An ID or other value it returns that the service's other endpoints take has the type and form they take for it.
 - It reads like real API output: no placeholder values (an example.com or other example.* host is one)
   and no commentary around the JSON.
 - Real-world facts are checked only where the arguments or the tool's description fix them, such as a
@@ -205,6 +226,7 @@ Criteria for failure:
 - It answers a different request than the arguments make, or contradicts the tool's description.
 - It contradicts itself, an earlier response or the current time, or gives a result, score or reading for an event after the current time.
 - A computed value is wrong.
+- It returns an ID or other value in a type or form the service's other endpoints don't take for it.
 - It holds placeholder values or commentary.
 - It is an error the call does not warrant.
 </RUBRIC>
@@ -326,7 +348,7 @@ Criteria for failure:
 - The response does not address the user's question or request.
 - The response is unintelligible, empty, or a non-sequitur that ignores the conversation context.
 - The response states a figure, name, date or other result that no tool response in the conversation contains, contradicts a tool response, or says it performed an action, such as a booking, a change or a lookup, that no tool call in the conversation performed.
-- The response says it cannot look up or do something one of the assistant's tools does, rather than asking the user for what the call is missing, or calls results its tool calls returned unreliable without a reason the conversation shows.
+- The response says it cannot look up or do something one of the assistant's tools does, rather than asking the user for what the call is missing, or calls results its tool calls returned unreliable without a reason the conversation shows. Declining for a legal, safety or privacy reason, or saying accurately that no offered tool does what is asked, is not this failure.
 
 </RUBRIC>
 
@@ -350,6 +372,8 @@ _DEFAULT_TOOL_RELEVANCE_FAILURE = (
     "- The request can be fully answered from general knowledge or opinion alone,\n"
     "  without needing any of the available tools.\n"
     "- The request asks for something none of the available tools can do.\n"
+    "- The request can't be acted on yet, because it waits on something that hasn't\n"
+    "  happened, or it needs a file or photo the user can't give as a link.\n"
 )
 
 # ── Public templates (YAML overrides compiled-in defaults) ────────────────

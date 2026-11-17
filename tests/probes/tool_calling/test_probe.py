@@ -28,6 +28,7 @@ from usersim.engine.probes.tool_calling.probe import (
     _find_tool_spec,
     _format_now,
     _format_tools_for_api,
+    _other_endpoints,
     _simulate_tool_response,
 )
 from usersim.engine.probes.tool_calling.prompts import (
@@ -62,7 +63,7 @@ class TestPromptTemplates:
         assert ASSISTANT_SYSTEM_PROMPT == ""
 
     def test_tool_simulator_prompt_has_placeholders(self):
-        for p in ["{tool_spec}", "{tool_args}", "{earlier_calls}"]:
+        for p in ["{tool_spec}", "{tool_args}", "{other_endpoints}", "{earlier_calls}"]:
             assert p in TOOL_SIMULATOR_PROMPT
 
     def test_user_judge_prompt_has_placeholders(self):
@@ -554,10 +555,21 @@ class TestOpeningsTheToolsCanServe:
         assert "and the available tools can do what it asks." in " ".join(rubric.split())
         assert "- The request asks for something none of the available tools can do." in rubric
 
+    def test_the_opening_gate_fails_a_request_that_waits_on_something_or_needs_a_file(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        rubric = " ".join(probe.format_gate_prompt("Remind me once my interview is set.", "N/A").split())
+
+        assert (
+            "- The request can't be acted on yet, because it waits on something that hasn't happened, or it needs a "
+            "file or photo the user can't give as a link." in rubric
+        )
+
     def test_a_follow_up_may_ask_for_what_no_offered_tool_does(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        rubric = probe.format_gate_prompt("And a recipe?", "User: Hi")
 
-        assert "none of the available tools can do" not in probe.format_gate_prompt("And a recipe?", "User: Hi")
+        assert "none of the available tools can do" not in rubric
+        assert "can't be acted on yet" not in rubric
 
     def test_the_user_asks_about_records_a_service_holds(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools)
@@ -596,6 +608,15 @@ class TestAssistantJudge:
         prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
 
         assert "tools does, rather than asking the user for what the call is missing, or calls results" in prompt
+
+    def test_declining_for_a_reason_or_naming_a_real_gap_in_the_tools_is_not_that_failure(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompt = " ".join(probe.format_assistant_judge_prompt("R", "H").split())
+
+        assert (
+            "the conversation shows. Declining for a legal, safety or privacy reason, or saying accurately that no "
+            "offered tool does what is asked, is not this failure." in prompt
+        )
 
     def test_an_earlier_replys_error_counts_against_that_reply(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools)
@@ -652,6 +673,13 @@ class TestToday:
             )
 
         assert "It is Friday, 2026-11-06, 12:02 UTC." in prompts[0]
+
+    async def test_the_simulator_and_its_judge_read_times_tied_to_a_place_in_its_local_time(self):
+        _result, api_prompts, judge_prompts = await _simulate_with_judge()
+        local = "times tied to a place follow the local time there, converted from that UTC time."
+
+        assert local in " ".join(api_prompts[0].split())
+        assert local in " ".join(judge_prompts[0].split())
 
     async def test_the_user_and_the_tool_simulator_share_the_runs_date(self, sample_tools):
         result, _assistant, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
@@ -747,6 +775,98 @@ class TestCallerRecords:
 
         assert "records on the person" not in prompt
         assert "A User" not in prompt
+
+
+async def _simulate_with_judge(spec: dict | None = None, arguments: str = '{"location": "Tokyo"}'):
+    """One judged simulated response; returns it with the prompts the simulator and its judge read."""
+    api_prompts: list[str] = []
+    judge_prompts: list[str] = []
+
+    async def fake_call_llm(models, alias, messages, **kwargs):
+        api_prompts.append(messages[0]["content"])
+        return {"content": '{"temp": 22}'}
+
+    async def fake_judge(models, alias, prompt):
+        judge_prompts.append(prompt)
+        return "Fine.", "success", True, True
+
+    tool_call = {"function": {"name": "get_weather", "arguments": arguments}}
+    with (
+        patch("usersim.engine.probes.tool_calling.probe.acall_llm", side_effect=fake_call_llm),
+        patch("usersim.engine.probes.tool_calling.probe.run_inline_judge_ex", side_effect=fake_judge),
+    ):
+        result = await _simulate_tool_response(
+            {},
+            spec or {"name": "get_weather", "parameters": {"type": "object"}},
+            tool_call,
+            [],
+            now="Friday, 2026-11-06, 12:00 UTC",
+            judge=True,
+        )
+    return result, api_prompts, judge_prompts
+
+
+def _tool(tool_name: str, **parameter_types: str) -> dict:
+    properties = {parameter: {"type": kind} for parameter, kind in parameter_types.items()}
+    return {"tool": {"type": "function", "function": {"name": tool_name, "parameters": {"properties": properties}}}}
+
+
+async def test_a_tool_that_returns_random_or_generated_items_returns_new_ones_each_time():
+    _result, api_prompts, judge_prompts = await _simulate_with_judge()
+
+    assert "A tool that returns random or newly generated items by design" in " ".join(api_prompts[0].split())
+    assert "random or newly generated items by design returns new ones each time" in " ".join(judge_prompts[0].split())
+
+
+async def test_the_response_judge_checks_computed_values_but_not_fields_describing_the_response():
+    _result, _api_prompts, judge_prompts = await _simulate_with_judge()
+    rubric = " ".join(judge_prompts[0].split())
+
+    assert "Every value the tool computes (a total, a conversion, a date difference, a formula) is correct" in rubric
+    assert (
+        "A field that only describes the response itself, such as a count of the items it lists or an offset derived "
+        "from its other fields, is not grounds for failure." in rubric
+    )
+
+
+class TestOtherEndpoints:
+    """The simulated service and its judge see the service's other endpoints, so an ID a response returns has the
+    type the endpoints that take it accept."""
+
+    def test_each_other_offered_tool_is_listed_with_its_parameter_types(self):
+        tools = [_tool("add_pet", name="string"), _tool("get_pet", pet_id="integer"), _tool("list_pets")]
+
+        assert _other_endpoints(tools, "add_pet") == "- get_pet(pet_id: integer)\n- list_pets()"
+
+    def test_a_tool_offered_alone_has_no_other_endpoints(self):
+        assert _other_endpoints([_tool("add_pet", name="string")], "add_pet") == "None."
+
+    async def test_the_simulator_and_its_judge_read_the_probes_other_tools(self, sample_tools):
+        probe, _data, _cfg = _concrete_tool_probe(sample_tools)
+        prompts = []
+
+        async def fake_call_llm(models, alias, messages, **kwargs):
+            prompts.append(messages[0]["content"])
+            return {"content": '{"temp": 22}'}
+
+        async def fake_judge(models, alias, prompt):
+            prompts.append(prompt)
+            return "Fine.", "success", True, True
+
+        tool_call = {"id": "c", "function": {"name": "get_weather", "arguments": '{"location": "Tokyo"}'}}
+        with (
+            patch("usersim.engine.probes.tool_calling.probe.acall_llm", side_effect=fake_call_llm),
+            patch("usersim.engine.probes.tool_calling.probe.run_inline_judge_ex", side_effect=fake_judge),
+        ):
+            await probe.execute_tool_call(
+                "get_weather", {"location": "Tokyo"}, tool_call, ConversationState(), {}, turn_idx=0, call_idx=0
+            )
+
+        expected = _other_endpoints(probe.tool_subset, "get_weather")
+        assert "- search_recipes(ingredient: string, cuisine: string)" in expected
+        assert len(prompts) == 2
+        assert all(f"<OTHER_ENDPOINTS>\n{expected}\n</OTHER_ENDPOINTS>" in prompt for prompt in prompts)
+        assert all("- get_weather(" not in prompt for prompt in prompts)
 
 
 class TestCredentials:

@@ -117,15 +117,21 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
 - There is **no real execution**: the `api_response_model` alias (see
   [`cli/models_default.toml`](../../../../../cli/models_default.toml)) synthesizes the
   tool's response from the schema, so a run needs no live service. It sees
-  what the service would: the call, the calls made earlier in the conversation
-  with their responses and the time each was made, which it keeps consistent
-  with, and its clock, noon UTC on the conversation's date at the user's first
-  message and two minutes later with each one after, up to 12:59, but none of
-  the conversation's messages. An event after the clock has no result yet,
-  while what is planned for later, such as a schedule, a listing or a
-  forecast, already exists; an identical call returns the same data, except
+  what the service would: the call, the service's other endpoints (the other
+  offered tools' names and parameter types), whose parameters an ID or other
+  value it returns fits, such as an integer ID where they take an integer, the
+  calls made earlier in the conversation with their responses and the time
+  each was made, which it keeps consistent with, and its clock, noon UTC on
+  the conversation's date at the user's first message and two minutes later
+  with each one after, up to 12:59, but none of
+  the conversation's messages. Opening hours, market sessions and other times
+  tied to a place follow the local time there. An event after the clock has no
+  result yet, while what is planned for later, such as a schedule, a listing
+  or a forecast, already exists; an identical call returns the same data, except
   that what moves with time, such as a live score, a job's progress, stock or
-  a price, may have moved since it was made. A tool with a parameter naming one
+  a price, may have moved since it was made, and a tool that returns random or
+  newly generated items by design, such as a random image or a generated
+  password, returns new ones each time. A tool with a parameter naming one
   of the user's own things (a tracking, order, booking or reservation number,
   an invoice or a receipt) also gets the service's records on the person,
   their name and where they live, which that thing carries, while an argument
@@ -147,9 +153,12 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   assistant sees it: that it answers the call, agrees with the earlier calls'
   responses and the clock, gives no result for an event later than the clock
   while letting a schedule or forecast for later stand,
-  computes values correctly, and holds no placeholder
-  such as an `example.com` link. It checks real-world facts only where the
-  arguments or the tool's description fix them. A rejected response is
+  computes values correctly (a field that only describes the response, such
+  as a count of the items it lists, is not grounds for rejecting it), returns
+  IDs and values of the type and form the service's other endpoints take, and
+  holds no placeholder such as an `example.com` link. It checks real-world
+  facts only where the arguments or the tool's description fix them. A
+  rejected response is
   rewritten with the judge's reason, within `max_response_attempts` (the
   probe's `judge_responses` setting turns this off). The judge is the models file's `api_response_judge_model` (the
   probe's `response_judge_model_alias` setting), so these checks can run on
@@ -162,7 +171,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   `n_assistant_ungrounded`. The judge also sees the tools the assistant was
   offered, and fails a reply that says it can't do what one of them does,
   rather than asking the user for what the call is missing, or calls its
-  tools' results unreliable without a reason. It judges only what
+  tools' results unreliable without a reason; declining for a legal, safety
+  or privacy reason, or saying accurately that no offered tool does what is
+  asked, is not that failure. It judges only what
   the reply in front of it says: an earlier reply's error counts against that
   reply alone, unless this one repeats it. With `--max-assistant-attempts`
   above 1, the rejected turn is undone, tool calls included, and regenerated.

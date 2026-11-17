@@ -16,7 +16,9 @@ the other probes.
   run. The toolset is the row's theme.
 - The simulated user writes requests the tools can serve, in the row's
   language, and holds any credential a tool declares, API key or password. The
-  check on the opening request fails one that no offered tool can do, so the
+  check on the opening request fails one that no offered tool can do, one that
+  can't be acted on yet because it waits on something that hasn't happened,
+  and one that needs a file or photo the user can't give as a link, so the
   user writes it again. The user asks a service about the records it holds,
   such as bookings or balances, rather than describing them, and gives what
   the assistant asks for that a real user would have, such as a link or a
@@ -26,12 +28,15 @@ the other probes.
 - The assistant is offered the tools. A call that breaks the tool's schema gets
   a 400, a call without the user's credential gets a 401, and any other call
   gets a response the `api_response_model` writes for that tool. It writes from
-  what the service would see: the call, the calls made earlier in the
-  conversation with their responses, and its clock, never the conversation's
-  messages, so a detail the user gives reaches it only through the arguments the
-  assistant passes. Before the assistant sees the response, `judge_model`
-  checks it against the call (the tool's description, the arguments, the
-  earlier calls' responses, the clock, any computed value) and has a rejected
+  what the service would see: the call, the service's other endpoints (the
+  other offered tools, with their parameter types), the calls made earlier in
+  the conversation with their responses, and its clock, never the
+  conversation's messages, so a detail the user gives reaches it only through
+  the arguments the assistant passes. An ID or other value it returns has the
+  type and form the other endpoints take for it. Before the assistant sees the
+  response, `judge_model` checks it against the call (the tool's description,
+  the arguments, the other endpoints, the earlier calls' responses, the clock,
+  any computed value) and has a rejected
   one rewritten with its reason; a response still
   rejected when the attempts run out stands, and the row carries an
   `unverified_tool_response` warning. A call that sets a new password leaves
@@ -59,7 +64,8 @@ the dates in requests and in tool results agree. The `api_response_model`'s
 clock reads noon UTC on it at the user's first message and moves two minutes
 with each one after, so a live score or a job's progress can move between
 turns; an event after the clock has no result yet, while what is planned for
-later, such as a schedule or a forecast, already exists. Each row
+later, such as a schedule or a forecast, already exists. Opening hours, market
+sessions and other times tied to a place follow the local time there. Each row
 records the date as `today` in `conversation_metadata`. The first user message the assistant sees
 opens with a line its app would attach, the date and the persona's location,
 such as `[2026-11-06 · Austin, Texas, USA]`; the simulated user is told the
