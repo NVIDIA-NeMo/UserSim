@@ -110,6 +110,8 @@ and the arguments provided.
 It is {now}. An event later than that has not happened, so it has no result, score or reading yet;
 what is planned for later, such as a schedule, showtime, listing, forecast, booking or price, already
 exists.
+Opening hours, market sessions and other times tied to a place follow the local time there, converted
+from that UTC time.
 
 Tool specification:
 {tool_spec}
@@ -177,6 +179,8 @@ _DEFAULT_TOOL_SIMULATOR_CREDENTIALS = (
 _DEFAULT_TOOL_SIMULATOR_JUDGE = """You are checking a simulated API response before an AI assistant sees it.
 
 It is {now}.
+Opening hours, market sessions and other times tied to a place follow the local time there, converted
+from that UTC time.
 
 Tool specification:
 {tool_spec}

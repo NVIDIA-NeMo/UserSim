@@ -62,7 +62,8 @@ the dates in requests and in tool results agree. The `api_response_model`'s
 clock reads noon UTC on it at the user's first message and moves two minutes
 with each one after, so a live score or a job's progress can move between
 turns; an event after the clock has no result yet, while what is planned for
-later, such as a schedule or a forecast, already exists. Each row
+later, such as a schedule or a forecast, already exists. Opening hours, market
+sessions and other times tied to a place follow the local time there. Each row
 records the date as `today` in `conversation_metadata`. The first user message the assistant sees
 opens with a line its app would attach, the date and the persona's location,
 such as `[2026-11-06 · Austin, Texas, USA]`; the simulated user is told the

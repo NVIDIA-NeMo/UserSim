@@ -654,6 +654,13 @@ class TestToday:
 
         assert "It is Friday, 2026-11-06, 12:02 UTC." in prompts[0]
 
+    async def test_the_simulator_and_its_judge_read_times_tied_to_a_place_in_its_local_time(self):
+        _result, api_prompts, judge_prompts = await _simulate_with_judge()
+        local = "times tied to a place follow the local time there, converted from that UTC time."
+
+        assert local in " ".join(api_prompts[0].split())
+        assert local in " ".join(judge_prompts[0].split())
+
     async def test_the_user_and_the_tool_simulator_share_the_runs_date(self, sample_tools):
         result, _assistant, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
 
@@ -748,6 +755,35 @@ class TestCallerRecords:
 
         assert "records on the person" not in prompt
         assert "A User" not in prompt
+
+
+async def _simulate_with_judge(spec: dict | None = None, arguments: str = '{"location": "Tokyo"}'):
+    """One judged simulated response; returns it with the prompts the simulator and its judge read."""
+    api_prompts: list[str] = []
+    judge_prompts: list[str] = []
+
+    async def fake_call_llm(models, alias, messages, **kwargs):
+        api_prompts.append(messages[0]["content"])
+        return {"content": '{"temp": 22}'}
+
+    async def fake_judge(models, alias, prompt):
+        judge_prompts.append(prompt)
+        return "Fine.", "success", True, True
+
+    tool_call = {"function": {"name": "get_weather", "arguments": arguments}}
+    with (
+        patch("usersim.engine.probes.tool_calling.probe.acall_llm", side_effect=fake_call_llm),
+        patch("usersim.engine.probes.tool_calling.probe.run_inline_judge_ex", side_effect=fake_judge),
+    ):
+        result = await _simulate_tool_response(
+            {},
+            spec or {"name": "get_weather", "parameters": {"type": "object"}},
+            tool_call,
+            [],
+            now="Friday, 2026-11-06, 12:00 UTC",
+            judge=True,
+        )
+    return result, api_prompts, judge_prompts
 
 
 def _tool(tool_name: str, **parameter_types: str) -> dict:

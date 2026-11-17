@@ -124,9 +124,10 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   each was made, which it keeps consistent with, and its clock, noon UTC on
   the conversation's date at the user's first message and two minutes later
   with each one after, up to 12:59, but none of
-  the conversation's messages. An event after the clock has no result yet,
-  while what is planned for later, such as a schedule, a listing or a
-  forecast, already exists; an identical call returns the same data, except
+  the conversation's messages. Opening hours, market sessions and other times
+  tied to a place follow the local time there. An event after the clock has no
+  result yet, while what is planned for later, such as a schedule, a listing
+  or a forecast, already exists; an identical call returns the same data, except
   that what moves with time, such as a live score, a job's progress, stock or
   a price, may have moved since it was made. A tool with a parameter naming one
   of the user's own things (a tracking, order, booking or reservation number,
