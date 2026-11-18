@@ -122,6 +122,36 @@ class TestEvalWarnsOnRepeatedIds:
         assert self._warnings(caplog) == []
 
 
+class TestEvalWarnsOnSelfJudging:
+    """A judge running the model under test grades its own replies, so ``usersim eval`` says so."""
+
+    @staticmethod
+    def _warning(capsys) -> str:
+        return next((line for line in capsys.readouterr().err.splitlines() if "grades its own replies" in line), "")
+
+    def test_a_judge_running_the_assistants_model_is_named(self, tmp_path, monkeypatch, trajectory_df, capsys):
+        _evaluate(tmp_path, monkeypatch, trajectory_df, "--judges", "assistant_model")
+
+        assert "judge 'assistant_model' runs google/gemma-4-31b-it" in self._warning(capsys)
+
+    def test_a_judge_running_another_model_gives_no_warning(self, tmp_path, monkeypatch, trajectory_df, capsys):
+        _evaluate(tmp_path, monkeypatch, trajectory_df)
+
+        assert self._warning(capsys) == ""
+
+    def test_the_runs_recorded_assistant_wins_over_the_models_file(self, tmp_path, monkeypatch, trajectory_df, capsys):
+        from usersim.engine.core import manifest
+
+        recorded = SimpleNamespace(
+            models={"assistant_model": SimpleNamespace(model="nvidia/nemotron-3.5-lightning-30b-a3b")}
+        )
+        monkeypatch.setattr(manifest, "load_run_manifest", lambda run_id, root: recorded)
+
+        _evaluate(tmp_path, monkeypatch, trajectory_df)
+
+        assert "judge 'evaluator_model' runs nvidia/nemotron-3.5-lightning-30b-a3b" in self._warning(capsys)
+
+
 @pytest.mark.parametrize("recorded", ["per_locale", None], ids=["recorded", "not_recorded"])
 def test_report_labels_the_run_by_its_recorded_pass(tmp_path, trajectory_df, evaluator_df, recorded):
     """A pass that recorded nothing about its sampling is not labelled full."""

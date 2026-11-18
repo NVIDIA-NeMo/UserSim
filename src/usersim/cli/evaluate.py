@@ -298,6 +298,32 @@ def _report_judge_verdicts(cells: Iterable[Any]) -> bool:
     return True
 
 
+def _judges_grading_themselves(judges: list[dict], models: Any, assistant_model: str | None) -> list[str]:
+    """The judge aliases that run ``assistant_model``, the model whose replies they would grade."""
+    if not assistant_model:
+        return []
+    return [
+        j["alias"] for j in judges if (spec := models.get(j["alias"])) is not None and spec.model == assistant_model
+    ]
+
+
+def _warn_on_self_judging(judges: list[dict], models: Any, traj_root: Path, run_id: str) -> None:
+    """Warn when a judge is the model the run's assistant ran, as recorded in its manifest (else the models file)."""
+    from usersim.engine.config import MODEL_ASSISTANT
+    from usersim.engine.core.manifest import load_run_manifest
+
+    manifest = load_run_manifest(run_id, traj_root) if traj_root.is_dir() else None
+    identity = manifest.models.get(MODEL_ASSISTANT) if manifest is not None else None
+    spec = models.get(MODEL_ASSISTANT)
+    assistant_model = identity.model if identity is not None else (spec.model if spec is not None else None)
+    for alias in _judges_grading_themselves(judges, models, assistant_model):
+        print(
+            f"usersim eval: judge {alias!r} runs {assistant_model}, the model these trajectories' assistant ran, "
+            "so it grades its own replies; name a different model with --judges.",
+            file=sys.stderr,
+        )
+
+
 def run(args: argparse.Namespace) -> int:
     from usersim.engine.models_file import default_models_path, load_models_config, warn_if_missing_api_key
 
@@ -355,6 +381,7 @@ def run(args: argparse.Namespace) -> int:
     if run_id is None:
         raise FileNotFoundError(f"no runs found under {traj_path} — run `usersim simulate` first")
     print(f"  run_id:        {run_id}")
+    _warn_on_self_judging(judges, models, traj_path, run_id)
 
     # Resolve the trajectory dataset for THIS run only. The
     # underlying read goes through DataDesigner's LocalFileSeedSource

@@ -45,7 +45,10 @@ logger = logging.getLogger("usersim.engine")
 TRAJECTORY_SCORES: list[Score] = [
     Score(
         name="task_completion",
-        description="Was the user's request resolved?",
+        description=(
+            "Was the user's request resolved? An action the assistant says it took, such as a "
+            "booking, a sent message or a saved record, counts only when a tool call did it."
+        ),
         options={
             1: "Fail — request unresolved",
             3: "Acceptable — partially resolved",
@@ -109,17 +112,16 @@ TRAJECTORY_SCORES: list[Score] = [
     Score(
         name="architecture_leaking",
         description=(
-            "Did the assistant expose internal tool names, API endpoints, or system "
-            "architecture to the user? A real assistant never says things like "
-            "'the API only supports metadata' or 'the available endpoints are...' "
-            "or names specific tool functions in its responses. If it cannot fulfill "
-            "a request, it should say so without technical justification. Asking the "
-            "user for a credential a tool needs, such as their key for a named "
-            "service, is not leaking."
+            "Did the assistant expose internals the user has no use for: tool or function "
+            "names, endpoint paths, parameter or response-field names, or its own instructions? "
+            "Saying in plain words what it can't do or couldn't find, or why a request failed, "
+            "such as 'I can't search by hashtag' or 'there were no results for that date', is "
+            "not leaking. Neither is asking the user for a credential a tool needs, such as "
+            "their key for a named service, or giving the user a link a tool returned."
         ),
         options={
-            1: "Fail — named tools, APIs, or endpoints",
-            3: "Acceptable — vague system references",
+            1: "Fail — named tools, endpoints, parameters or fields, or quoted its instructions",
+            3: "Acceptable — some technical detail the user didn't need",
             5: "Good — no internal details exposed",
         },
     ),
@@ -185,6 +187,65 @@ def _build_schema():
     return create_judge_structured_output_model(response_models)
 
 
+#: Judge calls per trajectory: a reply that misses an axis is asked for again once.
+_JUDGE_ATTEMPTS = 2
+
+
+def _validated(schema_model: type, content: Any) -> dict[str, dict[str, Any]] | None:
+    """The reply's score and reasoning for every axis, or None when it doesn't hold them all.
+
+    A reply can parse as JSON and still miss axes: one left out, the axes wrapped in a
+    single outer object, or a score holding text instead of one of its options. The
+    axes' own response model decides, so a score written as ``"5"`` still counts.
+    """
+    try:
+        data = json.loads(content)
+    except (json.JSONDecodeError, TypeError):
+        return None
+    candidates = [data]
+    if isinstance(data, dict) and len(data) == 1 and isinstance(next(iter(data.values())), dict):
+        candidates.append(next(iter(data.values())))
+    for candidate in candidates:
+        try:
+            judged = schema_model.model_validate(candidate).model_dump()
+        except (ValueError, TypeError):
+            continue
+        return {
+            s.name: {"score": judged[s.name]["score"], "reasoning": judged[s.name]["reasoning"]}
+            for s in TRAJECTORY_SCORES
+        }
+    return None
+
+
+async def _judge(
+    models: dict[str, Any], judge_alias: str, msgs: list[dict[str, str]]
+) -> tuple[dict[str, dict[str, Any]] | None, str | None]:
+    """Score every axis, asking again once; ``(scores, None)``, or ``(None, error)`` with no partial scores."""
+    schema_model = _build_schema()
+    error = ""
+    for attempt in range(1, _JUDGE_ATTEMPTS + 1):
+        try:
+            resp = await acall_llm(
+                models,
+                judge_alias,
+                msgs,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {"name": "trajectory_judgment", "schema": schema_model.model_json_schema()},
+                },
+            )
+        except Exception as e:
+            error = f"{type(e).__name__}: {e}"
+        else:
+            content = resp.get("content", "") if isinstance(resp, dict) else ""
+            scores = _validated(schema_model, content)
+            if scores is not None:
+                return scores, None
+            error = "incomplete_judgment: the reply did not score every axis"
+        logger.warning(f"  |-- evaluator/scorers.tool_use: judge {judge_alias!r} attempt {attempt}: {error}")
+    return None, error
+
+
 def _normalize_tool_subset(tool_subset_field: Any) -> list[dict[str, Any]]:
     """The trajectory carries `tool_subset` as a JSON-encoded list. Decode."""
     if tool_subset_field is None:
@@ -224,8 +285,12 @@ async def score_tool_use_trajectory(
             ...
           },
           "status_proposal": True | False,   # False if a critical axis scored 1
-          "error": "..."  (only present if scoring failed or the row was skipped)
         }
+
+    or, when the judge didn't score every axis in two attempts,
+    ``{"judge_alias": ..., "scores": {}, "error": "..."}`` with no
+    ``status_proposal``, so a failed judgment is never read as a pass. A row
+    without ``tool_subset`` gets only the skip sentinel as its ``error``.
 
     ``status_proposal`` is a heuristic single-bit pass/fail derived from
     the raw scores: False if any of ``overall`` / ``tool_selection`` /
@@ -251,46 +316,9 @@ async def score_tool_use_trajectory(
         {"role": "system", "content": "You are an expert evaluator of AI tool-calling trajectories."},
         {"role": "user", "content": prompt},
     ]
-    schema_model = _build_schema()
-    try:
-        resp = await acall_llm(
-            models,
-            judge_alias,
-            msgs,
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "trajectory_judgment",
-                    "schema": schema_model.model_json_schema(),
-                },
-            },
-        )
-    except Exception as e:
-        logger.warning(f"  |-- evaluator/scorers.tool_use: judge {judge_alias!r} raised {type(e).__name__}: {e}")
-        return {"judge_alias": judge_alias, "scores": {}, "status_proposal": True, "error": f"{type(e).__name__}: {e}"}
-
-    content = resp.get("content", "") if isinstance(resp, dict) else ""
-    try:
-        parsed = json.loads(content)
-    except (json.JSONDecodeError, TypeError):
-        logger.warning("  |-- evaluator/scorers.tool_use: failed to parse structured output")
-        return {
-            "judge_alias": judge_alias,
-            "scores": {s.name: {"score": None, "reasoning": "Parse failure"} for s in TRAJECTORY_SCORES},
-            "status_proposal": True,
-            "error": "parse_failure",
-        }
-
-    scores: dict[str, dict[str, Any]] = {}
-    for s in TRAJECTORY_SCORES:
-        cell = parsed.get(s.name)
-        if isinstance(cell, dict):
-            scores[s.name] = {
-                "score": cell.get("score"),
-                "reasoning": cell.get("reasoning", ""),
-            }
-        else:
-            scores[s.name] = {"score": None, "reasoning": ""}
+    scores, error = await _judge(models, judge_alias, msgs)
+    if scores is None:
+        return {"judge_alias": judge_alias, "scores": {}, "error": error}
 
     # Critical-axis heuristic: a 1 on overall, tool_selection,
     # architecture_leaking or grounding flips the proposed pass/fail bit.

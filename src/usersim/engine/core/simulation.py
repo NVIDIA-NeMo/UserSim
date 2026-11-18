@@ -25,6 +25,7 @@ from usersim.engine.core.behavioral import (
     ROLE_ANCHOR_PROMPT_WRAPUP,
     USER_QUERY_INSTRUCTION,
     USER_QUERY_INSTRUCTION_GROUNDED,
+    USER_QUERY_RETRY,
     compute_frustration_level,
     get_conversation_language,
     get_frustration_prompt,
@@ -540,6 +541,14 @@ def _build_user_followup_messages(
 # ---------------------------------------------------------------------------
 
 
+def _retry_note(draft: str, reason: str) -> list[dict[str, str]]:
+    """The rejected opening, as the user wrote it, and why it was rejected, for the user's next attempt."""
+    return [
+        {"role": "assistant", "content": draft},
+        {"role": "user", "content": USER_QUERY_RETRY.format(reason=reason[:500])},
+    ]
+
+
 def _first_user_message(probe: Any, text: str) -> dict[str, Any]:
     """The first user message the assistant sees: ``text``, opened by the probe's ``user_context`` line when it has one."""
     hook = getattr(probe, "user_context", None)
@@ -669,10 +678,12 @@ class ConversationLoop:
         expl = ""
         rating = "failure"
         fail_kind: str | None = "gate"
+        # The last rejected draft and why, shown to the next attempt only; state.user_history keeps neither.
+        retry: list[dict[str, str]] = []
         for attempt in range(max_query_attempts):
             state.outcome.inc_user_query_attempts()
             try:
-                resp = await acall_llm(models, MODEL_USER, state.user_history)
+                resp = await acall_llm(models, MODEL_USER, [*state.user_history, *retry])
             except ContextWindowError:
                 raise
             except Exception as e:
@@ -738,6 +749,7 @@ class ConversationLoop:
                     f"pre-filter triggered on turn-1 "
                     f"(attempt {attempt + 1}/{max_query_attempts})"
                 )
+                retry = _retry_note(user_query, "it reads as the assistant's reply, not as your own request.")
                 continue
 
             if _is_fourth_wall_break(user_query, policy.allowed_phrases):
@@ -754,6 +766,7 @@ class ConversationLoop:
                     f"  |-- {probe.label}: fourth-wall pre-filter triggered "
                     f"(attempt {attempt + 1}/{max_query_attempts})"
                 )
+                retry = _retry_note(user_query, "it talks about the conversation or your role in it.")
                 continue
 
             if enforce_language and not _is_user_script_compliant(
@@ -777,6 +790,9 @@ class ConversationLoop:
                 logger.debug(
                     f"  |-- {probe.label}: language pre-filter triggered (attempt {attempt + 1}/{max_query_attempts})"
                 )
+                retry = _retry_note(
+                    user_query, "it is not written in the language and script your instructions ask for."
+                )
                 continue
 
             rejected = policy.check_opening(user_query) if policy.check_opening is not None else None
@@ -796,6 +812,7 @@ class ConversationLoop:
                 logger.debug(
                     f"  |-- {probe.label}: opening rejected ({rejected}) (attempt {attempt + 1}/{max_query_attempts})"
                 )
+                retry = _retry_note(user_query, rejected)
                 continue
 
             gate_prompt = probe.format_gate_prompt(user_query, "N/A")
@@ -849,6 +866,7 @@ class ConversationLoop:
                     )
                 )
             logger.debug(f"  |-- {probe.label}: gate check failed (attempt {attempt + 1}/{max_query_attempts})")
+            retry = _retry_note(user_query, expl or "it does not fit what your instructions ask for.")
         return user_query, ok, rating, expl, fail_kind
 
     async def _generate_and_judge_assistant_turn(

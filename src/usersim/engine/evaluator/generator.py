@@ -81,6 +81,7 @@ from usersim.engine.evaluator.prompts import (
     render_rubric,
 )
 from usersim.engine.evaluator.scorers import get_scorer
+from usersim.taxonomy.eval_cell import scorer_state
 
 logger = logging.getLogger("usersim.engine")
 
@@ -157,6 +158,12 @@ def judge_verdict(cell: Any) -> JudgeVerdict:
         for verdict in by_judge.values()
     )
     return JudgeVerdict.SCORED if scored else JudgeVerdict.MISSING
+
+
+def _scorer_errored(cell: dict) -> bool:
+    """Whether a scorer in a stored cell recorded an error, which a re-run judges again."""
+    scorers = cell.get("scorers")
+    return isinstance(scorers, dict) and any(scorer_state(block) == "error" for block in scorers.values())
 
 
 class TrajectoryEvaluatorGenerator(
@@ -245,6 +252,7 @@ class TrajectoryEvaluatorGenerator(
                 isinstance(existing, dict)
                 and existing.get("envelope") == envelope
                 and judge_verdict(existing) is not JudgeVerdict.MISSING
+                and not _scorer_errored(existing)
             ):
                 logger.debug(
                     f"  |-- evaluator: skip — envelope match for traj {data.get(cfg.trajectory_id_column, '?')}"

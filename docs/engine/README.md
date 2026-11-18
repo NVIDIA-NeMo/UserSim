@@ -321,8 +321,8 @@ config_builder.add_column(
 existing cell value already carries an envelope matching the current config
 is *not* re-judged; the cell's `skipped`/`skipped_reason` fields are flipped
 so downstream reporting can count skips. A cell with rubric axes that no judge
-scored (every call failed, or returned output that did not parse) is judged
-again. Bumping `prompt_version` or changing
+scored (every call failed, or returned output that did not parse), or one where
+a scorer recorded an error, is judged again. Bumping `prompt_version` or changing
 the axes / scorers / judges / `tool_result_chars`, or the model behind a judge alias, invalidates
 prior envelopes and forces a fresh run. `judge_models` also records which
 model scored each row: the capability report and the notebook's run listing
@@ -331,6 +331,10 @@ stood when the simulation ran. `usersim eval` reads only the trajectory store
 and writes a fresh evaluation of the run each time, so the envelope skip
 applies when a pipeline feeds stored cells back to the evaluator. `usersim rescore` updates
 the model-free scorers of an existing evaluation without any model call.
+
+**Self-judging.** `usersim eval` warns when a judge runs the model the
+run's assistant ran (read from the run manifest, else from the models file),
+since that judge would grade its own replies.
 
 **Judge-family diversity.** Configs with two or more judges are validated at
 config-construct time (and re-validated at run time) to span ≥2 distinct
@@ -473,7 +477,7 @@ diagnostics in the simulator-health report quantify that for a given run, and
 | `assets_dir` | str? | `None` | The asset root every probe is pinned to (`--assets-dir`); `None` reads each probe's own assets, after any `USERSIM_ASSET_PATH` override |
 | `max_turns` | int | `5` | Max conversation turns |
 | `max_steps` | int | `10` | Max tool steps per turn |
-| `max_query_attempts` | int | `3` | Max retries for the user-LLM query / follow-up + judge gate before declaring `USER_QUERY_GATE_EXHAUSTED` |
+| `max_query_attempts` | int | `3` | Max retries for the user-LLM query / follow-up + judge gate before declaring `USER_QUERY_GATE_EXHAUSTED`; a retried opening sees its rejected draft and why it was rejected |
 | `assistant_judge` | bool | `True` | Run the per-turn assistant judge and record its verdict in `assistant_judge_ratings`; a failed verdict also raises the simulated user's frustration. It reads the conversation with the assistant's tool calls and their results, each result up to 24,000 characters as the evaluator reads them. `False` (`--no-assistant-judge`) saves a judge call per turn, as for training runs scored only afterwards, and cannot be combined with a `max_assistant_attempts` above `1` |
 | `max_assistant_attempts` | int | `1` | Assistant-turn resampling budget. `1` (default) keeps the per-turn assistant judge flag-only (evaluation semantics). `>1` discards a judge-rejected assistant candidate and regenerates it within the budget: for SDG-style runs where the assistant is a data generator, not a model under test. A discarded attempt is undone: its messages, the metadata, counters, warnings and traces it recorded, and the probe's own state (`snapshot_turn_state` / `restore_turn_state`), keeping only the judge's verdict. Discards are counted in `n_assistant_retries`. Probes whose turn changes state the loop can't undo, such as `financial_services` and `safety_agentic`, opt out via `supports_assistant_resampling = False`; `tool_calling` resamples. Gate semantics: the judge's `warn` rating passes (only `failure` triggers a resample), and a judge reply with no parseable rating is re-asked once on the same candidate rather than charged against the budget (entries marked `judge_parse_error`). With a budget `>1`, prefer a judge from a different model family than the assistant, so the model never filters its own generations: `models_default.toml` and `models_openrouter.toml` pair the assistant with a judge from another family, and `models_openai.toml` uses a different OpenAI model as judge |
 | `enforce_user_language` | bool | `True` | Regenerate a simulated-user turn written in the wrong script (a deterministic check) or the wrong language (a rule in the user-turn judge gate, for every locale), within `max_query_attempts`; each retry counts in `n_user_language_violations` |
@@ -638,7 +642,7 @@ The tables describe the main files.
 | `test_evaluator_judges.py` | `JudgeFamily` registry, `infer_judge_family`, `validate_ensemble_diversity` |
 | `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `load_default_scorers`) |
 | `test_evaluator_scorer_structured_output_schemas.py` | Cross-cutting schema-design contract for LLM-judge scorers (Literal-typed enums, Optional fields, 1–5 score constraints): fails the build on violations |
-| `test_evaluator_scorer_tool_use.py` | Tool-calling trajectory judge: its axes, and that it reads whole tool results |
+| `test_evaluator_scorer_tool_use.py` | Tool-calling trajectory judge: its axes, that it reads whole tool results, and that a reply missing an axis is asked for again and then recorded as an error |
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |
 | `test_evaluator_scorer_response_shape.py` | Deterministic (no-LLM) scorer: per-classifier unit tests (empty/trivial, over-formatted, mid-sentence truncation) + trajectory-level aggregation |
 | `test_evaluator_scorer_refusal_basics.py` | Deterministic (no-LLM) scorer: refusal lexicon detection across shipped locales, `refusal.in_wrong_language_rate` (English-refusal-in-non-English-locale) composite, canned-AI-phrase detection, status-proposal gating semantics |

@@ -748,6 +748,87 @@ class TestTurn1LanguageGate:
         assert out.n_user_language_violations == 0
 
 
+class TestTurn1RetrySeesWhyItFailed:
+    """A rejected opening goes back to the user model with its reason, so the next draft can fix it."""
+
+    async def _run(self, monkeypatch, *, drafts, verdicts, locale="en_IN"):
+        import usersim.engine.core.simulation as sim
+
+        calls: list[list[dict]] = []
+        replies = iter(drafts)
+        judged = iter(verdicts)
+
+        async def _user_turn(models, alias, msgs, **kw):
+            calls.append(list(msgs))
+            return {"content": next(replies)}
+
+        async def _judge(models, alias, prompt):
+            expl, ok = next(judged)
+            return (expl, "success" if ok else "failure", ok)
+
+        monkeypatch.setattr(sim, "acall_llm", _user_turn)
+        monkeypatch.setattr(sim, "run_inline_judge", _judge)
+        state = ConversationState(outcome=OutcomeBuilder())
+        result = await ConversationLoop()._generate_and_gate_first_turn(
+            models={},
+            state=state,
+            probe=_StubAdapter(),
+            cfg=_gate_cfg(),
+            query_instruction="Ask your question.",
+            locale=locale,
+            _t_loop_start=0.0,
+        )
+        return result, calls, state
+
+    async def test_a_gate_rejection_reaches_the_next_draft_with_the_judges_reason(self, monkeypatch):
+        hinglish = "Bhai, ek kaam karo na, Lata ji ke gaane dhoondh do."
+        reason = "[LANGUAGE] The message is in romanized Hindi, not Indian English."
+        (uq, ok, *_), calls, state = await self._run(
+            monkeypatch,
+            drafts=[hinglish, "Could you find me some Lata Mangeshkar songs, yaar?"],
+            verdicts=[(reason, False), ("fine", True)],
+        )
+
+        assert ok is True and uq.startswith("Could you find")
+        assert calls[1][:-2] == calls[0]
+        draft, note = calls[1][-2:]
+        assert draft == {"role": "assistant", "content": hinglish}
+        assert note["role"] == "user" and reason in note["content"] and "not sent" in note["content"]
+        assert state.user_history == calls[0]
+
+    async def test_a_wrong_script_draft_is_named_for_the_next_one(self, monkeypatch):
+        (_, ok, *_), calls, _state = await self._run(
+            monkeypatch,
+            drafts=[_ROMANIZED_TURN, _DEVA_TURN],
+            verdicts=[("fine", True)],
+            locale="hi_Deva_IN",
+        )
+
+        assert ok is True
+        assert calls[1][-2]["content"] == _ROMANIZED_TURN
+        assert "not written in the language and script your instructions ask for" in calls[1][-1]["content"]
+
+    async def test_only_the_last_rejection_is_shown(self, monkeypatch):
+        (_, ok, *_), calls, _state = await self._run(
+            monkeypatch,
+            drafts=["first draft", "second draft", "third draft"],
+            verdicts=[("too vague", False), ("still vague", False), ("fine", True)],
+            locale="en_US",
+        )
+
+        assert ok is True
+        assert len(calls[2]) == len(calls[0]) + 2
+        assert calls[2][-2]["content"] == "second draft" and "still vague" in calls[2][-1]["content"]
+
+    async def test_an_accepted_first_draft_sends_the_instructions_alone(self, monkeypatch):
+        (_, ok, *_), calls, state = await self._run(
+            monkeypatch, drafts=["Could you check my order?"], verdicts=[("fine", True)], locale="en_US"
+        )
+
+        assert ok is True and len(calls) == 1
+        assert calls[0] == state.user_history
+
+
 class TestUserLanguageGateExhaustedFailureClass:
     """The dedicated failure class is wired and distinct from the gate one."""
 

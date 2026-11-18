@@ -10,6 +10,8 @@ path.
 
 from __future__ import annotations
 
+import json
+
 import pytest
 from data_designer.config.column_configs import Score
 
@@ -76,10 +78,8 @@ class TestScorerOnFakeJudge:
         tool_use_module.acall_llm = self._orig_acall_llm
 
     def _stub_call_llm(self, structured_response: dict):
-        import json as _json
-
         async def _stub(models, alias, msgs, **kwargs):
-            return {"content": _json.dumps(structured_response)}
+            return {"content": json.dumps(structured_response)}
 
         tool_use_module.acall_llm = _stub
 
@@ -162,25 +162,70 @@ class TestScorerOnFakeJudge:
         await score_tool_use_trajectory(trajectory, {"judge": object()})
         assert "TAIL_FIGURE" in prompts[0]
 
-    async def test_unparseable_response_returns_parse_error(self) -> None:
+    def _stub_replies(self, *replies: str) -> list[int]:
+        """Answer each judge call with the next reply; return a list that counts the calls."""
+        calls: list[int] = []
+
         async def _stub(models, alias, msgs, **kwargs):
-            return {"content": "not json"}
+            calls.append(1)
+            return {"content": replies[min(len(calls), len(replies)) - 1]}
 
         tool_use_module.acall_llm = _stub
-        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
-        assert result["error"] == "parse_failure"
-        # All scores marked None.
-        for s in TRAJECTORY_SCORES:
-            assert result["scores"][s.name]["score"] is None
+        return calls
 
-    async def test_call_llm_exception_returns_error_field(self) -> None:
+    @staticmethod
+    def _all_axes(score=5) -> dict:
+        return {name: {"score": score, "reasoning": "ok"} for name in AXES}
+
+    @staticmethod
+    def _assert_no_judgment(result: dict) -> None:
+        """A failed judgment holds no scores and proposes no status, so nothing reads it as a pass."""
+        assert result["scores"] == {}
+        assert "status_proposal" not in result
+        assert result["error"]
+
+    async def test_unparseable_response_is_asked_again_then_recorded_as_an_error(self) -> None:
+        calls = self._stub_replies("not json")
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        assert len(calls) == 2
+        self._assert_no_judgment(result)
+
+    async def test_a_reply_missing_an_axis_is_an_error_not_a_pass(self) -> None:
+        partial = self._all_axes()
+        del partial["overall"]
+        self._stub_replies(json.dumps(partial))
+        self._assert_no_judgment(await score_tool_use_trajectory(self._trajectory(), {"judge": object()}))
+
+    async def test_an_axis_holding_text_instead_of_a_score_is_asked_again(self) -> None:
+        broken = self._all_axes()
+        broken["task_completion"] = {"score": '\n<parameter name="reasoning">Resolved.', "reasoning": ""}
+        calls = self._stub_replies(json.dumps(broken), json.dumps(self._all_axes(3)))
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        assert len(calls) == 2
+        assert result["scores"]["task_completion"] == {"score": 3, "reasoning": "ok"}
+        assert result["status_proposal"] is True
+
+    async def test_axes_wrapped_in_one_outer_object_are_read(self) -> None:
+        calls = self._stub_replies(json.dumps({"input": self._all_axes(1)}))
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        assert len(calls) == 1
+        assert {cell["score"] for cell in result["scores"].values()} == {1}
+        assert result["status_proposal"] is False
+
+    async def test_a_score_written_as_text_counts(self) -> None:
+        self._stub_replies(json.dumps({name: {"score": "5", "reasoning": "ok"} for name in AXES}))
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        assert result["scores"]["overall"]["score"] == 5
+
+    async def test_call_llm_exception_is_asked_again_then_recorded_as_an_error(self) -> None:
+        calls: list[int] = []
+
         async def _boom(models, alias, msgs, **kwargs):
+            calls.append(1)
             raise RuntimeError("boom")
 
         tool_use_module.acall_llm = _boom
         result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
-        assert "error" in result
+        assert len(calls) == 2
+        self._assert_no_judgment(result)
         assert "boom" in result["error"]
-        # status_proposal defaults to True when scoring fails (we can't
-        # claim sim-side failure on the assistant's behalf without data).
-        assert result["status_proposal"] is True
