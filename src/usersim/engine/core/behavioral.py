@@ -471,6 +471,13 @@ USER_QUERY_INSTRUCTION_GROUNDED = (
     "Stay in character as the user."
 )
 
+#: Follows a rejected opening when the user writes it again, so the next draft
+#: knows what to fix instead of repeating the same mistake.
+USER_QUERY_RETRY = (
+    "That message was not sent, because a check found this problem with it: {reason}\n"
+    "Write your message again without that problem, still in character and following your instructions."
+)
+
 ROLE_ANCHOR_PROMPT = (
     "[Stay in character as the USER. Read the assistant's last response "
     "before replying. Does it actually answer your question? "
