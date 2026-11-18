@@ -117,8 +117,28 @@ def test_every_gate_shows_the_judge_where_the_token_goes(locale: str) -> None:
 def test_an_english_gate_fails_another_language_but_not_idioms(locale: str) -> None:
     clause = _language_judge_clause(locale)
     assert f"written in {get_conversation_language(locale)}." in clause
-    assert "borrowed word are fine" in clause
+    assert "the occasional borrowed word" in clause and "are fine, but phrases or sentences" in clause
     assert "whether in its own script or in Latin letters" in clause
+
+
+@pytest.mark.parametrize(
+    "locale, words",
+    [("en_IN", "'yaar', 'bhai' or 'theek hai'"), ("en_SG", "'lah', 'shiok' or 'makan'")],
+)
+def test_the_user_and_the_gate_name_the_same_borrowed_words(locale: str, words: str) -> None:
+    """A short local expression is a borrowed word to the user and to the gate alike, not a phrase."""
+    language = get_conversation_language(locale)
+    for text in (
+        language_instruction(language, locale),
+        _language_requirement(language, locale),
+        _language_judge_clause(locale),
+    ):
+        assert f"the occasional borrowed word, such as {words}, are fine" in text
+
+
+def test_other_english_locales_name_no_borrowed_words() -> None:
+    assert "such as '" not in _language_judge_clause("en_US")
+    assert "such as '" not in language_instruction("English", "en_US")
 
 
 def test_a_gate_tells_apart_two_languages_in_one_script() -> None:

@@ -532,7 +532,9 @@ of its locale, which the probe reads as `self._language` (and its locale as
 write every message in that language and, for a locale with a script of its
 own or a romanized one, in which script, without transliterating. An English
 locale's says English, allowing local idioms and borrowed words but not phrases
-in another language, romanized or not. In every locale, text the user asks
+in another language, romanized or not; `en_IN` and `en_SG` name a few borrowed
+words, such as "theek hai" or "lah", so the user and the gate read them alike.
+In every locale, text the user asks
 about, such as a phrase to translate or a sentence to have corrected, may stay
 in its own language. The loop repeats the same requirement in
 every follow-up prompt. It then checks the script of each user turn itself, with no

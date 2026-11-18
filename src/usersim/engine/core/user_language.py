@@ -170,9 +170,9 @@ def _language_judge_clause(locale: str) -> str:
         return ""
     if _is_english(language, locale):
         rule = (
-            f"written in {language}. Local idioms and the occasional borrowed word are "
-            "fine, but phrases or sentences in another language, whether in its own "
-            "script or in Latin letters, are not"
+            f"written in {language}. Local idioms and the occasional borrowed word"
+            f"{_borrowed_examples(locale)} are fine, but phrases or sentences in another "
+            "language, whether in its own script or in Latin letters, are not"
         )
     else:
         script = _SCRIPT_LABEL_BY_LOCALE.get(locale)
@@ -186,14 +186,35 @@ def _language_judge_clause(locale: str) -> str:
     )
 
 
-#: What an English-locale user may and may not mix into English. A user in
-#: India or Singapore writes local idioms and borrowed words, but whole phrases
-#: in another language are another locale's conversation (hi_Latn_IN, for one).
-_ENGLISH_ALLOWANCE = (
-    "Local idioms and the occasional borrowed word are fine, but do NOT write "
-    "phrases or sentences in another language, whether in its own script or "
-    "in Latin letters." + _ASKED_ABOUT_USER
-)
+#: Borrowed words an English-locale user in India or Singapore drops into English,
+#: named so the user and the judge draw the line between a word and a phrase alike.
+_BORROWED_WORDS_BY_LOCALE = {
+    "en_IN": ("yaar", "bhai", "theek hai"),
+    "en_SG": ("lah", "shiok", "makan"),
+}
+
+
+def _borrowed_examples(locale: str | None) -> str:
+    """``", such as 'yaar', 'bhai' or 'theek hai',"`` for a locale with named borrowed words, else ''."""
+    words = _BORROWED_WORDS_BY_LOCALE.get(locale or "")
+    if not words:
+        return ""
+    quoted = [f"'{w}'" for w in words]
+    return f", such as {', '.join(quoted[:-1])} or {quoted[-1]},"
+
+
+def _english_allowance(locale: str | None) -> str:
+    """What an English-locale user may and may not mix into English.
+
+    A user in India or Singapore writes local idioms and borrowed words, but
+    whole phrases in another language are another locale's conversation
+    (hi_Latn_IN, for one).
+    """
+    return (
+        f"Local idioms and the occasional borrowed word{_borrowed_examples(locale)} are fine, "
+        "but do NOT write phrases or sentences in another language, whether in its own "
+        "script or in Latin letters." + _ASKED_ABOUT_USER
+    )
 
 
 def _is_english(language: str, locale: str | None) -> bool:
@@ -211,7 +232,7 @@ def _language_requirement(language: str, locale: str | None = None) -> str:
     the same requirement on every turn as in its system prompt.
     """
     if _is_english(language, locale):
-        return f"in {language}. {_ENGLISH_ALLOWANCE}"
+        return f"in {language}. {_english_allowance(locale)}"
     return f"in {language}.{_script_directive(locale)}{_ASKED_ABOUT_USER}"
 
 
@@ -225,7 +246,7 @@ def language_instruction(language: str, locale: str | None = None) -> str:
     about, such as a phrase to translate, in its own language.
     """
     if _is_english(language, locale):
-        return f"IMPORTANT: You MUST write your messages in {language}. {_ENGLISH_ALLOWANCE}"
+        return f"IMPORTANT: You MUST write your messages in {language}. {_english_allowance(locale)}"
     return (
         f"IMPORTANT: You MUST write your messages in {language}. "
         f"The entire conversation should be in {language}."
