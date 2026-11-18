@@ -375,6 +375,52 @@ class TestPartialReRunSkip:
         assert parsed["skipped"] is False
         assert parsed["axes"]["helpfulness"]["judge_a"] == {"score": 5, "reasoning": "fresh"}
 
+    @pytest.mark.parametrize(
+        "block, judged_again",
+        [
+            ({"scores": {}, "error": "incomplete_judgment: the reply did not score every axis"}, True),
+            ({"error": "no tool_subset on this trajectory — scorer skipped"}, False),
+            ({"scores": {"overall": {"score": 4}}, "status_proposal": True}, False),
+        ],
+        ids=["scorer-error", "scorer-not-applicable", "scorer-ok"],
+    )
+    async def test_a_scorer_error_is_judged_again(self, block, judged_again) -> None:
+        """A row whose scorer failed is not finished, so a re-run judges it; a skipped or scored one stays."""
+        cfg = TrajectoryEvaluatorConfig(
+            name="eval_v2",
+            judges=_ok_judges(),
+            axes=["helpfulness"],
+            scorers=["tool_use"],
+            prompt_version="v1.0",
+        )
+        gen = _build_generator(
+            cfg,
+            judge_responses={"judge_a": {"helpfulness": {"score": 5, "reasoning": "fresh"}}},
+        )
+        existing = {
+            "envelope": {
+                "judge_aliases": ["judge_a", "judge_b"],
+                "judge_models": ["judge_a-model", "judge_b-model"],
+                "judge_families": ["openai", "nvidia_nemotron"],
+                "axes": ["helpfulness"],
+                "scorers": ["tool_use"],
+                "prompt_version": "v1.0",
+                "evaluator_version": EVALUATOR_VERSION,
+                "tool_result_chars": EVALUATOR_TOOL_RESULT_CHARS,
+            },
+            "axes": {"helpfulness": {"judge_a": {"score": 3, "reasoning": "old"}}},
+            "scorers": {"tool_use": block},
+            "skipped": False,
+            "skipped_reason": None,
+        }
+        data = self._trajectory_with_assistant()
+        data["eval_v2"] = json.dumps(existing)
+
+        parsed = json.loads((await gen.agenerate(data))["eval_v2"])
+
+        assert parsed["skipped"] is not judged_again
+        assert parsed["axes"]["helpfulness"]["judge_a"]["reasoning"] == ("fresh" if judged_again else "old")
+
     async def test_changed_prompt_version_invalidates(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",

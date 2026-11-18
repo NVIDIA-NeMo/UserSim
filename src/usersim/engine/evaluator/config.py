@@ -74,7 +74,7 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
     row already carries a non-null value in this column whose envelope
     (``judge_aliases`` and the ``judge_models`` behind them, ``axes``,
     ``scorers``, ``prompt_version``) matches the current config, the LLM
-    judge calls are skipped. See
+    judge calls are skipped, unless one of its scorers recorded an error. See
     ``evaluator/generator.py`` for the envelope check.
     """
 
@@ -145,8 +145,8 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
         default=True,
         description=(
             "If True (the default), skip re-judging a row whose existing "
-            "cell value matches the current envelope. Set False to "
-            "force re-evaluation."
+            "cell value matches the current envelope and whose scorers "
+            "recorded no error. Set False to force re-evaluation."
         ),
     )
 

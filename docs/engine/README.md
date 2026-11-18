@@ -321,8 +321,8 @@ config_builder.add_column(
 existing cell value already carries an envelope matching the current config
 is *not* re-judged; the cell's `skipped`/`skipped_reason` fields are flipped
 so downstream reporting can count skips. A cell with rubric axes that no judge
-scored (every call failed, or returned output that did not parse) is judged
-again. Bumping `prompt_version` or changing
+scored (every call failed, or returned output that did not parse), or one where
+a scorer recorded an error, is judged again. Bumping `prompt_version` or changing
 the axes / scorers / judges / `tool_result_chars`, or the model behind a judge alias, invalidates
 prior envelopes and forces a fresh run. `judge_models` also records which
 model scored each row: the capability report and the notebook's run listing
