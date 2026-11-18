@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -241,6 +242,14 @@ async def test_the_host_records_each_replys_finish_reason_and_usage(
     calls = json.loads(report.hosted_row["conversation_metadata"])["ext_records_call_calls"]
     assert calls, "the episode must call the assistant for this to check anything"
     assert all(call == ["length", usage] for call in calls)
+
+
+@pytest.mark.parametrize("reply", [Mock(), SimpleNamespace(choices=None), SimpleNamespace(choices=[])])
+def test_a_reply_without_a_list_of_choices_reports_no_finish_reason(reply: object) -> None:
+    """A model double in a parity check need not shape its replies as a provider's."""
+    from usersim.testing import _reported_finish_reason
+
+    assert _reported_finish_reason(reply) is None
 
 
 @pytest.mark.parametrize("role", ["assistant", "user"])

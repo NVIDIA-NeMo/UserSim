@@ -74,7 +74,7 @@ does not load the conversation loop.
 | `MODEL_ASSISTANT` | The alias of the assistant under test |
 | `MODEL_JUDGE` | The alias of the model that checks user turns and judges assistant turns during the conversation, and checks tool_calling's simulated tool responses when the models file has no `api_response_judge_model` |
 | `ConversationSimulatorConfig` | The run's settings, which hooks receive as `cfg` |
-| `acall_llm` | Calls the model behind an alias and returns its reply as a message |
+| `acall_llm` | Calls the model behind an alias and returns its reply as a message, with two keys that describe the call: `finish_reason`, why the model stopped in OpenAI's terms (`"length"` for a cut-off reply, None when the provider gave none), and `usage`, `{"input_tokens", "output_tokens"}` or None when the provider reported no counts. Only the real `acall_llm` returns them, so read them with `.get`; `assistant_message` leaves them out of the message it builds |
 | `run_inline_judge` | Asks a judge alias for an `<explanation>` and a `<rating>`, reformatting once if needed; returns the explanation, the rating and whether it passed (`success` or `warn`) |
 | `run_inline_judge_ex` | `run_inline_judge` plus whether the reply could be read: `False` when even the reformatted reply has no valid `<rating>`, so a caller can tell an unreadable verdict from a rejection |
 | `resolve_model_name` | The model id behind an alias, or the alias when its model does not expose one |

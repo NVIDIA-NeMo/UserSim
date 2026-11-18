@@ -824,8 +824,8 @@ def _first_count(usage: Any, *names: str) -> Any:
 
 def _reported_finish_reason(reply: Any) -> str | None:
     """The reply's finish reason as the provider gave it; the runtime maps it as for a configured model."""
-    choices = getattr(reply, "choices", None) or []
-    reason = getattr(choices[0], "finish_reason", None) if choices else None
+    choices = getattr(reply, "choices", None)
+    reason = getattr(choices[0], "finish_reason", None) if isinstance(choices, (list, tuple)) and choices else None
     return reason if isinstance(reason, str) else None
 
 

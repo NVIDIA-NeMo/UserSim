@@ -678,9 +678,12 @@ def _reports_token_counts(usage: Any) -> bool:
 
 
 def _finish_reason(response: Any) -> str | None:
-    """The first choice's finish reason in OpenAI's vocabulary, or None."""
-    choices = getattr(response, "choices", None) or []
-    reason = getattr(choices[0], "finish_reason", None) if choices else None
+    """The first choice's finish reason in OpenAI's vocabulary, or None.
+
+    A response without a list of choices, such as a test double, has none.
+    """
+    choices = getattr(response, "choices", None)
+    reason = getattr(choices[0], "finish_reason", None) if isinstance(choices, (list, tuple)) and choices else None
     if not isinstance(reason, str) or not reason:
         return None
     return _ANTHROPIC_FINISH_REASONS.get(reason, reason)

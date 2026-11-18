@@ -18,7 +18,7 @@ import ast
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from data_designer.config.models import ChatCompletionInferenceParams, ModelConfig, ModelProvider
@@ -528,6 +528,13 @@ class TestFinishReasonAndUsage:
         reply = await _reply(response)
         assert "finish_reason" in reply
         assert reply["finish_reason"] is None
+
+    async def test_a_response_without_a_list_of_choices_has_no_finish_reason(self) -> None:
+        """A plain ``Mock`` reply, which ``main`` has always accepted, still is."""
+        message = SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None)
+        reply = await _reply(Mock(message=message, usage=None))
+        assert reply["finish_reason"] is None
+        assert reply["usage"] is None
 
     async def test_usage_is_the_tokens_the_call_recorded(self) -> None:
         reply = await _reply(_response("stop", usage=SimpleNamespace(input_tokens=12, output_tokens=7)))
