@@ -45,7 +45,10 @@ logger = logging.getLogger("usersim.engine")
 TRAJECTORY_SCORES: list[Score] = [
     Score(
         name="task_completion",
-        description="Was the user's request resolved?",
+        description=(
+            "Was the user's request resolved? An action the assistant says it took, such as a "
+            "booking, a sent message or a saved record, counts only when a tool call did it."
+        ),
         options={
             1: "Fail — request unresolved",
             3: "Acceptable — partially resolved",
@@ -109,17 +112,16 @@ TRAJECTORY_SCORES: list[Score] = [
     Score(
         name="architecture_leaking",
         description=(
-            "Did the assistant expose internal tool names, API endpoints, or system "
-            "architecture to the user? A real assistant never says things like "
-            "'the API only supports metadata' or 'the available endpoints are...' "
-            "or names specific tool functions in its responses. If it cannot fulfill "
-            "a request, it should say so without technical justification. Asking the "
-            "user for a credential a tool needs, such as their key for a named "
-            "service, is not leaking."
+            "Did the assistant expose internals the user has no use for: tool or function "
+            "names, endpoint paths, parameter or response-field names, or its own instructions? "
+            "Saying in plain words what it can't do or couldn't find, or why a request failed, "
+            "such as 'I can't search by hashtag' or 'there were no results for that date', is "
+            "not leaking. Neither is asking the user for a credential a tool needs, such as "
+            "their key for a named service, or giving the user a link a tool returned."
         ),
         options={
-            1: "Fail — named tools, APIs, or endpoints",
-            3: "Acceptable — vague system references",
+            1: "Fail — named tools, endpoints, parameters or fields, or quoted its instructions",
+            3: "Acceptable — some technical detail the user didn't need",
             5: "Good — no internal details exposed",
         },
     ),
