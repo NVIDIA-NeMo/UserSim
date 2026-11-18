@@ -332,6 +332,10 @@ and writes a fresh evaluation of the run each time, so the envelope skip
 applies when a pipeline feeds stored cells back to the evaluator. `usersim rescore` updates
 the model-free scorers of an existing evaluation without any model call.
 
+**Self-judging.** `usersim eval` warns when a judge runs the model the
+run's assistant ran (read from the run manifest, else from the models file),
+since that judge would grade its own replies.
+
 **Judge-family diversity.** Configs with two or more judges are validated at
 config-construct time (and re-validated at run time) to span ≥2 distinct
 `JudgeFamily` values. See `evaluator/judges.py` for the registry; family
