@@ -147,7 +147,9 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   first; past that, a call shows without its response. It writes links on the
   service's own domain, real entities where the tool covers real things such
   as places, films or stocks, and a list of the page size the call or the
-  tool's description sets, or about 10 items.
+  tool's description sets, or about 10 items, up to 20 items a page: a call
+  that asks for more gets the first 20 and the field that leads to the rest,
+  and the judge accepts that page.
   Its JSON is kept compact, as a service sends it, and a reply cut off before
   its JSON ends is written again, asked for fewer items and, where the tool
   pages, the field that leads to the rest.

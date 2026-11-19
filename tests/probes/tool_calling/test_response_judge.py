@@ -235,6 +235,19 @@ async def test_the_simulator_writes_like_the_real_service() -> None:
     assert "compact, on one line, as the service sends it" in prompt
 
 
+async def test_the_simulator_caps_a_page_at_20_items_and_the_judge_accepts_it() -> None:
+    _, api_prompts, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True)
+    simulator = " ".join(api_prompts[0].split())
+    judge = " ".join(judge_prompts[0].split())
+    assert (
+        "A page holds at most 20 items: when the arguments ask for more, it holds the first 20 and the field "
+        "that leads to the rest, such as a next-page token, cursor or offset." in simulator
+    )
+    assert (
+        "A list of at most 20 items with the field that leads to the rest answers a call that asks for more." in judge
+    )
+
+
 async def test_the_judge_fails_example_hosts_and_checks_only_the_facts_the_call_fixes() -> None:
     _, _, judge_prompts = await _simulate(['{"temp":22}'], [(True, "Fine.")], judge=True)
     prompt = " ".join(judge_prompts[0].split())
