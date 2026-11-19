@@ -13,7 +13,7 @@ authoritative per-tool descriptions live inside each tool's JSON spec.
 
 ## Catalog at a glance
 
-**143 toolsets · 3,406 tools · 79 categories.** A "toolset" is a named bundle
+**143 toolsets · 3,397 tools · 79 categories.** A "toolset" is a named bundle
 of related tools (e.g. `openweathermap` → `current_weather`); `num_tools`
 counts the functions in that bundle.
 
@@ -26,11 +26,11 @@ this project. Counts:
 |---|---:|---:|
 | `UltraTools` | 22 | 2,328 |
 | `ToolEyes` | 95 | 567 |
-| `API-Bank` | 10 | 225 |
+| `API-Bank` | 10 | 216 |
 | `Custom` | 10 | 109 |
 | `RestGPT` | 2 | 94 |
 | `AutoTools` | 4 | 83 |
-| **Total** | **143** | **3,406** |
+| **Total** | **143** | **3,397** |
 
 > `UltraTools` dominates the raw tool count; `ToolEyes` contributes the most
 > distinct toolsets (95). Per-toolset size ranges from 1 to 354 functions
@@ -55,7 +55,7 @@ tool-selection behaviour rather than to reach any of these services.
 | Flight | 171 |
 | Other | 129 |
 | Hotel | 120 |
-| All | 100 |
+| All | 96 |
 | Competition | 95 |
 | Account | 87 |
 | Train | 86 |
@@ -73,7 +73,7 @@ Library Management System, …) make up the long tail.
 ```
 UltraTools      ████████████████████████████████████████ 2328
 ToolEyes        ██████████ 567
-API-Bank        ████ 225
+API-Bank        ████ 216
 Custom          ██ 109
 RestGPT         ██ 94
 AutoTools       █ 83
@@ -82,10 +82,10 @@ AutoTools       █ 83
 **Toolsets by size** (how many functions each toolset bundles):
 
 ```
-   1 tool   ███████ 8
-  2-5       ██████████████████████████████████ 39
-  6-10      ████████████████████████████████████████ 46
- 11-25      ████████████████████████ 28
+   1 tool   ████████ 9
+  2-5       ████████████████████████████████ 38
+  6-10      ████████████████████████████████████████ 47
+ 11-25      ███████████████████████ 27
  26-50      ██████ 7
  51-100     █████ 6
 101-500     ████████ 9
@@ -346,7 +346,7 @@ responses from these projects.
 |---|---:|---:|---|---|
 | `UltraTools` | 22 | 2,328 | [UltraTool](https://github.com/JoeYing1019/UltraTool) | [Apache-2.0](https://github.com/JoeYing1019/UltraTool/blob/main/LICENSE) |
 | `ToolEyes` | 95 | 567 | [ToolEyes](https://github.com/Junjie-Ye/ToolEyes) | [Apache-2.0](https://github.com/Junjie-Ye/ToolEyes/blob/main/LICENSE) |
-| `API-Bank` | 10 | 225 | [API-Bank](https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/api-bank), part of DAMO-ConvAI | [Apache-2.0](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/main/api-bank/LICENSE) for the `api-bank` folder, [MIT](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/main/LICENSE) for the repository |
+| `API-Bank` | 10 | 216 | [API-Bank](https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/api-bank), part of DAMO-ConvAI | [Apache-2.0](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/main/api-bank/LICENSE) for the `api-bank` folder, [MIT](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/main/LICENSE) for the repository |
 | `RestGPT` (categories `Spotify`, `TMDB`) | 2 | 94 | [RestGPT](https://github.com/Yifan-Song793/RestGPT) (RestBench) | [MIT](https://github.com/Yifan-Song793/RestGPT/blob/main/LICENSE) |
 | `AutoTools` (categories `Food`, `Game`, `Music`, `Weather`) | 4 | 83 | [AutoTools](https://github.com/mangopy/AutoTools) | [Apache-2.0](https://github.com/mangopy/AutoTools/blob/main/LICENSE) |
 
@@ -425,9 +425,11 @@ other changes are listed per source:
     `execute_mysql_query`, are required, described `Your email password.` and
     `Your MySQL password.`, and declared under `credentials`.
 - **API-Bank** ([Li et al., 2023](https://aclanthology.org/2023.emnlp-main.187/)):
-  100 of the 101 APIs listed in
+  96 of the 101 APIs listed in
   [`api-bank/data/all_apis.csv`](https://github.com/AlibabaResearch/DAMO-ConvAI/blob/faf754671f5b850e1b4d1ff870db37a6a2480df6/api-bank/data/all_apis.csv)
-  (commit `faf7546`), all except `ImageCaption`. Tool names are the upstream
+  (commit `faf7546`), all except the five that take an image, audio or video
+  file, which a conversation cannot hand over: `ImageCaption`, `IdentifySong`,
+  `ObjectDetection`, `SpeechRecognition` and `VideoDescription`. Tool names are the upstream
   class names in lower case (`AddAlarm` becomes `addalarm`); parameter types
   are written as JSON Schema types (`str` as `string`, `int` as `integer`,
   `datetime` as `string`, `List[str]` as `array`); and output parameters are
