@@ -137,6 +137,8 @@ An identical call returns the same data unless a call in between changed it, and
 earlier response returned keeps its values; only what moves with time, such as a live score, a job's
 progress, stock or a price, may have moved since then. A tool that returns random or newly generated
 items by design, such as a random image or a generated password, returns new ones each time.
+An ID an earlier response returned names the same record in every response: its name, title and
+other fields stay as returned, and no other record takes that ID.
 
 Write it as the real service would:
 - Links use the service's own domain or another realistic one, never example.com, another
@@ -228,6 +230,7 @@ Criteria for success:
 Criteria for failure:
 - It answers a different request than the arguments make, or contradicts the tool's description.
 - It contradicts itself, an earlier response or the current time, or gives a result, score or reading for an event after the current time.
+- It gives an ID an earlier response returned to a different record, or changes that record's name, title or other fields that don't move with time.
 - A computed value is wrong.
 - It returns an ID or other value in a type or form the service's other endpoints don't take for it.
 - It holds placeholder values or commentary.

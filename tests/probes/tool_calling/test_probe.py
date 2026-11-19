@@ -879,6 +879,19 @@ async def test_the_simulator_and_its_judge_count_timestamps_from_the_unix_time()
     )
 
 
+async def test_an_id_names_the_same_record_in_every_response():
+    _result, api_prompts, judge_prompts = await _simulate_with_judge()
+
+    assert (
+        "An ID an earlier response returned names the same record in every response: its name, title and other "
+        "fields stay as returned, and no other record takes that ID." in " ".join(api_prompts[0].split())
+    )
+    assert (
+        "It gives an ID an earlier response returned to a different record, or changes that record's name, title "
+        "or other fields that don't move with time." in " ".join(judge_prompts[0].split())
+    )
+
+
 async def test_the_response_judge_checks_computed_values_but_not_fields_describing_the_response():
     _result, _api_prompts, judge_prompts = await _simulate_with_judge()
     rubric = " ".join(judge_prompts[0].split())
