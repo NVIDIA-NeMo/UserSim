@@ -284,7 +284,9 @@ def _earlier_calls(conversation_messages: list, tool_name: str, arguments: str) 
     ``_EARLIER_CALLS_CHARS``: first the response to the same call
     (``tool_name`` with ``arguments``), then those naming one of its argument
     values, then the rest of ``tool_name``'s, then everything else, each
-    newest first. A response past that shows as its call alone.
+    newest first. A value every earlier response holds, such as a currency
+    or a locale, names no record in particular, so it doesn't count. A
+    response past that shows as its call alone.
     """
     calls: dict[Any, tuple[str, str]] = {}
     records: list[tuple[str, str, str, str]] = []
@@ -303,7 +305,7 @@ def _earlier_calls(conversation_messages: list, tool_name: str, arguments: str) 
     if not records:
         return "None."
     same_call = (tool_name, _canonical_arguments(arguments))
-    values = _argument_values(arguments)
+    values = [v for v in _argument_values(arguments) if not all(v in record[3] for record in records)]
 
     def rank(i: int) -> tuple[bool, bool, bool, int]:
         _call, name, args, response = records[i]

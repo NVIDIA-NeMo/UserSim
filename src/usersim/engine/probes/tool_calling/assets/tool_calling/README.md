@@ -143,7 +143,8 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   public data stays the same for any caller. Each response goes in whole until those earlier
   responses reach 24,000 characters (a Han, Kana or Hangul character counting
   as three): first the response to the same call, then those naming one of its
-  argument values (such as an ID or a name), then the same tool's, each newest
+  argument values (such as an ID or a name; a value every earlier response
+  holds, such as a currency, doesn't count), then the same tool's, each newest
   first; past that, a call shows without its response. It writes links on the
   service's own domain, real entities where the tool covers real things such
   as places, films or stocks, and a list of the page size the call or the

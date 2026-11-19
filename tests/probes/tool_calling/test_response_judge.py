@@ -226,6 +226,25 @@ async def test_past_the_budget_the_identical_call_and_records_naming_the_calls_v
         assert 'get_weather({"city": "C0"}) at 12:00 UTC returned a response too long to show here.' in prompt
 
 
+async def test_a_value_every_earlier_response_holds_does_not_rank_one_above_the_others() -> None:
+    station = '{"stations": [{"id": "TYO1234", "units": "metric"}], "pad": "' + "s" * 5_000 + '"}'
+    newer = [
+        m
+        for i in range(4)
+        for m in _call(f"w{i}", "get_weather", f'{{"station": "OSA{i}000", "units": "metric"}}', "w" * 7_000 + "metric")
+    ]
+    earlier = [*_call("s", "search_stations", '{"q": "Tokyo"}', station), *newer]
+    call = {"function": {"name": "get_weather", "arguments": '{"station": "TYO1234", "units": "metric"}'}}
+    _, api_prompts, judge_prompts = await _simulate(
+        ['{"temp":22}'], [(True, "Fine.")], judge=True, earlier=earlier, call=call
+    )
+    for prompt in (api_prompts[0], judge_prompts[0]):
+        assert station in prompt
+        assert (
+            'get_weather({"station": "OSA0000", "units": "metric"}) at 12:00 UTC returned a response too long' in prompt
+        )
+
+
 async def test_the_simulator_writes_like_the_real_service() -> None:
     _, api_prompts, _ = await _simulate(['{"temp":22}'], [], judge=False)
     prompt = " ".join(api_prompts[0].split())
