@@ -66,7 +66,11 @@ TRAJECTORY_SCORES: list[Score] = [
     ),
     Score(
         name="argument_quality",
-        description="Were arguments reasonable given the conversation?",
+        description=(
+            "Were arguments reasonable given the conversation? A credential the user never gave, "
+            "such as a placeholder or a guessed key passed as an API key, token or password, is an "
+            "incorrect argument."
+        ),
         options={
             1: "Fail — incorrect or missing arguments",
             3: "Acceptable — mostly correct with issues",
