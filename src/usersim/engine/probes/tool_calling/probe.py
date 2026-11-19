@@ -29,7 +29,7 @@ import logging
 import random
 import re
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -351,8 +351,14 @@ def _clock(user_messages: int) -> str:
 
 
 def _format_now(day: date, user_messages: int = 1) -> str:
-    """The simulated service's date and clock, such as ``Friday, 2026-11-06, 12:02 UTC``."""
-    return f"{_format_day(day)}, {_clock(user_messages)} UTC"
+    """The simulated service's date and clock, such as ``Friday, 2026-11-06, 12:02 UTC (Unix time 1793966520)``.
+
+    The Unix time is given so a timestamp in a response can be counted from it, not worked out from the date.
+    """
+    clock = _clock(user_messages)
+    hour, minute = (int(part) for part in clock.split(":"))
+    unix = int(datetime(day.year, day.month, day.day, hour, minute, tzinfo=timezone.utc).timestamp())
+    return f"{_format_day(day)}, {clock} UTC (Unix time {unix})"
 
 
 #: What a call answers when no attempt produced JSON.
@@ -554,7 +560,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.13"
+    prompt_version = "v1.14"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe

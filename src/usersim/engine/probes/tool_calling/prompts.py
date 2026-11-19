@@ -113,7 +113,7 @@ It is {now}. An event later than that has not happened, so it has no result, sco
 what is planned for later, such as a schedule, showtime, listing, forecast, booking or price, already
 exists.
 Opening hours, market sessions and other times tied to a place follow the local time there, converted
-from that UTC time.
+from that UTC time. A Unix timestamp counts from the Unix time given there, 86,400 seconds a day.
 
 Tool specification:
 {tool_spec}
@@ -183,7 +183,8 @@ _DEFAULT_TOOL_SIMULATOR_JUDGE = """You are checking a simulated API response bef
 
 It is {now}.
 Opening hours, market sessions and other times tied to a place follow the local time there, converted
-from that UTC time.
+from that UTC time. Check a Unix timestamp by counting from the Unix time given there, 86,400 seconds a
+day, not by working one out from the calendar.
 
 Tool specification:
 {tool_spec}
