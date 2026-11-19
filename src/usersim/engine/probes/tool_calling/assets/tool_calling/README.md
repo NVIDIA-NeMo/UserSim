@@ -152,9 +152,10 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   pages, the field that leads to the rest.
 - A judge checks each synthesized response against the call before the
   assistant sees it: that it answers the call, agrees with the earlier calls'
-  responses and the clock (a timestamp counted from its Unix time), gives no
-  result for an event later than the clock while letting a schedule or
-  forecast for later stand,
+  responses and the clock (a timestamp counted from its Unix time, while a
+  tool that returns random items may repeat one), gives no result for an
+  event later than the clock while letting a schedule or forecast for later
+  stand,
   computes values correctly (a field that only describes the response, such
   as a count of the items it lists, is not grounds for rejecting it), returns
   IDs and values of the type and form the service's other endpoints take, and

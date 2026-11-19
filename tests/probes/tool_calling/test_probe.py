@@ -857,11 +857,14 @@ def _tool(tool_name: str, **parameter_types: str) -> dict:
     return {"tool": {"type": "function", "function": {"name": tool_name, "parameters": {"properties": properties}}}}
 
 
-async def test_a_tool_that_returns_random_or_generated_items_returns_new_ones_each_time():
+async def test_a_tool_that_returns_random_or_generated_items_returns_new_ones_and_may_repeat_one():
+    """The simulator varies what a random tool returns; the judge doesn't fail a repeat, which a real one returns too."""
     _result, api_prompts, judge_prompts = await _simulate_with_judge()
 
-    assert "A tool that returns random or newly generated items by design" in " ".join(api_prompts[0].split())
-    assert "random or newly generated items by design returns new ones each time" in " ".join(judge_prompts[0].split())
+    assert "generated password, returns new ones each time." in " ".join(api_prompts[0].split())
+    assert "random or newly generated items by design may return new ones or repeat one." in " ".join(
+        judge_prompts[0].split()
+    )
 
 
 async def test_the_simulator_and_its_judge_count_timestamps_from_the_unix_time():

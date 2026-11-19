@@ -213,7 +213,7 @@ Criteria for success:
 - It is consistent with itself, with the earlier calls' responses and with the current time: an identical
   call returns the same data unless a call in between changed it, or time has passed and the data is the
   kind that moves with it, such as a live score, a job's progress, stock or a price. A tool that returns
-  random or newly generated items by design returns new ones each time. Anything planned for
+  random or newly generated items by design may return new ones or repeat one. Anything planned for
   after the current time, such as a schedule, a listing, a forecast or a booking, is fine.
 - Every value the tool computes (a total, a conversion, a date difference, a formula) is correct for the arguments.
 - A field that only describes the response itself, such as a count of the items it lists or an offset
