@@ -13,7 +13,7 @@ import json
 import types
 from collections.abc import Callable
 from contextlib import ExitStack
-from datetime import date
+from datetime import date, datetime, timezone
 from unittest.mock import patch
 
 import pytest
@@ -681,10 +681,22 @@ class TestToday:
     place."""
 
     @pytest.mark.parametrize(
-        ("user_messages", "clock"), [(0, "12:00"), (1, "12:00"), (2, "12:02"), (4, "12:06"), (100, "12:59")]
+        ("user_messages", "clock", "unix"),
+        [
+            (0, "12:00", 1793966400),
+            (1, "12:00", 1793966400),
+            (2, "12:02", 1793966520),
+            (4, "12:06", 1793966760),
+            (100, "12:59", 1793969940),
+        ],
     )
-    def test_the_clock_moves_two_minutes_with_each_user_message_and_stays_on_the_date(self, user_messages, clock):
-        assert _format_now(date(2026, 11, 6), user_messages) == f"Friday, 2026-11-06, {clock} UTC"
+    def test_the_clock_moves_two_minutes_with_each_user_message_and_stays_on_the_date(self, user_messages, clock, unix):
+        assert _format_now(date(2026, 11, 6), user_messages) == f"Friday, 2026-11-06, {clock} UTC (Unix time {unix})"
+
+    def test_the_unix_time_is_the_clocks_moment(self):
+        """A service that counts a timestamp from the Unix time lands on the clock's date and minute."""
+        unix = int(_format_now(date(2026, 11, 6), 3).rsplit(" ", 1)[1].rstrip(")"))
+        assert datetime.fromtimestamp(unix, timezone.utc) == datetime(2026, 11, 6, 12, 4, tzinfo=timezone.utc)
 
     async def test_a_call_after_the_users_second_message_reads_the_moved_clock(self, sample_tools):
         probe, _data, _cfg = _concrete_tool_probe(sample_tools, judge_responses=False)
@@ -706,7 +718,7 @@ class TestToday:
                 "get_weather", {"location": "Tokyo"}, tool_call, state, {}, turn_idx=1, call_idx=0
             )
 
-        assert "It is Friday, 2026-11-06, 12:02 UTC." in prompts[0]
+        assert "It is Friday, 2026-11-06, 12:02 UTC (Unix time 1793966520)." in prompts[0]
 
     async def test_the_simulator_and_its_judge_read_times_tied_to_a_place_in_its_local_time(self):
         _result, api_prompts, judge_prompts = await _simulate_with_judge()
@@ -719,7 +731,7 @@ class TestToday:
         result, _assistant, user_inputs, _judge, api_inputs = await _run_concrete_tool_probe(sample_tools)
 
         assert "Today is Friday, 2026-11-06." in user_inputs[0][0]["content"]
-        assert "It is Friday, 2026-11-06, 12:00 UTC." in api_inputs[0][0]["content"]
+        assert "It is Friday, 2026-11-06, 12:00 UTC (Unix time 1793966400)." in api_inputs[0][0]["content"]
         assert json.loads(result["conversation_metadata"])["today"] == "2026-11-06"
 
     async def test_the_assistant_sees_the_date_and_the_users_place_on_the_first_message(self, sample_tools):
@@ -845,11 +857,39 @@ def _tool(tool_name: str, **parameter_types: str) -> dict:
     return {"tool": {"type": "function", "function": {"name": tool_name, "parameters": {"properties": properties}}}}
 
 
-async def test_a_tool_that_returns_random_or_generated_items_returns_new_ones_each_time():
+async def test_a_tool_that_returns_random_or_generated_items_returns_new_ones_and_may_repeat_one():
+    """The simulator varies what a random tool returns; the judge doesn't fail a repeat, which a real one returns too."""
     _result, api_prompts, judge_prompts = await _simulate_with_judge()
 
-    assert "A tool that returns random or newly generated items by design" in " ".join(api_prompts[0].split())
-    assert "random or newly generated items by design returns new ones each time" in " ".join(judge_prompts[0].split())
+    assert "generated password, returns new ones each time." in " ".join(api_prompts[0].split())
+    assert "random or newly generated items by design may return new ones or repeat one." in " ".join(
+        judge_prompts[0].split()
+    )
+
+
+async def test_the_simulator_and_its_judge_count_timestamps_from_the_unix_time():
+    _result, api_prompts, judge_prompts = await _simulate_with_judge()
+
+    assert "A Unix timestamp counts from the Unix time given there, 86,400 seconds a day." in " ".join(
+        api_prompts[0].split()
+    )
+    assert (
+        "Check a Unix timestamp by counting from the Unix time given there, 86,400 seconds a day, not by working "
+        "one out from the calendar." in " ".join(judge_prompts[0].split())
+    )
+
+
+async def test_an_id_names_the_same_record_in_every_response():
+    _result, api_prompts, judge_prompts = await _simulate_with_judge()
+
+    assert (
+        "An ID an earlier response returned names the same record in every response: its name, title and other "
+        "fields stay as returned, and no other record takes that ID." in " ".join(api_prompts[0].split())
+    )
+    assert (
+        "It gives an ID an earlier response returned to a different record, or changes that record's name, title "
+        "or other fields that don't move with time." in " ".join(judge_prompts[0].split())
+    )
 
 
 async def test_the_response_judge_checks_computed_values_but_not_fields_describing_the_response():

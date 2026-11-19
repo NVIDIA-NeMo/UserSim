@@ -24,7 +24,7 @@ _WEATHER_TOOL = {
 
 CONTRACTS = {
     "tool_calling": ProbeContract(
-        trajectory_id="18e99dc0c369e6c1",
+        trajectory_id="bf2fc50c4b1f1bb2",
         # A conversation with no tool calls completed its protocol, and the evaluator scores it.
         succeeds_on=None,
         parity=(ParityCase(1003, {"tools": [_WEATHER_TOOL]}),),

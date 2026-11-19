@@ -123,7 +123,8 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   calls made earlier in the conversation with their responses and the time
   each was made, which it keeps consistent with, and its clock, noon UTC on
   the conversation's date at the user's first message and two minutes later
-  with each one after, up to 12:59, but none of
+  with each one after, up to 12:59, with the Unix time of that moment for
+  timestamps to count from, but none of
   the conversation's messages. Opening hours, market sessions and other times
   tied to a place follow the local time there. An event after the clock has no
   result yet, while what is planned for later, such as a schedule, a listing
@@ -131,7 +132,8 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   that what moves with time, such as a live score, a job's progress, stock or
   a price, may have moved since it was made, and a tool that returns random or
   newly generated items by design, such as a random image or a generated
-  password, returns new ones each time. A tool with a parameter naming one
+  password, returns new ones each time. An ID a response returned names the
+  same record in every later response. A tool with a parameter naming one
   of the user's own things (a tracking, order, booking or reservation number,
   an invoice or a receipt) also gets the service's records on the person,
   their name and where they live, which that thing carries, while an argument
@@ -151,8 +153,10 @@ toolsets_seed.parquet ── sample a toolset ──▶ assistant_model (model u
   pages, the field that leads to the rest.
 - A judge checks each synthesized response against the call before the
   assistant sees it: that it answers the call, agrees with the earlier calls'
-  responses and the clock, gives no result for an event later than the clock
-  while letting a schedule or forecast for later stand,
+  responses and the clock (a timestamp counted from its Unix time, and an ID
+  an earlier response returned still naming the same record, while a tool
+  that returns random items may repeat one), gives no result for an event
+  later than the clock while letting a schedule or forecast for later stand,
   computes values correctly (a field that only describes the response, such
   as a count of the items it lists, is not grounds for rejecting it), returns
   IDs and values of the type and form the service's other endpoints take, and
