@@ -1271,8 +1271,9 @@ class ToolExecutionMixin:
       across several assistant<->tool round-trips).
 
     In either shape, a call beyond the turn's cap is not run: it gets a
-    ``role:"tool"`` reply saying so, so every call an assistant message makes
-    has a reply, and the assistant sees why before it answers.
+    ``role:"tool"`` reply saying so and asking for an answer with the results
+    in hand, so every call an assistant message makes has a reply, and the
+    assistant sees why before it answers.
 
     Hooks a probe implements:
 
@@ -1379,7 +1380,8 @@ class ToolExecutionMixin:
                                 {
                                     "error": (
                                         "Not run: this turn reached its limit of "
-                                        f"{self.tool_max_calls_per_turn} tool calls."
+                                        f"{self.tool_max_calls_per_turn} tool calls. "
+                                        "Answer the user now with the results you have."
                                     ),
                                     "status": 429,
                                 }
