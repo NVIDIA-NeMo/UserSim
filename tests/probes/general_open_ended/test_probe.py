@@ -31,7 +31,7 @@ class KyotoTrip(ScriptedModel):
 
     CONTENT = {
         **ScriptedModel.CONTENT,
-        "user": "週末に京都へ行くなら、どのお寺を見ればいいですか？",
+        "user": "週末に京都へ行くので、見るべきお寺を教えてください。",
         "assistant": "清水寺と伏見稲荷大社がおすすめです。",
         "summary": "no",
     }

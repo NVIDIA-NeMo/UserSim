@@ -660,6 +660,24 @@ class TestToolExecutionMixin:
         assert replies["c2"]["status"] == 429
         assert _unanswered_call_ids(state.messages) == set()
 
+    async def test_a_call_past_the_cap_tells_the_assistant_to_answer_with_what_it_has(self) -> None:
+        probe = _ToolExecProbe(mode="multi", cap=1)
+        state = _StubState()
+        with patch(
+            "usersim.engine.core.llm.acall_llm",
+            return_value={"content": "capped synth", "tool_calls": None},
+        ):
+            await probe.after_assistant_turn(
+                {},
+                state,
+                {"content": "", "tool_calls": [_tc(cid="c1"), _tc(cid="c2")]},
+                object(),
+            )
+        refused = next(json.loads(m["content"]) for m in state.messages if m.get("tool_call_id") == "c2")
+        assert refused["error"] == (
+            "Not run: this turn reached its limit of 1 tool calls. Answer the user now with the results you have."
+        )
+
     async def test_multi_mode_turn_at_the_cap_is_told_before_its_reply_without_tools(self) -> None:
         probe = _ToolExecProbe(mode="multi", cap=2)
         state = _StubState()
