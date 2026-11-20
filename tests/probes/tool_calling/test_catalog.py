@@ -32,6 +32,8 @@ _ENDPOINT = re.compile(r" HTTP [A-Z]+ (\S+)$")
 #: Parameter names that take nothing but the caller's credential for a service.
 _KEY_NAME = re.compile(r"(?i)api_?key|secret|access_token|public_key|appid")
 _PASSWORD_NAME = re.compile(r"(?i)pass(word|wd)")
+#: Parameter names that take a media file: a conversation holds text and links, never the file itself.
+_MEDIA_NAME = re.compile(r"(?i)(^|_)(audio|voice|sound|image|photo|picture|video)(_|$)")
 #: Password parameters that take no password the user already holds, by
 #: (toolset, tool, parameter): each sets a password on something new, stores
 #: one, or is no secret.
@@ -149,6 +151,19 @@ def test_every_required_name_is_a_declared_parameter(toolsets):
         and not set(schema["required"]) <= set(schema.get("properties") or {})
     ]
     assert not wrong, f"required names that are not parameters: {wrong[:10]}"
+
+
+def test_no_tool_requires_a_media_file(toolsets):
+    """A required audio, image or video object can't be given in a conversation, so the tool could never be called."""
+    wrong = [
+        f"{where}.{name}"
+        for where, f in _tools(toolsets)
+        for name, schema in (f["parameters"].get("properties") or {}).items()
+        if name in (f["parameters"].get("required") or [])
+        and schema.get("type") == "object"
+        and _MEDIA_NAME.search(name)
+    ]
+    assert not wrong, f"tools that require a media file: {wrong}"
 
 
 def test_parameters_hold_no_output_schema(toolsets):

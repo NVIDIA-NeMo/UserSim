@@ -107,7 +107,9 @@ Nothing is needed per locale. To run on other tools, see
 
 The `tool_use` scorer, in `default_scorers`, judges each conversation on task
 completion, tool selection, argument quality, unnecessary tool use, information
-gathering, role adherence, architecture leaking and an overall score. Its
+gathering, role adherence, architecture leaking, grounding, confirmation (no
+booking, purchase, message or change the user didn't approve) and an overall
+score. Its
 evidence feeds the `tool_use_correctness` and `tool_use_restraint`
 capabilities in `capabilities.py`.
 

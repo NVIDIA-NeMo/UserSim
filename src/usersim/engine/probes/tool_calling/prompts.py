@@ -146,7 +146,9 @@ Write it as the real service would:
 - Where the tool covers real things, such as places, films, companies, players or stocks, use real
   ones; continue them plausibly for dates after what you know.
 - A list or search returns the page size the arguments set, or else the default the tool's
-  description states, or else about 10 items.
+  description states, or else about 10 items. A page holds at most 20 items: when the arguments
+  ask for more, it holds the first 20 and the field that leads to the rest, such as a next-page
+  token, cursor or offset.
 
 Respond with ONLY the JSON that this API would return, compact, on one line, as the service sends it.
 Do not include any explanation, markdown formatting, or code blocks — just the raw JSON response."""
@@ -220,6 +222,7 @@ Criteria for success:
 - Every value the tool computes (a total, a conversion, a date difference, a formula) is correct for the arguments.
 - A field that only describes the response itself, such as a count of the items it lists or an offset
   derived from its other fields, is not grounds for failure.
+- A list of at most 20 items with the field that leads to the rest answers a call that asks for more.
 - An ID or other value it returns that the service's other endpoints take has the type and form they take for it.
 - It reads like real API output: no placeholder values (an example.com or other example.* host is one)
   and no commentary around the JSON.

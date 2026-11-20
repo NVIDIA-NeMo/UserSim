@@ -284,7 +284,9 @@ def _earlier_calls(conversation_messages: list, tool_name: str, arguments: str) 
     ``_EARLIER_CALLS_CHARS``: first the response to the same call
     (``tool_name`` with ``arguments``), then those naming one of its argument
     values, then the rest of ``tool_name``'s, then everything else, each
-    newest first. A response past that shows as its call alone.
+    newest first. A value every earlier response holds, such as a currency
+    or a locale, names no record in particular, so it doesn't count. A
+    response past that shows as its call alone.
     """
     calls: dict[Any, tuple[str, str]] = {}
     records: list[tuple[str, str, str, str]] = []
@@ -303,7 +305,7 @@ def _earlier_calls(conversation_messages: list, tool_name: str, arguments: str) 
     if not records:
         return "None."
     same_call = (tool_name, _canonical_arguments(arguments))
-    values = _argument_values(arguments)
+    values = [v for v in _argument_values(arguments) if not all(v in record[3] for record in records)]
 
     def rank(i: int) -> tuple[bool, bool, bool, int]:
         _call, name, args, response = records[i]
@@ -560,7 +562,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     label = "tool_calling"
     # Bump on any semantic change to the probe's prompts or task derivation.
     # One variant: the tool category is the row's ``toolset_category``.
-    prompt_version = "v1.14"
+    prompt_version = "v1.15"
     assets_root = Path(__file__).parent / "assets"
     # The toolset catalog: each row draws one toolset and reads its tools from
     # the ``tools`` column. The toolset is also the row's theme, so the probe

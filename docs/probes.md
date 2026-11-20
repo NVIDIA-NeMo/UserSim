@@ -13,7 +13,7 @@ validates the mix at parse time so an unknown probe fails immediately.
 
 | Family | Probe | Catches |
 |--------|-------|---------|
-| General | `tool_calling` | Wrong tool choice, fabricated or malformed arguments, unnecessary tool calls, missed information gathering, architecture leaks and claims the tool results don't support, scored on the `tool_use` scorer's nine axes |
+| General | `tool_calling` | Wrong tool choice, fabricated or malformed arguments, unnecessary tool calls, missed information gathering, architecture leaks, claims the tool results don't support and actions the user didn't approve, scored on the `tool_use` scorer's ten axes |
 | General | `general_open_ended` | Information-seeking degradation across personality types, register mismatch, unhelpful hedging |
 | General | `general_educational` | Pedagogical failures, level mismatch, condescension, lack of scaffolding |
 | Sovereign-AI | `sov_ai_facts` | Locale-specific factual errors, false-premise traps, fabricated institutional knowledge, graded against a curated per-locale fact bank |

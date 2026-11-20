@@ -32,6 +32,7 @@ AXES = [
     "role_adherence",
     "architecture_leaking",
     "grounding",
+    "confirmation",
     "overall",
 ]
 
@@ -39,6 +40,22 @@ AXES = [
 class TestSchemaSurface:
     def test_scores_with_expected_names(self) -> None:
         assert [s.name for s in TRAJECTORY_SCORES] == AXES
+
+    def test_confirmation_fails_an_action_the_user_did_not_approve(self) -> None:
+        confirmation = next(s for s in TRAJECTORY_SCORES if s.name == "confirmation")
+        assert "hadn't approved that action with its specifics" in confirmation.description
+        assert "asked only to find, check or compare" in confirmation.description
+        assert "a conversation with no such action" in confirmation.description
+        assert confirmation.options[1] == "Fail — took an action the user didn't approve"
+
+    def test_argument_quality_fails_a_credential_the_user_never_gave(self) -> None:
+        argument_quality = next(s for s in TRAJECTORY_SCORES if s.name == "argument_quality")
+        assert "A credential the user never gave" in argument_quality.description
+        assert "a placeholder or a guessed key" in argument_quality.description
+
+    def test_a_reply_without_confirmation_is_incomplete(self) -> None:
+        reply = {name: {"score": 5, "reasoning": "Fine."} for name in AXES if name != "confirmation"}
+        assert tool_use_module._validated(_build_schema(), json.dumps(reply)) is None
 
     def test_scores_are_score_objects_with_1_3_5_scale(self) -> None:
         for s in TRAJECTORY_SCORES:
