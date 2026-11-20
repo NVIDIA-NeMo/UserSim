@@ -20,6 +20,7 @@ import pytest
 from usersim.engine.core.outcomes import FailureAttribution, FailureClass, OutcomeStatus
 from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.simulation import (
+    _EARLY_STOP_PROMPT,
     ConversationLoop,
     _check_conversation_complete,
     _poor_assistant_response_reason,
@@ -154,6 +155,23 @@ class TestEarlyStopping:
     async def test_llm_based_handles_whitespace(self):
         models = {"summary_model": StubFacade(["  Yes  \n"])}
         assert await _check_conversation_complete(models, "Perfect, thanks!")
+
+    @pytest.mark.parametrize(
+        "follow_up",
+        [
+            "That cutoff's already passed, so can you find the soonest option I can actually book?",
+            "Merci ! Et pour dimanche, tu regardes aussi ?",
+            "ありがとう。で、来週の分は？",
+        ],
+    )
+    async def test_a_message_with_a_question_never_ends_the_conversation(self, follow_up):
+        summary = StubFacade(["yes"])
+        assert not await _check_conversation_complete({"summary_model": summary}, follow_up)
+        assert summary._idx == 0  # decided without a model call
+
+    def test_the_question_covers_a_message_that_answers_the_assistant(self):
+        assert "answers the assistant's question or gives it the details" in _EARLY_STOP_PROMPT
+        assert "even when it also thanks the assistant or says that is all it needs" in _EARLY_STOP_PROMPT
 
 
 # ---------------------------------------------------------------------------

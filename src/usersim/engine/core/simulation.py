@@ -440,11 +440,16 @@ _EARLY_STOP_PROMPT = (
     "Does this user message end the conversation: the user is finished, satisfied "
     "or not, and the message asks the assistant to do nothing further? A message "
     "that also makes a request, gives an instruction or asks a question, such as "
-    "asking it to book, change or check something, does not end it. Consider the "
-    "language and cultural context.\n"
+    "asking it to book, change or check something, does not end it. Nor does one "
+    "that answers the assistant's question or gives it the details, a choice or a "
+    "correction it asked for, even when it also thanks the assistant or says that "
+    "is all it needs. Consider the language and cultural context.\n"
     "Reply with ONLY 'yes' or 'no'.\n\n"
     "User message: {follow_up}"
 )
+
+# A question mark in Latin, full-width (CJK) or Arabic script.
+_QUESTION_MARK = re.compile(r"[?？؟]")
 
 
 # Tool-call syntax that reached the reply as text instead of as a tool call.
@@ -477,8 +482,12 @@ async def _check_conversation_complete(models: dict, follow_up: str) -> bool:
     """Ask the summary_model whether the user is signaling conversation completion.
 
     Language-agnostic: works for any locale without per-language regex patterns.
-    Uses the cheapest model (summary_model) with a short yes/no prompt.
+    Uses the cheapest model (summary_model) with a short yes/no prompt. A message
+    holding a question mark asks for something, so it never ends the
+    conversation and needs no model call.
     """
+    if _QUESTION_MARK.search(follow_up or ""):
+        return False
     prompt = _EARLY_STOP_PROMPT.format(follow_up=follow_up)
     msgs = [{"role": "user", "content": prompt}]
     resp = await acall_llm(models, MODEL_SUMMARY, msgs)

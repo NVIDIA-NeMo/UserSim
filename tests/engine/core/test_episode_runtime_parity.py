@@ -162,7 +162,7 @@ class _ReplayableModel:
                 "assistant": "Scripted assistant response.",
                 "judge": "<explanation>valid scripted turn</explanation><rating>success</rating>",
                 "summary": "yes",
-                "user": "Could you explain that a little more?",
+                "user": "Please explain that a little more.",
             }[self.role]
         return SimpleNamespace(
             message=SimpleNamespace(
