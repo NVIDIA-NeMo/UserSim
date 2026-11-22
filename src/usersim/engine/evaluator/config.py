@@ -151,8 +151,18 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
     )
 
     # ── Operational knobs ───────────────────────────────────────────
-    max_judge_tokens: int = 4096
-    max_judge_tokens_non_ascii: int = 8192
+    max_judge_tokens: int = Field(
+        default=4096,
+        description=(
+            "Answer budget for a judge whose model sets no max_tokens. A judge "
+            "model's own max_tokens takes precedence, scaled up for locales "
+            "whose script tokenizes densely."
+        ),
+    )
+    max_judge_tokens_non_ascii: int = Field(
+        default=8192,
+        description="max_judge_tokens for locales whose script tokenizes densely.",
+    )
     verbosity: int = 1
 
     # ── Validators ─────────────────────────────────────────────────
