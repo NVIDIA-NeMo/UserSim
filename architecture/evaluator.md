@@ -11,6 +11,13 @@ ensemble of two or more must span at least two architecturally diverse model
 families, validated when the config is built and again at run time, so an
 ensemble never rests on one model family. A single judge is allowed.
 
+Each judge answers within its model's `max_tokens`, scaled up for locales whose
+script tokenizes densely, as the simulator's calls are; a judge whose model
+sets none gets 4,096 tokens, or 8,192 in those locales. A judge that reasons
+before answering can need more, which `max_tokens` on its row in the models
+file gives it. An answer that doesn't parse leaves the row without a judge
+verdict, and the next `usersim eval` of the run judges that row again.
+
 Every row is judged on the axes every probe shares. A built-in probe whose
 rows need axes of their own declares them in its package's `axes.py`, as
 `JUDGE_AXES` keyed by the probe's label, which is the row's `probe_family`.

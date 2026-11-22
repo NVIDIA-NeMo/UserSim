@@ -84,6 +84,7 @@ def _build_generator(
     facades = {j.alias: MagicMock(name=f"facade_{j.alias}") for j in cfg.judges}
     for alias, facade in facades.items():
         facade.model_config.model = f"{alias}-model"
+        facade._model_config.inference_parameters.max_tokens = None
     gen.get_model = lambda alias: facades.get(alias)  # type: ignore[method-assign]
     gen.get_models = lambda: facades  # type: ignore[method-assign]
 
@@ -165,6 +166,41 @@ class TestJudgePrompt:
         )
 
         assert ("TAIL_FIGURE" in prompts[0]) is sees_tail
+
+    @pytest.mark.parametrize(
+        ("locale", "configured", "expected"),
+        [
+            ("en_US", {"judge_a": 16384, "judge_b": 2048}, {"judge_a": 16384, "judge_b": 2048}),
+            ("ja_JP", {"judge_a": 16384, "judge_b": 2048}, {"judge_a": 32768, "judge_b": 4096}),
+            ("en_US", {"judge_a": None, "judge_b": None}, {"judge_a": 4096, "judge_b": 4096}),
+            ("ja_JP", {"judge_a": None, "judge_b": None}, {"judge_a": 8192, "judge_b": 8192}),
+        ],
+    )
+    async def test_each_judge_answers_within_its_models_max_tokens(
+        self, locale: str, configured: dict[str, int | None], expected: dict[str, int]
+    ) -> None:
+        gen = _build_generator(TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges()))
+        for alias, max_tokens in configured.items():
+            gen.get_models()[alias]._model_config.inference_parameters.max_tokens = max_tokens
+        budgets: dict[str, int] = {}
+
+        async def _capture(models, judge_alias, prompt, schema_model, max_tokens):
+            budgets[judge_alias] = max_tokens
+            return {}
+
+        gen._call_judge = _capture  # type: ignore[method-assign]
+        await gen.agenerate(
+            {
+                "conversation_messages": json.dumps(
+                    [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "hello"}]
+                ),
+                "persona": json.dumps({"first_name": "A", "last_name": "B"}),
+                "probe_family": "tool_calling",
+                "locale": locale,
+            }
+        )
+
+        assert budgets == expected
 
     async def test_a_row_with_no_family_is_judged_on_the_universal_axes_alone(self) -> None:
         gen = _build_generator(TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges()))

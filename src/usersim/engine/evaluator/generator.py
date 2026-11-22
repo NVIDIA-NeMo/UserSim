@@ -64,7 +64,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
 )
 
 from usersim.engine.core.identity import resolve_model_name
-from usersim.engine.core.llm import acall_llm
+from usersim.engine.core.llm import NON_ASCII_TOKEN_SCALE, acall_llm, scaled_max_tokens
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.core.missing import none_for_missing
 from usersim.engine.core.persona import format_persona_for_prompt
@@ -302,7 +302,6 @@ class TrajectoryEvaluatorGenerator(
             rubric=render_rubric(applicable_axes),
         )
 
-        max_tokens = cfg.max_judge_tokens_non_ascii if locale in _NON_ASCII_LOCALES else cfg.max_judge_tokens
         schema_model = _build_schema_for(applicable_axes)
 
         for spec in judge_specs if applicable_axes else ():
@@ -312,7 +311,7 @@ class TrajectoryEvaluatorGenerator(
                 judge_alias=spec.alias,
                 prompt=prompt,
                 schema_model=schema_model,
-                max_tokens=max_tokens,
+                max_tokens=self._judge_max_tokens(models.get(spec.alias), locale in _NON_ASCII_LOCALES),
             )
             judge_elapsed = time.monotonic() - t_judge
             logger.debug(
@@ -392,6 +391,13 @@ class TrajectoryEvaluatorGenerator(
                 logger.warning(f"  |-- evaluator: judge alias {j.alias!r} not resolvable in model registry: {e}")
         return out
 
+    def _judge_max_tokens(self, facade: Any, non_ascii: bool) -> int:
+        """A judge's answer budget: its model's ``max_tokens``, scaled up for a dense script, else the config's."""
+        configured = scaled_max_tokens(facade, NON_ASCII_TOKEN_SCALE if non_ascii else 1.0).get("max_tokens")
+        if configured:
+            return configured
+        return self.config.max_judge_tokens_non_ascii if non_ascii else self.config.max_judge_tokens
+
     async def _call_judge(
         self,
         models: dict[str, Any],
@@ -426,7 +432,11 @@ class TrajectoryEvaluatorGenerator(
         try:
             parsed = json.loads(content)
         except (json.JSONDecodeError, TypeError):
-            logger.warning(f"  |-- evaluator: judge {judge_alias!r} produced unparseable structured output")
+            logger.warning(
+                f"  |-- evaluator: judge {judge_alias!r} produced unparseable structured output within "
+                f"max_tokens={max_tokens}; a judge that reasons before answering may need a larger max_tokens "
+                "on its model's row"
+            )
             return {}
         return parsed if isinstance(parsed, dict) else {}
 
